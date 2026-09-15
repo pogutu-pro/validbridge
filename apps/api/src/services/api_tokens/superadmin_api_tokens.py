@@ -23,7 +23,7 @@ from src.security.security import (
 )
 
 
-TOKEN_PREFIX = "lh_sa_"
+TOKEN_PREFIX = "vb_sa_"
 TOKEN_BYTES = 32  # 256 bits of entropy
 
 

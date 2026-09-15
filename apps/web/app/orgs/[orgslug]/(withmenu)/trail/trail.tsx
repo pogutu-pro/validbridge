@@ -1,5 +1,5 @@
 'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import TrailCourseCard from '@components/Pages/Trail/TrailCourseCard'
 import UserCertificates from '@components/Pages/Trail/UserCertificates'
@@ -21,7 +21,7 @@ import { useTrackView, AnalyticsEvent } from '@services/analytics'
 function Trail(params: any) {
   const { t } = useTranslation()
   let orgslug = params.orgslug
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any
   const orgID = org?.id

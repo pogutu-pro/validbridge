@@ -8,13 +8,13 @@ import { AccountActionsMobile } from '@components/Objects/Account/AccountActions
 import { User } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { useMediaQuery } from 'usehooks-ts'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useTranslation } from 'react-i18next'
 import AccountGeneral from '@components/Objects/Account/subpages/AccountGeneral'
 import AccountProfile from '@components/Objects/Account/subpages/AccountProfile'
 import AccountSecurity from '@components/Objects/Account/subpages/AccountSecurity'
 import AccountPurchases from '@components/Objects/Account/subpages/AccountPurchases'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface AccountClientProps {
   orgslug: string
@@ -34,10 +34,10 @@ const getSubpageTitle = (subpage: string, t: (_key: string) => string): string =
 
 const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const user = session?.data?.user
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   // Fire one impression per distinct subpage (component stays mounted across
   // subpage changes, so guard on the value rather than relying on remount).

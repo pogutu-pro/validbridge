@@ -17,9 +17,9 @@ import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import OrgInviteCodeGenerate from '@components/Objects/Modals/Dash/OrgAccess/OrgInviteCodeGenerate'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import OrgSignupFields from './OrgSignupFields'
 
 function CopyButton({ text }: { text: string }) {
@@ -45,14 +45,14 @@ function CopyButton({ text }: { text: string }) {
 function OrgAccess() {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token;
   const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = React.useState(false)
   const [joinMethod, setJoinMethod] = React.useState('closed')
   const [invitesModal, setInvitesModal] = React.useState(false)
   const router = useRouter()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   const { data: invites, isLoading: isInvitesLoading } = useQuery({
     queryKey: queryKeys.org.inviteCodes(org?.id),

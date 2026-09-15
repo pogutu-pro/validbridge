@@ -1,12 +1,12 @@
 /**
  * Shared configuration for the E2E suite.
  *
- * Everything is overridable via env so the same specs can run against:
- *  - a self-host the suite boots itself via the LearnHouse CLI (default), or
- *  - an already-running instance (set E2E_BASE_URL to skip the boot).
+ * The suite runs against an already-running ValidBridge instance. Start the
+ * stack first (e.g. `docker compose up -d` at the repo root), then point the
+ * suite at it via E2E_BASE_URL / E2E_PORT (default http://localhost:3000).
  */
 
-const PORT = process.env.E2E_PORT || '8080'
+const PORT = process.env.E2E_PORT || '3000'
 const DOMAIN = process.env.E2E_DOMAIN || 'localhost'
 
 /** Base URL of the running instance the browser talks to. */
@@ -24,16 +24,6 @@ export const ORG_SLUG = process.env.E2E_ORG_SLUG || 'default'
 /** Bootstrapped admin / teacher account. */
 export const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@school.dev'
 export const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'E2eTestAdmin!234'
-
-/** CLI install name (also the docker-compose project dir under ~/.learnhouse). */
-export const INSTALL_NAME = process.env.E2E_INSTALL_NAME || 'e2e'
-
-/** The CLI command used to boot the self-host. Override to use a local build. */
-export const CLI = process.env.E2E_CLI || 'npx --yes learnhouse@latest'
-
-/** When set (or E2E_BASE_URL is provided), global-setup will NOT boot a new instance. */
-export const SKIP_BOOT =
-  process.env.E2E_SKIP_BOOT === '1' || Boolean(process.env.E2E_BASE_URL)
 
 export { PORT, DOMAIN }
 

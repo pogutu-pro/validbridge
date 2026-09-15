@@ -2078,7 +2078,7 @@ async def _resolve_token_submission_user(
     Submit-on-behalf lets a headless/custom frontend write a learner's answer
     via a token. The token must hold ``assignments.create`` and pass an explicit
     ``on_behalf_of_user_id``; the target learner must already be a member of the
-    token's organization (learners are referenced by existing LearnHouse id).
+    token's organization (learners are referenced by existing ValidBridge id).
 
     Returns the learner as a ``PublicUser`` to act as, or ``None`` for non-token
     callers (sessions act as themselves).

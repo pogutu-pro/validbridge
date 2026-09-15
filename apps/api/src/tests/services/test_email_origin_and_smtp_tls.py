@@ -6,7 +6,7 @@ Two hardening fixes in ``src/services/email/utils.py``:
   a magic-login / email-verification link. The shipped ``allowed_regexp``
   default used to be a catch-all that ``re.fullmatch`` accepted for any
   ``https://host``, so ``Origin: https://evil.com`` produced a genuine
-  LearnHouse email containing an attacker-hosted login link.
+  ValidBridge email containing an attacker-hosted login link.
 * ``starttls()`` with no ``context`` builds an *unverified* TLS session, so an
   on-path relay impersonator captures the SMTP credentials and every emailed
   token.
@@ -48,8 +48,8 @@ def _config(**overrides):
         allowed_origins=overrides.pop("allowed_origins", []),
         allowed_regexp=overrides.pop("allowed_regexp", ""),
         tenancy=overrides.pop("tenancy", "multi"),
-        domain=overrides.pop("domain", "learnhouse.io"),
-        frontend_domain=overrides.pop("frontend_domain", "app.learnhouse.io"),
+        domain=overrides.pop("domain", "validbridge.co.ke"),
+        frontend_domain=overrides.pop("frontend_domain", "app.validbridge.co.ke"),
         ssl=overrides.pop("ssl", True),
     )
     general = SimpleNamespace(
@@ -72,7 +72,7 @@ def _config(**overrides):
 
 def _patch_config(**overrides):
     return patch(
-        "src.services.email.utils.get_learnhouse_config",
+        "src.services.email.utils.get_validbridge_config",
         return_value=_config(**overrides),
     )
 
@@ -82,7 +82,7 @@ def _no_platform_url():
     # still needs the rest of the environment.
     return patch.dict(
         "src.services.email.utils.os.environ",
-        {"LEARNHOUSE_PLATFORM_URL": ""},
+        {"VALIDBRIDGE_PLATFORM_URL": ""},
         clear=False,
     )
 
@@ -94,16 +94,16 @@ class TestOriginAllowlist:
         with _patch_config(allowed_regexp=CATCH_ALL_REGEXP), _no_platform_url():
             assert not _is_allowed_base_url("https://evil.com")
             assert not _is_allowed_base_url("http://evil.com:8443")
-            assert not _is_allowed_base_url("https://learnhouse.io.evil.com")
-            assert not _is_allowed_base_url("https://evil.com/learnhouse.io")
+            assert not _is_allowed_base_url("https://validbridge.co.ke.evil.com")
+            assert not _is_allowed_base_url("https://evil.com/validbridge.co.ke")
 
     def test_platform_domain_and_org_subdomains_are_accepted(self):
         with _patch_config(allowed_regexp=CATCH_ALL_REGEXP), _no_platform_url():
-            assert _is_allowed_base_url("https://learnhouse.io")
-            assert _is_allowed_base_url("https://www.learnhouse.io")
-            assert _is_allowed_base_url("https://acme.learnhouse.io")
-            assert _is_allowed_base_url("https://app.learnhouse.io")
-            assert _is_allowed_base_url("https://learnhouse.io/")
+            assert _is_allowed_base_url("https://validbridge.co.ke")
+            assert _is_allowed_base_url("https://www.validbridge.co.ke")
+            assert _is_allowed_base_url("https://acme.validbridge.co.ke")
+            assert _is_allowed_base_url("https://app.validbridge.co.ke")
+            assert _is_allowed_base_url("https://validbridge.co.ke/")
 
     def test_explicit_allowed_origin_and_scoped_regexp_still_work(self):
         with _patch_config(
@@ -143,7 +143,7 @@ class TestOriginAllowlist:
     def test_platform_url_env_still_accepted_over_https_only(self):
         with _patch_config(), patch.dict(
             "src.services.email.utils.os.environ",
-            {"LEARNHOUSE_PLATFORM_URL": "https://www.platform.test"},
+            {"VALIDBRIDGE_PLATFORM_URL": "https://www.platform.test"},
             clear=True,
         ):
             assert _is_allowed_base_url("https://platform.test")
@@ -167,7 +167,7 @@ class TestScopedOriginRegexp:
         "pattern",
         [
             r"^https://scoped\.test$",
-            r"^https://(?:[a-z0-9-]+\.)*learnhouse\.io$",
+            r"^https://(?:[a-z0-9-]+\.)*validbridge\.co\.ke$",
         ],
     )
     def test_domain_scoped_patterns_are_accepted(self, pattern):
@@ -295,7 +295,7 @@ class TestMagicLinkUrlInEmailBody:
         assert sent["to"] == link_user.email
         assert "evil.com" not in sent["body"]
         # Falls back to the configured canonical frontend, not the attacker host.
-        assert "https://app.learnhouse.io/auth/magic?token=tok" in sent["body"]
+        assert "https://app.validbridge.co.ke/auth/magic?token=tok" in sent["body"]
 
     async def test_attacker_referer_does_not_reach_the_emailed_link(
         self, magic_client, link_user
@@ -305,16 +305,16 @@ class TestMagicLinkUrlInEmailBody:
         )
         assert response.status_code == 200
         assert "evil.com" not in sent["body"]
-        assert "https://app.learnhouse.io/auth/magic?token=tok" in sent["body"]
+        assert "https://app.validbridge.co.ke/auth/magic?token=tok" in sent["body"]
 
     async def test_legitimate_org_subdomain_origin_is_preserved(
         self, magic_client, link_user
     ):
         response, sent = await self._request_link(
-            magic_client, link_user.email, {"origin": "https://acme.learnhouse.io"}
+            magic_client, link_user.email, {"origin": "https://acme.validbridge.co.ke"}
         )
         assert response.status_code == 200
-        assert "https://acme.learnhouse.io/auth/magic?token=tok" in sent["body"]
+        assert "https://acme.validbridge.co.ke/auth/magic?token=tok" in sent["body"]
 
 
 class TestSmtpTls:

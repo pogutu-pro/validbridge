@@ -29,7 +29,7 @@ import {
   ClockCounterClockwise,
 } from '@phosphor-icons/react'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { uploadSqliteDb } from '@services/blocks/CodePlayground/sqlite'
@@ -426,7 +426,7 @@ const markdownComponents = {
 const CodePlaygroundComponent: React.FC = (props: any) => {
   const { node, updateAttributes } = props
   const editorState = useEditorProvider() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const course = useCourse() as any
   const isEditable = editorState?.isEditable ?? true

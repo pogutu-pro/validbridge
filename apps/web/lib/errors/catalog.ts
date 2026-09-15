@@ -17,7 +17,7 @@ export const ERROR_CATALOG: ErrorCategory[] = [
     kind: 'version_mismatch',
     title: 'The app just updated',
     description:
-      'A new version of LearnHouse was released while this page was open, so it briefly fell out of sync. Reloading will pick up the latest version.',
+      'A new version of ValidBridge was released while this page was open, so it briefly fell out of sync. Reloading will pick up the latest version.',
     matchers: {
       statuses: [],
       messageIncludes: [
@@ -305,7 +305,7 @@ export const ERROR_CATALOG: ErrorCategory[] = [
         'storage not configured',
         'analytics not configured',
         'email service',
-        'set learnhouse_judge0_api_url',
+        'set validbridge_judge0_api_url',
       ],
       names: [],
     },

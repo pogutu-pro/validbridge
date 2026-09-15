@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { verifyEmail } from '@services/auth/auth'
 import { useTranslation } from 'react-i18next'
 import AuthLayout from '@components/Auth/AuthLayout'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface VerifyEmailClientProps {
     org: any
@@ -14,7 +14,7 @@ interface VerifyEmailClientProps {
 
 function VerifyEmailClient({ org }: VerifyEmailClientProps) {
     const { t } = useTranslation();
-    const { track } = useLHAnalytics('public')
+    const { track } = useVBAnalytics('public')
     const searchParams = useSearchParams()
     const token = searchParams.get('token') || ''
     const userUuid = searchParams.get('user') || ''

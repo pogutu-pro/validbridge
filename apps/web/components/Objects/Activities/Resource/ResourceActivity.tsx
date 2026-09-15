@@ -5,9 +5,9 @@ import { buildEmbedUrl, buildResourceUrl, type ResourceKind } from '@/lib/librar
 
 const KIND_META: Partial<Record<ResourceKind, { label: string; icon: any; color: string }>> = {
   course: { label: 'Course', icon: GraduationCap, color: 'text-blue-500' },
-  podcast: { label: 'Podcast', icon: Microphone, color: 'text-violet-500' },
+  podcast: { label: 'Podcast', icon: Microphone, color: 'text-orange-500' },
   community: { label: 'Community', icon: UsersThree, color: 'text-emerald-500' },
-  board: { label: 'Board', icon: SquaresFour, color: 'text-indigo-500' },
+  board: { label: 'Board', icon: SquaresFour, color: 'text-orange-500' },
   playground: { label: 'Playground', icon: Code, color: 'text-amber-500' },
 }
 

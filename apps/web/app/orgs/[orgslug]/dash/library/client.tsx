@@ -3,7 +3,7 @@ import LibraryGrid from '@components/Dashboard/Library/LibraryGrid'
 import LibraryHeader, { filterLibrary, sortLibrary, type FilterKey } from '@components/Dashboard/Library/LibraryHeader'
 import { type FolderSortMode } from '@components/Dashboard/Library/FolderSortDropdown'
 import LibrarySearchResults from '@components/Dashboard/Library/LibrarySearchResults'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { getOrgFolders, getOrgRootItems, removeOrgRootContent, reorderFolders, searchLibrary } from '@services/folders/folders'
@@ -22,7 +22,7 @@ type Props = {
 
 function LibraryHome({ orgslug, org_id, initialFolders }: Props) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
 

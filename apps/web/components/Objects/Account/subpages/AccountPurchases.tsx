@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import { getUserEnrollments, getBillingPortalSession } from '@services/payments/offers'
 import {
@@ -10,7 +10,7 @@ import {
   ExternalLink, Loader2, CalendarDays, BadgeCheck
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { meaningfulMessage } from '@lib/errors/classify'
 import { useTranslation } from 'react-i18next'
 import { formatCurrency, formatDate } from '@/lib/format'
@@ -41,8 +41,8 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
   return (
     <div className="bg-white rounded-xl nice-shadow overflow-hidden">
       {/* Type stripe */}
-      <div className={`px-4 py-2 flex items-center justify-between ${isSubscription ? 'bg-indigo-50' : 'bg-gray-50'}`}>
-        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${isSubscription ? 'text-indigo-700' : 'text-gray-600'}`}>
+      <div className={`px-4 py-2 flex items-center justify-between ${isSubscription ? 'bg-orange-50' : 'bg-gray-50'}`}>
+        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${isSubscription ? 'text-orange-700' : 'text-gray-600'}`}>
           {isSubscription ? <RefreshCcw size={11} /> : <SquareCheck size={11} />}
           {isSubscription ? 'Subscription' : 'One-time purchase'}
         </span>
@@ -60,11 +60,11 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
           <p className="font-bold text-gray-900 leading-snug">{enrollment.offer_name}</p>
           {formattedPrice && (
             <div className="shrink-0 text-end">
-              <p className={`font-black text-lg ${isSubscription ? 'text-indigo-700' : 'text-gray-900'}`}>
+              <p className={`font-black text-lg ${isSubscription ? 'text-orange-700' : 'text-gray-900'}`}>
                 {formattedPrice}
               </p>
               {isSubscription && (
-                <p className="text-xs text-indigo-400 leading-none">recurring</p>
+                <p className="text-xs text-orange-400 leading-none">recurring</p>
               )}
             </div>
           )}
@@ -90,7 +90,7 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
             <button
               onClick={onManageBilling}
               disabled={billingLoading}
-              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 transition-colors px-3 py-2 rounded-lg"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-60 transition-colors px-3 py-2 rounded-lg"
             >
               {billingLoading
                 ? <Loader2 size={12} className="animate-spin" />
@@ -105,10 +105,10 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
 }
 
 function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [billingLoading, setBillingLoading] = useState(false)
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   const { data: enrollmentsResult, isLoading, error } = useQuery({
     queryKey: ['payments', orgId, 'enrollments', 'mine'],
@@ -209,7 +209,7 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
             <button
               onClick={() => handleManageBilling('invoices')}
               disabled={billingLoading}
-              className="shrink-0 flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-60 transition-colors"
+              className="shrink-0 flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-800 disabled:opacity-60 transition-colors"
             >
               {billingLoading ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={13} />}
               Open portal

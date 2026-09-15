@@ -1,5 +1,5 @@
 /**
- * Generic, feature-agnostic REST client for the LearnHouse API.
+ * Generic, feature-agnostic REST client for the ValidBridge API.
  *
  * Holds only platform-level primitives every feature needs: the low-level
  * request wrapper, login (with per-email token caching + 429 retry), org

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { Settings, Users, Gem, CreditCard, Layers, ShoppingBag, ExternalLink } from 'lucide-react'
 import { SiStripe } from '@icons-pack/react-simple-icons'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage'
 import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage'
@@ -24,7 +24,7 @@ export type PaymentsParams = {
 
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
   const params = use(props.params);
-  const _session = useLHSession() as any
+  const _session = useVBSession() as any
   const org = useOrg() as any
   const subpage = params.subpage || 'overview'
   const getPageTitle = () => {

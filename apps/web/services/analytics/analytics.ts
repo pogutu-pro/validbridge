@@ -1,7 +1,7 @@
 import { getAPIUrl } from '@services/config/config'
 
 // lgtm[js/hardcoded-credentials] -- not a secret, just a sessionStorage key name
-const SESSION_KEY = 'lh_analytics_session_id'
+const SESSION_KEY = 'vb_analytics_session_id'
 
 function getSessionId(): string {
   if (typeof window === 'undefined') return ''

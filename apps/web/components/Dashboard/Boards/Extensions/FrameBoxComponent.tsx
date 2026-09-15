@@ -8,7 +8,7 @@ import ResizeHandle from './ResizeHandle'
 import { useFrameDrag } from './useFrameDrag'
 
 const FRAME_COLORS = [
-  { name: 'purple', bg: '#f3e8ff', border: '#c084fc', pill: '#a855f7' },
+  { name: 'purple', bg: '#f3e8ff', border: '#c084fc', pill: '#f97316' },
   { name: 'blue', bg: '#dbeafe', border: '#93c5fd', pill: '#3b82f6' },
   { name: 'green', bg: '#dcfce7', border: '#86efac', pill: '#22c55e' },
   { name: 'pink', bg: '#fce7f3', border: '#f9a8d4', pill: '#ec4899' },

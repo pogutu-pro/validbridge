@@ -1,5 +1,5 @@
 'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import React, { useEffect, useRef, useState } from 'react'
 import { AlertTriangle, CheckCircle, Loader2, Mail, Ticket, UserPlus, X } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -24,7 +24,7 @@ interface SignUpClientProps {
 
 function SignUpClient(props: SignUpClientProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const router = useRouter()
   const [joinMethod, setJoinMethod] = React.useState('open')
   const [inviteCode, setInviteCode] = React.useState('')
@@ -33,7 +33,7 @@ function SignUpClient(props: SignUpClientProps) {
 
   const isAuthenticated = session.status === 'authenticated'
   // There is only an org to JOIN when we actually resolved one (a subdomain or an
-  // invite). On the org-less apex (`learnhouse.io/signup`) props.org is null, so a
+  // invite). On the org-less apex (`validbridge.co.ke/signup`) props.org is null, so a
   // signed-in visitor has nothing to sign up for and no org to join → send them to
   // the hub instead of a broken "Join <nothing>" screen.
   const hasOrgToJoin = !!props.org
@@ -64,7 +64,7 @@ function SignUpClient(props: SignUpClientProps) {
     <AuthLayout
       org={props.org}
       welcomeText={t('auth.invited_to_join')}
-      title={t('auth.image_title_signup', { defaultValue: 'Start teaching with LearnHouse.' })}
+      title={t('auth.image_title_signup', { defaultValue: 'Start teaching with ValidBridge.' })}
       subtitle={t('auth.image_subtitle_signup', {
         defaultValue: 'Create your account and launch your first course in minutes.',
       })}
@@ -114,7 +114,7 @@ interface JoinScreenProps {
 
 const LoggedInJoinScreen = ({ inviteCode, org }: JoinScreenProps) => {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const contextOrg = useOrg() as any
   const activeOrg = contextOrg || org
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -242,7 +242,7 @@ interface NoTokenScreenProps {
 
 const NoTokenScreen = ({ org }: NoTokenScreenProps) => {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const contextOrg = useOrg() as any
   const activeOrg = contextOrg || org
   const router = useRouter()

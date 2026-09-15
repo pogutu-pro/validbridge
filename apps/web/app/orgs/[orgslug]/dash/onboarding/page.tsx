@@ -27,10 +27,10 @@ export default function OnboardingPage() {
             className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(139,92,246,0.07) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(139,92,246,0.07) 1px, transparent 1px),
-                linear-gradient(rgba(139,92,246,0.035) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(139,92,246,0.035) 1px, transparent 1px)`,
+                linear-gradient(rgba(249,115,22,0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249,115,22,0.07) 1px, transparent 1px),
+                linear-gradient(rgba(249,115,22,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249,115,22,0.035) 1px, transparent 1px)`,
               backgroundSize: '60px 60px, 60px 60px, 15px 15px, 15px 15px',
               maskImage: 'linear-gradient(to bottom, black 0%, transparent 88%)',
               WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 88%)',
@@ -40,7 +40,7 @@ export default function OnboardingPage() {
           <div
             className="absolute inset-x-0 top-0 h-28 pointer-events-none"
             style={{
-              background: 'radial-gradient(70% 100% at 28% 0%, rgba(139,92,246,0.13), transparent 70%)',
+              background: 'radial-gradient(70% 100% at 28% 0%, rgba(249,115,22,0.13), transparent 70%)',
             }}
           />
 
@@ -48,8 +48,8 @@ export default function OnboardingPage() {
             {/* Left — eyebrow + title */}
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <ListChecks size={15} weight="bold" className="text-violet-500" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-violet-500">
+                <ListChecks size={15} weight="bold" className="text-orange-500" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-orange-500">
                   {t('onboarding.box_title', { defaultValue: 'Onboarding' })}
                 </span>
               </div>
@@ -68,13 +68,13 @@ export default function OnboardingPage() {
                   {Math.round(progress * 100)}%
                 </span>
               </div>
-              <div className="h-1.5 bg-violet-100/70 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-orange-100/70 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${progress * 100}%`,
-                    background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 55%, #a855f7 100%)',
-                    boxShadow: '0 0 8px rgba(139,92,246,0.55), 0 0 2px rgba(99,102,241,0.8)',
+                    background: 'linear-gradient(90deg, #f97316 0%, #f97316 55%, #f97316 100%)',
+                    boxShadow: '0 0 8px rgba(249,115,22,0.55), 0 0 2px rgba(249,115,22,0.8)',
                   }}
                 />
               </div>

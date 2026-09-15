@@ -1,6 +1,6 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { useDebounce } from '@/hooks/useDebounce'
 import { searchOrgContent } from '@services/search/search'
@@ -89,7 +89,7 @@ function normalize(data: any): ContentResult[] {
 
 export function useContentSearch(query: string) {
   const debounced = useDebounce(query, 250)
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const { orgslug } = useOrgMembership()
 

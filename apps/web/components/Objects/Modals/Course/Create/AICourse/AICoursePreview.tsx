@@ -8,7 +8,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
-import lrnaiIcon from 'public/lrnai_icon.png'
+import lrnaiIcon from 'public/validbridge_ai_icon.png'
 import toast from 'react-hot-toast'
 import type { CoursePlan, ChapterPlan, ActivityPlan, CreatedChapter } from '@services/ai/courseplanning'
 import {
@@ -158,7 +158,7 @@ function AICoursePreview({
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-all",
             activeTab === 'plan'
-              ? "text-white/90 border-b-2 border-purple-500 bg-white/[0.03]"
+              ? "text-white/90 border-b-2 border-orange-500 bg-white/[0.03]"
               : "text-white/40 hover:text-white/60 hover:bg-white/[0.02]"
           )}
         >
@@ -171,7 +171,7 @@ function AICoursePreview({
             className={cn(
               "flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-all",
               activeTab === 'content'
-                ? "text-white/90 border-b-2 border-purple-500 bg-white/[0.03]"
+                ? "text-white/90 border-b-2 border-orange-500 bg-white/[0.03]"
                 : "text-white/40 hover:text-white/60 hover:bg-white/[0.02]"
             )}
           >
@@ -303,7 +303,7 @@ function PlanTabContent({
                 const newChapter: ChapterPlan = { name: `Chapter ${plan.chapters.length + 1}`, description: 'New chapter', activities: [] }
                 onUpdatePlan({ ...plan, chapters: [...plan.chapters, newChapter] })
               }}
-              className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+              className="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition-colors"
             >
               <Plus className="w-3 h-3" />
               {t('courses.create.ai.add_chapter')}
@@ -325,7 +325,7 @@ function PlanTabContent({
                 "flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold transition-all",
                 (isCreatingCourse || isLoading)
                   ? "bg-white/5 text-white/30 cursor-not-allowed"
-                  : "bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 outline outline-1 outline-purple-500/30"
+                  : "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 outline outline-1 outline-orange-500/30"
               )}
             >
               {isCreatingCourse ? (
@@ -431,7 +431,7 @@ function ContentTabContent({
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
                 (!isCourseCreated || isAnyGenerating || generatedCount === totalActivities)
                   ? "bg-white/5 text-white/30 cursor-not-allowed"
-                  : "bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 outline outline-1 outline-purple-500/30"
+                  : "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 outline outline-1 outline-orange-500/30"
               )}
             >
               {isAnyGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
@@ -455,7 +455,7 @@ function ContentTabContent({
                   onClick={() => toggleChapter(ci)}
                 >
                   {expandedChapters.has(ci) ? <ChevronDown className="w-4 h-4 text-white/50" /> : <ChevronRight className="w-4 h-4 text-white/50" />}
-                  <BookOpen className="w-4 h-4 text-purple-400" />
+                  <BookOpen className="w-4 h-4 text-orange-400" />
                   <span className="flex-1 text-sm font-medium text-white">{chapter.name}</span>
                   <span className="text-xs text-white/40 tabular-nums">
                     {isCourseCreated && createdChapter
@@ -483,7 +483,7 @@ function ContentTabContent({
                             isGenerated
                               ? "bg-green-500/10 ring-green-500/20"
                               : isGenerating
-                              ? "bg-purple-500/10 ring-purple-500/20"
+                              ? "bg-orange-500/10 ring-orange-500/20"
                               : hasError
                               ? "bg-red-500/10 ring-red-500/20"
                               : "bg-white/5 ring-white/5"
@@ -509,7 +509,7 @@ function ContentTabContent({
                               <span className="text-xs">{t('courses.create.ai.done')}</span>
                             </div>
                           ) : isGenerating ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400 flex-shrink-0" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-400 flex-shrink-0" />
                           ) : hasError ? (
                             <button
                               onClick={() => createdActivity && onGenerateContent(createdActivity.activity_uuid, activity.name, activity.description, chapter.name)}
@@ -525,7 +525,7 @@ function ContentTabContent({
                               className={cn(
                                 "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-colors flex-shrink-0",
                                 canGenerate
-                                  ? "text-white/50 hover:text-purple-300 hover:bg-white/5"
+                                  ? "text-white/50 hover:text-orange-300 hover:bg-white/5"
                                   : "text-white/20 cursor-not-allowed"
                               )}
                             >
@@ -596,10 +596,10 @@ function CoursePlanHeader({ plan, onUpdatePlan }: { plan: CoursePlan; onUpdatePl
             <input
               type="text" value={nameValue} onChange={(e) => setNameValue(e.target.value)} onBlur={saveName}
               onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') { setNameValue(plan.name); setEditingName(false) } }}
-              className="w-full bg-white/10 rounded-lg px-3 py-2 text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500" autoFocus
+              className="w-full bg-white/10 rounded-lg px-3 py-2 text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" autoFocus
             />
           ) : (
-            <h2 onClick={() => setEditingName(true)} className="text-lg font-semibold text-white cursor-pointer hover:text-purple-300 transition-colors">
+            <h2 onClick={() => setEditingName(true)} className="text-lg font-semibold text-white cursor-pointer hover:text-orange-300 transition-colors">
               {plan.name}
             </h2>
           )}
@@ -608,7 +608,7 @@ function CoursePlanHeader({ plan, onUpdatePlan }: { plan: CoursePlan; onUpdatePl
             <textarea
               value={descValue} onChange={(e) => setDescValue(e.target.value)} onBlur={saveDesc}
               onKeyDown={(e) => { if (e.key === 'Escape') { setDescValue(plan.description); setEditingDesc(false) } }}
-              className="w-full mt-2 bg-white/10 rounded-lg px-3 py-2 text-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[60px] resize-none" autoFocus
+              className="w-full mt-2 bg-white/10 rounded-lg px-3 py-2 text-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[60px] resize-none" autoFocus
             />
           ) : (
             <p onClick={() => setEditingDesc(true)} className="text-sm text-white/60 mt-1 cursor-pointer hover:text-white/80 transition-colors">
@@ -619,7 +619,7 @@ function CoursePlanHeader({ plan, onUpdatePlan }: { plan: CoursePlan; onUpdatePl
           {plan.learnings && (
             <div className="flex flex-wrap gap-1.5 mt-3">
               {plan.learnings.split(',').map((l, i) => (
-                <span key={i} className="px-2 py-0.5 text-xs bg-purple-500/20 text-purple-300 rounded-full">{l.trim()}</span>
+                <span key={i} className="px-2 py-0.5 text-xs bg-orange-500/20 text-orange-300 rounded-full">{l.trim()}</span>
               ))}
             </div>
           )}
@@ -655,16 +655,16 @@ function PlanChapterCard({ chapter, chapterIndex, plan, onUpdatePlan }: {
     <div className="bg-white/5 rounded-xl ring-1 ring-inset ring-white/10 overflow-hidden">
       <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpanded(!expanded)}>
         {expanded ? <ChevronDown className="w-4 h-4 text-white/50" /> : <ChevronRight className="w-4 h-4 text-white/50" />}
-        <BookOpen className="w-4 h-4 text-purple-400" />
+        <BookOpen className="w-4 h-4 text-orange-400" />
         <div className="flex-1 min-w-0">
           {editingName ? (
             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <input type="text" value={nameValue} onChange={(e) => setNameValue(e.target.value)} onBlur={saveName}
                 onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') { setNameValue(chapter.name); setEditingName(false) } }}
-                className="flex-1 bg-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500" autoFocus />
+                className="flex-1 bg-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" autoFocus />
             </div>
           ) : (
-            <span onClick={(e) => { e.stopPropagation(); setEditingName(true) }} className="text-sm font-medium text-white hover:text-purple-300 cursor-pointer">
+            <span onClick={(e) => { e.stopPropagation(); setEditingName(true) }} className="text-sm font-medium text-white hover:text-orange-300 cursor-pointer">
               {chapter.name}
             </span>
           )}
@@ -695,7 +695,7 @@ function PlanChapterCard({ chapter, chapterIndex, plan, onUpdatePlan }: {
               const c = [...plan.chapters]; c[chapterIndex] = { ...c[chapterIndex], activities: [...c[chapterIndex].activities, newAct] }
               onUpdatePlan({ ...plan, chapters: c })
             }}
-            className="flex items-center gap-1 w-full justify-center py-2 text-xs text-white/40 hover:text-purple-400 hover:bg-white/5 rounded-lg transition-colors"
+            className="flex items-center gap-1 w-full justify-center py-2 text-xs text-white/40 hover:text-orange-400 hover:bg-white/5 rounded-lg transition-colors"
           >
             <Plus className="w-3 h-3" />
             {t('courses.create.ai.add_activity')}
@@ -739,9 +739,9 @@ function PlanActivityItem({ activity, activityIndex, chapterIndex, plan, onUpdat
         {editing ? (
           <input type="text" value={val} onChange={(e) => setVal(e.target.value)} onBlur={save}
             onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setVal(activity.name); setEditing(false) } }}
-            className="w-full bg-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500" autoFocus />
+            className="w-full bg-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" autoFocus />
         ) : (
-          <span onClick={() => setEditing(true)} className="text-sm text-white/80 hover:text-purple-300 cursor-pointer">{activity.name}</span>
+          <span onClick={() => setEditing(true)} className="text-sm text-white/80 hover:text-orange-300 cursor-pointer">{activity.name}</span>
         )}
         {activity.description && <p className="text-xs text-white/40 mt-0.5 line-clamp-1">{activity.description}</p>}
       </div>

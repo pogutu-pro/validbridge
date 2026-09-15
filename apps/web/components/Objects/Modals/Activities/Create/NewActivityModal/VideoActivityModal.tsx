@@ -120,7 +120,7 @@ function VideoModal({
         }}
       >
         <span className="flex items-center gap-2 bg-white nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600">
-          <PlayCircle size={18} weight="duotone" className="text-violet-400" />
+          <PlayCircle size={18} weight="duotone" className="text-orange-400" />
           Video
         </span>
       </div>

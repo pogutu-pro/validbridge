@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { UploadCloud, ArrowBigUpDash } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { updateBoardThumbnail } from '@services/boards/boards'
 import { getBoardThumbnailMediaDirectory } from '@services/media/media'
 import AIImageButton from '@components/Objects/AI/AIImageButton'
@@ -25,7 +25,7 @@ interface BoardThumbnailTabProps {
 function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: BoardThumbnailTabProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
 

@@ -49,7 +49,7 @@ class TestAnalyticsCacheHelpers:
         _core_redis.reset_pool()
         try:
             with patch(
-                "src.core.redis.get_learnhouse_config",
+                "src.core.redis.get_validbridge_config",
                 return_value=SimpleNamespace(
                     redis_config=SimpleNamespace(redis_connection_string="")
                 ),
@@ -59,11 +59,11 @@ class TestAnalyticsCacheHelpers:
             _core_redis.reset_pool()
 
     def test_get_redis_client_handles_construction_errors(self):
-        # Simulate get_learnhouse_config raising during pool creation.
+        # Simulate get_validbridge_config raising during pool creation.
         _core_redis.reset_pool()
         try:
             with patch(
-                "src.core.redis.get_learnhouse_config",
+                "src.core.redis.get_validbridge_config",
                 side_effect=RuntimeError("boom"),
             ):
                 assert _get_redis_client() is None

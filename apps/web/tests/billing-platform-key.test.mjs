@@ -16,27 +16,27 @@ const { platformApiKey } = await import("../services/billing/packs.ts");
 let original;
 
 beforeEach(() => {
-  original = process.env.LEARNHOUSE_PLATFORM_API_KEY;
+  original = process.env.VALIDBRIDGE_PLATFORM_API_KEY;
 });
 
 afterEach(() => {
-  if (original === undefined) delete process.env.LEARNHOUSE_PLATFORM_API_KEY;
-  else process.env.LEARNHOUSE_PLATFORM_API_KEY = original;
+  if (original === undefined) delete process.env.VALIDBRIDGE_PLATFORM_API_KEY;
+  else process.env.VALIDBRIDGE_PLATFORM_API_KEY = original;
 });
 
 describe("platformApiKey", () => {
   test("returns the configured key", () => {
-    process.env.LEARNHOUSE_PLATFORM_API_KEY = "platform-key";
+    process.env.VALIDBRIDGE_PLATFORM_API_KEY = "platform-key";
     expect(platformApiKey()).toBe("platform-key");
   });
 
   test("throws when unset instead of returning an empty key", () => {
-    delete process.env.LEARNHOUSE_PLATFORM_API_KEY;
-    expect(() => platformApiKey()).toThrow(/LEARNHOUSE_PLATFORM_API_KEY is unset/);
+    delete process.env.VALIDBRIDGE_PLATFORM_API_KEY;
+    expect(() => platformApiKey()).toThrow(/VALIDBRIDGE_PLATFORM_API_KEY is unset/);
   });
 
   test("treats an empty string as unset", () => {
-    process.env.LEARNHOUSE_PLATFORM_API_KEY = "";
-    expect(() => platformApiKey()).toThrow(/LEARNHOUSE_PLATFORM_API_KEY is unset/);
+    process.env.VALIDBRIDGE_PLATFORM_API_KEY = "";
+    expect(() => platformApiKey()).toThrow(/VALIDBRIDGE_PLATFORM_API_KEY is unset/);
   });
 });

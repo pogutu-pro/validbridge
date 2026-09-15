@@ -1,5 +1,5 @@
 'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup'
 import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup'
@@ -22,7 +22,7 @@ import { Badge } from '@components/ui/badge'
 function OrgUserGroups() {
     const { t } = useTranslation()
     const org = useOrg() as any
-    const session = useLHSession() as any
+    const session = useVBSession() as any
     const access_token = session?.data?.tokens?.access_token;
     const queryClient = useQueryClient()
     const [userGroupManagementModal, setUserGroupManagementModal] = React.useState(false)
@@ -90,7 +90,7 @@ function OrgUserGroups() {
                             <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <input
                                 placeholder={t('dashboard.users.usergroups.search_placeholder')}
-                                className="ps-10 pe-4 py-2 w-full sm:w-[220px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                                className="ps-10 pe-4 py-2 w-full sm:w-[220px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                             />
@@ -161,8 +161,8 @@ function OrgUserGroups() {
                                 >
                                     {/* Group Info */}
                                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                                        <div className="bg-indigo-50 p-2.5 rounded-lg">
-                                            <SquareUserRound className="w-5 h-5 text-indigo-600" />
+                                        <div className="bg-orange-50 p-2.5 rounded-lg">
+                                            <SquareUserRound className="w-5 h-5 text-orange-600" />
                                         </div>
                                         <div className="flex flex-col min-w-0 flex-1">
                                             <div className="flex items-center gap-2">

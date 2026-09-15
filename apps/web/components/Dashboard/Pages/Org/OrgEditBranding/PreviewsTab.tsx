@@ -8,7 +8,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { DotsSixVertical, Images, ImageSquare, Info, Plus, UploadSimple, X } from '@phosphor-icons/react'
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { constructAcceptValue } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { getOrgPreviewMediaDirectory, getOrgThumbnailMediaDirectory } from '@services/media/media'
@@ -61,7 +61,7 @@ export default function PreviewsTab() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
   const thumbnail = useAssetUpload({
@@ -262,7 +262,7 @@ export default function PreviewsTab() {
             <LinkPreviewVignette
               thumbnailUrl={thumbnailUrl}
               name={org?.name}
-              host={org?.slug ? `${org.slug}.learnhouse.io` : undefined}
+              host={org?.slug ? `${org.slug}.validbridge.co.ke` : undefined}
               label={t('dashboard.organization.branding.vignettes.link_preview')}
             />
           </>

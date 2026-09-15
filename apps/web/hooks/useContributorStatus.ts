@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { getCourseContributors } from '@services/courses/courses';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
@@ -12,7 +12,7 @@ interface Contributor {
 }
 
 export function useContributorStatus(courseUuid: string) {
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const userId = session?.data?.user?.id;
 

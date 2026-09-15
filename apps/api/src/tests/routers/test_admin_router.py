@@ -386,7 +386,7 @@ class TestAdminRouter:
         assert response.headers["location"].startswith("/auth/login?mfa_token=pending-tok")
         assert "redirect_to=%2Fdashboard" in response.headers["location"]
         # No session cookies may be set on the challenge redirect.
-        assert "LH_access" not in response.headers.get("set-cookie", "")
+        assert "VB_access" not in response.headers.get("set-cookie", "")
 
         with patch(
             "src.routers.admin.consume_magic_link_token",

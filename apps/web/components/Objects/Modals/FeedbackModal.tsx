@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from '@components/ui/dialog'
 import { cn } from '@/lib/utils'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useTranslation } from 'react-i18next'
 import { getAPIUrl } from '@services/config/config'
 
@@ -40,7 +40,7 @@ export function FeedbackModal({
   userEmail,
 }: FeedbackModalProps) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics()
+  const { track } = useVBAnalytics()
   const [feedbackMessage, setFeedbackMessage] = useState('')
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
@@ -144,7 +144,7 @@ export function FeedbackModal({
         className={cn(
           'sm:max-w-md',
           isDark
-            ? 'bg-[#0f0f10] border-white/10 text-white'
+            ? 'bg-[#F8F7F2] border-[#E7E5E4] text-[#262626]'
             : 'bg-white border-gray-200'
         )}
       >
@@ -152,13 +152,13 @@ export function FeedbackModal({
           <DialogTitle
             className={cn(
               'flex items-center gap-2',
-              isDark ? 'text-white' : 'text-gray-900'
+              isDark ? 'text-[#262626]' : 'text-gray-900'
             )}
           >
             <ChatCircleDots size={20} weight="fill" />
             {t('common.help_menu.feedback_title')}
           </DialogTitle>
-          <DialogDescription className={isDark ? 'text-white/60' : 'text-gray-500'}>
+          <DialogDescription className={isDark ? 'text-[#737373]/80' : 'text-gray-500'}>
             {t('common.help_menu.feedback_description')}
           </DialogDescription>
         </DialogHeader>
@@ -178,7 +178,7 @@ export function FeedbackModal({
                   className={isDark ? 'text-green-500' : 'text-green-600'}
                 />
               </div>
-              <p className={cn('font-medium', isDark ? 'text-white/90' : 'text-gray-900')}>
+              <p className={cn('font-medium', isDark ? 'text-[#262626]/90' : 'text-gray-900')}>
                 {t('common.help_menu.feedback_success')}
               </p>
             </div>
@@ -186,7 +186,7 @@ export function FeedbackModal({
             <div className="space-y-4">
               {/* Reaction Selection */}
               <div>
-                <p className={cn('text-sm mb-2', isDark ? 'text-white/60' : 'text-gray-600')}>
+                <p className={cn('text-sm mb-2', isDark ? 'text-[#737373]/80' : 'text-gray-600')}>
                   {t('common.help_menu.how_was_experience')}
                 </p>
                 <div className="flex gap-2">
@@ -200,7 +200,7 @@ export function FeedbackModal({
                           ? 'border-green-500 bg-green-500/10 text-green-500'
                           : 'border-green-500 bg-green-50 text-green-600'
                         : isDark
-                          ? 'border-white/10 hover:border-white/20 text-white/60 hover:text-white'
+                          ? 'border-[#E7E5E4] hover:border-white/20 text-[#737373]/80 hover:text-[#262626]'
                           : 'border-gray-200 hover:border-gray-300 text-gray-400 hover:text-gray-600'
                     )}
                   >
@@ -217,7 +217,7 @@ export function FeedbackModal({
                           ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500'
                           : 'border-yellow-500 bg-yellow-50 text-yellow-600'
                         : isDark
-                          ? 'border-white/10 hover:border-white/20 text-white/60 hover:text-white'
+                          ? 'border-[#E7E5E4] hover:border-white/20 text-[#737373]/80 hover:text-[#262626]'
                           : 'border-gray-200 hover:border-gray-300 text-gray-400 hover:text-gray-600'
                     )}
                   >
@@ -234,7 +234,7 @@ export function FeedbackModal({
                           ? 'border-red-500 bg-red-500/10 text-red-500'
                           : 'border-red-500 bg-red-50 text-red-600'
                         : isDark
-                          ? 'border-white/10 hover:border-white/20 text-white/60 hover:text-white'
+                          ? 'border-[#E7E5E4] hover:border-white/20 text-[#737373]/80 hover:text-[#262626]'
                           : 'border-gray-200 hover:border-gray-300 text-gray-400 hover:text-gray-600'
                     )}
                   >
@@ -253,7 +253,7 @@ export function FeedbackModal({
                 className={cn(
                   'w-full h-28 px-3 py-2 rounded-lg resize-none',
                   isDark
-                    ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/20'
+                    ? 'bg-white border border-[#E7E5E4] text-[#262626] placeholder:text-[#737373]/60 focus:outline-none focus:ring-2 focus:ring-white/20'
                     : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300'
                 )}
               />
@@ -277,7 +277,7 @@ export function FeedbackModal({
                           alt={`Upload ${index + 1}`}
                           className={cn(
                             'w-16 h-16 object-cover rounded-lg border',
-                            isDark ? 'border-white/10' : 'border-gray-200'
+                            isDark ? 'border-[#E7E5E4]' : 'border-gray-200'
                           )}
                         />
                         <button
@@ -285,7 +285,7 @@ export function FeedbackModal({
                           onClick={() => removeImage(index)}
                           className="absolute -top-1.5 -end-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          <X size={12} weight="bold" className="text-white" />
+                          <X size={12} weight="bold" className="text-[#262626]" />
                         </button>
                       </div>
                     ))}
@@ -298,13 +298,13 @@ export function FeedbackModal({
                     className={cn(
                       'flex items-center gap-2 text-sm transition-colors',
                       isDark
-                        ? 'text-white/50 hover:text-white'
+                        ? 'text-[#737373]/80 hover:text-[#262626]'
                         : 'text-gray-500 hover:text-gray-700'
                     )}
                   >
                     <ImageSquare size={18} />
                     <span>{t('common.help_menu.attach_image')}</span>
-                    <span className={isDark ? 'text-white/30' : 'text-gray-400'}>
+                    <span className={isDark ? 'text-[#737373]/60' : 'text-gray-400'}>
                       ({feedbackImages.length}/3)
                     </span>
                   </button>
@@ -321,7 +321,7 @@ export function FeedbackModal({
               className={cn(
                 'px-4 py-2 text-sm transition-colors',
                 isDark
-                  ? 'text-white/60 hover:text-white'
+                  ? 'text-[#737373]/80 hover:text-[#262626]'
                   : 'text-gray-600 hover:text-gray-900'
               )}
             >
@@ -334,7 +334,7 @@ export function FeedbackModal({
                 'flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
                 isDark
                   ? 'bg-white text-black hover:bg-white/90'
-                  : 'bg-black text-white hover:bg-gray-800'
+                  : 'bg-[#F8F7F2] text-[#262626] hover:bg-gray-800'
               )}
             >
               {feedbackSubmitting ? (

@@ -15,7 +15,7 @@ Two modes share one call:
 Gemini returns headerless 24 kHz / 16-bit / mono PCM; we wrap it in a WAV
 container (stdlib ``wave``) so it can be stored and streamed like any uploaded
 audio file. All TTS model ids are still *preview* upstream, so the model id is a
-config value (``LEARNHOUSE_AI_TTS_MODEL``), never hard-coded into behaviour.
+config value (``VALIDBRIDGE_AI_TTS_MODEL``), never hard-coded into behaviour.
 """
 
 from __future__ import annotations
@@ -27,14 +27,14 @@ import wave
 from dataclasses import dataclass
 from typing import Optional
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.ai.llm import AINotConfiguredError
 from src.services.ai.llm.provider import _GOOGLE_ALIASES
 
 logger = logging.getLogger(__name__)
 
 # Cheapest Gemini TTS model with a free tier; supports single AND multi-speaker.
-# Override with LEARNHOUSE_AI_TTS_MODEL (e.g. gemini-2.5-pro-preview-tts for higher
+# Override with VALIDBRIDGE_AI_TTS_MODEL (e.g. gemini-2.5-pro-preview-tts for higher
 # quality, or a newer preview once it is allowlisted for your key).
 DEFAULT_TTS_MODEL = "gemini-2.5-flash-preview-tts"
 
@@ -109,7 +109,7 @@ def _is_retryable(exc: Exception) -> bool:
 
 def _resolve_tts_config() -> tuple[str, str]:
     """Return ``(api_key, model)`` for TTS or raise if unconfigured."""
-    cfg = get_learnhouse_config().ai_config
+    cfg = get_validbridge_config().ai_config
     provider_id = (getattr(cfg, "provider", None) or "").strip().lower()
 
     api_key = None
@@ -120,8 +120,8 @@ def _resolve_tts_config() -> tuple[str, str]:
     if not api_key:
         raise AINotConfiguredError(
             "AI audio generation requires a Google/Gemini API key "
-            "(set LEARNHOUSE_GEMINI_API_KEY, or LEARNHOUSE_AI_API_KEY when "
-            "LEARNHOUSE_AI_PROVIDER=google)."
+            "(set VALIDBRIDGE_GEMINI_API_KEY, or VALIDBRIDGE_AI_API_KEY when "
+            "VALIDBRIDGE_AI_PROVIDER=google)."
         )
 
     model = (getattr(cfg, "tts_model", None) or "").strip() or DEFAULT_TTS_MODEL

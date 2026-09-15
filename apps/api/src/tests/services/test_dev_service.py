@@ -14,22 +14,22 @@ def _config(development_mode: bool):
 
 
 def test_is_dev_mode_enabled_true():
-    with patch("src.services.dev.dev.get_learnhouse_config", return_value=_config(True)):
+    with patch("src.services.dev.dev.get_validbridge_config", return_value=_config(True)):
         assert isDevModeEnabled() is True
 
 
 def test_is_dev_mode_enabled_false():
-    with patch("src.services.dev.dev.get_learnhouse_config", return_value=_config(False)):
+    with patch("src.services.dev.dev.get_validbridge_config", return_value=_config(False)):
         assert isDevModeEnabled() is False
 
 
 def test_is_dev_mode_enabled_or_raise_true():
-    with patch("src.services.dev.dev.get_learnhouse_config", return_value=_config(True)):
+    with patch("src.services.dev.dev.get_validbridge_config", return_value=_config(True)):
         assert isDevModeEnabledOrRaise() is True
 
 
 def test_is_dev_mode_enabled_or_raise_raises_when_disabled():
-    with patch("src.services.dev.dev.get_learnhouse_config", return_value=_config(False)):
+    with patch("src.services.dev.dev.get_validbridge_config", return_value=_config(False)):
         with pytest.raises(HTTPException) as exc:
             isDevModeEnabledOrRaise()
 

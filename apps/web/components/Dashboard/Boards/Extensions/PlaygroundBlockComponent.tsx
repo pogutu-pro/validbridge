@@ -22,7 +22,7 @@ import {
   iterateBoardsPlayground,
 } from '@services/boards/playground'
 import { useDragResize } from './useDragResize'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -108,7 +108,7 @@ export default function PlaygroundBlockComponent({
   getPos,
 }: any) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const { blockUuid, x, y, width, height, htmlContent, sessionUuid, iterationCount } = node.attrs
 
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -254,15 +254,15 @@ export default function PlaygroundBlockComponent({
         style={{ minHeight: height }}
       >
         {/* Top gradient */}
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-purple-50/80 to-transparent rounded-t-2xl pointer-events-none z-0" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-orange-50/80 to-transparent rounded-t-2xl pointer-events-none z-0" />
 
         <DragHandle onMouseDown={handleDragStart} />
 
         {/* Header */}
         <div className="flex items-center px-4 pt-4 pb-0.5 relative z-[1]">
           <div className="flex items-center gap-1.5 flex-1">
-            <div className="w-5 h-5 rounded-md bg-purple-100 flex items-center justify-center">
-              <Sparkles size={10} className="text-purple-500" />
+            <div className="w-5 h-5 rounded-md bg-orange-100 flex items-center justify-center">
+              <Sparkles size={10} className="text-orange-500" />
             </div>
             <span className="text-[9px] font-semibold tracking-wider uppercase select-none text-neutral-400">
               {t('boards.playground_block.title')}
@@ -314,7 +314,7 @@ export default function PlaygroundBlockComponent({
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/90 backdrop-blur-sm nice-shadow pointer-events-auto cursor-grab active:cursor-grabbing"
           onMouseDown={handleDragStart}
         >
-          <Sparkles size={11} className="text-purple-500 shrink-0" />
+          <Sparkles size={11} className="text-orange-500 shrink-0" />
           <span className="text-[10px] font-medium text-neutral-500">
             {t('boards.playground_block.title')}
           </span>
@@ -438,7 +438,7 @@ function PlaygroundModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <Sparkles size={13} className="text-white" />
             </div>
             <span className="text-sm font-semibold text-white/70">{t('boards.playground_block.title')}</span>
@@ -478,7 +478,7 @@ function PlaygroundModal({
               {showLoading && (
                 <div className="flex items-center justify-center w-full h-full">
                   <div className="text-center space-y-3">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-purple-400" />
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-orange-400" />
                     <p className="text-sm text-white/50">{t('boards.playground_block.generating')}</p>
                   </div>
                 </div>
@@ -488,7 +488,7 @@ function PlaygroundModal({
                 <div className="relative w-full h-full">
                   {showStreaming && (
                     <div className="absolute top-4 end-4 z-10 flex items-center gap-2 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm ring-1 ring-inset ring-white/10">
-                      <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-orange-400" />
                       <span className="text-xs text-white/70">{t('boards.playground_block.streaming')}</span>
                     </div>
                   )}
@@ -517,7 +517,7 @@ function PlaygroundModal({
           <div className="w-[400px] flex flex-col min-h-0">
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
               <div className="flex items-center gap-2">
-                <Sparkles size={14} className="text-purple-400" />
+                <Sparkles size={14} className="text-orange-400" />
                 <span className="font-semibold text-sm text-white/70">{t('boards.playground_block.chat_header')}</span>
               </div>
               <div className={cn(
@@ -549,7 +549,7 @@ function PlaygroundModal({
                 <div key={i} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
                   <div className={cn(
                     'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
-                    msg.role === 'user' ? 'bg-purple-600/80 text-white rounded-ee-md' : 'bg-white/5 text-white/80 rounded-es-md ring-1 ring-inset ring-white/10'
+                    msg.role === 'user' ? 'bg-orange-600/80 text-white rounded-ee-md' : 'bg-white/5 text-white/80 rounded-es-md ring-1 ring-inset ring-white/10'
                   )}>
                     {msg.role === 'user' ? (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -566,7 +566,7 @@ function PlaygroundModal({
                 <div className="flex justify-start">
                   <div className="bg-white/5 rounded-2xl rounded-es-md px-4 py-3 ring-1 ring-inset ring-white/10">
                     <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-orange-400" />
                       <span className="text-sm text-white/50">{t('boards.playground_block.creating')}</span>
                     </div>
                   </div>

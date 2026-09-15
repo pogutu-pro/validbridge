@@ -34,28 +34,28 @@ def _image_response(data=b"PNGBYTES"):
 # --- _resolve_image_config ---
 
 def test_resolve_config_google_uses_api_key():
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg(provider="google", api_key="gk")):
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg(provider="google", api_key="gk")):
         key, model = gen._resolve_image_config()
     assert key == "gk" and model == gen.DEFAULT_IMAGE_MODEL
 
 
 def test_resolve_config_non_google_falls_back_to_gemini_key():
     cfg = _cfg(provider="openai", api_key="openai-key", gemini_api_key="gemk")
-    with patch.object(gen, "get_learnhouse_config", return_value=cfg):
+    with patch.object(gen, "get_validbridge_config", return_value=cfg):
         key, _ = gen._resolve_image_config()
     assert key == "gemk"  # openai key ignored for image gen
 
 
 def test_resolve_config_custom_model():
     cfg = _cfg(image_model="my-image-model")
-    with patch.object(gen, "get_learnhouse_config", return_value=cfg):
+    with patch.object(gen, "get_validbridge_config", return_value=cfg):
         _, model = gen._resolve_image_config()
     assert model == "my-image-model"
 
 
 def test_resolve_config_missing_key_raises():
     cfg = _cfg(provider="anthropic", api_key=None, gemini_api_key=None)
-    with patch.object(gen, "get_learnhouse_config", return_value=cfg):
+    with patch.object(gen, "get_validbridge_config", return_value=cfg):
         with pytest.raises(AINotConfiguredError):
             gen._resolve_image_config()
 
@@ -85,7 +85,7 @@ async def test_generate_image_empty_prompt_raises():
 async def test_generate_image_success():
     client = MagicMock()
     client.aio.models.generate_content = AsyncMock(return_value=_image_response(b"IMG"))
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), patch(
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), patch(
         "google.genai.Client", return_value=client
     ):
         out = await gen.generate_image("a cat")
@@ -95,7 +95,7 @@ async def test_generate_image_success():
 async def test_generate_image_with_input_images():
     client = MagicMock()
     client.aio.models.generate_content = AsyncMock(return_value=_image_response(b"EDITED"))
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), patch(
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), patch(
         "google.genai.Client", return_value=client
     ), patch("google.genai.types.Part.from_bytes", return_value="PART"):
         out = await gen.generate_image("make it darker", input_images=[b"orig"])
@@ -110,7 +110,7 @@ async def test_generate_image_with_input_images():
 async def test_generate_image_no_image_raises_runtime():
     client = MagicMock()
     client.aio.models.generate_content = AsyncMock(return_value=SimpleNamespace(candidates=[]))
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), patch(
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), patch(
         "google.genai.Client", return_value=client
     ):
         with pytest.raises(RuntimeError):
@@ -120,7 +120,7 @@ async def test_generate_image_no_image_raises_runtime():
 async def test_generate_image_sdk_error_raises_runtime():
     client = MagicMock()
     client.aio.models.generate_content = AsyncMock(side_effect=Exception("boom"))
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), patch(
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), patch(
         "google.genai.Client", return_value=client
     ):
         with pytest.raises(RuntimeError):
@@ -131,7 +131,7 @@ async def test_generate_image_requests_image_modality():
     """Regression: the call MUST pass response_modalities so the model returns an image."""
     client = MagicMock()
     client.aio.models.generate_content = AsyncMock(return_value=_image_response(b"IMG"))
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), patch(
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), patch(
         "google.genai.Client", return_value=client
     ):
         await gen.generate_image("a cat")
@@ -158,7 +158,7 @@ async def test_generate_image_retries_transient_then_succeeds():
     client.aio.models.generate_content = AsyncMock(
         side_effect=[ServerError("busy"), _image_response(b"IMG")]
     )
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), patch(
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), patch(
         "google.genai.Client", return_value=client
     ), patch("asyncio.sleep", new=AsyncMock()):
         out = await gen.generate_image("a cat")
@@ -170,7 +170,7 @@ async def test_generate_image_truncates_long_prompt():
     client = MagicMock()
     client.aio.models.generate_content = AsyncMock(return_value=_image_response(b"IMG"))
     long_prompt = "a" * (gen.MAX_PROMPT_CHARS + 500)
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), patch(
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), patch(
         "google.genai.Client", return_value=client
     ):
         out = await gen.generate_image(long_prompt)

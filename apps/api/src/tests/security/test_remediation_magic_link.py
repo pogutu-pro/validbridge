@@ -75,7 +75,7 @@ async def test_magic_link_single_use_blocks_replay(legit_payload):
         "redis.Redis.from_url",
         return_value=redis_client,
     ), patch(
-        "config.config.get_learnhouse_config",
+        "config.config.get_validbridge_config",
         return_value=fake_cfg,
     ):
         _, access, refresh, redirect_to, mfa_token = await consume_magic_link_token(
@@ -131,7 +131,7 @@ async def test_magic_link_falls_through_when_redis_unavailable(legit_payload):
         "redis.Redis.from_url",
         side_effect=RuntimeError("redis down"),
     ), patch(
-        "config.config.get_learnhouse_config",
+        "config.config.get_validbridge_config",
         return_value=fake_cfg,
     ):
         result = await consume_magic_link_token(

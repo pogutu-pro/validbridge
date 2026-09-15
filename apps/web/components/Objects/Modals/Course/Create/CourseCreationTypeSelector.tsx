@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { PlanLevel } from '@services/plans/plans'
 import Image from 'next/image'
-import lrnaiIcon from 'public/lrnai_icon.png'
+import lrnaiIcon from 'public/validbridge_ai_icon.png'
 import { useOrg } from '@components/Contexts/OrgContext'
 
 interface CourseCreationTypeSelectorProps {
@@ -44,7 +44,7 @@ function CourseCreationTypeSelector({ onSelectType, currentPlan }: CourseCreatio
           disabled={!canUseAI}
           className={`group flex flex-col items-center p-6 rounded-xl border-2 transition-all duration-200 ${
             canUseAI
-              ? 'border-gray-200 bg-white hover:border-purple-500 hover:shadow-lg cursor-pointer'
+              ? 'border-gray-200 bg-white hover:border-orange-500 hover:shadow-lg cursor-pointer'
               : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60'
           }`}
         >

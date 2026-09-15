@@ -12,7 +12,7 @@ import React from 'react'
 import { updateRole } from '@services/roles/roles'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import { Shield, BookOpen, Users, UserCheck, FolderOpen, Image, Building, FileText, Activity, Monitor, CheckSquare, Square } from 'lucide-react'
@@ -311,7 +311,7 @@ const predefinedRoles = {
 function EditRole(props: EditRoleProps) {
     const { t } = useTranslation()
     const org = useOrg() as any;
-    const session = useLHSession() as any
+    const session = useVBSession() as any
     const access_token = session?.data?.tokens?.access_token;
     const queryClient = useQueryClient()
     const { handlePlanLimit } = useUpgradeModal()

@@ -5,10 +5,10 @@ import { updateActivity, getActivityState, getActivity } from '@services/courses
 import { toast } from 'react-hot-toast'
 import Toast from '@components/Objects/StyledElements/Toast/Toast'
 import { OrgProvider } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useTranslation } from 'react-i18next'
 import { preloadComponentsForContent } from './editorPreload'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 /**
  * Transforms ProseMirror JSON content to fix mark type names.
@@ -67,8 +67,8 @@ interface EditorWrapperProps {
 
 function EditorWrapper(props: EditorWrapperProps): JSX.Element {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('editor')
-  const session = useLHSession() as any
+  const { track } = useVBAnalytics('editor')
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token;
 
   // Track the current version we loaded with

@@ -21,7 +21,7 @@ from src.services.nudges.links import (
 )
 from src.services.nudges.tokens import verify_unsubscribe_token
 
-BASE = "https://acme.learnhouse.io"
+BASE = "https://acme.validbridge.co.ke"
 
 
 def _all_urls():
@@ -95,14 +95,14 @@ class TestRouteShapes:
 
 class TestUnsubscribeUrl:
     def test_token_round_trips_from_the_built_url(self):
-        url = unsubscribe_url("https://api.learnhouse.io", "user_abc")
+        url = unsubscribe_url("https://api.validbridge.co.ke", "user_abc")
         token = url.split("token=", 1)[1]
         assert verify_unsubscribe_token(token) == "user_abc"
 
     def test_points_at_the_api_endpoint(self):
-        url = unsubscribe_url("https://api.learnhouse.io", "user_abc")
-        assert url.startswith("https://api.learnhouse.io/api/v1/emails/unsubscribe?token=")
+        url = unsubscribe_url("https://api.validbridge.co.ke", "user_abc")
+        assert url.startswith("https://api.validbridge.co.ke/api/v1/emails/unsubscribe?token=")
 
     def test_trailing_slash_on_the_base_is_tolerated(self):
-        url = unsubscribe_url("https://api.learnhouse.io/", "user_abc")
+        url = unsubscribe_url("https://api.validbridge.co.ke/", "user_abc")
         assert "//api/v1" not in url

@@ -6,8 +6,8 @@ import { API_GROUPS, METHOD_TO_ACTION } from '../lib/reference/config.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const CONTENT_DIR = path.join(__dirname, '..', 'content')
 const OUTPUT_FILE = path.join(__dirname, '..', 'public', 'llms-full.txt')
-const SITE_URL = 'https://docs.learnhouse.app'
-const API_BASE_URL = (process.env.LEARNHOUSE_API_URL || 'https://api.learnhouse.io').replace(/\/$/, '')
+const SITE_URL = 'https://docs.validbridge.co.ke'
+const API_BASE_URL = (process.env.VALIDBRIDGE_API_URL || 'https://api.validbridge.co.ke').replace(/\/$/, '')
 const SNAPSHOT_PATH = path.join(__dirname, '..', 'lib', 'reference', 'openapi.snapshot.json')
 
 function collectMdxFiles(dir, basePath = '') {
@@ -65,9 +65,9 @@ mdxFiles.sort((a, b) => {
 
 const sections = []
 
-sections.push('# LearnHouse Documentation — Full Content')
+sections.push('# ValidBridge Documentation — Full Content')
 sections.push('')
-sections.push('> This file contains the complete text of all LearnHouse documentation pages.')
+sections.push('> This file contains the complete text of all ValidBridge documentation pages.')
 sections.push(`> Source: ${SITE_URL}`)
 sections.push('')
 
@@ -130,11 +130,11 @@ for (const [specPath, methods] of Object.entries(spec.paths || {})) {
 
 sections.push('---')
 sections.push('')
-sections.push('# LearnHouse API Reference')
+sections.push('# ValidBridge API Reference')
 sections.push(`URL: ${SITE_URL}/reference`)
 sections.push('')
 sections.push(`Base URL: ${API_BASE_URL} — all endpoints are prefixed with /api/v1.`)
-sections.push('Authentication: send an organization API token (prefix lh_, Pro plan) as')
+sections.push('Authentication: send an organization API token (prefix vb_, Pro plan) as')
 sections.push('`Authorization: Bearer <token>`. Session-only endpoints reject API tokens and')
 sections.push('need a user JWT from POST /api/v1/auth/login (form-encoded username/password).')
 sections.push('Errors return JSON `{ "detail": "..." }`; validation failures return 422.')

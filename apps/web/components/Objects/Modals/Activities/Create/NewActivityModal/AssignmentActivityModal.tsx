@@ -6,11 +6,11 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { createAssignment } from '@services/courses/assignments'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { createActivity, deleteActivity } from '@services/courses/activities'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useUpgradeModal } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'
 import { getErrorMessage } from '@services/utils/ts/errorMessage'
 import {
@@ -31,9 +31,9 @@ import {
 function NewAssignment({ submitActivity: _submitActivity, chapterId, course, closeModal }: any) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const { handlePlanLimit } = useUpgradeModal()
   const cleanCourseUuid = (id: string) => id?.replace(/^course_/, '') ?? id
   const _withUnpublishedActivities = course
@@ -274,7 +274,7 @@ function NewAssignment({ submitActivity: _submitActivity, chapterId, course, clo
           />
           {!ungraded && (
           <SmallToggleRow
-            icon={<Eye size={16} className="text-indigo-500" />}
+            icon={<Eye size={16} className="text-orange-500" />}
             label={t('dashboard.assignments.modals.create.form.show_correct_answers_label')}
             description={t('dashboard.assignments.modals.create.form.show_correct_answers_description')}
             checked={showCorrectAnswers}
@@ -403,7 +403,7 @@ const GRADING_TYPE_OPTIONS: {
   selectedBg: string
   illustration: string
 }[] = [
-  { value: 'ALPHABET', labelKey: 'grading_types.alphabet', descriptionKey: 'grading_type_descriptions.alphabet', icon: <ALargeSmall size={18} />, color: 'text-violet-600', selectedBorder: 'border-violet-400', selectedBg: 'bg-violet-50', illustration: 'A  B  C' },
+  { value: 'ALPHABET', labelKey: 'grading_types.alphabet', descriptionKey: 'grading_type_descriptions.alphabet', icon: <ALargeSmall size={18} />, color: 'text-orange-600', selectedBorder: 'border-orange-400', selectedBg: 'bg-orange-50', illustration: 'A  B  C' },
   { value: 'NUMERIC', labelKey: 'grading_types.numeric', descriptionKey: 'grading_type_descriptions.numeric', icon: <Hash size={18} />, color: 'text-blue-600', selectedBorder: 'border-blue-400', selectedBg: 'bg-blue-50', illustration: '0 — 100' },
   { value: 'PERCENTAGE', labelKey: 'grading_types.percentage', descriptionKey: 'grading_type_descriptions.percentage', icon: <Percent size={18} />, color: 'text-emerald-600', selectedBorder: 'border-emerald-400', selectedBg: 'bg-emerald-50', illustration: '85%' },
   { value: 'PASS_FAIL', labelKey: 'grading_types.pass_fail', descriptionKey: 'grading_type_descriptions.pass_fail', icon: <ThumbsUp size={18} />, color: 'text-amber-600', selectedBorder: 'border-amber-400', selectedBg: 'bg-amber-50', illustration: 'P / F' },

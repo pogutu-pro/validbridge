@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@learnhouse/e2e",
+      "name": "@validbridge/e2e",
       "devDependencies": {
         "@playwright/test": "^1.49.1",
         "@types/node": "^26.0.0",

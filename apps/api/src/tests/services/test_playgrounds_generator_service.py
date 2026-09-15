@@ -58,7 +58,7 @@ class TestPlaygroundsGeneratorService:
             "src.services.playgrounds.playgrounds_generator.redis.from_url",
             return_value=fake_redis,
         ), patch(
-            "src.services.playgrounds.playgrounds_generator.LH_CONFIG",
+            "src.services.playgrounds.playgrounds_generator.VB_CONFIG",
             SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -96,7 +96,7 @@ class TestPlaygroundsGeneratorService:
             "src.services.playgrounds.playgrounds_generator.redis.from_url",
             side_effect=RuntimeError("connect fail"),
         ), patch(
-            "src.services.playgrounds.playgrounds_generator.LH_CONFIG",
+            "src.services.playgrounds.playgrounds_generator.VB_CONFIG",
             SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -104,7 +104,7 @@ class TestPlaygroundsGeneratorService:
             assert get_redis_connection() is None
 
         with patch(
-            "src.services.playgrounds.playgrounds_generator.LH_CONFIG",
+            "src.services.playgrounds.playgrounds_generator.VB_CONFIG",
             SimpleNamespace(redis_config=SimpleNamespace(redis_connection_string=""))
         ):
             assert get_redis_connection() is None
@@ -115,7 +115,7 @@ class TestPlaygroundsGeneratorService:
             "src.services.playgrounds.playgrounds_generator.redis.from_url",
             return_value=bad_redis,
         ), patch(
-            "src.services.playgrounds.playgrounds_generator.LH_CONFIG",
+            "src.services.playgrounds.playgrounds_generator.VB_CONFIG",
             SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),

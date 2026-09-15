@@ -50,11 +50,11 @@ def _run(args: list[str], timeout: int) -> tuple[int, bytes, bytes]:
 
 
 def _ffmpeg() -> str:
-    return os.environ.get("LEARNHOUSE_FFMPEG_PATH", "ffmpeg")
+    return os.environ.get("VALIDBRIDGE_FFMPEG_PATH", "ffmpeg")
 
 
 def _ffprobe() -> str:
-    return os.environ.get("LEARNHOUSE_FFPROBE_PATH", "ffprobe")
+    return os.environ.get("VALIDBRIDGE_FFPROBE_PATH", "ffprobe")
 
 
 async def probe_duration(src_path: str) -> float:

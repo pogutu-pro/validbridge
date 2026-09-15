@@ -7,12 +7,12 @@
  */
 
 export const API_BASE_URL = (
-  process.env.LEARNHOUSE_API_URL || 'https://api.learnhouse.io'
+  process.env.VALIDBRIDGE_API_URL || 'https://api.validbridge.co.ke'
 ).replace(/\/$/, '')
 
 export const SPEC_REVALIDATE_SECONDS = 3600 // 1h ISR window for all reference pages
 
-export const TOKEN_PLACEHOLDER = 'lh_YOUR_API_TOKEN'
+export const TOKEN_PLACEHOLDER = 'vb_YOUR_API_TOKEN'
 export const TOKEN_STORAGE_KEY = 'lh:api-token'
 export const LANG_STORAGE_KEY = 'lh:ref-lang'
 
@@ -23,7 +23,7 @@ export const LANG_STORAGE_KEY = 'lh:ref-lang'
  * internal surfaces (superadmin, cloud_internal, ee, dev, …) stay out by default.
  *
  * `access` mirrors the router-level auth wiring in apps/api/src/router.py:
- *   'token'          — accepts lh_ API tokens or a user session
+ *   'token'          — accepts vb_ API tokens or a user session
  *   'token-required' — API token only (the headless /admin surface)
  *   'session'        — user session only, API tokens are rejected
  *   'public'         — credential/public endpoints (login, refresh, …)
@@ -49,7 +49,7 @@ export const API_GROUPS = [
     access: 'session',
     rightsBucket: null,
     description:
-      'Create and manage lh_ organization API tokens with scoped rights. The full token value is only returned once, at creation. Session-only: a token cannot mint other tokens.',
+      'Create and manage vb_ organization API tokens with scoped rights. The full token value is only returned once, at creation. Session-only: a token cannot mint other tokens.',
   },
   {
     slug: 'orgs',
@@ -174,7 +174,7 @@ export const API_GROUPS = [
     tags: ['webhooks'],
     access: 'session',
     rightsBucket: null,
-    description: 'Register HTTP endpoints that receive event notifications from LearnHouse.',
+    description: 'Register HTTP endpoints that receive event notifications from ValidBridge.',
   },
   {
     slug: 'headless',
@@ -183,7 +183,7 @@ export const API_GROUPS = [
     access: 'token-required',
     rightsBucket: null,
     description:
-      'Server-to-server endpoints for headless integrations: provision users, enroll learners and manage content programmatically. These endpoints require an lh_ API token.',
+      'Server-to-server endpoints for headless integrations: provision users, enroll learners and manage content programmatically. These endpoints require an vb_ API token.',
   },
 ]
 

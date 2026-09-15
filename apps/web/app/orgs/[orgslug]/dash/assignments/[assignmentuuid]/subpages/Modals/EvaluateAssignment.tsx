@@ -15,10 +15,10 @@ import TaskNumberAnswerObject from '../../_components/TaskEditor/Subs/TaskTypes/
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getTaskRefFileDir } from '@services/media/media';
 import { deleteUserSubmission, getFinalGrade, markActivityAsDoneForUser, putFinalGrade } from '@services/courses/assignments';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics';
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics';
 
 function pctToLetterGrade(pct: number): string {
     if (pct >= 90) return 'A';
@@ -100,11 +100,11 @@ function buildLiveGrade(gradePreview: any) {
 function EvaluateAssignment({ user_id }: any) {
     const { t } = useTranslation()
     const assignments = useAssignments() as any;
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const org = useOrg() as any;
     const access_token = session?.data?.tokens?.access_token;
     const queryClient = useQueryClient();
-    const { track } = useLHAnalytics('dashboard');
+    const { track } = useVBAnalytics('dashboard');
 
     // Overall feedback the teacher types. `undefined` means "not touched yet"
     // so we don't clobber existing server-side feedback with an empty string.

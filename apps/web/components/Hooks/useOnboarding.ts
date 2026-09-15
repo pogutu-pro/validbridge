@@ -29,7 +29,7 @@ type OnboardingState = {
   welcomeSeen: boolean
 }
 
-const STORAGE_KEY = 'lh_onboarding'
+const STORAGE_KEY = 'vb_onboarding'
 
 // Outcome-framed onboarding: 6 milestones that ladder toward the north-star —
 // your first enrolled learner — then retention. Each title is the WIN; the
@@ -116,7 +116,7 @@ function loadState(): OnboardingState {
 function saveState(state: OnboardingState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-    window.dispatchEvent(new Event('lh_onboarding_change'))
+    window.dispatchEvent(new Event('vb_onboarding_change'))
   } catch {
     /* ignore */
   }
@@ -147,8 +147,8 @@ export function useOnboarding() {
         return loaded
       })
     }
-    window.addEventListener('lh_onboarding_change', handler)
-    return () => window.removeEventListener('lh_onboarding_change', handler)
+    window.addEventListener('vb_onboarding_change', handler)
+    return () => window.removeEventListener('vb_onboarding_change', handler)
   }, [])
 
   const steps: OnboardingStep[] = DEFAULT_STEPS.map((s) => ({

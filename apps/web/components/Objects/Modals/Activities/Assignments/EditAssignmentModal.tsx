@@ -92,9 +92,9 @@ const GRADING_TYPES: {
         labelKey: 'dashboard.assignments.modals.edit.form.grading_types.alphabet',
         descriptionKey: 'dashboard.assignments.modals.edit.form.grading_type_descriptions.alphabet',
         icon: <ALargeSmall size={20} />,
-        color: 'text-violet-600',
-        selectedBorder: 'border-violet-400',
-        selectedBg: 'bg-violet-50',
+        color: 'text-orange-600',
+        selectedBorder: 'border-orange-400',
+        selectedBg: 'bg-orange-50',
         illustration: 'A  B  C',
     },
     {
@@ -432,7 +432,7 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                     />
                     {!formik.values.ungraded && (
                     <ToggleRow
-                        icon={<Eye size={16} className="text-indigo-500" />}
+                        icon={<Eye size={16} className="text-orange-500" />}
                         label={t('dashboard.assignments.modals.edit.form.show_correct_answers_label')}
                         description={t('dashboard.assignments.modals.edit.form.show_correct_answers_description')}
                         checked={formik.values.show_correct_answers}

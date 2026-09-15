@@ -15,7 +15,7 @@ mock.module("server-only", () => ({}));
 const { updateOrganizationConfigInternally } = await import("../services/billing/orgPlan.ts");
 
 const ORG_ID = 4242; // synthetic — never a real org
-const BOTH_NAMES = ["CLOUD_INTERNAL_KEY", "LEARNHOUSE_CLOUD_INTERNAL_KEY"];
+const BOTH_NAMES = ["CLOUD_INTERNAL_KEY", "VALIDBRIDGE_CLOUD_INTERNAL_KEY"];
 
 let calls;
 let originalFetch;
@@ -46,8 +46,8 @@ afterEach(() => {
 function setKeys({ cloud, prefixed }) {
   if (cloud === undefined) delete process.env.CLOUD_INTERNAL_KEY;
   else process.env.CLOUD_INTERNAL_KEY = cloud;
-  if (prefixed === undefined) delete process.env.LEARNHOUSE_CLOUD_INTERNAL_KEY;
-  else process.env.LEARNHOUSE_CLOUD_INTERNAL_KEY = prefixed;
+  if (prefixed === undefined) delete process.env.VALIDBRIDGE_CLOUD_INTERNAL_KEY;
+  else process.env.VALIDBRIDGE_CLOUD_INTERNAL_KEY = prefixed;
 }
 
 describe("updateOrganizationConfigInternally — internal key resolution", () => {
@@ -58,7 +58,7 @@ describe("updateOrganizationConfigInternally — internal key resolution", () =>
     expect(calls[0].init.headers["X-Internal-Key"]).toBe("key-unprefixed");
   });
 
-  test("sends the key when only LEARNHOUSE_CLOUD_INTERNAL_KEY is set", async () => {
+  test("sends the key when only VALIDBRIDGE_CLOUD_INTERNAL_KEY is set", async () => {
     setKeys({ prefixed: "key-prefixed" });
     await updateOrganizationConfigInternally(ORG_ID, "pro");
     expect(calls).toHaveLength(1);

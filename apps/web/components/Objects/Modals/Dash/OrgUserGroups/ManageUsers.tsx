@@ -1,9 +1,9 @@
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getAPIUrl } from '@services/config/config'
 import { linkUsersToUserGroup, unlinkUsersFromUserGroup } from '@services/usergroups/usergroups'
 import { apiFetch } from '@services/utils/ts/requests'
-import LearnHouseSpinner from '@components/Objects/Loaders/LearnHouseSpinner'
+import ValidBridgeSpinner from '@components/Objects/Loaders/ValidBridgeSpinner'
 import { Search, Check, Plus, Minus, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
@@ -25,7 +25,7 @@ type FilterTab = 'all' | 'in_group' | 'not_in_group'
 function ManageUsers(props: ManageUsersProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
 
@@ -211,7 +211,7 @@ function ManageUsers(props: ManageUsersProps) {
         <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           placeholder={t('dashboard.users.usergroups.modals.manage_users.search_placeholder')}
-          className="ps-10 pe-4 py-2 w-full border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+          className="ps-10 pe-4 py-2 w-full border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
         />
@@ -234,14 +234,14 @@ function ManageUsers(props: ManageUsersProps) {
 
       {/* Selection Bar */}
       {selectedUserIds.size > 0 && (
-        <div className="flex items-center justify-between bg-indigo-50 px-4 py-2 rounded-lg">
+        <div className="flex items-center justify-between bg-orange-50 px-4 py-2 rounded-lg">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-indigo-700">
+            <span className="text-sm font-medium text-orange-700">
               {t('dashboard.users.usergroups.modals.manage_users.selection.count', { count: selectedUserIds.size })}
             </span>
             <button
               onClick={clearSelection}
-              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+              className="text-sm text-orange-600 hover:text-orange-800 font-medium"
             >
               {t('dashboard.users.usergroups.modals.manage_users.selection.clear')}
             </button>
@@ -323,7 +323,7 @@ function ManageUsers(props: ManageUsersProps) {
           <>
           {isPageTransitioning && (
             <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-lg">
-              <LearnHouseSpinner size={24} />
+              <ValidBridgeSpinner size={24} />
             </div>
           )}
           {orgUsers.map((user: any) => {
@@ -332,7 +332,7 @@ function ManageUsers(props: ManageUsersProps) {
             return (
               <div
                 key={user.user.id}
-                className={`group flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 ${isSelected ? 'bg-indigo-50/50' : ''}`}
+                className={`group flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 ${isSelected ? 'bg-orange-50/50' : ''}`}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <Checkbox

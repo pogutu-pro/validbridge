@@ -40,8 +40,8 @@ export default function CourseViewToEnrollment({
       <AreaChart data={chartRows}>
         <defs>
           <linearGradient id="vteViewsMini" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.12} />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.01} />
+            <stop offset="0%" stopColor="#f97316" stopOpacity={0.12} />
+            <stop offset="100%" stopColor="#f97316" stopOpacity={0.01} />
           </linearGradient>
           <linearGradient id="vteEnrollsMini" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#10b981" stopOpacity={0.12} />
@@ -50,7 +50,7 @@ export default function CourseViewToEnrollment({
         </defs>
         <XAxis dataKey="shortDate" tick={{ fontSize: 9 }} axisLine={false} tickLine={false} />
         <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 13 }} />
-        <Area type="monotone" dataKey="views" name={t('analytics.course_analytics.common.views')} stroke="#6366f1" strokeWidth={1.5} fill="url(#vteViewsMini)" dot={false} />
+        <Area type="monotone" dataKey="views" name={t('analytics.course_analytics.common.views')} stroke="#f97316" strokeWidth={1.5} fill="url(#vteViewsMini)" dot={false} />
         <Area type="monotone" dataKey="enrollments" name={t('analytics.course_analytics.common.enrollments')} stroke="#10b981" strokeWidth={1.5} fill="url(#vteEnrollsMini)" dot={false} />
       </AreaChart>
     </ResponsiveContainer>
@@ -61,8 +61,8 @@ export default function CourseViewToEnrollment({
       <AreaChart data={chartRows}>
         <defs>
           <linearGradient id="vteViewsModal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.15} />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.01} />
+            <stop offset="0%" stopColor="#f97316" stopOpacity={0.15} />
+            <stop offset="100%" stopColor="#f97316" stopOpacity={0.01} />
           </linearGradient>
           <linearGradient id="vteEnrollsModal" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#10b981" stopOpacity={0.15} />
@@ -74,7 +74,7 @@ export default function CourseViewToEnrollment({
         <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
         <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 13 }} />
         <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-        <Area type="monotone" dataKey="views" name={t('analytics.course_analytics.common.views')} stroke="#6366f1" strokeWidth={2} fill="url(#vteViewsModal)" dot={{ r: 2 }} />
+        <Area type="monotone" dataKey="views" name={t('analytics.course_analytics.common.views')} stroke="#f97316" strokeWidth={2} fill="url(#vteViewsModal)" dot={{ r: 2 }} />
         <Area type="monotone" dataKey="enrollments" name={t('analytics.course_analytics.common.enrollments')} stroke="#10b981" strokeWidth={2} fill="url(#vteEnrollsModal)" dot={{ r: 2 }} />
       </AreaChart>
     </ResponsiveContainer>
@@ -93,9 +93,9 @@ export default function CourseViewToEnrollment({
         ) : (
           <div className="space-y-5">
             <div className="flex gap-8">
-              <div className="bg-indigo-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.common.views')}</p>
-                <p className="text-2xl font-bold text-indigo-600">{totalViews}</p>
+              <div className="bg-orange-50 rounded-xl px-5 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-orange-400 font-semibold">{t('analytics.course_analytics.common.views')}</p>
+                <p className="text-2xl font-bold text-orange-600">{totalViews}</p>
               </div>
               <div className="bg-emerald-50 rounded-xl px-5 py-3">
                 <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.enrollments')}</p>
@@ -123,7 +123,7 @@ export default function CourseViewToEnrollment({
               <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.conversion')}</span>
             </div>
             <div className="flex gap-3 text-xs">
-              <span className="text-indigo-500 font-medium">{totalViews} {t('analytics.course_analytics.units.views')}</span>
+              <span className="text-orange-500 font-medium">{totalViews} {t('analytics.course_analytics.units.views')}</span>
               <span className="text-emerald-500 font-medium">{totalEnrollments} {t('analytics.course_analytics.units.enrolled')}</span>
             </div>
           </div>

@@ -1,6 +1,6 @@
 """Compact authoring DSL for demo activity bodies, compiled to ProseMirror.
 
-Activity content in LearnHouse is a ProseMirror document. Writing ~90 of those
+Activity content in ValidBridge is a ProseMirror document. Writing ~90 of those
 by hand as raw JSON would be unreviewable — a reader could not tell good course
 copy from bad through four levels of node nesting — so the bundle authors
 content in a compact form and compiles it here:

@@ -36,7 +36,7 @@ _task: Optional[asyncio.Task] = None
 
 
 def _lock_key(day: datetime) -> str:
-    return f"learnhouse:nudges:daily:{day.date().isoformat()}"
+    return f"validbridge:nudges:daily:{day.date().isoformat()}"
 
 
 async def _claim_day(now: datetime) -> bool:
@@ -129,14 +129,14 @@ def start_scheduler() -> None:
 
         if not nudges_enabled():
             logger.info(
-                "Nudge scheduler idle: LEARNHOUSE_NUDGES_ENABLED is not set"
+                "Nudge scheduler idle: VALIDBRIDGE_NUDGES_ENABLED is not set"
             )
             return
         mode = get_deployment_mode()
         if mode != "saas":
             logger.info("Nudge scheduler idle: deployment mode is %r, not 'saas'", mode)
             return
-        if os.environ.get("LEARNHOUSE_NUDGES_NO_SCHEDULER"):
+        if os.environ.get("VALIDBRIDGE_NUDGES_NO_SCHEDULER"):
             # For deployments that would rather drive the CLI from their own cron.
             logger.info("Nudge scheduler disabled; drive `nudges-run` yourself")
             return

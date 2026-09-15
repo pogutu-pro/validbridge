@@ -4,13 +4,13 @@ import base64
 import secrets
 from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 
 ### 🔒 JWT ##############################################################
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-SECRET_KEY = get_learnhouse_config().security_config.auth_jwt_secret_key
+SECRET_KEY = get_validbridge_config().security_config.auth_jwt_secret_key
 ALGORITHM = "HS256"
 
 ### 🔒 JWT ##############################################################

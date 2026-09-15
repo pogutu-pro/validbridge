@@ -1,6 +1,6 @@
 # Multi-Tenancy
 
-LearnHouse supports two tenancy modes, selected by a single environment variable: `LEARNHOUSE_TENANCY`.
+ValidBridge supports two tenancy modes, selected by a single environment variable: `VALIDBRIDGE_TENANCY`.
 
 | Value      | Use case                                              | Hostname pattern                  | Default org? |
 |------------|-------------------------------------------------------|-----------------------------------|--------------|
@@ -12,32 +12,32 @@ There is no third mode — `single` covers both `localhost:3000` and any product
 ## How modes are selected
 
 ```
-LEARNHOUSE_TENANCY=multi   # requires EE (or SaaS) + LEARNHOUSE_DOMAIN
-LEARNHOUSE_TENANCY=single  # default for OSS / dev / VPS self-host
+VALIDBRIDGE_TENANCY=multi   # requires EE (or SaaS) + VALIDBRIDGE_DOMAIN
+VALIDBRIDGE_TENANCY=single  # default for OSS / dev / VPS self-host
 # unset                    # inferred — see "Default inference" below
 ```
 
 The backend validates at boot:
-- `multi` requires `is_ee_available()` OR `LEARNHOUSE_SAAS=true`, AND `LEARNHOUSE_DOMAIN` set to a routable parent domain (not `localhost`). Mis-configuration aborts startup with a clear error.
-- `single` ignores `LEARNHOUSE_DOMAIN` and `LEARNHOUSE_COOKIE_DOMAIN`. If you set them, you'll see a deprecation warning at boot — they are no longer authoritative.
+- `multi` requires `is_ee_available()` OR `VALIDBRIDGE_SAAS=true`, AND `VALIDBRIDGE_DOMAIN` set to a routable parent domain (not `localhost`). Mis-configuration aborts startup with a clear error.
+- `single` ignores `VALIDBRIDGE_DOMAIN` and `VALIDBRIDGE_COOKIE_DOMAIN`. If you set them, you'll see a deprecation warning at boot — they are no longer authoritative.
 
-### Default inference (when `LEARNHOUSE_TENANCY` is unset)
+### Default inference (when `VALIDBRIDGE_TENANCY` is unset)
 
 To preserve existing deployment behavior without forcing every operator to set a new env var, the backend infers the default from existing flags:
 
 | Signal                                                                                       | Inferred tenancy |
 |----------------------------------------------------------------------------------------------|------------------|
-| `LEARNHOUSE_SAAS=true` + real (non-localhost) domain + not self-hosted/dev                   | `multi`          |
-| EE folder present + `LEARNHOUSE_COOKIE_DOMAIN` starts with `.` + real domain + not self/dev  | `multi`          |
+| `VALIDBRIDGE_SAAS=true` + real (non-localhost) domain + not self-hosted/dev                   | `multi`          |
+| EE folder present + `VALIDBRIDGE_COOKIE_DOMAIN` starts with `.` + real domain + not self/dev  | `multi`          |
 | Anything else                                                                                | `single`         |
 
-The strong signal for "I want subdomain tenancy" is a dotted cookie domain (`LEARNHOUSE_COOKIE_DOMAIN=.foo.com`) — operators only set that when they want subdomains to share auth. This means an EE deployment on a single VPS domain (no dotted cookie domain) defaults to `single`, which is the right behavior for the self-host-EE case (one org, EE features locally available).
+The strong signal for "I want subdomain tenancy" is a dotted cookie domain (`VALIDBRIDGE_COOKIE_DOMAIN=.foo.com`) — operators only set that when they want subdomains to share auth. This means an EE deployment on a single VPS domain (no dotted cookie domain) defaults to `single`, which is the right behavior for the self-host-EE case (one org, EE features locally available).
 
-**Recommended:** set `LEARNHOUSE_TENANCY` explicitly in production. Inference is a backward-compat convenience, not a long-term contract.
+**Recommended:** set `VALIDBRIDGE_TENANCY` explicitly in production. Inference is a backward-compat convenience, not a long-term contract.
 
 ## Compatibility with deployment modes (oss / ee / saas)
 
-`LEARNHOUSE_TENANCY` is orthogonal to the existing **deployment mode** (`oss`, `ee`, `saas`) which is set by the presence of the `ee/` folder and `LEARNHOUSE_SAAS`. The matrix:
+`VALIDBRIDGE_TENANCY` is orthogonal to the existing **deployment mode** (`oss`, `ee`, `saas`) which is set by the presence of the `ee/` folder and `VALIDBRIDGE_SAAS`. The matrix:
 
 | Deployment | Tenancy   | Supported? | Typical use                                                     |
 |------------|-----------|------------|------------------------------------------------------------------|
@@ -48,15 +48,15 @@ The strong signal for "I want subdomain tenancy" is a dotted cookie domain (`LEA
 | `saas`     | `single`  | ✅ (unusual) | Edge case — SaaS billing logic on a single-org host            |
 | `saas`     | `multi`   | ✅          | The SaaS production deployment shape                            |
 
-Existing EE/SaaS deployments that haven't set `LEARNHOUSE_TENANCY` continue to behave as before because the inference reads their existing config (`LEARNHOUSE_SAAS`, `LEARNHOUSE_COOKIE_DOMAIN`, `LEARNHOUSE_DOMAIN`) and picks `multi` when those signal subdomain intent.
+Existing EE/SaaS deployments that haven't set `VALIDBRIDGE_TENANCY` continue to behave as before because the inference reads their existing config (`VALIDBRIDGE_SAAS`, `VALIDBRIDGE_COOKIE_DOMAIN`, `VALIDBRIDGE_DOMAIN`) and picks `multi` when those signal subdomain intent.
 
 ## Mode 1 — Multi (EE)
 
 Required env:
-- `LEARNHOUSE_TENANCY=multi`
-- `LEARNHOUSE_DOMAIN=your-domain.tld` (the apex; e.g. `learnhouse.io`)
-- `LEARNHOUSE_COOKIE_DOMAIN=.your-domain.tld` (so subdomains share the session)
-- `ee/` folder present (or unset `LEARNHOUSE_DISABLE_EE`)
+- `VALIDBRIDGE_TENANCY=multi`
+- `VALIDBRIDGE_DOMAIN=your-domain.tld` (the apex; e.g. `validbridge.co.ke`)
+- `VALIDBRIDGE_COOKIE_DOMAIN=.your-domain.tld` (so subdomains share the session)
+- `ee/` folder present (or unset `VALIDBRIDGE_DISABLE_EE`)
 
 Behavior:
 - Request `acme.your-domain.tld` → the middleware rewrites internally to `/orgs/acme/...`.
@@ -68,7 +68,7 @@ Behavior:
 ## Mode 2 / 3 — Single (localhost or VPS)
 
 Required env:
-- `LEARNHOUSE_TENANCY=single` (or just leave unset; this is the default)
+- `VALIDBRIDGE_TENANCY=single` (or just leave unset; this is the default)
 
 Behavior:
 - The middleware always rewrites to `/orgs/{default_org_slug}/...`. There is one organization, identified by its slug (default: `"default"`, falling back to the row with the lowest `id` if no `default` org exists).
@@ -79,31 +79,31 @@ Behavior:
 
 ## Cookies
 
-All LearnHouse cookies use the `LH_` prefix.
+All ValidBridge cookies use the `VB_` prefix.
 
 | Cookie                | Set by         | Purpose                                                                                       |
 |-----------------------|----------------|-----------------------------------------------------------------------------------------------|
-| `LH_access`           | API            | JWT access token (httpOnly, 8-hour TTL).                                                      |
-| `LH_refresh`          | API            | JWT refresh token (httpOnly, 30-day rotating).                                                |
-| `LH_org`              | middleware     | Canonical org slug for the current request. **Source of truth.**                              |
-| `LH_tenancy`          | middleware     | `multi` or `single`. Source of truth for `getTenancy()` on the frontend.                      |
-| `LH_default_org`      | middleware     | Default org slug from `instance/info`.                                                        |
-| `LH_frontend_domain`  | middleware     | Configured frontend domain (for cookie-domain math).                                          |
-| `LH_top_domain`       | middleware     | Configured top domain (apex without port).                                                    |
-| `LH_mode`             | middleware     | Deployment mode: `oss`, `ee`, or `saas`.                                                      |
-| `LH_custom_domain`    | middleware     | Set in multi mode when the request came in on a verified per-org custom domain.               |
-| `LH_session`          | platform API   | Non-httpOnly flag indicating an active session, read by client-side gating.                   |
-| `LH_region`           | platform mw    | `eur` or `usd`, derived from Vercel geolocation, used for Stripe pricing.                     |
-| `LH_last_org`         | localStorage   | Last visited org slug (UX hint, not security-relevant).                                       |
-| `LH_oauth_state`      | client         | OAuth CSRF state (5-min TTL).                                                                 |
-| `LH_oauth_orgslug`    | client         | Org slug context preserved across the OAuth round-trip.                                       |
-| `LH_oauth_org_id`     | client         | Org ID context preserved across the OAuth round-trip.                                         |
+| `VB_access`           | API            | JWT access token (httpOnly, 8-hour TTL).                                                      |
+| `VB_refresh`          | API            | JWT refresh token (httpOnly, 30-day rotating).                                                |
+| `VB_org`              | middleware     | Canonical org slug for the current request. **Source of truth.**                              |
+| `VB_tenancy`          | middleware     | `multi` or `single`. Source of truth for `getTenancy()` on the frontend.                      |
+| `VB_default_org`      | middleware     | Default org slug from `instance/info`.                                                        |
+| `VB_frontend_domain`  | middleware     | Configured frontend domain (for cookie-domain math).                                          |
+| `VB_top_domain`       | middleware     | Configured top domain (apex without port).                                                    |
+| `VB_mode`             | middleware     | Deployment mode: `oss`, `ee`, or `saas`.                                                      |
+| `VB_custom_domain`    | middleware     | Set in multi mode when the request came in on a verified per-org custom domain.               |
+| `VB_session`          | platform API   | Non-httpOnly flag indicating an active session, read by client-side gating.                   |
+| `VB_region`           | platform mw    | `eur` or `usd`, derived from Vercel geolocation, used for Stripe pricing.                     |
+| `VB_last_org`         | localStorage   | Last visited org slug (UX hint, not security-relevant).                                       |
+| `VB_oauth_state`      | client         | OAuth CSRF state (5-min TTL).                                                                 |
+| `VB_oauth_orgslug`    | client         | Org slug context preserved across the OAuth round-trip.                                       |
+| `VB_oauth_org_id`     | client         | Org ID context preserved across the OAuth round-trip.                                         |
 
 Request headers (set by the middleware on every tenant-scoped request, **not** stored anywhere — only readable via `next/headers` in the active request):
 
 | Header                  | Purpose                                                                       |
 |-------------------------|-------------------------------------------------------------------------------|
-| `x-lh-tenancy`          | `multi` or `single` — same as `LH_tenancy` cookie but available to RSC on the first cold load |
+| `x-lh-tenancy`          | `multi` or `single` — same as `VB_tenancy` cookie but available to RSC on the first cold load |
 | `x-lh-org`              | Resolved org slug for the current request                                     |
 | `x-lh-top-domain`       | Configured top domain                                                         |
 | `x-lh-frontend-domain`  | Configured frontend domain                                                    |
@@ -114,11 +114,11 @@ Request headers (set by the middleware on every tenant-scoped request, **not** s
 
 Cookies are hints; the backend is the security boundary. Per-cookie:
 
-- **`LH_access` / `LH_refresh`**: signed JWTs (HS256, server-side secret). Tampering invalidates the signature → API rejects. Also bound to `password_changed_at` and a Redis revocation list, so stale-but-valid tokens get rejected after logout/password change.
-- **`LH_tenancy`, `LH_default_org`, `LH_frontend_domain`, `LH_top_domain`, `LH_mode`, `LH_custom_domain`**: UX hints only. The middleware fetches authoritative tenancy/mode from the backend (`/instance/info`, server-side config). Editing these cookies only affects the rendered UI in that user's browser; they cannot redirect routing to a different deployment shape.
-- **`LH_org`**: also a hint. The proxy may rewrite to `/orgs/{tampered-slug}/...`, but every API endpoint re-checks `require_org_membership(user_id, org_id)`. Worst case: the tamperer sees a broken UI shell with no data.
-- **`LH_session`**: non-httpOnly boolean. Setting it to `1` without a valid JWT just triggers the "redirect logged-in users away from /login" branch — the dashboard then fails real auth and redirects back. Annoyance, not breach.
-- **`LH_region`**: changes which currency Stripe shows. **Stripe enforces server-side prices at checkout** — the user manipulates display, not the charge.
+- **`VB_access` / `VB_refresh`**: signed JWTs (HS256, server-side secret). Tampering invalidates the signature → API rejects. Also bound to `password_changed_at` and a Redis revocation list, so stale-but-valid tokens get rejected after logout/password change.
+- **`VB_tenancy`, `VB_default_org`, `VB_frontend_domain`, `VB_top_domain`, `VB_mode`, `VB_custom_domain`**: UX hints only. The middleware fetches authoritative tenancy/mode from the backend (`/instance/info`, server-side config). Editing these cookies only affects the rendered UI in that user's browser; they cannot redirect routing to a different deployment shape.
+- **`VB_org`**: also a hint. The proxy may rewrite to `/orgs/{tampered-slug}/...`, but every API endpoint re-checks `require_org_membership(user_id, org_id)`. Worst case: the tamperer sees a broken UI shell with no data.
+- **`VB_session`**: non-httpOnly boolean. Setting it to `1` without a valid JWT just triggers the "redirect logged-in users away from /login" branch — the dashboard then fails real auth and redirects back. Annoyance, not breach.
+- **`VB_region`**: changes which currency Stripe shows. **Stripe enforces server-side prices at checkout** — the user manipulates display, not the charge.
 
 The defense-in-depth principle: cookies tell us what UI to render, the JWT tells us who you are, the database tells us what you're allowed to do. Every API endpoint enforces the last two regardless of the first.
 
@@ -135,9 +135,9 @@ The cookie `Domain` attribute is computed by `auth.py:get_cookie_domain_for_requ
 
 ### Migration from older versions
 
-The cookie naming convention changed in this release. **All cookies now use the `LH_` prefix and legacy names are no longer read.** Old cookie names (`access_token_cookie`, `refresh_token_cookie`, `learnhouse_orgslug`, `learnhouse_tenancy`, `learnhouse_multi_org`, `learnhouse_current_orgslug`, `learnhouse_has_session`, `lh_region`, etc.) are dropped entirely — there is no read-fallback window.
+The cookie naming convention changed in this release. **All cookies now use the `VB_` prefix and legacy names are no longer read.** Old cookie names (`access_token_cookie`, `refresh_token_cookie`, `validbridge_orgslug`, `validbridge_tenancy`, `validbridge_multi_org`, `validbridge_current_orgslug`, `validbridge_has_session`, `vb_region`, etc.) are dropped entirely — there is no read-fallback window.
 
-**Impact on rollout:** existing logged-in users will be signed out when this version deploys, because their browsers hold cookies the new code does not recognize. They will re-authenticate once and the new `LH_*` cookies will be set. There is no data loss; only an interactive sign-in.
+**Impact on rollout:** existing logged-in users will be signed out when this version deploys, because their browsers hold cookies the new code does not recognize. They will re-authenticate once and the new `VB_*` cookies will be set. There is no data loss; only an interactive sign-in.
 
 If you cannot tolerate forced logouts, deploy this change during a maintenance window or notify users in advance.
 
@@ -145,7 +145,7 @@ If you cannot tolerate forced logouts, deploy this change during a maintenance w
 
 | Tenancy    | `allow_origin_regex`                                                       | Why                                          |
 |------------|----------------------------------------------------------------------------|----------------------------------------------|
-| `multi`    | Configured via `LEARNHOUSE_ALLOWED_REGEXP` (matches apex + subdomains)     | Strict allowlist for known multi-tenant domain |
+| `multi`    | Configured via `VALIDBRIDGE_ALLOWED_REGEXP` (matches apex + subdomains)     | Strict allowlist for known multi-tenant domain |
 | `single`   | `^https?://[^/\s]+$` (any well-formed http(s) origin)                      | Operator's host is the only valid origin; cookies are host-only so cross-origin attackers cannot forge authenticated requests |
 
 `allow_credentials=True` in both modes (cookie-based auth requires it).
@@ -160,8 +160,8 @@ The frontend middleware fetches `GET /api/v1/instance/info` once per 30 seconds 
   "tenancy": "multi" | "single",
   "multi_org_enabled": true | false,
   "default_org_slug": "default",
-  "frontend_domain": "learnhouse.io",
-  "top_domain": "learnhouse.io"
+  "frontend_domain": "validbridge.co.ke",
+  "top_domain": "validbridge.co.ke"
 }
 ```
 
@@ -198,17 +198,17 @@ Adding a new caller? Use `getUriWithOrg(slug, path)` and you'll get correct beha
 - `tenancy=single` → uses the URL the request came in on (`get_base_url_from_request`).
 - `tenancy=multi` → custom domain (if verified for that org) → `https://{slug}.{domain}` → request fallback.
 
-`_is_allowed_base_url` validates the URL against an allowlist before returning it. In `single` mode the operator's host is authoritative — any well-formed http(s) URL is accepted. In `multi` mode, the URL must match `LEARNHOUSE_ALLOWED_ORIGINS` / `LEARNHOUSE_ALLOWED_REGEXP` / `LEARNHOUSE_PLATFORM_URL`.
+`_is_allowed_base_url` validates the URL against an allowlist before returning it. In `single` mode the operator's host is authoritative — any well-formed http(s) URL is accepted. In `multi` mode, the URL must match `VALIDBRIDGE_ALLOWED_ORIGINS` / `VALIDBRIDGE_ALLOWED_REGEXP` / `VALIDBRIDGE_PLATFORM_URL`.
 
 ## EE / OSS code split
 
-The OSS frontend never imports subdomain or custom-domain logic directly. All of that lives under `learnhouse/apps/web/ee/services/tenancy/`:
+The OSS frontend never imports subdomain or custom-domain logic directly. All of that lives under `validbridge/apps/web/ee/services/tenancy/`:
 
 - `core.ts` — pure logic (subdomain extraction, custom-domain detection, full priority chain). Runtime-agnostic.
 - `resolveMulti.middleware.ts` — entry point for the Next.js middleware (Edge Runtime). Takes a `NextRequest`.
 - `resolveMulti.server.ts` — entry point for Server Components (Node runtime). Takes `next/headers`.
 
-The OSS `proxy.ts` and `services/org/orgResolution.ts` reach these via dynamic `import()` wrapped in try/catch. If EE is unavailable (folder removed at deploy time, or `LEARNHOUSE_DISABLE_EE=1`) the resolver falls back to the default org and logs a warning.
+The OSS `proxy.ts` and `services/org/orgResolution.ts` reach these via dynamic `import()` wrapped in try/catch. If EE is unavailable (folder removed at deploy time, or `VALIDBRIDGE_DISABLE_EE=1`) the resolver falls back to the default org and logs a warning.
 
 The backend EE/OSS gate is `is_multi_org_allowed()` in `src/core/ee_hooks.py`. It returns true only when the deployment mode is `ee` or `saas`. The `tenancy=multi` boot validation already requires the EE folder to be present.
 
@@ -216,9 +216,9 @@ The backend EE/OSS gate is `is_multi_org_allowed()` in `src/core/ee_hooks.py`. I
 
 ### Mode 1 — Multi (EE)
 ```sh
-LEARNHOUSE_TENANCY=multi
-LEARNHOUSE_DOMAIN=lh.test
-LEARNHOUSE_COOKIE_DOMAIN=.lh.test
+VALIDBRIDGE_TENANCY=multi
+VALIDBRIDGE_DOMAIN=lh.test
+VALIDBRIDGE_COOKIE_DOMAIN=.lh.test
 ```
 Add hosts entries:
 ```
@@ -233,8 +233,8 @@ Verify:
 
 ### Mode 2 — Single (localhost)
 ```sh
-LEARNHOUSE_TENANCY=single
-# LEARNHOUSE_DOMAIN unset
+VALIDBRIDGE_TENANCY=single
+# VALIDBRIDGE_DOMAIN unset
 ```
 Verify on `http://localhost:3000`:
 - Every path rewrites to `/orgs/{default}/...`.
@@ -245,7 +245,7 @@ Verify on `http://localhost:3000`:
 
 ### Mode 3 — Single (VPS)
 ```sh
-LEARNHOUSE_TENANCY=single
+VALIDBRIDGE_TENANCY=single
 ```
 Deploy at `https://learn.example.org`. Verify:
 - Same as mode 2 but `Secure=true` on cookies.
@@ -254,21 +254,21 @@ Deploy at `https://learn.example.org`. Verify:
 
 ### OSS-without-EE smoke
 ```sh
-LEARNHOUSE_DISABLE_EE=1
-LEARNHOUSE_TENANCY=multi   # should fail at boot
-LEARNHOUSE_TENANCY=single  # should boot cleanly
+VALIDBRIDGE_DISABLE_EE=1
+VALIDBRIDGE_TENANCY=multi   # should fail at boot
+VALIDBRIDGE_TENANCY=single  # should boot cleanly
 ```
 With `single`, no EE imports are attempted at runtime.
 
-## Upgrading from versions before `LEARNHOUSE_TENANCY` existed
+## Upgrading from versions before `VALIDBRIDGE_TENANCY` existed
 
-Prior versions decided multi-vs-single behavior implicitly from `is_multi_org_allowed()` (deployment mode in `ee`/`saas`), `self_hosted`, `development_mode`, and `LEARNHOUSE_USE_DEFAULT_ORG`. After the introduction of `LEARNHOUSE_TENANCY` these flags are deprecated and the new env var is the source of truth.
+Prior versions decided multi-vs-single behavior implicitly from `is_multi_org_allowed()` (deployment mode in `ee`/`saas`), `self_hosted`, `development_mode`, and `VALIDBRIDGE_USE_DEFAULT_ORG`. After the introduction of `VALIDBRIDGE_TENANCY` these flags are deprecated and the new env var is the source of truth.
 
 The boot-time inference (above) is designed so that **you do not need to change anything for existing deployments** — your current env vars produce the same tenancy mode you had before. To verify after upgrade:
 
-1. Check the boot log for any deprecation warnings about `LEARNHOUSE_USE_DEFAULT_ORG`, `LEARNHOUSE_SELF_HOSTED`, or `LEARNHOUSE_COOKIE_DOMAIN` being set in single mode.
+1. Check the boot log for any deprecation warnings about `VALIDBRIDGE_USE_DEFAULT_ORG`, `VALIDBRIDGE_SELF_HOSTED`, or `VALIDBRIDGE_COOKIE_DOMAIN` being set in single mode.
 2. Hit `GET /api/v1/instance/info` and confirm `tenancy` matches your expectation.
-3. Set `LEARNHOUSE_TENANCY` explicitly in your env config to lock the behavior — inference is a backward-compat convenience, not a long-term contract.
+3. Set `VALIDBRIDGE_TENANCY` explicitly in your env config to lock the behavior — inference is a backward-compat convenience, not a long-term contract.
 
 ## Operations checklist
 
@@ -276,30 +276,30 @@ When deploying:
 
 1. **Pick a tenancy mode** before pointing DNS. Switching modes after launch is a planned migration, not a config flip — cookie domains, email link shape, and the org-picker UX all change.
 2. **`multi` mode** requires:
-   - EE folder included in the build (`docker build --build-arg LEARNHOUSE_PUBLIC=false`)
+   - EE folder included in the build (`docker build --build-arg VALIDBRIDGE_PUBLIC=false`)
    - DNS wildcard for `*.your-domain.tld` pointing at the same backend
    - TLS cert covering the apex and `*.your-domain.tld` (or per-subdomain ACME)
-   - Backend env: `LEARNHOUSE_TENANCY=multi`, `LEARNHOUSE_DOMAIN`, `LEARNHOUSE_COOKIE_DOMAIN`, `LEARNHOUSE_ALLOWED_REGEXP`
+   - Backend env: `VALIDBRIDGE_TENANCY=multi`, `VALIDBRIDGE_DOMAIN`, `VALIDBRIDGE_COOKIE_DOMAIN`, `VALIDBRIDGE_ALLOWED_REGEXP`
 3. **`single` mode** on a VPS:
-   - Point any domain at the server. No env config beyond `LEARNHOUSE_TENANCY=single` is needed.
+   - Point any domain at the server. No env config beyond `VALIDBRIDGE_TENANCY=single` is needed.
    - The default org's slug (`default`) is shown in the URL bar at `/orgs/default/...` paths only when accessed directly; the middleware rewrites externally-clean paths internally.
 4. **Custom per-org domains** (multi only): admins add the domain in the org settings, set up DNS to point at the platform, and verify ownership. Verified domains immediately resolve. Note that the CORS allowlist for verified custom domains is a known gap — newly-verified domains may need a backend restart for cross-origin API calls to succeed.
 
 ## File reference
 
 Backend:
-- `learnhouse/apps/api/config/config.py` — `LEARNHOUSE_TENANCY` env, validation
-- `learnhouse/apps/api/src/routers/instance.py` — `instance/info` endpoint
-- `learnhouse/apps/api/src/routers/auth.py` — `get_cookie_domain_for_request`
-- `learnhouse/apps/api/src/services/email/utils.py` — `get_org_signup_base_url`
-- `learnhouse/apps/api/app.py` — CORS branching
-- `learnhouse/apps/api/src/core/ee_hooks.py` — `is_multi_org_allowed`, EE detection
+- `validbridge/apps/api/config/config.py` — `VALIDBRIDGE_TENANCY` env, validation
+- `validbridge/apps/api/src/routers/instance.py` — `instance/info` endpoint
+- `validbridge/apps/api/src/routers/auth.py` — `get_cookie_domain_for_request`
+- `validbridge/apps/api/src/services/email/utils.py` — `get_org_signup_base_url`
+- `validbridge/apps/api/app.py` — CORS branching
+- `validbridge/apps/api/src/core/ee_hooks.py` — `is_multi_org_allowed`, EE detection
 
 Frontend:
-- `learnhouse/apps/web/proxy.ts` — middleware (resolveTenant)
-- `learnhouse/apps/web/ee/services/tenancy/core.ts` — pure resolver logic
-- `learnhouse/apps/web/ee/services/tenancy/resolveMulti.middleware.ts` — Edge entry
-- `learnhouse/apps/web/ee/services/tenancy/resolveMulti.server.ts` — Node entry
-- `learnhouse/apps/web/services/org/orgResolution.ts` — server-side org resolution
-- `learnhouse/apps/web/services/auth/cookies.ts` — cookie options
-- `learnhouse/apps/web/services/config/config.ts` — `getTenancy`, `getUriWithOrg`
+- `validbridge/apps/web/proxy.ts` — middleware (resolveTenant)
+- `validbridge/apps/web/ee/services/tenancy/core.ts` — pure resolver logic
+- `validbridge/apps/web/ee/services/tenancy/resolveMulti.middleware.ts` — Edge entry
+- `validbridge/apps/web/ee/services/tenancy/resolveMulti.server.ts` — Node entry
+- `validbridge/apps/web/services/org/orgResolution.ts` — server-side org resolution
+- `validbridge/apps/web/services/auth/cookies.ts` — cookie options
+- `validbridge/apps/web/services/config/config.ts` — `getTenancy`, `getUriWithOrg`

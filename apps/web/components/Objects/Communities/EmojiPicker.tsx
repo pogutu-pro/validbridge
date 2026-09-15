@@ -89,7 +89,7 @@ export function EmojiPicker({ value, onChange, triggerClassName, disabled = fals
                 type="button"
                 onClick={() => handleSelectEmoji(emoji)}
                 className={`w-8 h-8 flex items-center justify-center text-lg rounded hover:bg-gray-100 transition-colors ${
-                  value === emoji ? 'bg-indigo-100' : ''
+                  value === emoji ? 'bg-orange-100' : ''
                 }`}
               >
                 {emoji}

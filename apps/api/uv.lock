@@ -694,7 +694,7 @@ wheels = [
 ]
 
 [[package]]
-name = "learnhouse-api"
+name = "validbridge-api"
 version = "1.3.6"
 source = { virtual = "." }
 dependencies = [

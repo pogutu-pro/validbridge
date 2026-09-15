@@ -9,13 +9,13 @@ import FormLayout, {
 import * as Form from '@radix-ui/react-form'
 import { createMedia } from '@services/media/media-resource'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { UploadCloud, Link as LinkIcon, FileUp } from 'lucide-react'
 import React from 'react'
 import { BarLoader } from 'react-spinners'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 type Props = {
   folderUuid?: string
@@ -27,9 +27,9 @@ type Props = {
 function UploadMediaModal({ folderUuid, closeModal, onChanged }: Props) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   const [mode, setMode] = React.useState<'UPLOAD' | 'EMBED'>('UPLOAD')
   const [name, setName] = React.useState('')
@@ -96,7 +96,7 @@ function UploadMediaModal({ folderUuid, closeModal, onChanged }: Props) {
           onClick={() => setMode('UPLOAD')}
           className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${
             mode === 'UPLOAD'
-              ? 'bg-white border-indigo-200 ring-1 ring-indigo-100 text-gray-900'
+              ? 'bg-white border-orange-200 ring-1 ring-orange-100 text-gray-900'
               : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
           }`}
         >
@@ -107,7 +107,7 @@ function UploadMediaModal({ folderUuid, closeModal, onChanged }: Props) {
           onClick={() => setMode('EMBED')}
           className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${
             mode === 'EMBED'
-              ? 'bg-white border-indigo-200 ring-1 ring-indigo-100 text-gray-900'
+              ? 'bg-white border-orange-200 ring-1 ring-orange-100 text-gray-900'
               : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
           }`}
         >

@@ -19,18 +19,18 @@ import {
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 // Shared easing — the same curve used across all onboarding animations.
 export const ease = [0.25, 0.1, 0.25, 1] as const
 
 const STEP_ICON: Record<string, { icon: React.ElementType; color: string }> = {
   create_course: { icon: BookOpen, color: 'text-blue-500' },
-  add_content: { icon: Browsers, color: 'text-violet-500' },
+  add_content: { icon: Browsers, color: 'text-orange-500' },
   brand_school: { icon: Palette, color: 'text-rose-500' },
   share_grow: { icon: ShareNetwork, color: 'text-emerald-500' },
   invite_learners: { icon: UserPlus, color: 'text-sky-500' },
-  build_community: { icon: ChatsCircle, color: 'text-indigo-500' },
+  build_community: { icon: ChatsCircle, color: 'text-orange-500' },
 }
 
 /**
@@ -42,7 +42,7 @@ const STEP_ICON: Record<string, { icon: React.ElementType; color: string }> = {
 export default function OnboardingSteps() {
   const { steps, completeStep, dismiss } = useOnboarding()
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const org = useOrg() as any
   const orgSlug = org?.slug || ''
 

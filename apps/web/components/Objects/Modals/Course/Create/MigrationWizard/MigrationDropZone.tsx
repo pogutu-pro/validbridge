@@ -28,7 +28,7 @@ function getFileIcon(ext: string) {
   if (['png', 'jpg', 'jpeg', 'webp'].includes(ext))
     return <Image size={16} className="text-green-500" />
   if (['mp3', 'wav'].includes(ext))
-    return <Music size={16} className="text-purple-500" />
+    return <Music size={16} className="text-orange-500" />
   return <FileText size={16} className="text-gray-500" />
 }
 

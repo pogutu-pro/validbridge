@@ -56,7 +56,7 @@ class TestProvenancePublished:
 
     async def test_org_api_token_publishes_api_token_and_org(self, db):
         token_user = SimpleNamespace(id=0, org_id=77, created_by_user_id=3)
-        req = _request(auth="Bearer lh_faketoken")
+        req = _request(auth="Bearer vb_faketoken")
 
         with patch("src.security.auth.validate_api_token", return_value=token_user), patch(
             "src.security.auth._verify_api_token_org_boundary"
@@ -70,7 +70,7 @@ class TestProvenancePublished:
 
     async def test_superadmin_api_token_publishes_api_token_no_org(self, db):
         sa_user = SimpleNamespace(id=0, is_superadmin=True)
-        req = _request(auth="Bearer lh_sa_faketoken")
+        req = _request(auth="Bearer vb_sa_faketoken")
 
         # Superadmin tokens are an EE credential and are refused outright in
         # 'oss', which the suite pins globally. Run this against EE.

@@ -37,7 +37,7 @@ _LOOPS_API_ROOT = "https://app.loops.so/api/"
 
 # Must match apps/web/services/emails/loops.ts.
 _LOOPS_SIGNED_USERS_GROUP = "signed-users"
-_LOOPS_SOURCE = "learnhouse.io"
+_LOOPS_SOURCE = "validbridge.co.ke"
 
 # Lazy singleton httpx client for Loops requests.
 _loops_client: httpx.AsyncClient | None = None

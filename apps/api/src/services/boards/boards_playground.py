@@ -4,7 +4,7 @@ import logging
 import redis
 import json
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.ai.llm import generate_stream, model_for_tier
 from src.services.boards.schemas.boards_playground import (
     BoardsPlaygroundContext,
@@ -14,7 +14,7 @@ from src.services.boards.schemas.boards_playground import (
 
 logger = logging.getLogger(__name__)
 
-LH_CONFIG = get_learnhouse_config()
+VB_CONFIG = get_validbridge_config()
 
 BOARDS_PLAYGROUND_SESSION_KEY = "boards_playground_session:{session_uuid}"
 SESSION_TTL = 2160000  # 25 days
@@ -31,7 +31,7 @@ def get_redis_connection():
     global _redis_client
     if _redis_client is not None:
         return _redis_client
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
     if redis_conn_string:
         try:
             _redis_client = redis.from_url(redis_conn_string)

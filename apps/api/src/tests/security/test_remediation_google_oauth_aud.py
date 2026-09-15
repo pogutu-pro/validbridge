@@ -1,12 +1,12 @@
 """
 F-07: Google OAuth access-token audience verification.
 
-When ``LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID`` is set, tokens minted for a
+When ``VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID`` is set, tokens minted for a
 different OAuth client (``aud`` mismatch) must be rejected with 401 —
 blocks the classic OAuth confused-deputy attack.
 
-When neither ``LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID`` nor its
-``LEARNHOUSE_GOOGLE_CLIENT_ID`` alias is set we cannot check ``aud`` at
+When neither ``VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID`` nor its
+``VALIDBRIDGE_GOOGLE_CLIENT_ID`` alias is set we cannot check ``aud`` at
 all, so sign-in is refused rather than accepted unverified — falling
 through would leave the confused-deputy attack open by default.
 """
@@ -46,7 +46,7 @@ async def test_rejects_token_minted_for_different_oauth_client(monkeypatch):
     This is the confused-deputy attack: attacker's Google app gets a valid
     access token for the victim, attacker posts it to /auth/oauth.
     """
-    monkeypatch.setenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID", "our-client-id")
+    monkeypatch.setenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID", "our-client-id")
 
     class _FakeClient:
         async def __aenter__(self_inner):
@@ -67,7 +67,7 @@ async def test_rejects_token_minted_for_different_oauth_client(monkeypatch):
 @pytest.mark.asyncio
 async def test_accepts_token_minted_for_our_client(monkeypatch):
     """Happy path: token aud matches our client_id → no exception."""
-    monkeypatch.setenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID", "our-client-id")
+    monkeypatch.setenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID", "our-client-id")
 
     class _FakeClient:
         async def __aenter__(self_inner):
@@ -91,8 +91,8 @@ async def test_refuses_when_no_client_id_is_configured(monkeypatch):
     token. Both names must be cleared: either one alone is enough to
     configure the check.
     """
-    monkeypatch.delenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID", raising=False)
-    monkeypatch.delenv("LEARNHOUSE_GOOGLE_CLIENT_ID", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_GOOGLE_CLIENT_ID", raising=False)
 
     with pytest.raises(HTTPException) as exc:
         await _verify_google_token_audience("unverifiable-token")
@@ -101,9 +101,9 @@ async def test_refuses_when_no_client_id_is_configured(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_accepts_token_when_only_the_alias_env_var_is_set(monkeypatch):
-    """The CLI env template emits LEARNHOUSE_GOOGLE_CLIENT_ID; honour it."""
-    monkeypatch.delenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID", raising=False)
-    monkeypatch.setenv("LEARNHOUSE_GOOGLE_CLIENT_ID", "our-client-id")
+    """The CLI env template emits VALIDBRIDGE_GOOGLE_CLIENT_ID; honour it."""
+    monkeypatch.delenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID", raising=False)
+    monkeypatch.setenv("VALIDBRIDGE_GOOGLE_CLIENT_ID", "our-client-id")
 
     class _FakeClient:
         async def __aenter__(self_inner):
@@ -123,7 +123,7 @@ async def test_accepts_token_when_only_the_alias_env_var_is_set(monkeypatch):
 @pytest.mark.asyncio
 async def test_rejects_when_tokeninfo_endpoint_returns_non_200(monkeypatch):
     """Expired/revoked tokens produce non-200 from tokeninfo → 401 from us."""
-    monkeypatch.setenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID", "our-client-id")
+    monkeypatch.setenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID", "our-client-id")
 
     class _BadResp:
         status_code = 400

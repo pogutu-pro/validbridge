@@ -88,7 +88,7 @@ export default function LearnerEngagementScore({ days = '30' }: { days?: string 
                         </span>
                       </a>
                     </td>
-                    <td className="py-1.5 text-right font-semibold text-indigo-600">{Math.round(r.engagement_score)}</td>
+                    <td className="py-1.5 text-right font-semibold text-orange-600">{Math.round(r.engagement_score)}</td>
                     <td className="py-1.5 text-right text-gray-500">{r.page_views}</td>
                     <td className="py-1.5 text-right text-gray-500">{r.activities_completed}</td>
                     <td className="py-1.5 text-right text-gray-500">{r.courses_completed}</td>

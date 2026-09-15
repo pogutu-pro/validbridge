@@ -3,7 +3,7 @@ import { Send, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import type { MagicBlockMessage } from './types'
-import lrnaiIcon from 'public/lrnai_icon.png'
+import lrnaiIcon from 'public/validbridge_ai_icon.png'
 import { useTranslation } from 'react-i18next'
 
 interface MagicBlockChatProps {
@@ -127,7 +127,7 @@ function MagicBlockChat({
               className={cn(
                 "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm",
                 message.role === 'user'
-                  ? "bg-purple-600/80 text-white rounded-ee-md"
+                  ? "bg-orange-600/80 text-white rounded-ee-md"
                   : "bg-white/5 text-white/80 rounded-es-md ring-1 ring-inset ring-white/10"
               )}
             >
@@ -150,7 +150,7 @@ function MagicBlockChat({
           <div className="flex justify-start">
             <div className="bg-white/5 rounded-2xl rounded-es-md px-4 py-3 ring-1 ring-inset ring-white/10">
               <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                <Loader2 className="w-4 h-4 animate-spin text-orange-400" />
                 <span className="text-sm text-white/50">{t('editor.blocks.magic_block_content.creating_magic')}</span>
               </div>
             </div>

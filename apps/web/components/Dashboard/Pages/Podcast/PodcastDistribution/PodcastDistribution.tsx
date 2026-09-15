@@ -77,7 +77,7 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
           {/* Apple Podcasts */}
           <div className="border rounded-lg p-5">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                 <SiApplepodcasts size={22} color="#fff" />
               </div>
               <div>

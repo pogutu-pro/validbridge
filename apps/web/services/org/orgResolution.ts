@@ -19,14 +19,14 @@ export interface OrgResolutionResult {
 /**
  * Read the active tenancy mode on the server side.
  *
- * The middleware writes `LH_tenancy` ('multi' | 'single') on every request.
+ * The middleware writes `VB_tenancy` ('multi' | 'single') on every request.
  * Defaults to 'single' when not present (e.g. error boundaries with no
  * request context).
  */
 async function getServerTenancy(): Promise<'multi' | 'single'> {
   try {
     const cookieStore = await cookies()
-    const t = cookieStore.get('LH_tenancy')?.value
+    const t = cookieStore.get('VB_tenancy')?.value
     if (t === 'multi' || t === 'single') return t
   } catch {
     // cookies() may throw outside of a request context
@@ -37,7 +37,7 @@ async function getServerTenancy(): Promise<'multi' | 'single'> {
 /**
  * Resolves the organization context from multiple sources in priority order:
  * 1. Subdomain (multi tenancy only — delegates to the EE resolver)
- * 2. `LH_org` cookie
+ * 2. `VB_org` cookie
  * 3. Action token (for password reset, email verification links)
  *
  * In single tenancy the subdomain step is skipped — the middleware has
@@ -70,7 +70,7 @@ export async function resolveOrg(searchParams?: { token?: string }): Promise<Org
 
 /**
  * Get just the org slug from available sources (useful for client components).
- * Priority: subdomain (multi only) > LH_org cookie.
+ * Priority: subdomain (multi only) > VB_org cookie.
  */
 export async function getOrgSlug(): Promise<string | null> {
   const tenancy = await getServerTenancy()
@@ -81,7 +81,7 @@ export async function getOrgSlug(): Promise<string | null> {
   }
 
   const cookieStore = await cookies()
-  const orgslugCookie = cookieStore.get('LH_org')
+  const orgslugCookie = cookieStore.get('VB_org')
   if (orgslugCookie?.value) return orgslugCookie.value
 
   return null
@@ -91,11 +91,11 @@ export async function getOrgSlug(): Promise<string | null> {
  * Resolve the org slug for AUTH pages (login/signup/reset/forgot/verify).
  *
  * Auth org context is driven by WHERE you are, not by a (possibly stale)
- * `LH_org` cookie:
+ * `VB_org` cookie:
  *  - multi tenancy: the SUBDOMAIN only. `corp.learn.io` → "corp"; the bare apex
  *    `learn.io` → null, i.e. a generic, org-less login. We deliberately do NOT
  *    fall back to the cookie so the apex is never branded with a previous org.
- *  - single tenancy: the default org (from the `LH_org` cookie the middleware
+ *  - single tenancy: the default org (from the `VB_org` cookie the middleware
  *    pinned) is the only context, so auth is branded for it.
  */
 export async function getAuthOrgSlug(): Promise<string | null> {
@@ -106,7 +106,7 @@ export async function getAuthOrgSlug(): Promise<string | null> {
   }
 
   const cookieStore = await cookies()
-  return cookieStore.get('LH_org')?.value ?? null
+  return cookieStore.get('VB_org')?.value ?? null
 }
 
 // =============================================================================
@@ -129,8 +129,8 @@ async function getOrgSlugFromSubdomainViaEE(): Promise<string | null> {
     const mod = await import('@/ee/services/tenancy/resolveMulti.server')
     const cookieStore = await cookies()
     const frontendDomain =
-      process.env.NEXT_PUBLIC_LEARNHOUSE_DOMAIN
-      || cookieStore.get('LH_frontend_domain')?.value
+      process.env.NEXT_PUBLIC_VALIDBRIDGE_DOMAIN
+      || cookieStore.get('VB_frontend_domain')?.value
       || 'localhost'
     return await mod.getOrgSlugFromHost(frontendDomain)
   } catch {
@@ -147,7 +147,7 @@ async function getOrgSlugFromSubdomainViaEE(): Promise<string | null> {
 async function resolveFromCookie(): Promise<ResolvedOrg | null> {
   try {
     const cookieStore = await cookies()
-    const orgslugCookie = cookieStore.get('LH_org')
+    const orgslugCookie = cookieStore.get('VB_org')
     if (!orgslugCookie?.value) return null
     return await fetchOrgBySlug(orgslugCookie.value)
   } catch (error) {

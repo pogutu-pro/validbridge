@@ -15,11 +15,11 @@ import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { getUserGroups, getUserGroupResources } from '@services/usergroups/usergroups'
 import { useCourses } from '@/hooks/queries/useCourses'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import CatalogPagination, { useCatalogPagination } from '@components/Objects/Catalog/CatalogPagination'
 import { asArray } from '@services/utils/ts/requests'
 
@@ -35,10 +35,10 @@ function Courses(props: CourseProps) {
   const [newCourseModal, setNewCourseModal] = React.useState(isCreatingCourse)
   const { isAdmin: isUserAdmin } = useAdminStatus()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const isAuthenticated = session?.status === 'authenticated'
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const { data: coursesData, isLoading: coursesLoading } = useCourses(orgslug)
 
   const allCourses = coursesData || []
@@ -49,7 +49,7 @@ function Courses(props: CourseProps) {
   const [usergroups, setUsergroups] = useState<any[]>([])
   const [selectedUsergroupId, setSelectedUsergroupId] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('lh_course_usergroup_filter') || ''
+      return localStorage.getItem('vb_course_usergroup_filter') || ''
     }
     return ''
   })
@@ -65,7 +65,7 @@ function Courses(props: CourseProps) {
         setUsergroups(list)
         if (selectedUsergroupId && !list.some((ug: any) => String(ug.id) === selectedUsergroupId)) {
           setSelectedUsergroupId('')
-          localStorage.removeItem('lh_course_usergroup_filter')
+          localStorage.removeItem('vb_course_usergroup_filter')
         }
       })
       .catch(() => setUsergroups([]))
@@ -88,9 +88,9 @@ function Courses(props: CourseProps) {
   const handleUsergroupChange = (value: string) => {
     setSelectedUsergroupId(value)
     if (value) {
-      localStorage.setItem('lh_course_usergroup_filter', value)
+      localStorage.setItem('vb_course_usergroup_filter', value)
     } else {
-      localStorage.removeItem('lh_course_usergroup_filter')
+      localStorage.removeItem('vb_course_usergroup_filter')
     }
   }
 

@@ -1,7 +1,7 @@
 'use client'
 import { Building2, ArrowRight } from 'lucide-react'
 import React, { useState } from 'react'
-import { getLEARNHOUSE_DOMAIN_VAL } from '@services/config/config'
+import { getVALIDBRIDGE_DOMAIN_VAL } from '@services/config/config'
 import { stripPort } from '@services/utils/ts/hostUtils'
 import { safeRedirectUrl } from '@services/auth/redirects'
 
@@ -13,7 +13,7 @@ function OrgNotFound() {
     e.preventDefault()
     if (!orgSlug.trim()) return
 
-    const domain = getLEARNHOUSE_DOMAIN_VAL()
+    const domain = getVALIDBRIDGE_DOMAIN_VAL()
     const baseDomain = stripPort(domain)
     const cleanSlug = orgSlug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '')
     if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(cleanSlug)) return
@@ -51,7 +51,7 @@ function OrgNotFound() {
                 className="flex-1 bg-transparent outline-none text-gray-900 placeholder-gray-400"
                 autoFocus
               />
-              <span className="text-gray-400 text-sm">.{stripPort(getLEARNHOUSE_DOMAIN_VAL())}</span>
+              <span className="text-gray-400 text-sm">.{stripPort(getVALIDBRIDGE_DOMAIN_VAL())}</span>
             </div>
 
             <button

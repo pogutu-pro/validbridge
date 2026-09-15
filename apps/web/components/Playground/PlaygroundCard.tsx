@@ -6,7 +6,7 @@ import { Globe, Lock, Users, Pencil } from 'lucide-react'
 import { Cube } from '@phosphor-icons/react'
 import { Playground } from '@services/playgrounds/playgrounds'
 import { getPlaygroundThumbnailMediaDirectory } from '@services/media/media'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface PlaygroundCardProps {
   playground: Playground
@@ -21,7 +21,7 @@ const accessConfig = {
 }
 
 export default function PlaygroundCard({ playground, orgslug: _orgslug, canEdit }: PlaygroundCardProps) {
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const access = accessConfig[playground.access_type as keyof typeof accessConfig] || accessConfig.authenticated
   const AccessIcon = access.icon
 

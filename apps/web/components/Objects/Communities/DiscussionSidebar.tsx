@@ -141,9 +141,9 @@ export function DiscussionSidebar({
         </div>
         <Link
           href={getUriWithOrg(orgslug, `/community/${communityId}`)}
-          className="group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors"
+          className="group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-orange-600 transition-colors"
         >
-          <MessageCircle size={14} className="text-gray-400 group-hover:text-indigo-500" />
+          <MessageCircle size={14} className="text-gray-400 group-hover:text-orange-500" />
           {community.name}
         </Link>
       </div>

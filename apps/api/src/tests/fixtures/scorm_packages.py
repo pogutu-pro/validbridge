@@ -434,7 +434,7 @@ def adv_path_traversal() -> bytes:
     return make_zip({
         "imsmanifest.xml": manifest_12_single(),
         "index.html": sco_html("SCORM_12"),
-        "../../../../tmp/lh_scorm_pwned.txt": "owned",
+        "../../../../tmp/vb_scorm_pwned.txt": "owned",
     })
 
 

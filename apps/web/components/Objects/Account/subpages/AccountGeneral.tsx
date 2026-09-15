@@ -3,7 +3,7 @@ import { updateProfile } from '@services/settings/profile'
 import { getUser } from '@services/users/users'
 import React, { useEffect, useState, useCallback } from 'react'
 import { Formik, Form } from 'formik'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import {
   ArrowBigUpDash,
   Check,
@@ -45,7 +45,7 @@ import { signOut } from '@components/Contexts/AuthContext'
 import { getUriWithoutOrg } from '@services/config/config';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useTranslation } from 'react-i18next';
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics';
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics';
 
 const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif'])
 
@@ -537,7 +537,7 @@ const UserEditForm = ({
 };
 
 function AccountGeneral() {
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [localAvatar, setLocalAvatar] = React.useState(null) as any
   const [isLoading, setIsLoading] = React.useState(false) as any
@@ -545,7 +545,7 @@ function AccountGeneral() {
   const [success, setSuccess] = React.useState('') as any
   const [userData, setUserData] = useState<any>(null);
   const { t } = useTranslation();
-  const { track } = useLHAnalytics('learner');
+  const { track } = useVBAnalytics('learner');
 
   useEffect(() => {
     const fetchUserData = async () => {

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
@@ -16,7 +16,7 @@ import Image from 'next/image'
 
 const OrgEditAI: React.FC = () => {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const queryClient = useQueryClient()
@@ -92,8 +92,8 @@ const OrgEditAI: React.FC = () => {
         {/* Header */}
         <div className="flex items-center gap-3">
           <Image
-            src="/learnhouse_ai_simple_colored.png"
-            alt="LearnHouse AI"
+            src="/validbridge_ai_colored.png"
+            alt="ValidBridge AI"
             width={28}
             height={28}
           />

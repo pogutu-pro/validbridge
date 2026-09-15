@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { updateCommunity, Community } from '@services/communities/communities'
 import { revalidateTags } from '@services/utils/ts/requests'
@@ -36,7 +36,7 @@ export function EditCommunityModal({
   community,
   orgSlug,
 }: EditCommunityModalProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const router = useRouter()
   const queryClient = useQueryClient()

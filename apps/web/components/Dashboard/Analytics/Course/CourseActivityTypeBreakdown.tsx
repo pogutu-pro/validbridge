@@ -8,7 +8,7 @@ import CourseWidgetCard, { WidgetIcon } from './CourseWidgetCard'
 const TYPE_COLORS: Record<string, string> = {
   video: 'bg-blue-500',
   document: 'bg-amber-500',
-  quiz: 'bg-purple-500',
+  quiz: 'bg-orange-500',
   assignment: 'bg-rose-500',
   dynamic: 'bg-teal-500',
   custom: 'bg-gray-500',
@@ -18,7 +18,7 @@ const TYPE_COLORS: Record<string, string> = {
 const TYPE_HEX: Record<string, string> = {
   video: '#3b82f6',
   document: '#f59e0b',
-  quiz: '#8b5cf6',
+  quiz: '#f97316',
   assignment: '#f43f5e',
   dynamic: '#14b8a6',
   custom: '#6b7280',

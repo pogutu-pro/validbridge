@@ -48,7 +48,7 @@ export default function EditorLoader({ courseid: _courseid, activityuuid }: Edit
         <p className="text-sm">Failed to load editor. Please refresh the page.</p>
         <button
           onClick={() => window.location.reload()}
-          className="text-sm text-indigo-600 hover:underline"
+          className="text-sm text-orange-600 hover:underline"
         >
           Refresh
         </button>

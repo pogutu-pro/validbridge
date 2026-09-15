@@ -148,8 +148,8 @@ describe("resolveHlsThumbnails", () => {
 
 describe("shouldSendHlsCredentials", () => {
   test("credentials only for our API playlist endpoint", () => {
-    expect(shouldSendHlsCredentials("https://api.learnhouse.io/api/v1/stream/hls/o/c/a/master.m3u8")).toBe(true);
-    expect(shouldSendHlsCredentials("https://api.learnhouse.io/api/v1/stream/hls/o/c/a/v720p/index.m3u8")).toBe(true);
+    expect(shouldSendHlsCredentials("https://api.validbridge.co.ke/api/v1/stream/hls/o/c/a/master.m3u8")).toBe(true);
+    expect(shouldSendHlsCredentials("https://api.validbridge.co.ke/api/v1/stream/hls/o/c/a/v720p/index.m3u8")).toBe(true);
   });
 
   test("no credentials for presigned R2 segment URLs", () => {

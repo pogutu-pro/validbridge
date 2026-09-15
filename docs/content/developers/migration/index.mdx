@@ -1,11 +1,11 @@
 import { Callout } from 'nextra/components'
 
-# Migrating Content into LearnHouse
+# Migrating Content into ValidBridge
 
-This section explains how to bring existing course content into LearnHouse using the public API. There are two supported approaches:
+This section explains how to bring existing course content into ValidBridge using the public API. There are two supported approaches:
 
 1. **Programmatic Migration** -- you script every step (create the course, then chapters, then activities, then upload files). Use this when you need full control of the resulting structure -- typical for migrating from another LMS where you already know the chapter/activity layout.
-2. **AI-Assisted Migration** -- you upload a folder of media (videos, PDFs, images, audio) and LearnHouse asks Gemini to propose a chapter/activity tree. You review and confirm, and a single endpoint creates the entire course in one transaction. Use this when you have a pile of files but no predefined structure.
+2. **AI-Assisted Migration** -- you upload a folder of media (videos, PDFs, images, audio) and ValidBridge asks Gemini to propose a chapter/activity tree. You review and confirm, and a single endpoint creates the entire course in one transaction. Use this when you have a pile of files but no predefined structure.
 
 Both approaches share the same underlying data model -- a Course contains Chapters, and each Chapter contains an ordered list of Activities.
 
@@ -18,13 +18,13 @@ All endpoints below are prefixed with `/api/v1/`. In local development the base 
 Every migration call must be authenticated. There are two token types:
 
 - **JWT access tokens** (`POST /api/v1/auth/login`) -- a user session, 8-hour lifetime, refreshable.
-- **API tokens** (Pro plan) -- prefixed with `lh_`, issued per organization, no expiry.
+- **API tokens** (Pro plan) -- prefixed with `vb_`, issued per organization, no expiry.
 
 Both are sent the same way:
 
 ```bash
 curl http://localhost:1338/api/v1/courses/?org_id=1 \
-  -H "Authorization: Bearer lh_your_api_token_here"
+  -H "Authorization: Bearer vb_your_api_token_here"
 ```
 
 API tokens are bound to a single organization at creation time. Any attempt to operate on a different `org_id` is rejected at the auth layer, so a leaked token cannot reach across tenants.
@@ -35,7 +35,7 @@ API tokens are bound to a single organization at creation time. Any attempt to o
 ```bash
 # Mint a user JWT using your API token
 curl -X POST 'http://localhost:1338/api/v1/admin/{org_slug}/auth/token' \
-  -H 'Authorization: Bearer lh_your_api_token' \
+  -H 'Authorization: Bearer vb_your_api_token' \
   -H 'Content-Type: application/json' \
   -d '{"user_id": 1}'
 # → { "access_token": "eyJ...", "token_type": "bearer", "user_id": 1, "user_uuid": "..." }
@@ -53,7 +53,7 @@ The minted JWT is a normal user session and works on every endpoint, including t
 | `POST /assignments/`, `POST /assignments/{uuid}/tasks` | ✓ | ✓ |
 | `POST /courses/migrate/upload` / `/suggest` / `/create` | ✗ | ✓ |
 
-The blocks router has `Depends(get_non_api_token_user)` at the router level, so even though individual block handlers accept anonymous + JWT users, an `lh_*` API token is rejected with `403 "API tokens cannot access this resource"`. The same is true for the AI-assisted migration endpoints. For both, use the admin token-swap to mint a JWT first (see callout above).
+The blocks router has `Depends(get_non_api_token_user)` at the router level, so even though individual block handlers accept anonymous + JWT users, an `vb_*` API token is rejected with `403 "API tokens cannot access this resource"`. The same is true for the AI-assisted migration endpoints. For both, use the admin token-swap to mint a JWT first (see callout above).
 
 See [Authentication](/developers/api/authentication) for token issuance.
 

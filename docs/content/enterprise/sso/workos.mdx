@@ -12,7 +12,7 @@ Requires `WORKOS_API_KEY` and `WORKOS_CLIENT_ID` environment variables to be set
 
 - **Admin Portal** — WorkOS provides a hosted portal where organization admins can set up and manage their IdP connection directly.
 - **SAML & OIDC** — Supports both protocols through a single integration.
-- **Auto User Provisioning** — Automatically creates LearnHouse accounts from IdP profiles.
+- **Auto User Provisioning** — Automatically creates ValidBridge accounts from IdP profiles.
 - **Domain Restrictions** — Restrict access to specific email domains.
 - **Default Role Assignment** — Assign a default role to newly provisioned users.
 
@@ -35,7 +35,7 @@ You need either an `organization_id` (for organization-level SSO) or a `connecti
 ## Setup Steps
 
 1. Create a [WorkOS account](https://workos.com) and obtain your API key and Client ID.
-2. Set the `WORKOS_API_KEY` and `WORKOS_CLIENT_ID` environment variables in your LearnHouse deployment.
+2. Set the `WORKOS_API_KEY` and `WORKOS_CLIENT_ID` environment variables in your ValidBridge deployment.
 3. In the organization settings, select **WorkOS** as the SSO provider.
 4. Use the Admin Portal link to configure the identity provider connection (SAML or OIDC).
 5. Users with matching email domains can now log in via SSO.

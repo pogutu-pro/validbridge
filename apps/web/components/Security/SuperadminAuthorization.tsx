@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useRouter } from 'next/navigation'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 
@@ -11,7 +11,7 @@ type SuperadminAuthorizationProps = {
 const SuperadminAuthorization: React.FC<SuperadminAuthorizationProps> = ({
   children,
 }) => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const router = useRouter()
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [isChecking, setIsChecking] = useState(true)
@@ -57,10 +57,10 @@ const SuperadminAuthorization: React.FC<SuperadminAuthorizationProps> = ({
   // than one.
   if (!isAuthorized) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[#0f0f10]">
+      <div className="flex justify-center items-center h-screen bg-[#F8F7F2]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
-          <p className="text-white/50">
+          <h1 className="text-2xl font-bold text-[#262626] mb-2">Access Denied</h1>
+          <p className="text-[#737373]/80">
             You need superadmin privileges to access this page.
           </p>
         </div>

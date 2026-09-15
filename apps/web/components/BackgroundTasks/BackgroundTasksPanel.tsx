@@ -15,8 +15,8 @@ function StatusIcon({ status }: { status: BgTask['status'] }) {
   if (status === 'error' || status === 'interrupted')
     return <Warning size={16} weight="fill" className="text-red-500" />
   if (status === 'processing')
-    return <CircleNotch size={16} className="text-violet-500 animate-spin" />
-  return <UploadSimple size={16} className="text-violet-500" />
+    return <CircleNotch size={16} className="text-orange-500 animate-spin" />
+  return <UploadSimple size={16} className="text-orange-500" />
 }
 
 function TaskRow({ task, onDismiss }: { task: BgTask; onDismiss: (_id: string) => void }) {
@@ -45,7 +45,7 @@ function TaskRow({ task, onDismiss }: { task: BgTask; onDismiss: (_id: string) =
         {active && (
           <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-gray-100">
             <div
-              className={`h-full rounded-full bg-violet-500 transition-[width] duration-200 ${
+              className={`h-full rounded-full bg-orange-500 transition-[width] duration-200 ${
                 task.indeterminate || task.status === 'processing' ? 'animate-pulse w-1/3' : ''
               }`}
               style={
@@ -108,7 +108,7 @@ export default function BackgroundTasksPanel() {
         >
           <span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
             {activeCount > 0 ? (
-              <CircleNotch size={16} className="text-violet-500 animate-spin" />
+              <CircleNotch size={16} className="text-orange-500 animate-spin" />
             ) : (
               <CheckCircle size={16} weight="fill" className="text-green-500" />
             )}

@@ -418,7 +418,7 @@ def test_reload_module_covers_production_branch(monkeypatch, caplog):
         return _fake_engine_instance
 
     monkeypatch.setenv("TESTING", "false")
-    monkeypatch.setattr("config.config.get_learnhouse_config", lambda: _FakeConfig())
+    monkeypatch.setattr("config.config.get_validbridge_config", lambda: _FakeConfig())
     monkeypatch.setattr(
         "sqlalchemy.ext.asyncio.create_async_engine", fake_create_async_engine
     )
@@ -496,7 +496,7 @@ def _reload_with_url(monkeypatch, url: str, fake_create_async_engine=None):
         fake_create_async_engine = _engine
 
     monkeypatch.setenv("TESTING", "false")
-    monkeypatch.setattr("config.config.get_learnhouse_config", lambda: _FakeConfig())
+    monkeypatch.setattr("config.config.get_validbridge_config", lambda: _FakeConfig())
     monkeypatch.setattr("sqlalchemy.ext.asyncio.create_async_engine", fake_create_async_engine)
     monkeypatch.setattr(sa_event, "listens_for", lambda *a, **kw: (lambda fn: fn))
     monkeypatch.setattr(sa_event, "listen", lambda *a, **kw: None)

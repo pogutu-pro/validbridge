@@ -33,7 +33,7 @@ def _config(
 class TestGetCorsOriginRegex:
     def test_single_tenancy_pins_to_configured_hosts(self):
         with patch(
-            "src.core.middleware.cors.get_learnhouse_config",
+            "src.core.middleware.cors.get_validbridge_config",
             return_value=_config("single"),
         ):
             regex = get_cors_origin_regex()
@@ -45,7 +45,7 @@ class TestGetCorsOriginRegex:
 
     def test_single_tenancy_falls_back_to_localhost_when_unconfigured(self):
         with patch(
-            "src.core.middleware.cors.get_learnhouse_config",
+            "src.core.middleware.cors.get_validbridge_config",
             return_value=_config("single", frontend_domain="", domain=""),
         ):
             regex = get_cors_origin_regex()
@@ -54,9 +54,9 @@ class TestGetCorsOriginRegex:
             assert not re.fullmatch(regex, "https://evil.example.org")
 
     def test_multi_tenancy_returns_configured_regex(self):
-        configured = r"^https?://(.*\.)?learnhouse\.io$"
+        configured = r"^https?://(.*\.)?validbridge\.co\.ke$"
         with patch(
-            "src.core.middleware.cors.get_learnhouse_config",
+            "src.core.middleware.cors.get_validbridge_config",
             return_value=_config("multi", allowed_regexp=configured),
         ):
             assert get_cors_origin_regex() == configured
@@ -66,20 +66,20 @@ class TestGetCorsOriginRegex:
         # derive a domain-and-subdomain regex from the base domain rather than
         # returning an empty value (which would take the SaaS frontend offline).
         with patch(
-            "src.core.middleware.cors.get_learnhouse_config",
-            return_value=_config("multi", allowed_regexp="", domain="learnhouse.io"),
+            "src.core.middleware.cors.get_validbridge_config",
+            return_value=_config("multi", allowed_regexp="", domain="validbridge.co.ke"),
         ):
             regex = get_cors_origin_regex()
-            assert re.fullmatch(regex, "https://learnhouse.io")
-            assert re.fullmatch(regex, "https://acme.learnhouse.io")
-            assert re.fullmatch(regex, "https://deep.sub.learnhouse.io:8443")
+            assert re.fullmatch(regex, "https://validbridge.co.ke")
+            assert re.fullmatch(regex, "https://acme.validbridge.co.ke")
+            assert re.fullmatch(regex, "https://deep.sub.validbridge.co.ke:8443")
             assert not re.fullmatch(regex, "https://evil.example.org")
 
     def test_multi_tenancy_falls_back_to_localhost_when_regexp_and_domain_empty(self):
         # cors.py:83 - with neither allowed_regexp nor domain configured, multi
         # mode falls back to the localhost regex.
         with patch(
-            "src.core.middleware.cors.get_learnhouse_config",
+            "src.core.middleware.cors.get_validbridge_config",
             return_value=_config("multi", allowed_regexp="", domain=""),
         ):
             regex = get_cors_origin_regex()
@@ -94,7 +94,7 @@ class TestSingleTenancyRegex:
     @staticmethod
     def _regex() -> str:
         with patch(
-            "src.core.middleware.cors.get_learnhouse_config",
+            "src.core.middleware.cors.get_validbridge_config",
             return_value=_config("single"),
         ):
             return get_cors_origin_regex()
@@ -134,7 +134,7 @@ class TestConfigureCors:
     def test_registers_cors_middleware_on_app(self):
         app = FastAPI()
         with patch(
-            "src.core.middleware.cors.get_learnhouse_config",
+            "src.core.middleware.cors.get_validbridge_config",
             return_value=_config("single"),
         ):
             configure_cors(app)
@@ -147,7 +147,7 @@ class TestConfigureCors:
     def test_propagates_tenancy_into_middleware_options(self):
         app = FastAPI()
         with patch(
-            "src.core.middleware.cors.get_learnhouse_config",
+            "src.core.middleware.cors.get_validbridge_config",
             return_value=_config("multi", allowed_regexp=r"^https?://acme\.test$"),
         ):
             configure_cors(app)

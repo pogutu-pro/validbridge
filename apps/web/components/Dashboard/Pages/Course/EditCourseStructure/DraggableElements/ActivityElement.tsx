@@ -34,7 +34,7 @@ import {
   Video,
 } from 'lucide-react'
 import { MarkdownLogo, Globe as GlobePhosphor, Cube } from '@phosphor-icons/react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -74,7 +74,7 @@ interface ModifiedActivityInterface {
 function ActivityElement(props: ActivitiyElementProps) {
   const { t } = useTranslation()
   const router = useRouter()
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [modifiedActivity, setModifiedActivity] = React.useState<
     ModifiedActivityInterface | undefined

@@ -41,7 +41,7 @@ const VIEWPORT = { width: 1280, height: 720 }
 async function caption(page: Page, step: string, text: string, holdMs = 2600): Promise<void> {
   await page.evaluate(
     ({ step, text }) => {
-      const id = '__lh_demo_caption__'
+      const id = '__vb_demo_caption__'
       document.getElementById(id)?.remove()
       const el = document.createElement('div')
       el.id = id
@@ -97,7 +97,7 @@ async function loggedInPage(browser: Browser, email: string, password: string): 
   await page.evaluate(() => {
     try {
       window.localStorage.setItem(
-        'lh_onboarding',
+        'vb_onboarding',
         JSON.stringify({ completedSteps: [], skippedSteps: [], minimized: true, expanded: false, showAllSteps: false, dismissed: true, welcomeSeen: true }),
       )
     } catch { /* ignore */ }

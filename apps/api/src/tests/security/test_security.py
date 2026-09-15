@@ -107,23 +107,23 @@ class TestSecurity:
         assert security_verify_password("wrong", hashed) is False
 
     def test_security_verify_token_round_trip(self):
-        token = "lh_abc1234567890"
+        token = "vb_abc1234567890"
         assert security_verify_token(token, security_hash_token(token)) is True
-        assert security_verify_token("lh_other", security_hash_token(token)) is False
+        assert security_verify_token("vb_other", security_hash_token(token)) is False
 
     def test_security_verify_token_malformed_stored_hash(self):
-        assert security_verify_token("lh_abc", "not-a-valid-argon2-hash") is False
-        assert security_verify_token("lh_abc", "") is False
+        assert security_verify_token("vb_abc", "not-a-valid-argon2-hash") is False
+        assert security_verify_token("vb_abc", "") is False
         # None forces the hasher to raise TypeError; verify_token swallows it.
-        assert security_verify_token("lh_abc", None) is False  # type: ignore[arg-type]
+        assert security_verify_token("vb_abc", None) is False  # type: ignore[arg-type]
 
     def test_security_verify_token_legacy_sha256(self):
         # Pre-argon2 tokens were stored as pepperless SHA-256 hex.
-        token = "lh_legacytoken123"
+        token = "vb_legacytoken123"
         legacy_hash = hashlib.sha256(token.encode()).hexdigest()
 
         assert security_verify_token(token, legacy_hash) is True
-        assert security_verify_token("lh_other", legacy_hash) is False
+        assert security_verify_token("vb_other", legacy_hash) is False
         assert security_token_needs_rehash(legacy_hash) is True
         # Argon2 hashes from the current scheme should not be flagged for rehash.
         assert security_token_needs_rehash(security_hash_token(token)) is False

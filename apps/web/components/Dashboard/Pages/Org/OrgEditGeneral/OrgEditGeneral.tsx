@@ -12,7 +12,7 @@ import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { Input } from "@components/ui/input"
 import { Textarea } from "@components/ui/textarea"
@@ -22,7 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const ORG_LABELS = [
   { value: 'languages', label: '🌐 Languages' },
@@ -83,11 +83,11 @@ interface OrganizationValues {
 const OrgEditGeneral: React.FC = () => {
   const { t } = useTranslation()
   const _router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   // Footer text state
   const [footerText, setFooterText] = React.useState<string>(org?.config?.config?.customization?.general?.footer_text || org?.config?.config?.general?.footer_text || '')

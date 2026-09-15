@@ -62,7 +62,7 @@ ENC_KEY_URI = f"../{ENC_KEY_NAME}"
 
 
 def encryption_enabled() -> bool:
-    return os.environ.get("LEARNHOUSE_HLS_ENCRYPT", "true").strip().lower() == "true"
+    return os.environ.get("VALIDBRIDGE_HLS_ENCRYPT", "true").strip().lower() == "true"
 
 
 # Subprocess timeouts so a malformed/hostile source can never hang the worker.
@@ -113,11 +113,11 @@ def select_ladder(source_height: int) -> list[Rung]:
 
 
 def ffmpeg_threads() -> str:
-    """ffmpeg `-threads` value (LEARNHOUSE_HLS_FFMPEG_THREADS, default '1').
+    """ffmpeg `-threads` value (VALIDBRIDGE_HLS_FFMPEG_THREADS, default '1').
 
     Kept as a string for the arg list; sanitized to a small non-negative int
     ('0' means ffmpeg auto = all cores)."""
-    raw = os.environ.get("LEARNHOUSE_HLS_FFMPEG_THREADS", "1")
+    raw = os.environ.get("VALIDBRIDGE_HLS_FFMPEG_THREADS", "1")
     try:
         return str(max(0, int(raw)))
     except (TypeError, ValueError):
@@ -148,7 +148,7 @@ def build_ffmpeg_args(
             "-filter_complex", filter_complex]
     # Cap CPU so a transcode doesn't peg the whole pod (which spikes the API
     # autoscaler). Default 1 thread ≈ ~1 core instead of ~all cores; raise via
-    # LEARNHOUSE_HLS_FFMPEG_THREADS if you have headroom and want faster encodes.
+    # VALIDBRIDGE_HLS_FFMPEG_THREADS if you have headroom and want faster encodes.
     args += ["-threads", ffmpeg_threads()]
 
     for i, r in enumerate(rungs):

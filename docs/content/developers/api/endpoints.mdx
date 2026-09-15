@@ -12,7 +12,7 @@ All endpoints are prefixed with `/api/v1/`. The [API Reference](/reference) docu
 public endpoint group:
 
 - **[Authentication](/reference/auth)** — login, refresh, logout
-- **[API Tokens](/reference/api-tokens)** — create and manage `lh_` tokens
+- **[API Tokens](/reference/api-tokens)** — create and manage `vb_` tokens
 - **[Organizations](/reference/orgs)**, **[Users](/reference/users)**, **[User Groups](/reference/usergroups)**
 - **[Courses](/reference/courses)**, **[Chapters](/reference/chapters)**, **[Activities](/reference/activities)**, **[Blocks](/reference/blocks)**
 - **[Assignments](/reference/assignments)** — including [headless grading flows](/developers/api/headless-assignments)
@@ -26,7 +26,7 @@ public endpoint group:
 - Resources follow standard REST conventions: `GET` to list or retrieve, `POST` to create, `PUT` to update, `DELETE` to remove.
 - Create/update endpoints commonly accept **multipart form data** rather than JSON, since many also accept file uploads (e.g. thumbnails, avatars).
 - Authenticated endpoints require either the `Authorization: Bearer <token>` header or the `access_token_cookie` cookie.
-- Programmatic access uses API tokens with the `lh_` prefix (Pro plan).
+- Programmatic access uses API tokens with the `vb_` prefix (Pro plan).
 - Responses are returned as JSON.
 
 For a local development instance, the interactive Swagger UI also remains available at

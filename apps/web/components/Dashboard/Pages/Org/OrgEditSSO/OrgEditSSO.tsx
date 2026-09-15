@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { safeExternalUrl } from '@services/security/url'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
@@ -38,12 +38,12 @@ import {
   CheckCircle2,
   Info,
 } from 'lucide-react'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const OrgEditSSO: React.FC = () => {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
-  const session = useLHSession() as any
+  const { track } = useVBAnalytics('dashboard')
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
 

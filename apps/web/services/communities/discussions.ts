@@ -9,7 +9,7 @@ import {
 export const DISCUSSION_LABELS = [
   { id: 'general', name: 'General', color: '#6B7280', icon: 'MessageSquare' },
   { id: 'question', name: 'Q&A', color: '#EAB308', icon: 'HelpCircle' },
-  { id: 'idea', name: 'Ideas', color: '#8B5CF6', icon: 'Lightbulb' },
+  { id: 'idea', name: 'Ideas', color: '#f97316', icon: 'Lightbulb' },
   { id: 'announcement', name: 'Announcements', color: '#3B82F6', icon: 'Megaphone' },
   { id: 'showcase', name: 'Show and Tell', color: '#10B981', icon: 'Star' },
 ] as const

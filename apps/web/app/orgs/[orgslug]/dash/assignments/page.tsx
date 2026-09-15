@@ -1,5 +1,5 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { getUriWithOrg } from '@services/config/config';
@@ -44,7 +44,7 @@ const BADGE_BASE =
   'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ring-1 ring-inset whitespace-nowrap'
 
 const BADGE_VIOLET =
-  'bg-gradient-to-b from-violet-50 to-violet-100 text-violet-700 ring-violet-300/40 shadow-[0_1px_2px_rgba(139,92,246,0.18),inset_0_1px_0_rgba(255,255,255,0.85)]'
+  'bg-gradient-to-b from-orange-50 to-orange-100 text-orange-700 ring-orange-300/40 shadow-[0_1px_2px_rgba(249,115,22,0.18),inset_0_1px_0_rgba(255,255,255,0.85)]'
 const BADGE_BLUE =
   'bg-gradient-to-b from-blue-50 to-blue-100 text-blue-700 ring-blue-300/40 shadow-[0_1px_2px_rgba(59,130,246,0.18),inset_0_1px_0_rgba(255,255,255,0.85)]'
 const BADGE_EMERALD =
@@ -68,7 +68,7 @@ const GRADING_TYPE_BADGE: Record<string, { icon: React.ReactNode; labelKey: stri
 
 function AssignmentsHome() {
   const { t } = useTranslation()
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const queryClient = useQueryClient();

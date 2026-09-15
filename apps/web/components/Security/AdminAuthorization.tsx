@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { usePathname, useRouter } from 'next/navigation';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -18,7 +18,7 @@ type AuthorizationProps = {
 const ADMIN_PATH_PREFIX = '/dash';
 
 const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizationMode }) => {
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const org = useOrg() as any;
   const pathname = usePathname();
   const router = useRouter();

@@ -93,7 +93,7 @@ class TestAuthRuntime:
 
     @pytest.mark.asyncio
     async def test_get_current_user_api_token_success(self):
-        request = _mock_request(auth_header="Bearer lh_test_token")
+        request = _mock_request(auth_header="Bearer vb_test_token")
         db_session = Mock(spec=Session)
         api_token_record = _make_api_token_record(
             rights={
@@ -117,7 +117,7 @@ class TestAuthRuntime:
         assert result.username == "api_token_Test Token"
         assert request.state.user == result
         assert request.state.is_api_token is True
-        mock_validate.assert_awaited_once_with("lh_test_token", db_session)
+        mock_validate.assert_awaited_once_with("vb_test_token", db_session)
         mock_boundary.assert_awaited_once()
         assert result.rights["courses"] == {"model_dump": True}
         assert result.rights["activities"] == {"dict": True}
@@ -126,7 +126,7 @@ class TestAuthRuntime:
 
     @pytest.mark.asyncio
     async def test_get_current_user_api_token_rejected_when_invalid(self):
-        request = _mock_request(auth_header="Bearer lh_invalid")
+        request = _mock_request(auth_header="Bearer vb_invalid")
         db_session = Mock(spec=Session)
 
         with patch("src.services.api_tokens.api_tokens.validate_api_token_for_auth", new=AsyncMock(return_value=None)):
@@ -170,7 +170,7 @@ class TestAuthRuntime:
         db_session = Mock(spec=Session)
 
         with patch("src.services.api_tokens.api_tokens.validate_api_token_for_auth", new=AsyncMock(return_value=None)):
-            result = await validate_api_token("lh_invalid", db_session)
+            result = await validate_api_token("vb_invalid", db_session)
 
         assert result is None
 
@@ -180,7 +180,7 @@ class TestAuthRuntime:
         api_token = _make_api_token_record(rights=None)
 
         with patch("src.services.api_tokens.api_tokens.validate_api_token_for_auth", new=AsyncMock(return_value=api_token)):
-            result = await validate_api_token("lh_valid", db_session)
+            result = await validate_api_token("vb_valid", db_session)
 
         assert result is not None
         assert result.rights is None
@@ -202,7 +202,7 @@ class TestAuthRuntime:
         )
 
         with patch("src.services.api_tokens.api_tokens.validate_api_token_for_auth", new=AsyncMock(return_value=api_token)):
-            result = await validate_api_token("lh_valid", db_session)
+            result = await validate_api_token("vb_valid", db_session)
 
         assert result is not None
         assert result.username == "api_token_Test Token"
@@ -230,7 +230,7 @@ class TestAuthRuntime:
         )
 
         with patch("src.services.api_tokens.api_tokens.validate_api_token_for_auth", new=AsyncMock(return_value=api_token)):
-            result = await validate_api_token("lh_valid", db_session)
+            result = await validate_api_token("vb_valid", db_session)
 
         assert result is not None
         assert result.rights["courses"] == {"scope": "read"}
@@ -242,7 +242,7 @@ class TestAuthRuntime:
         api_token = _make_api_token_record(rights=_RawRightsDictOnly())
 
         with patch("src.services.api_tokens.api_tokens.validate_api_token_for_auth", new=AsyncMock(return_value=api_token)):
-            result = await validate_api_token("lh_valid", db_session)
+            result = await validate_api_token("vb_valid", db_session)
 
         assert result is not None
         assert result.rights == _required_rights()

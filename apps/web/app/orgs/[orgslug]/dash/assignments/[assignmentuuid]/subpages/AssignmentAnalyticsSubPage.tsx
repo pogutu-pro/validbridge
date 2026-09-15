@@ -1,4 +1,4 @@
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getAPIUrl } from '@services/config/config';
@@ -98,7 +98,7 @@ const GRADE_BUCKETS = [
 
 function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: string }) {
     const { t } = useTranslation();
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const assignment = useAssignments() as any;
     const assignmentObj = assignment?.assignment_object;
@@ -318,8 +318,8 @@ function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: stri
                 {/* KPI row */}
                 <div className="grid grid-cols-4 gap-3">
                     <KpiCard
-                        icon={<Target size={14} className="text-indigo-600" />}
-                        iconBg="bg-indigo-50"
+                        icon={<Target size={14} className="text-orange-600" />}
+                        iconBg="bg-orange-50"
                         label={t('dashboard.assignments.analytics.kpis.average')}
                         value={noGraded ? '—' : avgFmt.primary}
                         sub={noGraded ? undefined : avgFmt.secondary}
@@ -427,8 +427,8 @@ function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: stri
                                 <AreaChart data={timelineData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
                                     <defs>
                                         <linearGradient id="submittedGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.35} />
-                                            <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                                            <stop offset="0%" stopColor="#f97316" stopOpacity={0.35} />
+                                            <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
                                         </linearGradient>
                                         <linearGradient id="gradedGrad" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
@@ -469,11 +469,11 @@ function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: stri
                                     <Area
                                         type="monotone"
                                         dataKey="submitted"
-                                        stroke="#6366f1"
+                                        stroke="#f97316"
                                         strokeWidth={2}
                                         fill="url(#submittedGrad)"
                                         name={t('dashboard.assignments.analytics.timeline.submitted')}
-                                        dot={{ r: 3, strokeWidth: 0, fill: '#6366f1' }}
+                                        dot={{ r: 3, strokeWidth: 0, fill: '#f97316' }}
                                     />
                                     <Area
                                         type="monotone"
@@ -639,7 +639,7 @@ function KpiCard({
 const TONE_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
     emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', ring: 'ring-emerald-200/50' },
     rose: { bg: 'bg-rose-50', text: 'text-rose-700', ring: 'ring-rose-200/50' },
-    violet: { bg: 'bg-violet-50', text: 'text-violet-700', ring: 'ring-violet-200/50' },
+    violet: { bg: 'bg-orange-50', text: 'text-orange-700', ring: 'ring-orange-200/50' },
     sky: { bg: 'bg-sky-50', text: 'text-sky-700', ring: 'ring-sky-200/50' },
 };
 

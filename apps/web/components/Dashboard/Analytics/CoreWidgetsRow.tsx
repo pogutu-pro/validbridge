@@ -31,7 +31,7 @@ import { useTranslation } from 'react-i18next'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
 
-const COLORS = ['#6b8de3', '#818cf8', '#a78bfa', '#c4b5fd']
+const COLORS = ['#6b8de3', '#818cf8', '#fb923c', '#fdba74']
 
 function ExpandButton({ onClick }: { onClick: () => void }) {
   return (
@@ -84,7 +84,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         {/* {t('analytics.overview.enrollment_funnel')} */}
         <div className="flex-1 p-5 min-w-0">
           <div className="flex items-center gap-2 mb-4">
-            <Funnel size={16} weight="duotone" className="text-indigo-400" />
+            <Funnel size={16} weight="duotone" className="text-orange-400" />
             <h3 className="text-sm font-semibold text-gray-700">
               {t('analytics.overview.enrollment_funnel')}
             </h3>
@@ -202,7 +202,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         open={funnelOpen}
         onClose={() => setFunnelOpen(false)}
         title="{t('analytics.overview.enrollment_funnel')}"
-        icon={<Funnel size={20} weight="duotone" className="text-indigo-400" />}
+        icon={<Funnel size={20} weight="duotone" className="text-orange-400" />}
       >
         {chartData.length === 0 ? (
           <div className="text-center text-gray-300 py-12">{t('analytics.common.no_data')}</div>

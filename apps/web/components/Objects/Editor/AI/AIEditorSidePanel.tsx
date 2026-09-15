@@ -22,14 +22,14 @@ import {
   Type,
   Box,
 } from 'lucide-react'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
-import learnhouseAI_logo_black from 'public/learnhouse_ai_black_logo.png'
+import validbridgeAI_icon from 'public/validbridge_ai.png'
+import validbridgeAI_logo_black from 'public/validbridge_ai_black.png'
 import {
   AIEditorStateTypes,
   useAIEditor,
   useAIEditorDispatch,
 } from '@components/Contexts/AI/AIEditorContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import {
   startEditorAIChatSessionStream,
   sendEditorAIChatMessageStream,
@@ -38,7 +38,7 @@ import {
 import UserAvatar from '@components/Objects/UserAvatar'
 import { useTranslation } from 'react-i18next'
 import { useDirection } from '@hooks/useDirection'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import AIMarkdownRenderer from '@components/Objects/Activities/AI/AIMarkdownRenderer'
 import { setAIHighlight, clearAIHighlight } from '../Extensions/AISelectionHighlight/AISelectionHighlight'
 
@@ -58,8 +58,8 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
   const { t } = useTranslation()
   // Panel slides in from the inline end; the offset is physical pixels.
   const { x: dx } = useDirection()
-  const { track } = useLHAnalytics('editor')
-  const session = useLHSession() as any
+  const { track } = useVBAnalytics('editor')
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const dispatchAIEditor = useAIEditorDispatch() as any
@@ -1028,7 +1028,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                 isInputDisabled ? 'animate-pulse' : ''
               }`}
               width={24}
-              src={learnhouseAI_icon}
+              src={validbridgeAI_icon}
               alt=""
             />
             <span className="text-sm font-semibold text-white/80">
@@ -1112,7 +1112,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                     </div>
                     <div className="flex items-center space-x-1.5 px-2 py-2">
                       <motion.span
-                        className="w-2 h-2 bg-purple-400/80 rounded-full"
+                        className="w-2 h-2 bg-orange-400/80 rounded-full"
                         animate={{
                           opacity: [0.4, 1, 0.4],
                           scale: [0.85, 1, 0.85],
@@ -1124,7 +1124,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                         }}
                       />
                       <motion.span
-                        className="w-2 h-2 bg-purple-400/80 rounded-full"
+                        className="w-2 h-2 bg-orange-400/80 rounded-full"
                         animate={{
                           opacity: [0.4, 1, 0.4],
                           scale: [0.85, 1, 0.85],
@@ -1137,7 +1137,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                         }}
                       />
                       <motion.span
-                        className="w-2 h-2 bg-purple-400/80 rounded-full"
+                        className="w-2 h-2 bg-orange-400/80 rounded-full"
                         animate={{
                           opacity: [0.4, 1, 0.4],
                           scale: [0.85, 1, 0.85],
@@ -1298,9 +1298,9 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                 transition={{ duration: 0.2 }}
                 className="mb-3"
               >
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                  <Type size={14} className="text-purple-400 flex-shrink-0" />
-                  <span className="text-xs text-purple-300/80 truncate">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                  <Type size={14} className="text-orange-400 flex-shrink-0" />
+                  <span className="text-xs text-orange-300/80 truncate">
                     {(() => {
                       const sel = aiEditorState.persistentSelection
                       if (sel && props.editor) {
@@ -1312,10 +1312,10 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                   </span>
                   <button
                     onClick={clearSelectionHighlight}
-                    className="ms-auto p-1 rounded hover:bg-purple-500/20 transition-colors"
+                    className="ms-auto p-1 rounded hover:bg-orange-500/20 transition-colors"
                     title={t('editor.ai_panel.clear_selection')}
                   >
-                    <X size={12} className="text-purple-400/60 hover:text-purple-400" />
+                    <X size={12} className="text-orange-400/60 hover:text-orange-400" />
                   </button>
                 </div>
               </motion.div>
@@ -1330,22 +1330,22 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                 transition={{ duration: 0.2 }}
                 className="mb-3"
               >
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-500/10 border border-violet-500/20">
-                  <Box size={14} className="text-violet-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                  <Box size={14} className="text-orange-400 flex-shrink-0" />
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-xs font-medium text-violet-300">
+                    <span className="text-xs font-medium text-orange-300">
                       {aiEditorState.activeBlockContext.label}
                     </span>
-                    <span className="text-xs text-violet-300/60">
+                    <span className="text-xs text-orange-300/60">
                       {t('editor.ai_panel.block_selected')}
                     </span>
                   </div>
                   <button
                     onClick={clearSelectionHighlight}
-                    className="ms-auto p-1 rounded hover:bg-violet-500/20 transition-colors"
+                    className="ms-auto p-1 rounded hover:bg-orange-500/20 transition-colors"
                     title={t('editor.ai_panel.clear_selection')}
                   >
-                    <X size={12} className="text-violet-400/60 hover:text-violet-400" />
+                    <X size={12} className="text-orange-400/60 hover:text-orange-400" />
                   </button>
                 </div>
               </motion.div>
@@ -1382,7 +1382,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
               <button
                 onClick={() => sendMessage(aiEditorState.chatInputValue)}
                 disabled={isInputDisabled || !aiEditorState.chatInputValue.trim()}
-                className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <MessageCircle size={18} />
               </button>
@@ -1450,7 +1450,7 @@ function AIEditorMessageComponent({
 }
 
 const AIEditorSidePanelPlaceholder = (props: { sendMessage: (_msg: string) => void }) => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const { t } = useTranslation()
 
@@ -1488,7 +1488,7 @@ const AIEditorSidePanelPlaceholder = (props: { sendMessage: (_msg: string) => vo
             <Image
               width={80}
               className="mx-auto"
-              src={learnhouseAI_logo_black}
+              src={validbridgeAI_logo_black}
               alt=""
             />
             <p className="pt-3 text-lg font-semibold text-white/70 flex flex-col justify-center items-center">

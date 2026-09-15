@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { ArrowElbowDownLeft, ArrowRight, CircleNotch, ClockCounterClockwise, GitBranch, MagicWand, Sparkle, Trash } from '@phosphor-icons/react'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import {
   generateAIScenario,
   fetchAIScenarioHistory,
@@ -51,7 +51,7 @@ const AIScenarioGeneratorModal: React.FC<AIScenarioGeneratorModalProps> = ({
   activityUuid,
 }) => {
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const [tab, setTab] = useState<'generate' | 'history'>('generate')

@@ -134,8 +134,8 @@ export default function SSOCallbackPage() {
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <div className="relative">
-              <Shield className="w-16 h-16 text-indigo-600" />
-              <Loader2 className="w-6 h-6 text-indigo-600 absolute -bottom-1 -end-1 animate-spin" />
+              <Shield className="w-16 h-16 text-orange-600" />
+              <Loader2 className="w-6 h-6 text-orange-600 absolute -bottom-1 -end-1 animate-spin" />
             </div>
           </div>
           <h1 className="text-xl font-semibold text-gray-800 mb-2">
@@ -263,7 +263,7 @@ export default function SSOCallbackPage() {
           <div className="space-y-3">
             <Link
               href="/login"
-              className="block w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              className="block w-full py-2 px-4 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
             >
               {t('auth.sso_callback.try_again')}
             </Link>

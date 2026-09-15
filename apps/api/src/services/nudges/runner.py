@@ -65,7 +65,7 @@ def _flag(name: str, default: bool = False) -> bool:
 
 
 def nudges_enabled() -> bool:
-    return _flag("LEARNHOUSE_NUDGES_ENABLED", False)
+    return _flag("VALIDBRIDGE_NUDGES_ENABLED", False)
 
 
 def backfill_mode() -> str:
@@ -74,7 +74,7 @@ def backfill_mode() -> str:
     ``full`` exists only as an escape hatch and is not a supported setting —
     it would evaluate the entire catalog against years of history.
     """
-    return (os.environ.get("LEARNHOUSE_NUDGES_BACKFILL_MODE") or "off").strip().lower()
+    return (os.environ.get("VALIDBRIDGE_NUDGES_BACKFILL_MODE") or "off").strip().lower()
 
 
 async def _ledger_has_rows(db_session: AsyncSession) -> bool:
@@ -99,7 +99,7 @@ async def activation_date(
     """When this system started running here.
 
     Orgs created before it are "pre-existing" and reachable only by the winback
-    tracks. An explicit `LEARNHOUSE_NUDGES_ACTIVATION_DATE` wins; otherwise it
+    tracks. An explicit `VALIDBRIDGE_NUDGES_ACTIVATION_DATE` wins; otherwise it
     falls back to the ledger's first real row.
 
     Deriving it from the ledger alone was a mistake worth naming: the first run
@@ -109,14 +109,14 @@ async def activation_date(
     place the line deliberately — including in the past, to treat existing
     organizations as ordinary.
     """
-    raw = (os.environ.get("LEARNHOUSE_NUDGES_ACTIVATION_DATE") or "").strip()
+    raw = (os.environ.get("VALIDBRIDGE_NUDGES_ACTIVATION_DATE") or "").strip()
     if raw:
         try:
             parsed = datetime.fromisoformat(raw)
             return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
         except ValueError:
             logger.warning(
-                "Ignoring unparseable LEARNHOUSE_NUDGES_ACTIVATION_DATE: %r", raw
+                "Ignoring unparseable VALIDBRIDGE_NUDGES_ACTIVATION_DATE: %r", raw
             )
 
     earliest = (
@@ -412,7 +412,7 @@ async def run_nudges(
         return stats
 
     if not force and not dry_run and not seed and not nudges_enabled():
-        logger.info("Nudges skipped: LEARNHOUSE_NUDGES_ENABLED is not set")
+        logger.info("Nudges skipped: VALIDBRIDGE_NUDGES_ENABLED is not set")
         return stats
 
     # First run here: seed instead of sending. Seeding consumes the dedupe

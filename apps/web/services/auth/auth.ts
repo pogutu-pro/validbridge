@@ -186,7 +186,7 @@ export async function getNewAccessTokenUsingRefreshTokenServer(
     method: 'GET',
     redirect: 'follow',
     headers: {
-      Cookie: `LH_refresh=${refresh_token_cookie}`,
+      Cookie: `VB_refresh=${refresh_token_cookie}`,
     },
     credentials: 'include',
   }
@@ -198,7 +198,7 @@ export async function getNewAccessTokenUsingRefreshTokenServer(
 // cookies
 
 export async function getAccessTokenFromRefreshTokenCookie(cookieStore: any) {
-  const refresh_token_cookie: any = cookieStore.get('LH_refresh')
+  const refresh_token_cookie: any = cookieStore.get('VB_refresh')
   const access_token_cookie: any =
     await getNewAccessTokenUsingRefreshTokenServer(refresh_token_cookie?.value)
   return access_token_cookie && refresh_token_cookie

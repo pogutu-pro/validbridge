@@ -44,7 +44,7 @@ export interface AuthedUser {
 }
 
 /**
- * Authenticate the caller from the httpOnly LH_access cookie by validating it
+ * Authenticate the caller from the httpOnly VB_access cookie by validating it
  * against the backend session endpoint. Identity (email, roles) is ALWAYS
  * taken from this verified session — never from caller-supplied request fields,
  * which would otherwise allow acting on another user's billing (IDOR).

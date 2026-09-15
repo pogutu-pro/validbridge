@@ -13,7 +13,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { useMediaQuery } from 'usehooks-ts'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
 
 interface PodcastClientProps {
@@ -33,7 +33,7 @@ export default function PodcastClient({
   const { t } = useTranslation()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const { state } = usePodcastPlayer()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   // Use TanStack Query for real-time updates

@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Callable
 from fastapi import FastAPI
-from config.config import LearnHouseConfig, get_learnhouse_config
+from config.config import ValidBridgeConfig, get_validbridge_config
 from src.core.events.autoinstall import auto_install
 from src.core.events.content import check_content_directory
 from src.core.events.database import close_database, connect_to_db
@@ -39,9 +39,9 @@ async def _reconcile_packs():
 
 def startup_app(app: FastAPI) -> Callable:
     async def start_app() -> None:
-        # Get LearnHouse Config
-        learnhouse_config: LearnHouseConfig = get_learnhouse_config()
-        app.learnhouse_config = learnhouse_config  # type: ignore
+        # Get ValidBridge Config
+        validbridge_config: ValidBridgeConfig = get_validbridge_config()
+        app.validbridge_config = validbridge_config  # type: ignore
 
         # Connect to database
         await connect_to_db(app)
@@ -76,12 +76,12 @@ def startup_app(app: FastAPI) -> Callable:
 
         # The shared demo organization refreshes itself on an interval, so the
         # feature needs no external scheduler. No-op unless
-        # LEARNHOUSE_DEMO_ENABLED; never raises.
+        # VALIDBRIDGE_DEMO_ENABLED; never raises.
         from src.services.demo.scheduler import start_scheduler as start_demo_scheduler
         start_demo_scheduler()
 
         # Start the in-app HLS transcoding consumer (drains the Redis queue as a
-        # background task; no separate worker). No-op unless LEARNHOUSE_HLS_ENABLED.
+        # background task; no separate worker). No-op unless VALIDBRIDGE_HLS_ENABLED.
         from src.services.utils.hls_jobs import start_consumer
         start_consumer()
 

@@ -1,6 +1,6 @@
 # Demo bundle provenance
 
-Everything in this bundle is original work produced for LearnHouse and is
+Everything in this bundle is original work produced for ValidBridge and is
 redistributable under the repository's licence. Nothing here is third-party
 content, and nothing depicts a real person or organisation.
 

@@ -1,7 +1,7 @@
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { useAssignmentSubmission, useAssignmentTaskSubmissions } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI'
 import { getAssignmentTask, getAssignmentTaskSubmissionsUser, handleAssignmentTaskSubmission, updateSubFile } from '@services/courses/assignments';
@@ -29,7 +29,7 @@ type TaskFileObjectProps = {
 
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGraded }: TaskFileObjectProps) {
     const { t } = useTranslation()
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const org = useOrg() as any;
     const access_token = session?.data?.tokens?.access_token;
     const [isLoading, setIsLoading] = React.useState(false);

@@ -37,23 +37,23 @@ def _bind_session(monkeypatch, session):
 # --------------------------------------------------------------------------
 
 def test_flags_default_off(monkeypatch):
-    monkeypatch.delenv("LEARNHOUSE_HLS_ENABLED", raising=False)
-    monkeypatch.delenv("LEARNHOUSE_HLS_CONCURRENCY", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_HLS_ENABLED", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_HLS_CONCURRENCY", raising=False)
     assert hls_jobs.hls_enabled() is False
     assert hls_jobs.hls_concurrency() == 1  # default
 
 
 def test_flags_parse_true(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_HLS_ENABLED", "TRUE")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_ENABLED", "TRUE")
     assert hls_jobs.hls_enabled() is True
 
 
 def test_hls_concurrency_parsing(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_HLS_CONCURRENCY", "3")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_CONCURRENCY", "3")
     assert hls_jobs.hls_concurrency() == 3
-    monkeypatch.setenv("LEARNHOUSE_HLS_CONCURRENCY", "0")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_CONCURRENCY", "0")
     assert hls_jobs.hls_concurrency() == 1  # clamped to >=1
-    monkeypatch.setenv("LEARNHOUSE_HLS_CONCURRENCY", "bad")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_CONCURRENCY", "bad")
     assert hls_jobs.hls_concurrency() == 1  # invalid → 1
 
 
@@ -542,11 +542,11 @@ async def test_reconcile_resilient_to_redis_errors(monkeypatch, db, org, course,
 
 
 def test_hls_max_retries_parsing(monkeypatch):
-    monkeypatch.delenv("LEARNHOUSE_HLS_MAX_RETRIES", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_HLS_MAX_RETRIES", raising=False)
     assert hls_jobs.hls_max_retries() == 6
-    monkeypatch.setenv("LEARNHOUSE_HLS_MAX_RETRIES", "3")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_MAX_RETRIES", "3")
     assert hls_jobs.hls_max_retries() == 3
-    monkeypatch.setenv("LEARNHOUSE_HLS_MAX_RETRIES", "bad")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_MAX_RETRIES", "bad")
     assert hls_jobs.hls_max_retries() == 6
 
 

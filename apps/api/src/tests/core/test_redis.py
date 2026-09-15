@@ -25,14 +25,14 @@ class TestBuildPool:
     def test_returns_none_when_conn_string_empty(self):
         config = MagicMock()
         config.redis_config.redis_connection_string = ""
-        with patch("src.core.redis.get_learnhouse_config", return_value=config):
+        with patch("src.core.redis.get_validbridge_config", return_value=config):
             pool = redis_module._build_pool()
         assert pool is None
 
     def test_returns_none_when_conn_string_is_none(self):
         config = MagicMock()
         config.redis_config.redis_connection_string = None
-        with patch("src.core.redis.get_learnhouse_config", return_value=config):
+        with patch("src.core.redis.get_validbridge_config", return_value=config):
             pool = redis_module._build_pool()
         assert pool is None
 
@@ -40,7 +40,7 @@ class TestBuildPool:
         config = MagicMock()
         config.redis_config.redis_connection_string = "redis://localhost:6379/0"
         fake_pool = MagicMock()
-        with patch("src.core.redis.get_learnhouse_config", return_value=config), patch(
+        with patch("src.core.redis.get_validbridge_config", return_value=config), patch(
             "redis.ConnectionPool.from_url", return_value=fake_pool
         ) as mock_from_url:
             pool = redis_module._build_pool()
@@ -53,14 +53,14 @@ class TestBuildPool:
         )
 
     def test_returns_none_on_config_exception(self):
-        with patch("src.core.redis.get_learnhouse_config", side_effect=RuntimeError("no config")):
+        with patch("src.core.redis.get_validbridge_config", side_effect=RuntimeError("no config")):
             pool = redis_module._build_pool()
         assert pool is None
 
     def test_returns_none_on_from_url_exception(self):
         config = MagicMock()
         config.redis_config.redis_connection_string = "redis://localhost"
-        with patch("src.core.redis.get_learnhouse_config", return_value=config), patch(
+        with patch("src.core.redis.get_validbridge_config", return_value=config), patch(
             "redis.ConnectionPool.from_url", side_effect=Exception("connection refused")
         ):
             pool = redis_module._build_pool()

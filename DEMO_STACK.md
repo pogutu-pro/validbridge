@@ -20,14 +20,14 @@ root, which is gitignored.
 editing is needed.
 
 **The demo refreshes every 10 minutes**, which is also the shipped default.
-Drop `LEARNHOUSE_DEMO_REFRESH_MINUTES` lower in `run_demo_api.sh` if you want to
+Drop `VALIDBRIDGE_DEMO_REFRESH_MINUTES` lower in `run_demo_api.sh` if you want to
 watch a refresh land without waiting.
 
 ## Start it
 
 ```bash
 # 1. Postgres + Redis
-docker compose -f .learnhouse/docker-compose.dev.yml up -d
+docker compose up -d db redis
 
 # 2. API (exports its own env; see the file for why)
 cd apps/api && bash run_demo_api.sh
@@ -48,11 +48,11 @@ The demo builds itself on API startup and refreshes every 10 minutes after that.
 The demo is a **second** organization. In single tenancy every path resolves to
 the one default org, so the demo is unreachable — clicking into it lands you on
 the default org's dashboard. `run_demo_api.sh` therefore sets
-`LEARNHOUSE_TENANCY=multi` with `LEARNHOUSE_DOMAIN=lvh.me:3010`, which is how
+`VALIDBRIDGE_TENANCY=multi` with `VALIDBRIDGE_DOMAIN=lvh.me:3010`, which is how
 `demo.<domain>` would work in production too.
 
 Multi tenancy is gated on "EE available OR SaaS mode". The script uses
-`LEARNHOUSE_SAAS=true` because the EE checkout this worktree symlinks to expects
+`VALIDBRIDGE_SAAS=true` because the EE checkout this worktree symlinks to expects
 a module this branch does not have; the demo needs nothing from EE.
 
 ## Watching it work
@@ -111,7 +111,7 @@ nor should override.
   process — tenancy and demo flags there made four unrelated tests fail on this
   machine and nowhere else.
 - Redis caches `/instance/info` for 600s. After changing tenancy, run
-  `docker exec learnhouse-redis-dev redis-cli FLUSHALL`.
+  `docker exec validbridge-redis redis-cli FLUSHALL`.
 - The admin account must be marked email-verified directly in the database;
   SaaS mode requires verification and there is no mail provider configured here:
   `UPDATE "user" SET email_verified = true WHERE email = 'admin@school.dev';`

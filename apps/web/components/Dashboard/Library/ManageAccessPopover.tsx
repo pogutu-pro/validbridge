@@ -1,5 +1,5 @@
 'use client'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
@@ -14,7 +14,7 @@ import { updateCourse, getCourse } from '@services/courses/courses'
 import { apiFetch } from '@services/utils/ts/requests'
 import { Check, Globe, Info, SquareUserRound, Users, X } from 'lucide-react'
 import Link from 'next/link'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -49,7 +49,7 @@ const AccessCard = React.forwardRef<
         transition-all duration-150
         ${
           selected
-            ? 'bg-white border border-indigo-200 ring-1 ring-indigo-100 shadow-xs'
+            ? 'bg-white border border-orange-200 ring-1 ring-orange-100 shadow-xs'
             : 'bg-gray-50/80 border border-gray-100 hover:bg-gray-50 hover:border-gray-200'
         }
         ${className || ''}
@@ -57,8 +57,8 @@ const AccessCard = React.forwardRef<
       style={{ minHeight: 160 }}
     >
       {selected && (
-        <div className="absolute top-3 end-3 flex items-center gap-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-full ps-1 pe-2 py-0.5">
-          <span className="w-4 h-4 rounded-full bg-indigo-600 flex items-center justify-center">
+        <div className="absolute top-3 end-3 flex items-center gap-1 text-[11px] font-semibold text-orange-700 bg-orange-50 border border-orange-100 rounded-full ps-1 pe-2 py-0.5">
+          <span className="w-4 h-4 rounded-full bg-orange-600 flex items-center justify-center">
             <Check size={10} strokeWidth={3.5} className="text-white" />
           </span>
           <span>{t('access.active')}</span>
@@ -66,7 +66,7 @@ const AccessCard = React.forwardRef<
       )}
       <div
         className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-150 ${
-          selected ? 'bg-indigo-50 text-indigo-600' : 'bg-white border border-gray-100 text-gray-400'
+          selected ? 'bg-orange-50 text-orange-600' : 'bg-white border border-gray-100 text-gray-400'
         }`}
       >
         <Icon size={24} strokeWidth={1.75} />
@@ -103,10 +103,10 @@ function LinkUserGroup({
 }) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const { data } = useSWR(
     org?.id ? ['usergroups', org.id] : null,
     () => getUserGroups(org.id, access_token)
@@ -183,7 +183,7 @@ function LinkUserGroup({
 
 function ManageAccessPopover({ resource_uuid, resourceType }: Props) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
 
@@ -204,7 +204,7 @@ function ManageAccessPopover({ resource_uuid, resourceType }: Props) {
     }
   )
 
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(undefined)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -330,7 +330,7 @@ function UserGroupsSection({
   mutateGroups: () => void
 }) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const [linkModal, setLinkModal] = useState(false)
@@ -398,7 +398,7 @@ function UserGroupsSection({
                 <tr key={usergroup.id} className="hover:bg-gray-50 transition-colors">
                   <td className="py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
                         <Users className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col min-w-0">

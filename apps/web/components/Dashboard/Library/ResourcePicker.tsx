@@ -1,6 +1,6 @@
 'use client'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { addFolderContent, addOrgRootContent } from '@services/folders/folders'
@@ -21,7 +21,7 @@ import React from 'react'
 import toast from 'react-hot-toast'
 import useSWR from 'swr'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 export type TabKey = 'courses' | 'podcasts' | 'communities' | 'boards' | 'playgrounds' | 'media'
 
@@ -90,9 +90,9 @@ function ResourceList({
 }: ResourceListProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const [query, setQuery] = React.useState('')
   const [added, setAdded] = React.useState<Set<string>>(new Set())
   const [pending, setPending] = React.useState<string | null>(null)
@@ -262,7 +262,7 @@ function TabButton({
 }) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const Icon = TAB_META[tab].icon
 

@@ -4,7 +4,7 @@ import React from 'react'
 import toast from 'react-hot-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, CircleNotch, Clock, ClockCounterClockwise, FileArrowUp, Hash, ListChecks, PencilSimple, Plus, Sparkle, TextT, Trash, X, type Icon as PhosphorIcon } from '@phosphor-icons/react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { queryKeys } from '@/lib/query/keys'
 import { getAPIUrl } from '@services/config/config'
@@ -26,7 +26,7 @@ import { QUIZ_RESPONSE_SINGLE, resolveQuizResponseType } from '@/lib/quiz/modes'
 // NOTE: strings are hardcoded English here rather than routed through i18n,
 // because the shared locale files live outside the assignments dashboard area
 // (which this task is scoped to). Everything else mirrors the surrounding
-// LearnHouse design language (neutral palette, nice-shadow, rounded-lg,
+// ValidBridge design language (neutral palette, nice-shadow, rounded-lg,
 // lucide icons — no AI-gradient styling).
 // ---------------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ function GenerateTasksAIModal({
   assignment_uuid: string
   closeModal: (_open: boolean) => void
 }) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const queryClient = useQueryClient()

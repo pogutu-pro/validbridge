@@ -56,7 +56,7 @@ class TestUploadContentService:
         )
 
         with patch(
-            "src.services.utils.upload_content.get_learnhouse_config",
+            "src.services.utils.upload_content.get_validbridge_config",
             return_value=fake_config,
         ), patch("src.services.utils.upload_content.ensure_directory_exists"):
             with pytest.raises(HTTPException) as exc:
@@ -75,13 +75,13 @@ class TestUploadContentService:
         file_path.parent.mkdir(parents=True)
         cwd = tmp_path
         with patch(
-            "src.services.utils.upload_content.get_learnhouse_config",
+            "src.services.utils.upload_content.get_validbridge_config",
             return_value=fake_config,
         ):
             with patch("os.getcwd", return_value=str(cwd)):
                 pass
         with patch(
-            "src.services.utils.upload_content.get_learnhouse_config",
+            "src.services.utils.upload_content.get_validbridge_config",
             return_value=fake_config,
         ):
             import os
@@ -120,7 +120,7 @@ class TestUploadContentService:
         os.chdir(tmp_path)
         try:
             with patch(
-                "src.services.utils.upload_content.get_learnhouse_config",
+                "src.services.utils.upload_content.get_validbridge_config",
                 return_value=fake_config,
             ), patch(
                 "src.services.utils.upload_content.boto3.client",
@@ -144,7 +144,7 @@ class TestUploadContentService:
                 "upload_file",
             )
             with patch(
-                "src.services.utils.upload_content.get_learnhouse_config",
+                "src.services.utils.upload_content.get_validbridge_config",
                 return_value=fake_config,
             ), patch(
                 "src.services.utils.upload_content.boto3.client",
@@ -186,7 +186,7 @@ class TestUploadContentService:
         os.chdir(tmp_path)
         try:
             with patch(
-                "src.services.utils.upload_content.get_learnhouse_config",
+                "src.services.utils.upload_content.get_validbridge_config",
                 return_value=fake_config,
             ):
                 data = await read_content("ai_images", "orgs", "org_uuid", "img.png")
@@ -215,7 +215,7 @@ class TestUploadContentService:
         s3_client.get_object.return_value = {"Body": body}
 
         with patch(
-            "src.services.utils.upload_content.get_learnhouse_config",
+            "src.services.utils.upload_content.get_validbridge_config",
             return_value=fake_config,
         ), patch(
             "src.services.utils.upload_content.boto3.client",
@@ -233,7 +233,7 @@ class TestUploadContentService:
             {"Error": {"Code": "NoSuchKey", "Message": "nope"}}, "get_object"
         )
         with patch(
-            "src.services.utils.upload_content.get_learnhouse_config",
+            "src.services.utils.upload_content.get_validbridge_config",
             return_value=fake_config,
         ), patch(
             "src.services.utils.upload_content.boto3.client",
@@ -263,7 +263,7 @@ class TestUploadContentService:
         os.chdir(tmp_path)
         try:
             with patch(
-                "src.services.utils.upload_content.get_learnhouse_config",
+                "src.services.utils.upload_content.get_validbridge_config",
                 return_value=fake_config,
             ), patch(
                 "src.services.utils.upload_content.boto3.client",

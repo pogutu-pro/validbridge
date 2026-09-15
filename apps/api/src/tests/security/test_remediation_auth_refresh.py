@@ -134,9 +134,9 @@ async def test_refresh_happy_path_rotates_refresh_cookie(client):
         )
     assert response.status_code == 200
     assert response.json()["access_token"] == "new-access-token"
-    # Both cookies should have been set: LH_access + LH_refresh.
+    # Both cookies should have been set: VB_access + VB_refresh.
     set_cookies = [c for c in response.headers.get_list("set-cookie")]
-    assert any("LH_refresh=rotated-refresh" in c for c in set_cookies), set_cookies
+    assert any("VB_refresh=rotated-refresh" in c for c in set_cookies), set_cookies
 
 
 @pytest.mark.asyncio
@@ -168,7 +168,7 @@ async def test_refresh_replay_within_grace_window_reuses_pair(client):
     # Served the cached pair, not a freshly-minted one.
     assert response.json()["access_token"] == "grace-access"
     set_cookies = response.headers.get_list("set-cookie")
-    assert any("LH_refresh=grace-refresh" in c for c in set_cookies), set_cookies
+    assert any("VB_refresh=grace-refresh" in c for c in set_cookies), set_cookies
     # Crucially: no mass session revocation for a benign concurrent refresh.
     revoke_mock.assert_not_called()
 

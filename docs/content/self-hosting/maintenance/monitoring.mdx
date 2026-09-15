@@ -2,16 +2,16 @@ import { Callout } from 'nextra/components'
 
 # Monitoring
 
-Monitoring your self-hosted LearnHouse instance helps you catch issues early and ensure a reliable experience for your users.
+Monitoring your self-hosted ValidBridge instance helps you catch issues early and ensure a reliable experience for your users.
 
 ## Service Health Checks
 
 The CLI offers three complementary commands:
 
 ```bash
-learnhouse status    # quick container status for each service
-learnhouse health    # PostgreSQL, Redis, HTTP health endpoint, disk, resources
-learnhouse doctor    # deep diagnostics (Docker, ports, DNS, env validation, logs)
+validbridge status    # quick container status for each service
+validbridge health    # PostgreSQL, Redis, HTTP health endpoint, disk, resources
+validbridge doctor    # deep diagnostics (Docker, ports, DNS, env validation, logs)
 ```
 
 You can also verify the application health endpoint directly:
@@ -25,14 +25,14 @@ curl http://localhost/api/v1/health
 Stream logs from all containers:
 
 ```bash
-learnhouse logs
+validbridge logs
 ```
 
 ## What to Monitor
 
 ### Application Health
 
-- Run `learnhouse doctor` regularly to verify all services are running and healthy
+- Run `validbridge doctor` regularly to verify all services are running and healthy
 - Watch for container restarts, which may indicate memory issues or application errors
 
 ### Disk Usage
@@ -43,7 +43,7 @@ learnhouse logs
 
 ### Memory Usage
 
-- LearnHouse requires at least 2 GB of RAM
+- ValidBridge requires at least 2 GB of RAM
 - Monitor memory consumption to ensure the server is not swapping, which degrades performance
 
 ### Database Performance
@@ -55,7 +55,7 @@ learnhouse logs
 
 For production deployments, consider setting up:
 
-- **Uptime monitoring** -- use an external service to check that your LearnHouse instance is accessible (e.g., monitor `http://your-domain/api/v1/health`)
+- **Uptime monitoring** -- use an external service to check that your ValidBridge instance is accessible (e.g., monitor `http://your-domain/api/v1/health`)
 - **Disk space alerts** -- get notified before disk space runs out
 - **Log aggregation** -- ship logs to a centralized logging system for easier analysis
 - **Container monitoring** -- tools like Docker's built-in stats, cAdvisor, or Prometheus with node-exporter can track resource usage over time

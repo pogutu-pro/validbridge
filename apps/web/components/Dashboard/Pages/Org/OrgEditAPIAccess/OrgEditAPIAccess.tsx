@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { Button } from '@components/ui/button'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -55,15 +55,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import APIDocumentation from './APIDocumentation'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const OrgEditAPIAccess: React.FC = () => {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const [activeTab, setActiveTab] = useState('tokens')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
@@ -230,11 +230,11 @@ const OrgEditAPIAccess: React.FC = () => {
             </TabsTrigger>
           </TabsList>
           <a
-            href="mailto:hello@learnhouse.app"
+            href="mailto:hello@validbridge.co.ke"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors border border-gray-200"
-            title="Contact LearnHouse support"
+            title="Contact ValidBridge support"
           >
             <LifeBuoy size={14} />
             {t('dashboard.organization.api_access.something_not_working')}

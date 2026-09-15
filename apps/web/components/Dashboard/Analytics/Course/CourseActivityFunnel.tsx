@@ -48,7 +48,7 @@ function FunnelStep({
           <div className="flex items-center gap-2 mb-2">
             <Link
               href={href}
-              className="text-sm font-semibold text-gray-800 truncate hover:text-indigo-600 hover:underline transition-colors"
+              className="text-sm font-semibold text-gray-800 truncate hover:text-orange-600 hover:underline transition-colors"
               title={`${row.chapterName ? row.chapterName + ' — ' : ''}${row.displayName}`}
             >
               {row.displayName}
@@ -58,7 +58,7 @@ function FunnelStep({
             )}
           </div>
           <div className="relative mb-2" style={{ width: `${viewsWidth}%` }}>
-            <div className="h-8 rounded-lg bg-indigo-100 relative overflow-hidden">
+            <div className="h-8 rounded-lg bg-orange-100 relative overflow-hidden">
               <div
                 className={`absolute inset-y-0 left-0 rounded-lg ${colors.bar} transition-all duration-500`}
                 style={{ width: `${completionFill}%` }}
@@ -71,7 +71,7 @@ function FunnelStep({
             </div>
           </div>
           <div className="flex items-center gap-4 text-xs">
-            <span className="flex items-center gap-1 text-indigo-500">
+            <span className="flex items-center gap-1 text-orange-500">
               <Eye size={12} weight="bold" />
               {row.views} {t('analytics.course_analytics.units.views')}
             </span>
@@ -104,7 +104,7 @@ function CompactFunnelRow({ row, maxViews }: { row: any; maxViews: number }) {
         {row.displayName}
       </span>
       <div className="flex-1 relative" style={{ width: `${barWidth}%` }}>
-        <div className="h-5 rounded-md bg-indigo-100 relative overflow-hidden">
+        <div className="h-5 rounded-md bg-orange-100 relative overflow-hidden">
           <div
             className={`absolute inset-y-0 left-0 rounded-md ${colors.bar} transition-all`}
             style={{ width: `${completionFill}%` }}
@@ -143,9 +143,9 @@ function FunnelModalContent({
   return (
     <div className="space-y-5">
       <div className="flex gap-4">
-        <div className="bg-indigo-50 rounded-xl px-5 py-3 flex-1">
-          <p className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.common.total_views')}</p>
-          <p className="text-2xl font-bold text-indigo-600">{totalViews}</p>
+        <div className="bg-orange-50 rounded-xl px-5 py-3 flex-1">
+          <p className="text-[10px] uppercase tracking-wider text-orange-400 font-semibold">{t('analytics.course_analytics.common.total_views')}</p>
+          <p className="text-2xl font-bold text-orange-600">{totalViews}</p>
         </div>
         <div className="bg-emerald-50 rounded-xl px-5 py-3 flex-1">
           <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.total_completions')}</p>
@@ -231,7 +231,7 @@ export default function CourseActivityFunnel({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Funnel} bg="bg-indigo-50" color="text-indigo-500" />}
+      icon={<WidgetIcon icon={Funnel} bg="bg-orange-50" color="text-orange-500" />}
       title={t('analytics.course_analytics.activity_funnel.title')}
       subtitle={t('analytics.course_analytics.activity_funnel.subtitle')}
       modalContent={

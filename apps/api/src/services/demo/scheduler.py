@@ -9,7 +9,7 @@ Two deliberate differences from the nudge scheduler:
 * It ticks on an interval rather than at a fixed hour, because the demo is
   meant to be recent rather than daily.
 * It is **not** gated on SaaS mode. A self-hosted install demonstrating
-  LearnHouse to its own stakeholders wants the demo as much as the hosted
+  ValidBridge to its own stakeholders wants the demo as much as the hosted
   product does.
 
 Correctness does not depend on only one replica running it. The sync is
@@ -39,7 +39,7 @@ _task: Optional[asyncio.Task] = None
 def _lock_key(now: datetime, interval_minutes: int) -> str:
     """One lock per interval bucket, so a tick is claimed at most once."""
     bucket = int(now.timestamp()) // (interval_minutes * 60)
-    return f"learnhouse:demo:refresh:{bucket}"
+    return f"validbridge:demo:refresh:{bucket}"
 
 
 async def _claim(now: datetime, interval_minutes: int) -> bool:

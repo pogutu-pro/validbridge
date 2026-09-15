@@ -2,19 +2,19 @@ import { Callout } from 'nextra/components'
 
 # Programmatic Migration
 
-This guide walks through the full sequence of API calls needed to build a course from scratch -- the same calls the LearnHouse web UI makes when an editor clicks through the dashboard. Use it as a reference when writing your own migration script.
+This guide walks through the full sequence of API calls needed to build a course from scratch -- the same calls the ValidBridge web UI makes when an editor clicks through the dashboard. Use it as a reference when writing your own migration script.
 
 The base URL in every example is `http://localhost:1338/api/v1` -- replace it with your instance domain.
 
 <Callout type="info">
-All examples use an API token (`Authorization: Bearer lh_...`). A user JWT works identically.
+All examples use an API token (`Authorization: Bearer vb_...`). A user JWT works identically.
 </Callout>
 
 ## 1. Create the course
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/courses/?org_id=1" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -F 'name=Introduction to Python' \
   -F 'description=A beginner-friendly Python course' \
   -F 'public=false' \
@@ -65,7 +65,7 @@ Chapters are created one at a time with a JSON body:
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/chapters/" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Chapter 1 — Getting set up",
@@ -119,7 +119,7 @@ Use this for **dynamic pages, markdown pages, embeds, assignments (shell), and c
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/activities/" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Hello, world",
@@ -152,7 +152,7 @@ Multipart form data. Creates a `TYPE_VIDEO` / `SUBTYPE_VIDEO_HOSTED` activity in
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/activities/video" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -F 'name=Lesson 1 walkthrough' \
   -F 'chapter_id=7' \
   -F 'video_file=@./lesson-01.mp4;type=video/mp4' \
@@ -171,7 +171,7 @@ JSON body. Creates a `TYPE_VIDEO` / `SUBTYPE_VIDEO_YOUTUBE` activity that embeds
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/activities/external_video" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Intro lecture",
@@ -190,7 +190,7 @@ Multipart form data. Creates a `TYPE_DOCUMENT` / `SUBTYPE_DOCUMENT_PDF` activity
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/activities/documentpdf" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -F 'name=Course syllabus' \
   -F 'chapter_id=7' \
   -F 'pdf_file=@./syllabus.pdf;type=application/pdf'
@@ -207,7 +207,7 @@ An assignment is **never just an activity**. It is an activity shell + an `Assig
 ```bash
 # 1. Activity shell
 ACT=$(curl -fsS -X POST "http://localhost:1338/api/v1/activities/" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Final project",
@@ -221,7 +221,7 @@ ACT_ID=$(echo "$ACT" | jq -r .id)
 
 # 2. Assignment record (all four foreign keys are required)
 ASSIGN=$(curl -fsS -X POST "http://localhost:1338/api/v1/assignments/" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d "{
     \"title\":\"Final project\",
@@ -238,7 +238,7 @@ ASSIGN_UUID=$(echo "$ASSIGN" | jq -r .assignment_uuid)
 
 # 3. At least one task — without this the assignment renders without a submission UI
 curl -fsS -X POST "http://localhost:1338/api/v1/assignments/$ASSIGN_UUID/tasks" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "title":"Submit your project file",
@@ -314,7 +314,7 @@ After creating a dynamic-page activity (`content: {}`), upload any media blocks,
 
 ```bash
 curl -X PUT "http://localhost:1338/api/v1/activities/activity_91c..." \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "content": {
@@ -350,7 +350,7 @@ Chapters and the activities inside them appear in the order they were created. T
 
 ```bash
 curl -X PUT "http://localhost:1338/api/v1/chapters/course/course_8e3.../order" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "chapter_order_by_ids": [
@@ -380,13 +380,13 @@ When the migration is complete, flip the course and each activity to `published:
 ```bash
 # Publish the course
 curl -X PUT "http://localhost:1338/api/v1/courses/course_8e3..." \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{ "published": true }'
 
 # Publish an activity
 curl -X PUT "http://localhost:1338/api/v1/activities/activity_91c..." \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{ "published": true }'
 ```
@@ -395,7 +395,7 @@ To preview unpublished work, fetch the course tree with the `with_unpublished_ac
 
 ```bash
 curl "http://localhost:1338/api/v1/courses/course_8e3.../meta?with_unpublished_activities=true" \
-  -H "Authorization: Bearer lh_your_api_token"
+  -H "Authorization: Bearer vb_your_api_token"
 ```
 
 ## End-to-end script (bash)
@@ -405,17 +405,17 @@ The script below creates a complete, public, published course with **one of ever
 Save the assets you want to use to a folder (the script expects `thumbnail.jpg`, `diagram.jpg`, `clip.mp4`, `doc.pdf`) and run it. Total runtime is under 10 seconds against a local dev instance.
 
 <Callout type="info">
-**Pre-requisites:** `bash`, `curl`, `jq`, and `python3` (for one inline JSON-builder). The script uses the API-token-to-JWT swap so it works with either an `lh_*` API token (the recommended setup) or by replacing `TOKEN=...` with a JWT you already have.
+**Pre-requisites:** `bash`, `curl`, `jq`, and `python3` (for one inline JSON-builder). The script uses the API-token-to-JWT swap so it works with either an `vb_*` API token (the recommended setup) or by replacing `TOKEN=...` with a JWT you already have.
 </Callout>
 
 ```bash
 #!/usr/bin/env bash
-# build-demo-course.sh — create a complete course end-to-end via the LearnHouse API.
+# build-demo-course.sh — create a complete course end-to-end via the ValidBridge API.
 set -euo pipefail
 
 # ── Config ───────────────────────────────────────────────────────────────────
 API=http://localhost:1338/api/v1
-API_TOKEN=lh_your_api_token        # Pro-plan API token
+API_TOKEN=vb_your_api_token        # Pro-plan API token
 ORG_SLUG=default                   # your org slug
 ORG_ID=1                           # your org id
 USER_ID=1                          # which user the script acts as
@@ -438,7 +438,7 @@ COURSE=$(curl -fsS -X POST "$API/courses/?org_id=$ORG_ID" \
   -H "Authorization: Bearer $TOKEN" \
   -F 'name=The Complete Demo Course' \
   -F 'description=One of every activity type, built via the API' \
-  -F 'about=Created end-to-end by the LearnHouse migration quickstart script.' \
+  -F 'about=Created end-to-end by the ValidBridge migration quickstart script.' \
   -F 'public=true' \
   -F 'thumbnail_type=image' \
   -F "thumbnail=@$ASSETS/thumbnail.jpg;type=image/jpeg")
@@ -563,7 +563,7 @@ What you should see in the browser at the printed URL:
 - **Welcome page** with the heading, bold paragraph, embedded image, bullet list, and Python-highlighted code block, plus a TOC sidebar generated from the headings.
 - **Markdown remote page** rendering the GitHub README with full formatting.
 - **Embed example** showing a Wikipedia article inside an iframe.
-- **Hosted MP4 sample** in the LearnHouse video player.
+- **Hosted MP4 sample** in the ValidBridge video player.
 - **YouTube embed** with the YouTube iframe player.
 - **Sample PDF document** in the embedded PDF.js viewer with toolbar.
 - **Final assignment** showing the description, due date, and File Submission widget -- **but only when signed in**. The `/api/v1/assignments/*` router rejects anonymous requests, so on a public course an anonymous viewer sees a blank panel where the assignment widget would be. Sign in (or open via the dashboard) to see the description, tasks, and submission UI.

@@ -17,7 +17,7 @@ class TestAnalyticsTrack:
     @pytest.mark.asyncio
     async def test_track_no_tinybird_config_returns_without_scheduling(self):
         with patch(
-            "src.services.analytics.analytics.get_learnhouse_config",
+            "src.services.analytics.analytics.get_validbridge_config",
             return_value=_make_config(),
         ), patch("src.services.analytics.analytics.asyncio.create_task") as mock_create_task:
             await track("page_view", org_id=10)
@@ -35,7 +35,7 @@ class TestAnalyticsTrack:
             return Mock(name="task")
 
         with patch(
-            "src.services.analytics.analytics.get_learnhouse_config",
+            "src.services.analytics.analytics.get_validbridge_config",
             return_value=_make_config(tinybird_config=tinybird_config),
         ), patch("src.services.analytics.analytics.asyncio.create_task", side_effect=_fake_create_task) as mock_create_task:
             await track(
@@ -161,7 +161,7 @@ class TestAnalyticsSendEvent:
 class TestAnalyticsIngestClient:
     def test_get_ingest_client_missing_config_returns_none(self):
         with patch(
-            "src.services.analytics.analytics.get_learnhouse_config",
+            "src.services.analytics.analytics.get_validbridge_config",
             return_value=_make_config(),
         ):
             assert _get_ingest_client() is None
@@ -171,7 +171,7 @@ class TestAnalyticsIngestClient:
         fake_client = Mock(name="async_client")
 
         with patch(
-            "src.services.analytics.analytics.get_learnhouse_config",
+            "src.services.analytics.analytics.get_validbridge_config",
             return_value=_make_config(tinybird_config=tinybird_config),
         ), patch("src.services.analytics.analytics.httpx.AsyncClient", return_value=fake_client) as mock_async_client, patch.object(
             analytics_module,

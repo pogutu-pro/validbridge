@@ -1,24 +1,24 @@
 'use client'
 import React, { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { Check, Loader2, AlertTriangle } from 'lucide-react'
 import { motion } from 'motion/react'
 import toast from 'react-hot-toast'
 import { verifyStripeConnection } from '@services/payments/providers/stripe'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import Image from 'next/image'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import validbridgeIcon from 'public/validbridge_bigicon_1.png'
 import { useTranslation } from 'react-i18next'
 
 function StripeConnectCallbackInner() {
   const { t } = useTranslation()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
   const [message, setMessage] = useState('')
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   useEffect(() => {
     const verifyConnection = async () => {
@@ -73,7 +73,7 @@ function StripeConnectCallbackInner() {
             quality={100}
             width={50}
             height={50}
-            src={learnhouseIcon}
+            src={validbridgeIcon}
             alt=""
           />
         </div>

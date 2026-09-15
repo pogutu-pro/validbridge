@@ -12,7 +12,7 @@ def is_ee_available():
     SaaS deployments also ship with the EE folder present.
     Use get_deployment_mode() from src.core.deployment_mode to determine the actual mode.
     """
-    if os.environ.get("LEARNHOUSE_DISABLE_EE") == "1":
+    if os.environ.get("VALIDBRIDGE_DISABLE_EE") == "1":
         return False
     # Require the hooks module itself, not merely a directory named "ee":
     # a directory without it imports nothing, so it is not an EE install.
@@ -41,8 +41,8 @@ def get_ee_hooks():
 
 def register_ee_middlewares(app):
     """Call EE to register its middlewares."""
-    from config.config import get_learnhouse_config
-    if get_learnhouse_config().general_config.saas_mode:
+    from config.config import get_validbridge_config
+    if get_validbridge_config().general_config.saas_mode:
         return
     hooks = get_ee_hooks()
     if hooks and hasattr(hooks, "register_middlewares"):

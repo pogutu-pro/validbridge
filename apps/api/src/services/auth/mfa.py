@@ -7,11 +7,11 @@ valid codes forever. They are therefore encrypted at rest with Fernet
 (AES-128-CBC + HMAC) rather than hashed — verification needs the original
 value back, so hashing is not an option.
 
-The encryption key is derived via HKDF from ``LEARNHOUSE_MFA_ENCRYPTION_KEY``
+The encryption key is derived via HKDF from ``VALIDBRIDGE_MFA_ENCRYPTION_KEY``
 if set, otherwise from the JWT secret. Deriving from the JWT secret keeps this
 zero-config for existing deployments, but it couples the two:
 
-    ⚠️  Rotating the JWT secret without setting LEARNHOUSE_MFA_ENCRYPTION_KEY
+    ⚠️  Rotating the JWT secret without setting VALIDBRIDGE_MFA_ENCRYPTION_KEY
         makes every enrolled TOTP secret undecryptable, locking out every user
         who has 2FA on. Set the dedicated key before rotating.
 
@@ -42,7 +42,7 @@ from src.security.security import SECRET_KEY
 
 logger = logging.getLogger(__name__)
 
-TOTP_ISSUER = "LearnHouse"
+TOTP_ISSUER = "ValidBridge"
 TOTP_PERIOD_SECONDS = 30
 # Accept the immediately preceding and following timestep. Phone clock drift is
 # the single most common cause of "my code doesn't work" support tickets; one
@@ -55,7 +55,7 @@ BACKUP_CODE_LENGTH = 10
 # Excludes 0/O and 1/I/L — these get transcribed by hand off a printout.
 _BACKUP_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 
-_MFA_KEY_INFO = b"learnhouse-mfa-secret-encryption-v1"
+_MFA_KEY_INFO = b"validbridge-mfa-secret-encryption-v1"
 _fernet_cached: Optional[Fernet] = None
 
 
@@ -64,11 +64,11 @@ def _get_fernet() -> Fernet:
     if _fernet_cached is not None:
         return _fernet_cached
 
-    material = os.environ.get("LEARNHOUSE_MFA_ENCRYPTION_KEY") or SECRET_KEY
+    material = os.environ.get("VALIDBRIDGE_MFA_ENCRYPTION_KEY") or SECRET_KEY
     if not material:  # pragma: no cover - SECRET_KEY is always configured in a running app
         raise RuntimeError(
             "No key material available for MFA secret encryption: set "
-            "LEARNHOUSE_MFA_ENCRYPTION_KEY or the JWT secret."
+            "VALIDBRIDGE_MFA_ENCRYPTION_KEY or the JWT secret."
         )
     if isinstance(material, str):
         material = material.encode()

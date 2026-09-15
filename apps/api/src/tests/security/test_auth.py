@@ -334,11 +334,11 @@ class TestAuth:
         assert payload is None
 
     def test_extract_jwt_ignores_api_tokens(self):
-        """Test that extract_jwt_from_request ignores API tokens (lh_ prefix)"""
+        """Test that extract_jwt_from_request ignores API tokens (vb_ prefix)"""
         mock_request = Mock(spec=Request)
         mock_request.cookies = {}
         mock_request.headers = Mock()
-        mock_request.headers.get = Mock(return_value="Bearer lh_test_api_token")
+        mock_request.headers.get = Mock(return_value="Bearer vb_test_api_token")
 
         token = extract_jwt_from_request(mock_request)
         assert token is None
@@ -415,13 +415,13 @@ class TestSessionLifetime:
 
         with patch.dict("os.environ", {}, clear=False):
             import os
-            os.environ.pop("LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS", None)
+            os.environ.pop("VALIDBRIDGE_AUTH_REFRESH_TOKEN_DAYS", None)
             assert _refresh_token_lifetime() == timedelta(days=DEFAULT_REFRESH_TOKEN_DAYS)
 
     def test_refresh_lifetime_honours_env_override(self):
         from src.security.auth import _refresh_token_lifetime
 
-        with patch.dict("os.environ", {"LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS": "45"}):
+        with patch.dict("os.environ", {"VALIDBRIDGE_AUTH_REFRESH_TOKEN_DAYS": "45"}):
             assert _refresh_token_lifetime() == timedelta(days=45)
 
     def test_refresh_lifetime_never_drops_below_two_weeks(self):
@@ -432,13 +432,13 @@ class TestSessionLifetime:
 
         assert MIN_REFRESH_TOKEN_DAYS == 14
         for bad in ("1", "7", "13", "0", "-5"):
-            with patch.dict("os.environ", {"LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS": bad}):
+            with patch.dict("os.environ", {"VALIDBRIDGE_AUTH_REFRESH_TOKEN_DAYS": bad}):
                 assert _refresh_token_lifetime() == timedelta(days=MIN_REFRESH_TOKEN_DAYS)
 
     def test_refresh_lifetime_ignores_garbage_env(self):
         from src.security.auth import _refresh_token_lifetime, DEFAULT_REFRESH_TOKEN_DAYS
 
-        with patch.dict("os.environ", {"LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS": "not-a-number"}):
+        with patch.dict("os.environ", {"VALIDBRIDGE_AUTH_REFRESH_TOKEN_DAYS": "not-a-number"}):
             assert _refresh_token_lifetime() == timedelta(days=DEFAULT_REFRESH_TOKEN_DAYS)
 
     def test_issued_refresh_token_outlives_two_weeks(self):

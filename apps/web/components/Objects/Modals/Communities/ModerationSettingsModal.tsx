@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Plus, Trash2, Shield, AlertTriangle, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { Community, updateCommunity } from '@services/communities/communities'
 import { revalidateTags } from '@services/utils/ts/requests'
 import {
@@ -26,7 +26,7 @@ export function ModerationSettingsModal({
   community,
   orgSlug,
 }: ModerationSettingsModalProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const router = useRouter()
   const accessToken = session?.data?.tokens?.access_token
   const inputRef = useRef<HTMLInputElement>(null)

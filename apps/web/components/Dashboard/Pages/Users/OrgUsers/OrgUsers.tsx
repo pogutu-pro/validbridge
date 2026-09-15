@@ -1,8 +1,8 @@
 'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
-import LearnHouseSpinner from '@components/Objects/Loaders/LearnHouseSpinner'
+import ValidBridgeSpinner from '@components/Objects/Loaders/ValidBridgeSpinner'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import Toast from '@components/Objects/StyledElements/Toast/Toast'
 import UserAvatar from '@components/Objects/UserAvatar'
@@ -58,7 +58,7 @@ function OrgUsers() {
   const org = useOrg() as any
   // The org's custom signup fields become extra members-table columns.
   const customFields = useMemo(() => readSignupFields(org), [org])
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token;
   const queryClient = useQueryClient()
   // Member mutations (remove, role change) require admin/maintainer server-side
@@ -322,7 +322,7 @@ function OrgUsers() {
                   <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     placeholder={t('dashboard.users.active_users.search_placeholder') || 'Search users...'}
-                    className="ps-10 pe-4 py-2 w-full sm:w-[220px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                    className="ps-10 pe-4 py-2 w-full sm:w-[220px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
                     value={searchValue}
                     onChange={(e) => handleSearchChange(e.target.value)}
                   />
@@ -400,20 +400,20 @@ function OrgUsers() {
 
             {/* Selection Action Bar */}
             {selectedUserIds.size > 0 && (
-              <div className="flex items-center justify-between px-6 py-3 bg-indigo-50 border-b border-indigo-100">
-                <span className="text-sm font-medium text-indigo-700">
+              <div className="flex items-center justify-between px-6 py-3 bg-orange-50 border-b border-orange-100">
+                <span className="text-sm font-medium text-orange-700">
                   {selectedUserIds.size} user{selectedUserIds.size !== 1 ? 's' : ''} selected
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSelectedUserIds(new Set())}
-                    className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 rounded-md hover:bg-indigo-100 transition-all"
+                    className="text-xs text-orange-600 hover:text-orange-800 font-medium px-3 py-1.5 rounded-md hover:bg-orange-100 transition-all"
                   >
                     Clear selection
                   </button>
                   <button
                     onClick={() => setComparing(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-md text-xs font-medium transition-all"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-orange-700 border border-orange-200 hover:bg-orange-100 rounded-md text-xs font-medium transition-all"
                   >
                     <GitCompare className="w-3.5 h-3.5" />
                     <span>{t('dashboard.users.analytics.compare')}</span>
@@ -493,7 +493,7 @@ function OrgUsers() {
                     {hasActiveFilters && (
                       <button
                         onClick={resetFilters}
-                        className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                        className="text-xs text-orange-600 hover:text-orange-800 font-medium"
                       >
                         Clear all filters
                       </button>
@@ -504,7 +504,7 @@ function OrgUsers() {
                 <div className="relative">
                 {isPageTransitioning && (
                   <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-lg">
-                    <LearnHouseSpinner size={28} />
+                    <ValidBridgeSpinner size={28} />
                   </div>
                 )}
                 <table className="w-full">
@@ -515,7 +515,7 @@ function OrgUsers() {
                           type="checkbox"
                           checked={allVisibleSelected}
                           onChange={toggleSelectAll}
-                          className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
                         />
                       </th>
                       <th className="text-start text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">
@@ -561,7 +561,7 @@ function OrgUsers() {
                     {orgUsers?.map((user: any) => (
                       <tr
                         key={user.user.id}
-                        className={`hover:bg-gray-50 transition-colors ${selectedUserIds.has(user.user.id) ? 'bg-indigo-50/40' : ''}`}
+                        className={`hover:bg-gray-50 transition-colors ${selectedUserIds.has(user.user.id) ? 'bg-orange-50/40' : ''}`}
                       >
                         {/* Checkbox */}
                         <td className="px-6 py-4 w-10">
@@ -569,7 +569,7 @@ function OrgUsers() {
                             type="checkbox"
                             checked={selectedUserIds.has(user.user.id)}
                             onChange={() => toggleSelectUser(user.user.id)}
-                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                            className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
                           />
                         </td>
 
@@ -647,7 +647,7 @@ function OrgUsers() {
                               {user.user.signup_method && (
                                 <span className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium ${
                                   user.user.signup_method !== 'email'
-                                    ? 'bg-purple-50 text-purple-600'
+                                    ? 'bg-orange-50 text-orange-600'
                                     : 'bg-gray-100 text-gray-600'
                                 }`}>
                                   {user.user.signup_method !== 'email' ? (
@@ -688,7 +688,7 @@ function OrgUsers() {
                           >
                             <SelectTrigger className={`h-8 w-fit px-3 text-xs font-semibold rounded-md nice-shadow transition-all border-0 ${
                               user.role.name.toLowerCase().includes('admin')
-                                ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                                ? 'bg-orange-50 text-orange-700 hover:bg-orange-100'
                                 : user.role.name.toLowerCase().includes('teacher') || user.role.name.toLowerCase().includes('instructor')
                                 ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                                 : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
@@ -711,7 +711,7 @@ function OrgUsers() {
                                 <SelectItem key={role.id} value={role.role_uuid}>
                                   <div className="flex items-center gap-2">
                                     {role.name.toLowerCase().includes('admin') ? (
-                                      <Crown className="w-3.5 h-3.5 text-indigo-600" />
+                                      <Crown className="w-3.5 h-3.5 text-orange-600" />
                                     ) : role.name.toLowerCase().includes('teacher') || role.name.toLowerCase().includes('instructor') ? (
                                       <Shield className="w-3.5 h-3.5 text-emerald-600" />
                                     ) : (
@@ -743,7 +743,7 @@ function OrgUsers() {
                           <div className="inline-flex items-center gap-1.5">
                             <button
                               onClick={() => setAnalyticsUserId(user.user.id)}
-                              className="inline-flex items-center gap-1.5 h-8 px-3 bg-white text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-md text-xs font-medium nice-shadow transition-all"
+                              className="inline-flex items-center gap-1.5 h-8 px-3 bg-white text-gray-600 hover:bg-orange-50 hover:text-orange-600 rounded-md text-xs font-medium nice-shadow transition-all"
                               title={t('dashboard.users.analytics.view_analytics')}
                             >
                               <BarChart3 className="w-3.5 h-3.5" />

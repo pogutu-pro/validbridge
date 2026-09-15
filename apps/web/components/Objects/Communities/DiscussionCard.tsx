@@ -37,7 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import UserAvatar from '@components/Objects/UserAvatar'
 
@@ -104,7 +104,7 @@ export function DiscussionCard({
   onDiscussionDelete,
 }: DiscussionCardProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const currentUserId = session?.data?.user?.id
 
@@ -173,7 +173,7 @@ export function DiscussionCard({
         isSelectMode ? 'cursor-pointer' : ''
       } ${
         isSelected
-          ? 'bg-indigo-50/50'
+          ? 'bg-orange-50/50'
           : discussion.is_pinned
           ? 'bg-amber-50/30'
           : 'hover:bg-gray-50/50'
@@ -185,7 +185,7 @@ export function DiscussionCard({
           <div
             className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
               isSelected
-                ? 'bg-indigo-600 border-indigo-600'
+                ? 'bg-orange-600 border-orange-600'
                 : 'border-gray-300 bg-white'
             }`}
           >
@@ -245,7 +245,7 @@ export function DiscussionCard({
                   onClick={onClick}
                   className="block group flex-1 min-w-0"
                 >
-                  <h3 className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1" dir="auto">
+                  <h3 className="text-sm font-medium text-gray-900 group-hover:text-orange-600 transition-colors line-clamp-1" dir="auto">
                     {discussion.title}
                   </h3>
                 </Link>

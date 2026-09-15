@@ -25,7 +25,7 @@ export async function resolveMultiFromServer(
   const cookieStore = await cookies()
 
   const host = headersList.get('host')
-  const cookieOrgslug = cookieStore.get('LH_org')?.value || null
+  const cookieOrgslug = cookieStore.get('VB_org')?.value || null
 
   return resolveMultiTenant({ host, cookieOrgslug, instance })
 }

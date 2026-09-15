@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, AlertTriangle, Trash2, ShieldAlert, UserCog, KeyRound } from 'lucide-react'
 import { Toaster, toast } from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { signOut } from '@components/Contexts/AuthContext'
 import UserAvatar from '@components/Objects/UserAvatar'
 import AccountGeneral from '@components/Objects/Account/subpages/AccountGeneral'
@@ -19,12 +19,12 @@ import {
   DialogFooter,
 } from '@components/ui/dialog'
 import { deleteUser } from './_lib/deleteUser'
-import { useLHAnalytics } from '@services/analytics/useLHAnalytics'
+import { useVBAnalytics } from '@services/analytics/useVBAnalytics'
 import { AnalyticsEvent } from '@services/analytics/events'
 
 function AccountClient() {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const router = useRouter()
 
   const access_token = session?.data?.tokens?.access_token
@@ -140,7 +140,7 @@ function AccountClient() {
 
 function DangerZone({ user, access_token }: { user: any; access_token: string }) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('hub')
+  const { track } = useVBAnalytics('hub')
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const [deleting, setDeleting] = useState(false)

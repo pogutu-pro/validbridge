@@ -77,12 +77,12 @@ function Pagination() {
 
 function EditOnGitHub({ filePath }) {
   // `filePath` comes from Nextra page metadata and is the actual source path
-  // relative to the docs app root (e.g. "content/cli/index.mdx"). The docs app
-  // lives under docs/ in the learnhouse monorepo, so prefix with that. Using it
+  // relative to the docs app root (e.g. "content/index.mdx"). The docs app
+  // lives under docs/ in the validbridge monorepo, so prefix with that. Using it
   // directly avoids guessing folder-index vs leaf-file from the URL.
   if (!filePath) return null
 
-  const href = `https://github.com/learnhouse/learnhouse/edit/dev/docs/${filePath}`
+  const href = `https://github.com/pogutu-pro/validbridge/edit/dev/docs/${filePath}`
 
   return (
     <a
@@ -116,7 +116,7 @@ function LastEdited({ timestamp }) {
 function CloudAd() {
   return (
     <a
-      href="https://learnhouse.app"
+      href="https://validbridge.co.ke"
       target="_blank"
       rel="noopener noreferrer"
       className="group block nice-shadow rounded-2xl overflow-hidden bg-white! no-underline! relative transition-transform hover:scale-[1.02]"
@@ -134,7 +134,7 @@ function CloudAd() {
 
       <div className="relative p-4">
         <div className="flex items-center gap-2.5" style={{ marginBottom: 16 }}>
-          <img src="/img/logos/learnhouse-dark.svg" alt="LearnHouse" className="h-3.5" />
+          <img src="/img/logos/validbridge-dark.svg" alt="ValidBridge" className="h-3.5" />
           <span
             className="text-[8px] font-bold uppercase tracking-wide text-white! px-1.5 py-px rounded"
             style={{
@@ -148,7 +148,7 @@ function CloudAd() {
           </span>
         </div>
         <p className="text-[12px] font-semibold text-neutral-900! leading-snug m-0!">
-          Try LearnHouse Cloud
+          Try ValidBridge Cloud
         </p>
         <p className="mt-1.5 text-[10.5px] text-neutral-400! leading-relaxed m-0!">
           Managed hosting with automatic updates, backups, and scaling.

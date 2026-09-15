@@ -1,5 +1,5 @@
 import { useAssignmentsTask, useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import React, { useEffect } from 'react'
 import TaskQuizObject from './TaskTypes/TaskQuizObject';
 import TaskFileObject from './TaskTypes/TaskFileObject';
@@ -9,7 +9,7 @@ import TaskShortAnswerObject from './TaskTypes/TaskShortAnswerObject';
 import TaskNumberAnswerObject from './TaskTypes/TaskNumberAnswerObject';
 
 function AssignmentTaskContentEdit() {
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any
     const assignment_task = useAssignmentsTask() as any

@@ -48,7 +48,7 @@ class TestDevRouter:
     async def test_config_redacts_secrets_and_forbidden(self, client, app, admin_user):
         mock_config = SimpleNamespace(
             model_dump=lambda: {
-                "name": "LearnHouse",
+                "name": "ValidBridge",
                 "token": "abcd1234",
                 "nested": {
                     "password": "secret-value",
@@ -57,7 +57,7 @@ class TestDevRouter:
             }
         )
 
-        with patch("src.routers.dev.get_learnhouse_config", return_value=mock_config):
+        with patch("src.routers.dev.get_validbridge_config", return_value=mock_config):
             response = await client.get("/api/v1/dev/config")
 
         assert response.status_code == 200

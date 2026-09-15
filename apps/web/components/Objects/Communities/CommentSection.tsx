@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, User, AlertCircle, Lock, UserPlus } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import {
@@ -12,7 +12,7 @@ import {
   DiscussionCommentWithAuthor,
 } from '@services/communities/discussions'
 import { CommentCard } from './CommentCard'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CommentSectionProps {
   discussionUuid: string
@@ -22,12 +22,12 @@ interface CommentSectionProps {
 
 export function CommentSection({ discussionUuid, communityUuid, isLocked = false }: CommentSectionProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const isAuthenticated = session?.status === 'authenticated'
   const { isUserPartOfTheOrg } = useOrgMembership()
   const { canManageCommunity } = useCommunityRights(communityUuid || '')
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const canComment = isAuthenticated && isUserPartOfTheOrg
 
   const [comments, setComments] = useState<DiscussionCommentWithAuthor[]>([])

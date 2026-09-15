@@ -25,8 +25,8 @@ def _no_task():
 
 @pytest.fixture
 def demo_on(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_DEMO_ENABLED", "1")
-    monkeypatch.delenv("LEARNHOUSE_DEMO_NO_SCHEDULER", raising=False)
+    monkeypatch.setenv("VALIDBRIDGE_DEMO_ENABLED", "1")
+    monkeypatch.delenv("VALIDBRIDGE_DEMO_NO_SCHEDULER", raising=False)
 
 
 # ---------------------------------------------------------------------------
@@ -98,7 +98,7 @@ async def test_start_does_nothing_when_the_demo_is_off(monkeypatch):
     """Async on purpose: a sync test has no running event loop, so
     start_scheduler would fail at create_task and leave _task None whatever the
     flag said — the assertion would hold with the guard deleted."""
-    monkeypatch.delenv("LEARNHOUSE_DEMO_ENABLED", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_DEMO_ENABLED", raising=False)
 
     scheduler.start_scheduler()
 
@@ -110,7 +110,7 @@ async def test_start_does_nothing_when_the_scheduler_is_disabled(monkeypatch, de
 
     Async for the same reason as the test above.
     """
-    monkeypatch.setenv("LEARNHOUSE_DEMO_NO_SCHEDULER", "1")
+    monkeypatch.setenv("VALIDBRIDGE_DEMO_NO_SCHEDULER", "1")
 
     scheduler.start_scheduler()
 

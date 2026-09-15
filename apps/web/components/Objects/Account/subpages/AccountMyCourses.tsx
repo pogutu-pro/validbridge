@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useQuery } from '@tanstack/react-query'
 import { getUserEnrollments } from '@services/payments/offers'
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail'
@@ -14,7 +14,7 @@ interface AccountMyCoursesProps {
 }
 
 function AccountMyCourses({ orgId, orgslug }: AccountMyCoursesProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const { t } = useTranslation()
 

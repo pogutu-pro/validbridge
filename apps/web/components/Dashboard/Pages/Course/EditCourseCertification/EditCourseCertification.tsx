@@ -10,7 +10,7 @@ import CertificatePreview from './CertificatePreview';
 import * as Form from '@radix-ui/react-form';
 import React, { useEffect, useState, useRef } from 'react';
 import { useCourseFieldSync, useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { 
   createCertification, 
@@ -57,7 +57,7 @@ function EditCourseCertification(_props: EditCourseCertificationProps) {
   const [error, setError] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const _course = useCourse() as any;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const org = useOrg() as any;
   const access_token = session?.data?.tokens?.access_token;
   const queryClient = useQueryClient();

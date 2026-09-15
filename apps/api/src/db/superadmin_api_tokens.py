@@ -14,8 +14,8 @@ class SuperadminAPIToken(SuperadminAPITokenBase, table=True):
     """Database model for superadmin API tokens.
 
     Distinct from the org-scoped APIToken: no org_id (cross-org by design),
-    no rights (all-or-nothing scope). Token secret prefix is ``lh_sa_`` to
-    distinguish from org tokens (``lh_``).
+    no rights (all-or-nothing scope). Token secret prefix is ``vb_sa_`` to
+    distinguish from org tokens (``vb_``).
     """
     __tablename__ = "superadmin_apitoken"
     __table_args__ = (

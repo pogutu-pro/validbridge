@@ -534,7 +534,7 @@ class TestBuildExportZip:
             assert doc_txt.compress_type == zipfile.ZIP_DEFLATED
 
             manifest = json.loads(zf.read("manifest.json"))
-            assert manifest["format"] == "learnhouse-course-export"
+            assert manifest["format"] == "validbridge-course-export"
             assert manifest["courses"] == [
                 {
                     "course_uuid": "course-1",

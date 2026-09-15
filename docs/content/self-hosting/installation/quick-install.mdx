@@ -2,56 +2,42 @@ import { Callout } from 'nextra/components'
 
 # Quick Install
 
-Follow these steps to install and start a self-hosted LearnHouse instance using the LearnHouse CLI.
+Follow these steps to install and start a self-hosted ValidBridge instance using Docker Compose.
 
-## Step 1: Run the Setup Wizard
+## Step 1: Get the code and configure
 
-The quickest way to get started is to run the setup wizard directly using `npx`. No global installation is needed.
+Clone the repository and create your environment file:
 
 ```bash
-npx learnhouse@latest setup
+git clone https://github.com/pogutu-pro/validbridge.git
+cd validbridge
+cp .env.example .env
 ```
 
-<Callout type="info">
-You can also use the one-line installer scripts if you prefer:
-
-**macOS / Linux:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/learnhouse/learnhouse/main/apps/cli/install.sh | bash
-```
-
-**Windows (PowerShell):**
-```powershell
-irm https://raw.githubusercontent.com/learnhouse/learnhouse/main/apps/cli/install.ps1 | iex
-```
-</Callout>
-
-The wizard will prompt you for:
+Edit `.env` to configure:
 
 - **Domain configuration** -- your domain name or localhost for local development
-- **Database settings** -- PostgreSQL configuration (defaults are provided)
+- **Database settings** -- PostgreSQL credentials (defaults are provided)
 - **Admin credentials** -- email and password for the initial admin account
 - **Optional features** -- AI features, email delivery, and more
 
-The wizard generates `docker-compose.yml`, `.env`, `learnhouse.config.json`, and an nginx or Caddy configuration based on your choices. Sensible defaults are provided for most options -- you can press Enter to accept them and adjust settings later.
+The `docker-compose.yml` file runs PostgreSQL, Redis, the API, and the frontend. Sensible defaults are provided for most options.
 
-## Step 2: Start LearnHouse
-
-Once setup is complete, start all services:
+## Step 2: Start ValidBridge
 
 ```bash
-npx learnhouse start
+docker compose up -d
 ```
 
-The CLI will pull the required Docker images (on first run), create the containers, and start all services. This typically takes one to two minutes on first launch.
+This pulls the required Docker images (on first run), creates the containers, and starts all services. This typically takes one to two minutes on first launch.
 
-## Step 3: Access LearnHouse
+## Step 3: Access ValidBridge
 
-Once all services are running, access LearnHouse at your configured domain or:
+Once all services are running, access ValidBridge at:
 
-- **http://localhost** (if using the default local configuration)
+- **http://localhost:3000** (if using the default local configuration)
 
-Log in with the admin credentials you provided during setup.
+Log in with the admin credentials you provided in `.env`.
 
 <Callout type="warning">
 Change the default admin password after your first login. The initial credentials are intended only for the first setup. Navigate to your account settings to update your password.
@@ -59,21 +45,12 @@ Change the default admin password after your first login. The initial credential
 
 ## Verifying the Installation
 
-Run the built-in diagnostics to check that everything is working:
+Check the health endpoint directly:
 
 ```bash
-learnhouse doctor
-```
-
-This command checks Docker, container health, port availability, DNS resolution, and disk space, then reports any issues it finds.
-
-You can also verify the health endpoint directly:
-
-```bash
-curl http://localhost/api/v1/health
+curl http://localhost:8000/api/v1/health
 ```
 
 ## Next Steps
 
-- [CLI Reference](/self-hosting/installation/cli-reference) -- Learn all available CLI commands.
 - [Configuration](/self-hosting/configuration) -- Customize your instance with environment variables, AI, email, and more.

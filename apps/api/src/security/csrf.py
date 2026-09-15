@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +35,12 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
     Middleware that validates Origin header on state-changing requests.
 
     This protects against CSRF attacks by ensuring that requests come from
-    allowed origins. The allowed origins are configured in the LearnHouse config.
+    allowed origins. The allowed origins are configured in the ValidBridge config.
     """
 
     def __init__(self, app):
         super().__init__(app)
-        config = get_learnhouse_config()
+        config = get_validbridge_config()
         self.allowed_origins = config.hosting_config.allowed_origins
         self.allowed_regexp = config.hosting_config.allowed_regexp
         self.development_mode = config.general_config.development_mode
@@ -151,8 +151,8 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
         CSRF attacks exploit browser-sent cookies. Only requests that use
         auth mechanisms which NEVER fall back to cookies are exempt:
 
-        - API tokens (Bearer lh_*): validated independently, rejected if invalid
-          (auth.py never falls back to cookies for lh_ tokens)
+        - API tokens (Bearer vb_*): validated independently, rejected if invalid
+          (auth.py never falls back to cookies for vb_ tokens)
         - Stripe webhooks: use HMAC signature verification, no cookies involved
 
         Regular Bearer JWT tokens are NOT exempt because get_current_user()
@@ -161,8 +161,8 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
         via the victim's cookies.
         """
         auth_header = request.headers.get("authorization", "")
-        # Only exempt API tokens (lh_*) — these never fall back to cookies
-        if auth_header.lower().startswith("bearer lh_"):
+        # Only exempt API tokens (vb_*) — these never fall back to cookies
+        if auth_header.lower().startswith("bearer vb_"):
             return True
 
         # Stripe webhooks use signature-based verification, not cookies

@@ -1,10 +1,10 @@
 'use client'
 import React, { useState } from 'react'
 import dynamic from 'next/dynamic'
-import LearnHouseSpinner from '@components/Objects/Loaders/LearnHouseSpinner'
+import ValidBridgeSpinner from '@components/Objects/Loaders/ValidBridgeSpinner'
 import { Package } from 'lucide-react'
 import { updateActivity } from '@services/courses/activities'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
 
@@ -23,7 +23,7 @@ interface EditScormActivityModalProps {
 }
 
 function EditScormActivityModal({ activity, onClose }: EditScormActivityModalProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const [name, setName] = useState(activity.name || '')
@@ -96,7 +96,7 @@ function EditScormActivityModal({ activity, onClose }: EditScormActivityModalPro
           className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
         >
           {isSubmitting ? (
-            <LearnHouseSpinner size={18} className="[&>div]:border-t-white" />
+            <ValidBridgeSpinner size={18} className="[&>div]:border-t-white" />
           ) : (
             'Save changes'
           )}

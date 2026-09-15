@@ -10,7 +10,7 @@ import { Button } from '@components/ui/button'
 import { queryKeys } from '@/lib/query/keys'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 
 /* ------------------------------------------------------------------------ */
@@ -34,7 +34,7 @@ export function useAssetUpload({ upload, loading, success, error }: UseAssetUplo
   const router = useRouter()
   const queryClient = useQueryClient()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const [localUrl, setLocalUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)

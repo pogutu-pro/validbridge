@@ -119,7 +119,7 @@ class TestWebhookDispatchHelpers:
             mock_client_cls.assert_called_once_with(
                 timeout=10.0,
                 follow_redirects=False,
-                headers={"User-Agent": "LearnHouse-Webhooks/1.0"},
+                headers={"User-Agent": "ValidBridge-Webhooks/1.0"},
             )
 
             await dispatch.close_webhook_client()

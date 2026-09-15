@@ -3,7 +3,7 @@ import React from 'react'
 import { Users, MessageCircle, Plus, Globe, Lock, Settings } from 'lucide-react'
 import { Community } from '@services/communities/communities'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 
 interface CommunityActionsProps {
   community: Community
@@ -18,7 +18,7 @@ export function CommunityActions({
   onEdit,
   onCreateDiscussion,
 }: CommunityActionsProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const { canManageCommunity, canCreateDiscussion } = useCommunityRights(community.community_uuid)
 
   const renderStatsSection = () => {
@@ -49,7 +49,7 @@ export function CommunityActions({
                       cx="32"
                       cy="32"
                       r="28"
-                      stroke="#6366f1"
+                      stroke="#f97316"
                       strokeWidth="6"
                       fill="none"
                       strokeLinecap="round"
@@ -59,7 +59,7 @@ export function CommunityActions({
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <MessageCircle className="w-6 h-6 text-indigo-500" />
+                    <MessageCircle className="w-6 h-6 text-orange-500" />
                   </div>
                 </div>
                 <div className="flex-1">

@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react'
-import { useLHAnalytics, type EventProps } from './useLHAnalytics'
+import { useVBAnalytics, type EventProps } from './useVBAnalytics'
 import { AnalyticsEvent } from './events'
 
 /**
@@ -19,7 +19,7 @@ export function useTrackView(
   ready: boolean = true,
   surface?: string,
 ) {
-  const { track } = useLHAnalytics(surface)
+  const { track } = useVBAnalytics(surface)
   const firedRef = useRef(false)
 
   useEffect(() => {

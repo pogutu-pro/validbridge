@@ -72,7 +72,7 @@ export default function EELicenseError({ error }: { error: unknown }) {
               Enterprise Edition license required
             </div>
             <p className="text-xs text-sky-200/80 mt-1.5 leading-relaxed">
-              This endpoint is part of LearnHouse Enterprise Edition and is not
+              This endpoint is part of ValidBridge Enterprise Edition and is not
               available on this deployment.
             </p>
           </div>
@@ -109,12 +109,12 @@ export default function EELicenseError({ error }: { error: unknown }) {
                 )}
                 <li>
                   For SaaS deployments: confirm{' '}
-                  <code className="font-mono">LEARNHOUSE_SAAS=true</code> is set in the API
+                  <code className="font-mono">VALIDBRIDGE_SAAS=true</code> is set in the API
                   environment. SaaS short-circuits the license check.
                 </li>
                 <li>
                   For self-hosted EE: confirm{' '}
-                  <code className="font-mono">LEARNHOUSE_LICENSE_KEY</code> is set and the
+                  <code className="font-mono">VALIDBRIDGE_LICENSE_KEY</code> is set and the
                   license server (or grace window) is reachable.
                 </li>
                 <li>

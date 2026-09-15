@@ -7,7 +7,7 @@ VERSION="${1:-}"
 
 if [ -z "$VERSION" ]; then
   echo ""
-  echo "  📦 LearnHouse Release Script"
+  echo "  📦 ValidBridge Release Script"
   echo ""
   echo "  Usage: .github/utils/release.sh <version>"
   echo "  Example: .github/utils/release.sh 1.0.0"
@@ -33,7 +33,7 @@ VERSION_FILES=(
 )
 
 echo ""
-echo "  🚀 LearnHouse Release — ${TAG}"
+echo "  🚀 ValidBridge Release — ${TAG}"
 echo "  ─────────────────────────────"
 echo ""
 
@@ -287,23 +287,7 @@ CHANGELOG_FILE=$(mktemp)
   echo "**New installation:**"
   echo ""
   echo "\`\`\`bash"
-  echo "npx learnhouse setup"
-  echo "\`\`\`"
-  echo ""
-  echo "**Upgrade to this version:**"
-  echo ""
-  echo "\`\`\`bash"
-  echo "# Back up your database first"
-  echo "npx learnhouse backup"
-  echo ""
-  echo "# Update to this specific version"
-  echo "npx learnhouse update --version ${VERSION}"
-  echo "\`\`\`"
-  echo ""
-  echo "**Docker image:**"
-  echo ""
-  echo "\`\`\`bash"
-  echo "docker pull ghcr.io/learnhouse/app:${VERSION}"
+  echo "docker compose up -d"
   echo "\`\`\`"
   echo ""
   if [ "$MIGRATION_COUNT" -gt 0 ]; then

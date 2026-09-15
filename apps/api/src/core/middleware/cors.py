@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 
 _SINGLE_TENANCY_LOCALHOST_REGEX = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
@@ -61,12 +61,12 @@ def get_cors_origin_regex() -> str:
 
     - ``single`` → pin to the configured frontend/domain host(s) only (S25),
       since credentials are allowed and reflecting any origin would be unsafe.
-    - ``multi``  → use the configured ``LEARNHOUSE_ALLOWED_REGEXP`` (matches
+    - ``multi``  → use the configured ``VALIDBRIDGE_ALLOWED_REGEXP`` (matches
       the configured domain and its subdomains). Verified per-org custom
       domains are a known gap; they require backend restart or per-request
       DB resolution.
     """
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     if config.hosting_config.tenancy == "single":
         return _single_tenancy_origin_regex(config)
     # Multi-tenancy: use the configured regexp. If the operator left it empty

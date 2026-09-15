@@ -66,7 +66,7 @@ function AIMarkdownRenderer({ content, isStreaming = false }: AIMarkdownRenderer
             if (isInline) {
               return (
                 <code
-                  className="bg-white/10 text-purple-300 px-1.5 py-0.5 rounded text-xs font-mono"
+                  className="bg-white/10 text-orange-300 px-1.5 py-0.5 rounded text-xs font-mono"
                   {...props}
                 >
                   {children}
@@ -89,7 +89,7 @@ function AIMarkdownRenderer({ content, isStreaming = false }: AIMarkdownRenderer
           ),
           // Blockquote
           blockquote: ({ children }) => (
-            <blockquote className="border-s-2 border-purple-500/50 ps-3 my-2 text-white/70 italic">
+            <blockquote className="border-s-2 border-orange-500/50 ps-3 my-2 text-white/70 italic">
               {children}
             </blockquote>
           ),
@@ -99,7 +99,7 @@ function AIMarkdownRenderer({ content, isStreaming = false }: AIMarkdownRenderer
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-400 hover:text-purple-300 underline"
+              className="text-orange-400 hover:text-orange-300 underline"
             >
               {children}
             </a>
@@ -132,7 +132,7 @@ function AIMarkdownRenderer({ content, isStreaming = false }: AIMarkdownRenderer
         {content}
       </ReactMarkdown>
       {isStreaming && (
-        <span className="streaming-cursor inline-block w-1.5 h-4 bg-purple-400/90 ms-0.5 align-middle rounded-sm" />
+        <span className="streaming-cursor inline-block w-1.5 h-4 bg-orange-400/90 ms-0.5 align-middle rounded-sm" />
       )}
     </div>
   )

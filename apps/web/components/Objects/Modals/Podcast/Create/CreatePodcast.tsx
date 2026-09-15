@@ -8,7 +8,7 @@ import FormLayout, {
 } from '@components/Objects/StyledElements/Form/Form'
 import * as Form from '@radix-ui/react-form'
 import { createPodcast } from '@services/podcasts/podcasts'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useUpgradeModal } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs'
 import React, { useEffect } from 'react'
@@ -17,7 +17,7 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
@@ -29,9 +29,9 @@ import { useTranslation } from "react-i18next"
 function CreatePodcastModal({ closeModal, orgslug }: any) {
   const { t } = useTranslation()
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const { handlePlanLimit } = useUpgradeModal()
   const [orgId, setOrgId] = React.useState(null) as any
   const [isUploading, setIsUploading] = React.useState(false)

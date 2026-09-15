@@ -87,7 +87,7 @@ export const activityTypes: ActivityTypeCard[] = [
     icon: PlayCircle,
     labelKey: 'dashboard.courses.structure.activity.types.video',
     color: {
-      icon: 'text-violet-400',
+      icon: 'text-orange-400',
     },
     pattern: `repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(196,181,253,0.25) 6px, rgba(196,181,253,0.25) 7px)`,
   },
@@ -134,7 +134,7 @@ export const activityTypes: ActivityTypeCard[] = [
     icon: Cube,
     labelKey: 'dashboard.courses.structure.activity.types.resource',
     color: {
-      icon: 'text-indigo-400',
+      icon: 'text-orange-400',
     },
     pattern: `radial-gradient(circle, rgba(199,210,254,0.4) 1px, transparent 1px)`,
     patternSize: '12px 12px',

@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 # Activity Types Reference
 
-Every activity in LearnHouse is described by two enums and one JSON `content` blob:
+Every activity in ValidBridge is described by two enums and one JSON `content` blob:
 
 - `activity_type` -- one of `TYPE_DYNAMIC`, `TYPE_VIDEO`, `TYPE_DOCUMENT`, `TYPE_ASSIGNMENT`, `TYPE_CUSTOM`, `TYPE_SCORM`.
 - `activity_sub_type` -- a more specific variant within the type (e.g. `SUBTYPE_VIDEO_YOUTUBE` vs `SUBTYPE_VIDEO_HOSTED`).
@@ -89,7 +89,7 @@ blockEmbed, blockQuiz, blockUser, blockWebPreview,
 flipcard, scenarios, button, badge
 ```
 
-The `block*` types correspond to LearnHouse's custom node extensions. Standard TipTap block types (`paragraph`, `heading`, etc.) behave as in any TipTap editor.
+The `block*` types correspond to ValidBridge's custom node extensions. Standard TipTap block types (`paragraph`, `heading`, etc.) behave as in any TipTap editor.
 
 #### Inline marks
 
@@ -229,7 +229,7 @@ Renders an arbitrary URL inside an iframe (Google Docs, Notion, Figma, etc.):
 }
 ```
 
-The embedded site must allow iframe embedding (`X-Frame-Options` / `Content-Security-Policy`). LearnHouse cannot work around a destination's frame-blocking headers.
+The embedded site must allow iframe embedding (`X-Frame-Options` / `Content-Security-Policy`). ValidBridge cannot work around a destination's frame-blocking headers.
 
 ## Video activities
 
@@ -247,7 +247,7 @@ The endpoint creates the activity with `published: false` regardless of any payl
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/activities/video" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -F 'name=Lesson 1 walkthrough' \
   -F 'chapter_id=7' \
   -F 'video_file=@./lesson-01.mp4;type=video/mp4' \
@@ -263,7 +263,7 @@ curl -X POST "http://localhost:1338/api/v1/activities/video" \
 }
 ```
 
-`filename` is the safe-on-disk name LearnHouse generated; the player resolves it through `/api/v1/content/...`. The `details` form field is a JSON-encoded string with player options:
+`filename` is the safe-on-disk name ValidBridge generated; the player resolves it through `/api/v1/content/...`. The `details` form field is a JSON-encoded string with player options:
 
 | `details` key | Type | Notes |
 | --- | --- | --- |
@@ -280,7 +280,7 @@ For YouTube and Vimeo embeds. Note the sub-type name is historical -- the same s
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/activities/external_video" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Intro lecture",
@@ -311,7 +311,7 @@ The persisted `content` is `{ uri, type, activity_uuid }`.
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/activities/documentpdf" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -F 'name=Course syllabus' \
   -F 'chapter_id=7' \
   -F 'pdf_file=@./syllabus.pdf;type=application/pdf'
@@ -440,7 +440,7 @@ A free-form activity. `content` is any JSON object you want -- the platform stor
 ```
 
 <Callout type="warning">
-**Stock LearnHouse has no built-in renderer for `TYPE_CUSTOM`.** The activity will appear as an empty container in the learner viewer until you ship a custom frontend component for it. Treat `TYPE_CUSTOM` as a hook for your own integration code -- if you don't already have that integration, prefer `SUBTYPE_DYNAMIC_PAGE` (TipTap) or `SUBTYPE_DYNAMIC_EMBED` (iframe) instead.
+**Stock ValidBridge has no built-in renderer for `TYPE_CUSTOM`.** The activity will appear as an empty container in the learner viewer until you ship a custom frontend component for it. Treat `TYPE_CUSTOM` as a hook for your own integration code -- if you don't already have that integration, prefer `SUBTYPE_DYNAMIC_PAGE` (TipTap) or `SUBTYPE_DYNAMIC_EMBED` (iframe) instead.
 </Callout>
 
 ## SCORM

@@ -20,10 +20,10 @@ export default function PeakUsageHeatmap({ days = '30' }: { days?: string }) {
   const intensity = (count: number) => {
     if (count === 0) return 'bg-gray-50'
     const p = count / maxCount
-    if (p > 0.75) return 'bg-indigo-500 text-white'
-    if (p > 0.5) return 'bg-indigo-300'
-    if (p > 0.25) return 'bg-indigo-200'
-    return 'bg-indigo-100'
+    if (p > 0.75) return 'bg-orange-500 text-white'
+    if (p > 0.5) return 'bg-orange-300'
+    if (p > 0.25) return 'bg-orange-200'
+    return 'bg-orange-100'
   }
 
   return (

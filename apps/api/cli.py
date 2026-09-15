@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 import typer
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.db.organizations import OrganizationCreate
 from src.db.users import UserCreate
 from src.services.setup.setup import (
@@ -46,7 +46,7 @@ def _to_sync_url(url: str) -> str:
 def install(
     short: Annotated[bool, typer.Option(help="Install with predefined values")] = False
 ):
-    """Install LearnHouse: schema, default elements, organization, and admin user.
+    """Install ValidBridge: schema, default elements, organization, and admin user.
 
     Typer entry point — uses asyncio.run because no loop is running yet.
     Programmatic async callers (FastAPI lifespan, etc.) should await
@@ -56,8 +56,8 @@ def install(
 
 
 async def _install_async(short: bool) -> None:
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    validbridge_config = get_validbridge_config()
+    sql_url = validbridge_config.database_config.sql_connection_string  # type: ignore
 
     # Schema DDL runs on a sync engine (SQLModel.metadata.create_all is sync).
     sync_engine = create_engine(_to_sync_url(sql_url), echo=False, pool_pre_ping=True)
@@ -83,11 +83,11 @@ async def _install_async(short: bool) -> None:
                 await install_default_elements(db_session)
                 print("Default elements installed ✅")
 
-                # Honor LEARNHOUSE_INITIAL_ORG_NAME / LEARNHOUSE_INITIAL_ORG_SLUG when
+                # Honor VALIDBRIDGE_INITIAL_ORG_NAME / VALIDBRIDGE_INITIAL_ORG_SLUG when
                 # the CLI passes them — falls back to "Default Organization" / "default"
                 # so existing standalone deployments still work unchanged.
-                org_name = os.environ.get("LEARNHOUSE_INITIAL_ORG_NAME", "Default Organization")
-                org_slug = os.environ.get("LEARNHOUSE_INITIAL_ORG_SLUG", "default").lower()
+                org_name = os.environ.get("VALIDBRIDGE_INITIAL_ORG_NAME", "Default Organization")
+                org_slug = os.environ.get("VALIDBRIDGE_INITIAL_ORG_SLUG", "default").lower()
 
                 # Create the Organization
                 print(f"Creating organization '{org_name}' (slug: {org_slug})...")
@@ -107,16 +107,16 @@ async def _install_async(short: bool) -> None:
                 # Create Organization User
                 print("Creating default organization user...")
                 # Use email from environment variable if provided, otherwise default to "admin@school.dev"
-                email = os.environ.get("LEARNHOUSE_INITIAL_ADMIN_EMAIL", "admin@school.dev")
+                email = os.environ.get("VALIDBRIDGE_INITIAL_ADMIN_EMAIL", "admin@school.dev")
                 # Require password from environment variable
-                password = os.environ.get("LEARNHOUSE_INITIAL_ADMIN_PASSWORD")
+                password = os.environ.get("VALIDBRIDGE_INITIAL_ADMIN_PASSWORD")
                 if not password:
-                    print("❌ Error: LEARNHOUSE_INITIAL_ADMIN_PASSWORD environment variable is required")
-                    print("Please set LEARNHOUSE_INITIAL_ADMIN_PASSWORD environment variable before running installation.")
+                    print("❌ Error: VALIDBRIDGE_INITIAL_ADMIN_PASSWORD environment variable is required")
+                    print("Please set VALIDBRIDGE_INITIAL_ADMIN_PASSWORD environment variable before running installation.")
                     raise typer.Exit(code=1)
-                print("Using password from LEARNHOUSE_INITIAL_ADMIN_PASSWORD environment variable")
+                print("Using password from VALIDBRIDGE_INITIAL_ADMIN_PASSWORD environment variable")
                 if email != "admin@school.dev":
-                    print(f"Using email from LEARNHOUSE_INITIAL_ADMIN_EMAIL environment variable: {email}")
+                    print(f"Using email from VALIDBRIDGE_INITIAL_ADMIN_EMAIL environment variable: {email}")
                 user = UserCreate(
                     username="admin", email=email, password=password
                 )
@@ -130,7 +130,7 @@ async def _install_async(short: bool) -> None:
                 print("")
                 print("Login with the following credentials:")
                 print("email: " + email)
-                print("password: (the password you set in LEARNHOUSE_INITIAL_ADMIN_PASSWORD)")
+                print("password: (the password you set in VALIDBRIDGE_INITIAL_ADMIN_PASSWORD)")
                 print("⚠️ Remember to change the password after logging in ⚠️")
 
             else:
@@ -335,8 +335,8 @@ async def _compute_active_user_overage(year: int, month: int) -> None:
         now = datetime.now(timezone.utc)
         year, month = now.year, now.month
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    validbridge_config = get_validbridge_config()
+    sql_url = validbridge_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
 
     try:
@@ -377,7 +377,7 @@ def nudges_run(
     """
     Daily: send lifecycle nudges to organization admins.
 
-    Cron-invoked. Sends nothing unless LEARNHOUSE_NUDGES_ENABLED is set and the
+    Cron-invoked. Sends nothing unless VALIDBRIDGE_NUDGES_ENABLED is set and the
     deployment is SaaS — so deploying this command is not the same as arming
     it. Start with --dry-run, then --seed, then a small --max-sends.
     """
@@ -404,8 +404,8 @@ async def _run_nudges(
 ) -> None:
     from src.services.nudges.runner import run_nudges
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    validbridge_config = get_validbridge_config()
+    sql_url = validbridge_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
 
     try:
@@ -455,8 +455,8 @@ async def _nudges_stats(days: int) -> None:
 
     from src.db.nudges import NudgeSend
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    validbridge_config = get_validbridge_config()
+    sql_url = validbridge_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
     since = datetime.now(timezone.utc) - timedelta(days=days)
 
@@ -498,7 +498,7 @@ def demo_sync():
 
     The in-app scheduler calls the same code on an interval. This command is
     for operators who would rather drive it from their own cron (set
-    LEARNHOUSE_DEMO_NO_SCHEDULER) or want to force a refresh now.
+    VALIDBRIDGE_DEMO_NO_SCHEDULER) or want to force a refresh now.
     """
     asyncio.run(_demo_sync())
 
@@ -506,8 +506,8 @@ def demo_sync():
 async def _demo_sync() -> None:
     from src.services.demo.sync import sync_demo
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    validbridge_config = get_validbridge_config()
+    sql_url = validbridge_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
 
     try:
@@ -538,8 +538,8 @@ async def _demo_status() -> None:
     from src.db.demo_state import DEMO_STATE_ID, DemoState
     from src.db.organizations import Organization
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    validbridge_config = get_validbridge_config()
+    sql_url = validbridge_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
 
     try:
@@ -609,8 +609,8 @@ def demo_teardown(
 async def _demo_teardown() -> None:
     from src.services.demo.teardown import teardown_demo
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    validbridge_config = get_validbridge_config()
+    sql_url = validbridge_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
 
     try:

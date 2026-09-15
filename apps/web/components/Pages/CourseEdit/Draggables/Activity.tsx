@@ -18,7 +18,7 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { deleteActivity, updateActivity } from '@services/courses/activities'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 
 interface ModifiedActivityInterface {
@@ -28,7 +28,7 @@ interface ModifiedActivityInterface {
 
 function Activity(props: any) {
   const router = useRouter()
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const queryClient = useQueryClient()
   const cleanCourseUuid = (id: string) => id?.replace(/^course_/, '') ?? id
   const [modifiedActivity, setModifiedActivity] = React.useState<

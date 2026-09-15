@@ -10,7 +10,7 @@ import { fetchRAGChatSessions, RAGChatSession } from '@services/ai/ai'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
 import MenuLinks from './OrgMenuLinks'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { SearchBar } from '@components/Objects/Search/SearchBar'
 import { usePathname } from 'next/navigation'
@@ -47,11 +47,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@components/ui/tooltip'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 export const OrgMenu = (props: any) => {
   const orgslug = props.orgslug
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const _access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
@@ -61,7 +61,7 @@ export const OrgMenu = (props: any) => {
   const { rights } = useAdminStatus()
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
   const { isVisible: isJoinBannerVisible } = useJoinBannerVisible()
-  const { track } = useLHAnalytics()
+  const { track } = useVBAnalytics()
 
   // Copilot bubble state
   const [bubbleOpen, setBubbleOpen] = useState(false)
@@ -159,12 +159,12 @@ export const OrgMenu = (props: any) => {
                   {org?.logo_image ? (
                     <img
                       src={`${getOrgLogoMediaDirectory(org.org_uuid, org?.logo_image)}`}
-                      alt="Learnhouse"
+                      alt="ValidBridge"
                       style={{ width: 'auto', height: '100%' }}
                       className="rounded-md"
                     />
                   ) : (
-                    <LearnHouseLogo logoFilter={colors.logoFilter} />
+                    <ValidBridgeLogo logoFilter={colors.logoFilter} />
                   )}
                 </div>
               </Link>
@@ -315,7 +315,7 @@ export const OrgMenu = (props: any) => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://docs.learnhouse.app"
+                        href="https://docs.validbridge.co.ke"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"
@@ -326,7 +326,7 @@ export const OrgMenu = (props: any) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://learnhouse.app"
+                        href="https://validbridge.co.ke"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"
@@ -337,7 +337,7 @@ export const OrgMenu = (props: any) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://discord.gg/learnhouse"
+                        href="https://discord.gg/your-invite-link"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"
@@ -438,7 +438,7 @@ const CopilotMenuButton = ({
   bubbleOpen: boolean
   onOpenBubble: (_sessionUuid?: string) => void
 }) => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const [isOpen, setIsOpen] = useState(false)
 
@@ -459,13 +459,13 @@ const CopilotMenuButton = ({
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
               <button
-                className="relative p-2 rounded-lg transition-colors hover:bg-violet-500/10"
+                className="relative p-2 rounded-lg transition-colors hover:bg-orange-500/10"
                 aria-label="Copilot"
               >
-                <ChatCircle size={20} weight="fill" className="text-violet-500" />
+                <ChatCircle size={20} weight="fill" className="text-orange-500" />
                 {/* Active indicator dot */}
                 {isBubbleMode && bubbleOpen && (
-                  <span className="absolute top-1.5 end-1.5 w-2 h-2 rounded-full bg-violet-500 ring-2 ring-white dark:ring-neutral-900" />
+                  <span className="absolute top-1.5 end-1.5 w-2 h-2 rounded-full bg-orange-500 ring-2 ring-white dark:ring-neutral-900" />
                 )}
               </button>
             </DropdownMenuTrigger>
@@ -478,7 +478,7 @@ const CopilotMenuButton = ({
 
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="flex items-center gap-2">
-          <ChatCircle size={16} weight="fill" className="text-violet-500" />
+          <ChatCircle size={16} weight="fill" className="text-orange-500" />
           <span>Copilot</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -518,13 +518,13 @@ const CopilotMenuButton = ({
             onSelect={() => onOpenBubble()}
             className="flex items-center gap-2 font-medium cursor-pointer"
           >
-            <ChatCircle size={14} weight="fill" className="text-violet-500" />
+            <ChatCircle size={14} weight="fill" className="text-orange-500" />
             <span>{recentSessions.length > 0 ? 'New conversation' : 'Start a conversation'}</span>
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem asChild>
             <Link href={getUriWithOrg(orgslug, '/copilot')} className="flex items-center gap-2 font-medium">
-              <ChatCircle size={14} weight="fill" className="text-violet-500" />
+              <ChatCircle size={14} weight="fill" className="text-orange-500" />
               <span>{recentSessions.length > 0 ? 'View all conversations' : 'Start a conversation'}</span>
             </Link>
           </DropdownMenuItem>
@@ -542,7 +542,7 @@ const CopilotMenuButton = ({
           </span>
           <span
             className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors flex-shrink-0 ${
-              isBubbleMode ? 'bg-violet-500' : 'bg-neutral-200 dark:bg-neutral-600'
+              isBubbleMode ? 'bg-orange-500' : 'bg-neutral-200 dark:bg-neutral-600'
             }`}
           >
             <span
@@ -557,11 +557,11 @@ const CopilotMenuButton = ({
   )
 }
 
-const LearnHouseLogo = ({ logoFilter }: { logoFilter: string }) => {
+const ValidBridgeLogo = ({ logoFilter }: { logoFilter: string }) => {
   return (
     <Image
-      src="/lrn-text.svg"
-      alt="LearnHouse logo"
+      src="/validbridge-text.svg"
+      alt="ValidBridge logo"
       width={133}
       height={40}
       style={{ height: 'auto', filter: logoFilter }}

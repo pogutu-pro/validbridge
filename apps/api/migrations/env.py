@@ -7,11 +7,11 @@ from sqlalchemy import pool
 from sqlmodel import SQLModel
 from alembic import context
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
-# LearnHouse config
+# ValidBridge config
 
-lh_config = get_learnhouse_config()
+vb_config = get_validbridge_config()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -19,8 +19,8 @@ config = context.config
 
 # Alembic must target the same DB as the running app. The alembic.ini URL is
 # only a dev fallback (hardcoded localhost); inside Docker the real URL is in
-# LEARNHOUSE_SQL_CONNECTION_STRING (e.g. postgresql://...@db:5432/...).
-_runtime_db_url = os.environ.get("LEARNHOUSE_SQL_CONNECTION_STRING")
+# VALIDBRIDGE_SQL_CONNECTION_STRING (e.g. postgresql://...@db:5432/...).
+_runtime_db_url = os.environ.get("VALIDBRIDGE_SQL_CONNECTION_STRING")
 if _runtime_db_url:
     # Alembic uses psycopg2 (sync); strip the async driver suffix if present.
     _runtime_db_url = _runtime_db_url.replace(

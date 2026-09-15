@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { linkCommunityToCourse, unlinkCommunityFromCourse, Community } from '@services/communities/communities'
 import { getOrgCourses } from '@services/courses/courses'
@@ -31,7 +31,7 @@ export function LinkCourseModal({
   community,
   orgSlug,
 }: LinkCourseModalProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)

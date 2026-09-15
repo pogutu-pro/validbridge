@@ -2,10 +2,10 @@ import { Callout } from 'nextra/components'
 
 # Headless Assignments
 
-LearnHouse assignments can be driven entirely from your own frontend. With an API token you can author assignments and tasks, store an arbitrary custom data object on each task, read submissions and grades, submit answers on behalf of your learners, and grade them — all over the standard REST API, no LearnHouse UI required.
+ValidBridge assignments can be driven entirely from your own frontend. With an API token you can author assignments and tasks, store an arbitrary custom data object on each task, read submissions and grades, submit answers on behalf of your learners, and grade them — all over the standard REST API, no ValidBridge UI required.
 
 <Callout type="info">
-API tokens are available on the **Pro plan**. Create one under **Organization Settings → API Access** and grant it the **Assignments** permission. Tokens are prefixed with `lh_` and are scoped to a single organization.
+API tokens are available on the **Pro plan**. Create one under **Organization Settings → API Access** and grant it the **Assignments** permission. Tokens are prefixed with `vb_` and are scoped to a single organization.
 </Callout>
 
 ## Permissions
@@ -25,7 +25,7 @@ All requests are scoped to the token's organization: trying to touch an assignme
 
 ```bash
 curl http://localhost:1338/api/v1/assignments/{assignment_uuid} \
-  -H "Authorization: Bearer lh_your_api_token_here"
+  -H "Authorization: Bearer vb_your_api_token_here"
 ```
 
 ## Authoring
@@ -49,7 +49,7 @@ These endpoints create and manage assignments and their tasks. An assignment is 
 
 ```bash
 curl -X POST http://localhost:1338/api/v1/assignments/ \
-  -H "Authorization: Bearer lh_your_api_token_here" \
+  -H "Authorization: Bearer vb_your_api_token_here" \
   -H "Content-Type: application/json" \
   -d '{
         "title": "Field Report",
@@ -65,11 +65,11 @@ curl -X POST http://localhost:1338/api/v1/assignments/ \
 
 ## Custom tasks — bring your own data object
 
-Each task has an `assignment_type` and a free-form `contents` JSON object. For a fully custom assignment, use the `CUSTOM` type: LearnHouse stores your `contents` (the task definition) and the learner's `task_submission` (their answer) as an arbitrary, caller-owned JSON object. The server never interprets or auto-grades it — it's yours to render and grade however you like.
+Each task has an `assignment_type` and a free-form `contents` JSON object. For a fully custom assignment, use the `CUSTOM` type: ValidBridge stores your `contents` (the task definition) and the learner's `task_submission` (their answer) as an arbitrary, caller-owned JSON object. The server never interprets or auto-grades it — it's yours to render and grade however you like.
 
 ```bash
 curl -X POST http://localhost:1338/api/v1/assignments/{assignment_uuid}/tasks \
-  -H "Authorization: Bearer lh_your_api_token_here" \
+  -H "Authorization: Bearer vb_your_api_token_here" \
   -H "Content-Type: application/json" \
   -d '{
         "title": "Interactive Map Challenge",
@@ -87,12 +87,12 @@ curl -X POST http://localhost:1338/api/v1/assignments/{assignment_uuid}/tasks \
 The `contents` you send back out of `GET /assignments/task/{uuid}` is byte-for-byte what you stored.
 
 <Callout type="info">
-The built-in task types — `QUIZ`, `FORM`, `CODE`, `SHORT_ANSWER`, `NUMBER_ANSWER` — are auto-graded by LearnHouse against their `contents` schema. `CUSTOM` (and `FILE_SUBMISSION`) are **not** auto-graded and are graded manually.
+The built-in task types — `QUIZ`, `FORM`, `CODE`, `SHORT_ANSWER`, `NUMBER_ANSWER` — are auto-graded by ValidBridge against their `contents` schema. `CUSTOM` (and `FILE_SUBMISSION`) are **not** auto-graded and are graded manually.
 </Callout>
 
 ## Submissions and grading
 
-Learners are referenced by their existing LearnHouse `user_id`. These endpoints let you read submissions, write a learner's answer on their behalf, and finalize grades.
+Learners are referenced by their existing ValidBridge `user_id`. These endpoints let you read submissions, write a learner's answer on their behalf, and finalize grades.
 
 | Method | Endpoint | Action |
 | --- | --- | --- |
@@ -108,18 +108,18 @@ Learners are referenced by their existing LearnHouse `user_id`. These endpoints 
 
 ### Submitting on behalf of a learner
 
-To write a learner's answer, pass their LearnHouse id as `on_behalf_of_user_id`. The learner must already be a member of the token's organization.
+To write a learner's answer, pass their ValidBridge id as `on_behalf_of_user_id`. The learner must already be a member of the token's organization.
 
 ```bash
 # Save a learner's answer for a task
 curl -X PUT "http://localhost:1338/api/v1/assignments/{assignment_uuid}/tasks/{task_uuid}/submissions?on_behalf_of_user_id=42" \
-  -H "Authorization: Bearer lh_your_api_token_here" \
+  -H "Authorization: Bearer vb_your_api_token_here" \
   -H "Content-Type: application/json" \
   -d '{ "task_submission": { "answer": "my custom answer" } }'
 
 # Mark the assignment as submitted for that learner
 curl -X POST "http://localhost:1338/api/v1/assignments/{assignment_uuid}/submissions?on_behalf_of_user_id=42" \
-  -H "Authorization: Bearer lh_your_api_token_here"
+  -H "Authorization: Bearer vb_your_api_token_here"
 ```
 
 ### Grading
@@ -131,7 +131,7 @@ Two ways to grade, both gated by `update`:
 
 ```bash
 curl -X POST http://localhost:1338/api/v1/assignments/{assignment_uuid}/submissions/42/grade \
-  -H "Authorization: Bearer lh_your_api_token_here" \
+  -H "Authorization: Bearer vb_your_api_token_here" \
   -H "Content-Type: application/json" \
   -d '{ "overall_feedback": "Great work" }'
 ```

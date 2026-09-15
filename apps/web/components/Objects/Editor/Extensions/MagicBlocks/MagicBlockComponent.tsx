@@ -4,9 +4,9 @@ import { X, Edit3, Expand, GripHorizontal, Lock } from 'lucide-react'
 import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import Image from 'next/image'
-import lrnaiIcon from 'public/lrnai_icon.png'
+import lrnaiIcon from 'public/validbridge_ai_icon.png'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { cn } from '@/lib/utils'
@@ -56,7 +56,7 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
   const { t } = useTranslation()
   const { node, extension, updateAttributes } = props
   const editorState = useEditorProvider() as EditorState
-  const session = useLHSession() as Session
+  const session = useVBSession() as Session
   const course = useCourse() as Course | null
   const orgContext = useOrg() as any
 

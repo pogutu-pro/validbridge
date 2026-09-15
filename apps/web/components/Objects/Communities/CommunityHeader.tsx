@@ -13,7 +13,7 @@ export function CommunityHeader({ community }: CommunityHeaderProps) {
   return (
     <div className="relative inset-0 ring-1 ring-inset ring-black/10 rounded-lg shadow-xl w-full h-[150px] md:h-[250px] overflow-hidden">
       {/* Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-orange-500 to-orange-600">
         {/* Pattern overlay */}
         <div
           className="absolute inset-0 opacity-10"

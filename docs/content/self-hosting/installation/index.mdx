@@ -2,26 +2,22 @@ import { Callout } from 'nextra/components'
 
 # Installation Overview
 
-The **LearnHouse CLI** is the recommended and officially supported way to install and manage self-hosted LearnHouse instances. The CLI automates the entire deployment process, so you can go from a fresh server to a running LearnHouse instance in minutes.
+ValidBridge is self-hosted using **Docker Compose**. The repository ships a `docker-compose.yml` that runs PostgreSQL, Redis, the API, and the frontend, plus a `.env.example` you can copy to configure your instance.
 
-## What the CLI Does
+## What Docker Compose runs
 
-The LearnHouse CLI handles:
+- **PostgreSQL** — the application database
+- **Redis** — caching and session store
+- **API** — the FastAPI backend
+- **Frontend** — the Next.js application
 
-- **Interactive setup wizard** that walks you through initial configuration
-- **Docker Compose generation** based on your setup choices
-- **Environment file generation** with all required variables pre-configured
-- **Service management** to start, stop, and restart your instance
-- **Health checks** to verify all services are running correctly
-- **Backups and restores** for your database and uploaded content
-- **Updates** to pull the latest LearnHouse images and apply them
+Environment variables (from `.env`) configure the domain, admin account, database credentials, and optional features such as AI, email, and storage.
 
 <Callout type="info">
-You do not need to manually create or edit Docker Compose files. The CLI generates and manages them for you based on your configuration choices.
+You do not need to install Node.js, Python, or any other runtime on the host — the containers bundle their own runtimes.
 </Callout>
 
 ## Next Steps
 
 - [Requirements](/self-hosting/installation/requirements) -- Verify your server meets the minimum system requirements.
-- [Quick Install](/self-hosting/installation/quick-install) -- Install the CLI and set up LearnHouse in minutes.
-- [CLI Reference](/self-hosting/installation/cli-reference) -- Full reference of all available CLI commands.
+- [Quick Install](/self-hosting/installation/quick-install) -- Set up ValidBridge in minutes.

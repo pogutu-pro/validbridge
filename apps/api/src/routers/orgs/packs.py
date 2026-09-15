@@ -29,7 +29,7 @@ from src.services.packs.packs import (
 
 logger = logging.getLogger(__name__)
 
-# Set the first time a request arrives with LEARNHOUSE_PLATFORM_API_KEY unset, so
+# Set the first time a request arrives with VALIDBRIDGE_PLATFORM_API_KEY unset, so
 # the misconfiguration is reported once per process instead of on every request.
 _REPORTED_MISSING_PLATFORM_KEY = False
 
@@ -48,11 +48,11 @@ async def verify_platform_key(x_platform_key: str = Header(...)):
     """
     global _REPORTED_MISSING_PLATFORM_KEY
 
-    expected_key = os.getenv("LEARNHOUSE_PLATFORM_API_KEY", "")
+    expected_key = os.getenv("VALIDBRIDGE_PLATFORM_API_KEY", "")
     if not expected_key and not _REPORTED_MISSING_PLATFORM_KEY:
         _REPORTED_MISSING_PLATFORM_KEY = True
         logger.error(
-            "LEARNHOUSE_PLATFORM_API_KEY is not set on this deployment: every "
+            "VALIDBRIDGE_PLATFORM_API_KEY is not set on this deployment: every "
             "internal pack request is rejected, so pack activation and "
             "active-user overage billing silently do nothing until it is set."
         )

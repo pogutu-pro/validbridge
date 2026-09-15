@@ -85,12 +85,12 @@ async def test_platform_reset_legacy_path_variant_still_works(users_client):
 
 def test_single_label_cookie_domain_refused_in_prod(monkeypatch):
     """
-    F-17: ``LEARNHOUSE_COOKIE_DOMAIN=.com`` must raise at config load in
+    F-17: ``VALIDBRIDGE_COOKIE_DOMAIN=.com`` must raise at config load in
     non-dev mode. Single-label public parents are always a bug.
     """
-    monkeypatch.setenv("LEARNHOUSE_AUTH_JWT_SECRET_KEY", "x" * 40)
-    monkeypatch.setenv("LEARNHOUSE_DEVELOPMENT_MODE", "false")
-    monkeypatch.setenv("LEARNHOUSE_COOKIE_DOMAIN", ".com")
+    monkeypatch.setenv("VALIDBRIDGE_AUTH_JWT_SECRET_KEY", "x" * 40)
+    monkeypatch.setenv("VALIDBRIDGE_DEVELOPMENT_MODE", "false")
+    monkeypatch.setenv("VALIDBRIDGE_COOKIE_DOMAIN", ".com")
     monkeypatch.setenv("TESTING", "false")  # intentionally opt out of test bypass
 
     # Force a fresh import of the config module so the env takes effect.
@@ -100,16 +100,16 @@ def test_single_label_cookie_domain_refused_in_prod(monkeypatch):
 
     importlib.reload(cfg_module)
     with pytest.raises(ValueError) as exc:
-        cfg_module.get_learnhouse_config()
+        cfg_module.get_validbridge_config()
     assert "too broad" in str(exc.value).lower()
 
 
 def test_dotted_cookie_domain_ok(monkeypatch):
     """F-17: ``.app.example.com`` — normal SaaS setup — must load cleanly."""
-    monkeypatch.setenv("LEARNHOUSE_AUTH_JWT_SECRET_KEY", "x" * 40)
-    monkeypatch.setenv("LEARNHOUSE_DEVELOPMENT_MODE", "false")
-    monkeypatch.setenv("LEARNHOUSE_COOKIE_DOMAIN", ".app.example.com")
-    monkeypatch.setenv("LEARNHOUSE_COOKIE_DOMAIN_ALLOW_BROAD", "true")
+    monkeypatch.setenv("VALIDBRIDGE_AUTH_JWT_SECRET_KEY", "x" * 40)
+    monkeypatch.setenv("VALIDBRIDGE_DEVELOPMENT_MODE", "false")
+    monkeypatch.setenv("VALIDBRIDGE_COOKIE_DOMAIN", ".app.example.com")
+    monkeypatch.setenv("VALIDBRIDGE_COOKIE_DOMAIN_ALLOW_BROAD", "true")
     monkeypatch.setenv("TESTING", "false")
 
     import importlib
@@ -117,7 +117,7 @@ def test_dotted_cookie_domain_ok(monkeypatch):
     import config.config as cfg_module
 
     importlib.reload(cfg_module)
-    cfg = cfg_module.get_learnhouse_config()
+    cfg = cfg_module.get_validbridge_config()
     assert cfg.hosting_config.cookie_config.domain == ".app.example.com"
 
 

@@ -16,7 +16,7 @@ interface TodoItem {
 const TODO_COLORS = [
   { name: 'blue', bg: '#eff6ff', border: '#bfdbfe', accent: '#3b82f6', text: '#1e40af', doneBg: '#dbeafe' },
   { name: 'green', bg: '#f0fdf4', border: '#bbf7d0', accent: '#22c55e', text: '#166534', doneBg: '#dcfce7' },
-  { name: 'purple', bg: '#faf5ff', border: '#e9d5ff', accent: '#a855f7', text: '#6b21a8', doneBg: '#f3e8ff' },
+  { name: 'purple', bg: '#faf5ff', border: '#e9d5ff', accent: '#f97316', text: '#6b21a8', doneBg: '#f3e8ff' },
   { name: 'orange', bg: '#fff7ed', border: '#fed7aa', accent: '#f97316', text: '#9a3412', doneBg: '#ffedd5' },
   { name: 'pink', bg: '#fdf2f8', border: '#fbcfe8', accent: '#ec4899', text: '#9d174d', doneBg: '#fce7f3' },
   { name: 'yellow', bg: '#fefce8', border: '#fde68a', accent: '#eab308', text: '#854d0e', doneBg: '#fef9c3' },

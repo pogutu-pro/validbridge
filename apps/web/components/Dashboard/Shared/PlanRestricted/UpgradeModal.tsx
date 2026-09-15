@@ -24,7 +24,7 @@ import { getUpgradeUrl } from '@services/config/config'
 import { usePlan } from '@components/Hooks/usePlan'
 import PlanBadge from './PlanBadge'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -38,18 +38,18 @@ interface UpgradeModalProps {
 
 const STANDARD_HIGHLIGHTS = [
   { icon: Notebook, labelKey: 'upgrade_modal.plans.standard.highlights.courses', descKey: 'upgrade_modal.plans.standard.highlights.courses_desc', iconColor: 'text-blue-500' },
-  { icon: UsersThree, labelKey: 'upgrade_modal.plans.standard.highlights.members', descKey: 'upgrade_modal.plans.standard.highlights.members_desc', iconColor: 'text-indigo-500' },
+  { icon: UsersThree, labelKey: 'upgrade_modal.plans.standard.highlights.members', descKey: 'upgrade_modal.plans.standard.highlights.members_desc', iconColor: 'text-orange-500' },
   { icon: CreditCard, labelKey: 'upgrade_modal.plans.standard.highlights.payments', descKey: 'upgrade_modal.plans.standard.highlights.payments_desc', iconColor: 'text-emerald-500' },
   { icon: ChatsCircle, labelKey: 'upgrade_modal.plans.standard.highlights.communities', descKey: 'upgrade_modal.plans.standard.highlights.communities_desc', iconColor: 'text-teal-500' },
-  { icon: Microphone, labelKey: 'upgrade_modal.plans.standard.highlights.podcasts', descKey: 'upgrade_modal.plans.standard.highlights.podcasts_desc', iconColor: 'text-purple-500' },
+  { icon: Microphone, labelKey: 'upgrade_modal.plans.standard.highlights.podcasts', descKey: 'upgrade_modal.plans.standard.highlights.podcasts_desc', iconColor: 'text-orange-500' },
   { icon: Lightning, labelKey: 'upgrade_modal.plans.standard.highlights.playgrounds', descKey: 'upgrade_modal.plans.standard.highlights.playgrounds_desc', iconColor: 'text-amber-500' },
-  { icon: Robot, labelKey: 'upgrade_modal.plans.standard.highlights.ai', descKey: 'upgrade_modal.plans.standard.highlights.ai_desc', iconColor: 'text-violet-500' },
+  { icon: Robot, labelKey: 'upgrade_modal.plans.standard.highlights.ai', descKey: 'upgrade_modal.plans.standard.highlights.ai_desc', iconColor: 'text-orange-500' },
   { icon: ChartBar, labelKey: 'upgrade_modal.plans.standard.highlights.analytics', descKey: 'upgrade_modal.plans.standard.highlights.analytics_desc', iconColor: 'text-amber-500' },
 ]
 
 const PRO_HIGHLIGHTS = [
-  { icon: UsersThree, labelKey: 'upgrade_modal.plans.pro.highlights.members', descKey: 'upgrade_modal.plans.pro.highlights.members_desc', iconColor: 'text-indigo-500' },
-  { icon: Robot, labelKey: 'upgrade_modal.plans.pro.highlights.ai', descKey: 'upgrade_modal.plans.pro.highlights.ai_desc', iconColor: 'text-violet-500' },
+  { icon: UsersThree, labelKey: 'upgrade_modal.plans.pro.highlights.members', descKey: 'upgrade_modal.plans.pro.highlights.members_desc', iconColor: 'text-orange-500' },
+  { icon: Robot, labelKey: 'upgrade_modal.plans.pro.highlights.ai', descKey: 'upgrade_modal.plans.pro.highlights.ai_desc', iconColor: 'text-orange-500' },
   { icon: Certificate, labelKey: 'upgrade_modal.plans.pro.highlights.certifications', descKey: 'upgrade_modal.plans.pro.highlights.certifications_desc', iconColor: 'text-sky-500' },
   { icon: Globe, labelKey: 'upgrade_modal.plans.pro.highlights.custom_domain', descKey: 'upgrade_modal.plans.pro.highlights.custom_domain_desc', iconColor: 'text-cyan-500' },
   { icon: ShieldCheck, labelKey: 'upgrade_modal.plans.pro.highlights.roles', descKey: 'upgrade_modal.plans.pro.highlights.roles_desc', iconColor: 'text-rose-500' },
@@ -64,7 +64,7 @@ export default function UpgradeModal({ open, onClose, source = 'free_plan_banner
   const standardUrl = getUpgradeUrl(orgSlug, 'standard')
   const proUrl = getUpgradeUrl(orgSlug, 'pro')
   const currentPlan = usePlan()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   useEffect(() => {
     if (open) {
@@ -168,7 +168,7 @@ export default function UpgradeModal({ open, onClose, source = 'free_plan_banner
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        backgroundImage: `repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(139,92,246,0.04) 6px, rgba(139,92,246,0.04) 7px)`,
+                        backgroundImage: `repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(249,115,22,0.04) 6px, rgba(249,115,22,0.04) 7px)`,
                       }}
                     />
                     <div className="relative p-5 flex flex-col flex-1">

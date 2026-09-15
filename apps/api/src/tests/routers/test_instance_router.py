@@ -66,7 +66,7 @@ class TestInstanceRouter:
         )
         with patch("src.routers.instance.get_cached_instance_info", return_value=None), patch(
             "src.routers.instance.set_cached_instance_info", side_effect=lambda d: stored.update(d)
-        ), patch("src.routers.instance.get_learnhouse_config", return_value=config), patch(
+        ), patch("src.routers.instance.get_validbridge_config", return_value=config), patch(
             "src.routers.instance.get_deployment_mode", return_value="saas"
         ):
             response = await client.get("/api/v1/instance/info")
@@ -98,7 +98,7 @@ class TestInstanceRouter:
             "src.routers.instance.get_cached_instance_info",
             return_value=None,
         ), patch(
-            "src.routers.instance.get_learnhouse_config",
+            "src.routers.instance.get_validbridge_config",
             return_value=config,
         ), patch(
             "src.routers.instance.get_deployment_mode",
@@ -130,7 +130,7 @@ class TestInstanceRouter:
             "src.routers.instance.get_cached_instance_info",
             return_value=None,
         ), patch(
-            "src.routers.instance.get_learnhouse_config",
+            "src.routers.instance.get_validbridge_config",
             return_value=config,
         ), patch(
             "src.routers.instance.get_deployment_mode",
@@ -148,7 +148,7 @@ class TestInstanceRouter:
     async def test_get_instance_info_falls_back_when_db_lookup_fails(self, client):
         config = SimpleNamespace(
             hosting_config=SimpleNamespace(
-                frontend_domain="learnhouse.ai",
+                frontend_domain="validbridge.ai",
                 tenancy="single",
             )
         )
@@ -164,7 +164,7 @@ class TestInstanceRouter:
                 "src.routers.instance.get_cached_instance_info",
                 return_value=None,
             ), patch(
-                "src.routers.instance.get_learnhouse_config",
+                "src.routers.instance.get_validbridge_config",
                 return_value=config,
             ), patch(
                 "src.routers.instance.get_deployment_mode",

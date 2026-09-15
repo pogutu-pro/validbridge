@@ -8,13 +8,13 @@ import {
   getCookieOptions,
 } from '@services/auth/cookies'
 
-const BACKEND_URL = (getConfig('NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL') || 'http://localhost:1338').replace(/\/+$/, '')
-// Dormant cross-domain handoff safety valve. Post learnhouse.app deprecation the
+const BACKEND_URL = (getConfig('NEXT_PUBLIC_VALIDBRIDGE_BACKEND_URL') || 'http://localhost:1338').replace(/\/+$/, '')
+// Dormant cross-domain handoff safety valve. Post validbridge.co.ke deprecation the
 // .io apex and org subdomains share .{top_domain} cookies, so this route is no
 // longer used by the app (handleGoToOrg navigates directly). No hardcoded .app
 // default — if a legacy code is presented and PLATFORM_URL isn't configured, the
 // fetch fails and the route returns a clean 502 instead of silently calling .app.
-const PLATFORM_URL = (getConfig('NEXT_PUBLIC_LEARNHOUSE_PLATFORM_URL') || getConfig('LEARNHOUSE_PLATFORM_URL') || '').replace(/\/+$/, '')
+const PLATFORM_URL = (getConfig('NEXT_PUBLIC_VALIDBRIDGE_PLATFORM_URL') || getConfig('VALIDBRIDGE_PLATFORM_URL') || '').replace(/\/+$/, '')
 
 const MAX_CODE_LENGTH = 4096
 const PLATFORM_TIMEOUT_MS = 10_000
@@ -278,7 +278,7 @@ export async function POST(request: NextRequest) {
       ...cookieOptions,
       maxAge: REFRESH_TOKEN_MAX_AGE,
     })
-    response.cookies.set('LH_session', '1', {
+    response.cookies.set('VB_session', '1', {
       ...cookieOptions,
       httpOnly: false,
       maxAge: REFRESH_TOKEN_MAX_AGE,

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
-import lrnaiIcon from 'public/lrnai_icon.png'
+import lrnaiIcon from 'public/validbridge_ai_icon.png'
 import type { CreatedChapter } from '@services/ai/courseplanning'
 import {
   generateActivityContent,
@@ -235,7 +235,7 @@ function ContentGenerationPanel({
               "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all",
               isAnyGenerating || generatedCount === totalActivities
                 ? "bg-white/5 text-white/30 cursor-not-allowed"
-                : "bg-purple-500/20 text-purple-300 hover:bg-purple-500/30"
+                : "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30"
             )}
           >
             {isAnyGenerating ? (
@@ -265,7 +265,7 @@ function ContentGenerationPanel({
               ) : (
                 <ChevronRight className="w-4 h-4 text-white/50" />
               )}
-              <BookOpen className="w-4 h-4 text-purple-400" />
+              <BookOpen className="w-4 h-4 text-orange-400" />
               <span className="flex-1 text-sm font-medium text-white">
                 {chapter.name}
               </span>
@@ -291,7 +291,7 @@ function ContentGenerationPanel({
                         isGenerated
                           ? "bg-green-500/10 ring-green-500/20"
                           : isGenerating
-                          ? "bg-purple-500/10 ring-purple-500/20"
+                          ? "bg-orange-500/10 ring-orange-500/20"
                           : hasError
                           ? "bg-red-500/10 ring-red-500/20"
                           : "bg-white/5 ring-white/5"
@@ -324,7 +324,7 @@ function ContentGenerationPanel({
                           <span className="text-xs">{t('courses.create.ai.done')}</span>
                         </div>
                       ) : isGenerating ? (
-                        <div className="flex items-center gap-1 text-purple-400">
+                        <div className="flex items-center gap-1 text-orange-400">
                           <Loader2 className="w-4 h-4 animate-spin" />
                           <span className="text-xs">{t('courses.create.ai.generating_short')}</span>
                         </div>

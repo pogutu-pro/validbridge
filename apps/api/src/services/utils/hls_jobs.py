@@ -8,10 +8,10 @@ and record status on `activity.extra_metadata["hls"]`.
 Execution models (no dedicated worker infra exists yet):
 - A `transcode-worker` CLI drains a Redis queue — the recommended prod path so
   heavy ffmpeg runs off the API pods.
-- An in-process consumer (`LEARNHOUSE_HLS_INPROCESS_WORKER=true`, default off,
+- An in-process consumer (`VALIDBRIDGE_HLS_INPROCESS_WORKER=true`, default off,
   Semaphore(1)) for dev/self-host.
 
-Everything is gated by `LEARNHOUSE_HLS_ENABLED` (default off). Until a video is
+Everything is gated by `VALIDBRIDGE_HLS_ENABLED` (default off). Until a video is
 `ready`, callers keep using the optimized MP4 fallback.
 """
 
@@ -43,7 +43,7 @@ from src.services.utils.hls_transcode import transcode_source_to_hls
 
 logger = logging.getLogger(__name__)
 
-REDIS_QUEUE_KEY = "learnhouse:hls:queue"
+REDIS_QUEUE_KEY = "validbridge:hls:queue"
 
 
 @contextlib.contextmanager
@@ -57,7 +57,7 @@ def scratch_dir():
     already safe at that point; a leftover temp dir is not worth failing over
     (the periodic cleanup sweeps it later anyway).
     """
-    path = tempfile.mkdtemp(prefix="lh-hls-")
+    path = tempfile.mkdtemp(prefix="vb-hls-")
     try:
         yield path
     finally:
@@ -98,19 +98,19 @@ LEASE_HEARTBEAT_SECONDS = 60
 
 def hls_max_retries() -> int:
     """Max auto-retries per video before the reconciler gives up
-    (LEARNHOUSE_HLS_MAX_RETRIES, default 6)."""
+    (VALIDBRIDGE_HLS_MAX_RETRIES, default 6)."""
     try:
-        return max(1, int(os.environ.get("LEARNHOUSE_HLS_MAX_RETRIES", "6")))
+        return max(1, int(os.environ.get("VALIDBRIDGE_HLS_MAX_RETRIES", "6")))
     except (TypeError, ValueError):
         return 6
 
 
 def _lease_key(activity_uuid: str) -> str:
-    return f"learnhouse:hls:lease:{activity_uuid}"
+    return f"validbridge:hls:lease:{activity_uuid}"
 
 
 def _retries_key(activity_uuid: str) -> str:
-    return f"learnhouse:hls:retries:{activity_uuid}"
+    return f"validbridge:hls:retries:{activity_uuid}"
 
 
 async def _lease_heartbeat(client, key: str) -> None:
@@ -130,13 +130,13 @@ def _flag(name: str) -> bool:
 
 
 def hls_enabled() -> bool:
-    return _flag("LEARNHOUSE_HLS_ENABLED")
+    return _flag("VALIDBRIDGE_HLS_ENABLED")
 
 
 def hls_concurrency() -> int:
-    """Max concurrent transcodes per API pod (LEARNHOUSE_HLS_CONCURRENCY, default 1)."""
+    """Max concurrent transcodes per API pod (VALIDBRIDGE_HLS_CONCURRENCY, default 1)."""
     try:
-        return max(1, int(os.environ.get("LEARNHOUSE_HLS_CONCURRENCY", "1")))
+        return max(1, int(os.environ.get("VALIDBRIDGE_HLS_CONCURRENCY", "1")))
     except (TypeError, ValueError):
         return 1
 

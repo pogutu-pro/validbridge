@@ -1,6 +1,6 @@
 'use client'
 import { SessionProvider } from '@components/Contexts/AuthContext'
-import LHSessionProvider, { SessionGate } from '@components/Contexts/LHSessionContext'
+import VBSessionProvider, { SessionGate } from '@components/Contexts/VBSessionContext'
 import React from 'react'
 
 export default function AdminProviders({
@@ -10,11 +10,11 @@ export default function AdminProviders({
 }) {
   return (
     <SessionProvider>
-      <LHSessionProvider>
+      <VBSessionProvider>
         <SessionGate>
           {children}
         </SessionGate>
-      </LHSessionProvider>
+      </VBSessionProvider>
     </SessionProvider>
   )
 }

@@ -9,7 +9,7 @@ import { getServerAPIUrl } from '@services/config/config'
 // active only when: mode === 'saas'  AND  its key/secret is configured.
 //
 // Source of truth is the same as the proxy/billing guard: the backend instance
-// mode, surfaced to the frontend as the `LH_mode` cookie (zero-latency, set on
+// mode, surfaced to the frontend as the `VB_mode` cookie (zero-latency, set on
 // every request). We fall back to a short-cached instance/info fetch for the
 // rare non-request server contexts (crons) where no cookie is available.
 
@@ -24,10 +24,10 @@ function coerce(mode: unknown): DeploymentMode | null {
 
 /** Resolve the deployment mode server-side. Defaults to 'oss' when unknown. */
 export async function getInstanceMode(): Promise<DeploymentMode> {
-  // 1. LH_mode cookie (request-scoped, set by the proxy from instance/info).
+  // 1. VB_mode cookie (request-scoped, set by the proxy from instance/info).
   try {
     const store = await cookies()
-    const fromCookie = coerce(store.get('LH_mode')?.value)
+    const fromCookie = coerce(store.get('VB_mode')?.value)
     if (fromCookie) return fromCookie
   } catch {
     // cookies() throws outside a request scope — fall through to the fetch.
@@ -58,7 +58,7 @@ export async function isSaaSMode(): Promise<boolean> {
  *
  * SECURITY: this gates a bot-protection control, so it is derived from the
  * non-forgeable request Host (routed by the ingress) — NOT the client-settable
- * LH_custom_domain cookie. A host that is the platform apex/subdomain is never a
+ * VB_custom_domain cookie. A host that is the platform apex/subdomain is never a
  * custom domain (Turnstile stays on); any other host is only trusted after the
  * backend confirms it's a REGISTERED custom domain, so a spoofed Host can't
  * disable bot protection on the platform.
@@ -68,7 +68,7 @@ export async function isCustomDomainRequest(): Promise<boolean> {
     const host = (await headers()).get('host')?.split(':')[0]?.toLowerCase()
     if (!host || host === 'localhost' || /^[\d.]+$/.test(host)) return false
 
-    const platform = (process.env.NEXT_PUBLIC_LEARNHOUSE_DOMAIN || '').toLowerCase()
+    const platform = (process.env.NEXT_PUBLIC_VALIDBRIDGE_DOMAIN || '').toLowerCase()
     // Platform apex or subdomain → not a custom domain (keep Turnstile on).
     if (platform && (host === platform || host.endsWith(`.${platform}`))) return false
 

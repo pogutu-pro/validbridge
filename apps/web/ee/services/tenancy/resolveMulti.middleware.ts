@@ -23,7 +23,7 @@ export async function resolveMultiFromRequest(
   instance: InstanceInfo,
 ): Promise<ResolvedTenant> {
   const host = req.headers.get('host')
-  const cookieOrgslug = req.cookies.get('LH_org')?.value || null
+  const cookieOrgslug = req.cookies.get('VB_org')?.value || null
 
   return resolveMultiTenant({ host, cookieOrgslug, instance })
 }

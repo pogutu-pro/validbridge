@@ -1,8 +1,8 @@
 {
-  "name": "@learnhouse/e2e",
+  "name": "@validbridge/e2e",
   "version": "0.1.0",
   "private": true,
-  "description": "End-to-end UI acceptance tests for LearnHouse, driving a CLI-installed self-host like a human.",
+  "description": "End-to-end UI acceptance tests for ValidBridge, driving a running instance like a human.",
   "type": "module",
   "scripts": {
     "test": "playwright test",

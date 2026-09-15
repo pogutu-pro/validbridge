@@ -38,10 +38,10 @@ export default function OnboardingSidebarBox() {
         className="absolute -start-3 -end-3 -top-2 bottom-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(139,92,246,0.10) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139,92,246,0.10) 1px, transparent 1px),
-            linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px)`,
+            linear-gradient(rgba(249,115,22,0.10) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(249,115,22,0.10) 1px, transparent 1px),
+            linear-gradient(rgba(249,115,22,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(249,115,22,0.05) 1px, transparent 1px)`,
           backgroundSize: '40px 40px, 40px 40px, 10px 10px, 10px 10px',
           maskImage: 'linear-gradient(to bottom, black 0%, transparent 82%)',
           WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 82%)',
@@ -52,15 +52,15 @@ export default function OnboardingSidebarBox() {
         className="absolute -start-3 -end-3 -top-2 h-16 pointer-events-none"
         style={{
           background:
-            'radial-gradient(110% 90% at 50% 0%, rgba(139,92,246,0.20), rgba(99,102,241,0.05) 45%, transparent 78%)',
+            'radial-gradient(110% 90% at 50% 0%, rgba(249,115,22,0.20), rgba(249,115,22,0.05) 45%, transparent 78%)',
         }}
       />
 
       <div className="relative">
         {/* Header — uppercase label, count right on the same line */}
         <div className="flex items-center gap-2">
-          <ListChecks size={14} weight="bold" className="text-violet-300 shrink-0" />
-          <span className="text-[11px] font-bold uppercase tracking-wider text-violet-300 flex-1 truncate">
+          <ListChecks size={14} weight="bold" className="text-orange-300 shrink-0" />
+          <span className="text-[11px] font-bold uppercase tracking-wider text-orange-300 flex-1 truncate">
             {t('onboarding.box_title', { defaultValue: 'Onboarding' })}
           </span>
           <span className="text-[11px] text-white/35 tabular-nums shrink-0">
@@ -85,7 +85,7 @@ export default function OnboardingSidebarBox() {
         {/* CTA button */}
         <Link
           href={href}
-          className="group mt-3 flex items-center justify-center gap-1.5 w-full rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-[12px] font-semibold py-2 transition-colors"
+          className="group mt-3 flex items-center justify-center gap-1.5 w-full rounded-lg bg-orange-500 hover:bg-orange-400 text-white text-[12px] font-semibold py-2 transition-colors"
         >
           {t('onboarding.continue_setup', { defaultValue: 'Continue setup' })}
           <ArrowRight size={12} weight="bold" className="transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" data-dir-flip />

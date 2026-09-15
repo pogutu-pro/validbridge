@@ -12,13 +12,13 @@ import {
   DiscussionWithAuthor,
 } from '@services/communities/discussions'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import { useDiscussions, useMutateDiscussions } from '@components/Hooks/useDiscussions'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { searchMatchesAny } from '@/lib/search/normalize'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface DiscussionListProps {
   communityUuid: string
@@ -34,13 +34,13 @@ export function DiscussionList({
   initialDiscussions = [],
 }: DiscussionListProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const { isUserPartOfTheOrg } = useOrgMembership()
   const { canCreateDiscussion: hasCreatePermission, canManageCommunity } = useCommunityRights(communityUuid)
   const canCreateDiscussion = hasCreatePermission && isUserPartOfTheOrg
   const accessToken = session?.data?.tokens?.access_token
   const mutateDiscussions = useMutateDiscussions()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   const [sortBy, setSortBy] = useState<DiscussionSortBy>('recent')
   const [searchQuery, setSearchQuery] = useState('')
@@ -206,7 +206,7 @@ export function DiscussionList({
             placeholder={t('communities.discussion_list.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full ps-9 pe-9 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 transition-all"
+            className="w-full ps-9 pe-9 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-300 transition-all"
           />
           {searchQuery && (
             <button
@@ -235,7 +235,7 @@ export function DiscussionList({
                 onClick={toggleSelectMode}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md transition-colors h-8 ${
                   isSelectMode
-                    ? 'bg-indigo-100 text-indigo-700'
+                    ? 'bg-orange-100 text-orange-700'
                     : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -260,16 +260,16 @@ export function DiscussionList({
 
       {/* Selection Action Bar */}
       {isSelectMode && selectedIds.size > 0 && (
-        <div className="px-4 py-3 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between">
+        <div className="px-4 py-3 bg-orange-50 border-b border-orange-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={selectAll}
-              className="flex items-center gap-1.5 text-xs text-indigo-700 hover:text-indigo-800"
+              className="flex items-center gap-1.5 text-xs text-orange-700 hover:text-orange-800"
             >
               {allSelected ? <CheckSquare size={14} /> : <Square size={14} />}
               {allSelected ? t('communities.discussion_list.deselect_all') : t('communities.discussion_list.select_all')}
             </button>
-            <span className="text-xs text-indigo-600 font-medium">
+            <span className="text-xs text-orange-600 font-medium">
               {selectedIds.size} {t('communities.discussion_list.selected')}
             </span>
           </div>
@@ -312,7 +312,7 @@ export function DiscussionList({
                 </p>
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
                 >
                   {t('communities.discussion_list.clear_search')}
                 </button>

@@ -130,7 +130,7 @@ async def test_record_org_admin_omits_optional_fields(monkeypatch):
     assert put_body["email"] == "solo@test.com"
     assert put_body["is_org_admin"] is True
     assert put_body["userGroup"] == "signed-users"
-    assert put_body["source"] == "learnhouse.io"
+    assert put_body["source"] == "validbridge.co.ke"
     # Optional fields OMITTED when their source value is falsy.
     assert "org_slug" not in put_body
     assert "firstName" not in put_body

@@ -15,7 +15,7 @@ import {
   ArrowRight,
 } from '@phosphor-icons/react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl, getDeploymentMode, getMainDomainUri, getUpgradeUrl } from '@services/config/config'
 import { OrgUsageResponse, getOrgUsage } from '@services/orgs/usage'
 import { apiFetch } from '@services/utils/ts/requests'
@@ -38,7 +38,7 @@ const PLAN_COLORS: Record<string, { bg: string; text: string }> = {
   free: { bg: 'bg-gray-100', text: 'text-gray-600' },
   oss: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
   standard: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  pro: { bg: 'bg-purple-100', text: 'text-purple-700' },
+  pro: { bg: 'bg-orange-100', text: 'text-orange-700' },
   enterprise: { bg: 'bg-amber-100', text: 'text-amber-700' },
 }
 
@@ -64,7 +64,7 @@ const METER_ICONS: Record<string, React.ComponentType<any>> = {
 export default function OrgEditUsage() {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const token = session?.data?.tokens?.access_token
   const orgId = org?.id
 
@@ -316,19 +316,19 @@ function AICreditsDetail({ credits }: { credits: AICreditsSummary }) {
       : 0
 
   const barColor = isUnlimited
-    ? 'bg-violet-500'
+    ? 'bg-orange-500'
     : percent > 90
       ? 'bg-red-500'
       : percent > 70
         ? 'bg-amber-500'
-        : 'bg-violet-500'
+        : 'bg-orange-500'
 
   return (
     <div className="space-y-4">
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2.5">
-            <Lightning size={16} weight="duotone" className="text-violet-400" />
+            <Lightning size={16} weight="duotone" className="text-orange-400" />
             <span className="text-sm font-medium text-gray-700">
               {t('dashboard.organization.usage.credit_usage')}
             </span>
@@ -429,7 +429,7 @@ function PlanUpsell({ orgSlug, currentPlan }: { orgSlug: string; currentPlan: st
               style={{ background: `linear-gradient(to bottom, ${plan.topGlow}, transparent)` }}
             >
               {plan.popular && (
-                <span className="absolute top-4 end-4 text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                <span className="absolute top-4 end-4 text-[10px] font-bold uppercase tracking-wider text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
                   {t('dashboard.organization.usage.upsell.popular', { defaultValue: 'Popular' })}
                 </span>
               )}

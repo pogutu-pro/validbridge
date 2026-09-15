@@ -10,7 +10,7 @@ def _config(saas_mode: bool):
 
 def test_get_deployment_mode_prefers_saas_over_ee():
     with (
-        patch("src.core.deployment_mode.get_learnhouse_config", return_value=_config(True)),
+        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(True)),
         patch("src.core.deployment_mode.is_ee_available", return_value=True),
     ):
         assert get_deployment_mode() == "saas"
@@ -27,7 +27,7 @@ def test_get_deployment_mode_fails_closed_when_ee_hooks_do_not_load():
     module that failed to import.
     """
     with (
-        patch("src.core.deployment_mode.get_learnhouse_config", return_value=_config(False)),
+        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
         patch("src.core.deployment_mode.is_ee_available", return_value=True),
         patch("src.core.deployment_mode.get_ee_hooks", return_value=None),
     ):
@@ -36,7 +36,7 @@ def test_get_deployment_mode_fails_closed_when_ee_hooks_do_not_load():
 
 def test_get_deployment_mode_returns_oss_when_ee_unavailable():
     with (
-        patch("src.core.deployment_mode.get_learnhouse_config", return_value=_config(False)),
+        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
         patch("src.core.deployment_mode.is_ee_available", return_value=False),
     ):
         assert get_deployment_mode() == "oss"
@@ -45,7 +45,7 @@ def test_get_deployment_mode_returns_oss_when_ee_unavailable():
 def test_get_deployment_mode_returns_ee_when_license_active():
     hooks = SimpleNamespace(is_license_active=lambda: True)
     with (
-        patch("src.core.deployment_mode.get_learnhouse_config", return_value=_config(False)),
+        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
         patch("src.core.deployment_mode.is_ee_available", return_value=True),
         patch("src.core.deployment_mode.get_ee_hooks", return_value=hooks),
     ):
@@ -55,7 +55,7 @@ def test_get_deployment_mode_returns_ee_when_license_active():
 def test_get_deployment_mode_degrades_to_oss_when_license_inactive():
     hooks = SimpleNamespace(is_license_active=lambda: False)
     with (
-        patch("src.core.deployment_mode.get_learnhouse_config", return_value=_config(False)),
+        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
         patch("src.core.deployment_mode.is_ee_available", return_value=True),
         patch("src.core.deployment_mode.get_ee_hooks", return_value=hooks),
     ):
@@ -73,7 +73,7 @@ def test_get_deployment_mode_fails_closed_for_hooks_without_license_check():
     """
     hooks = SimpleNamespace()
     with (
-        patch("src.core.deployment_mode.get_learnhouse_config", return_value=_config(False)),
+        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
         patch("src.core.deployment_mode.is_ee_available", return_value=True),
         patch("src.core.deployment_mode.get_ee_hooks", return_value=hooks),
     ):
@@ -89,7 +89,7 @@ def test_empty_ee_dir_does_not_count_as_ee_available(tmp_path, monkeypatch):
     """
     from src.core.ee_hooks import is_ee_available
 
-    monkeypatch.delenv("LEARNHOUSE_DISABLE_EE", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_DISABLE_EE", raising=False)
     monkeypatch.chdir(tmp_path)
     (tmp_path / "ee").mkdir()
     assert is_ee_available() is False

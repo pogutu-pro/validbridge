@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { Drop, TextAa, X } from '@phosphor-icons/react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { updateOrgColorConfig, updateOrgFontConfig } from '@services/settings/org'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { queryKeys } from '@/lib/query/keys'
@@ -17,14 +17,14 @@ import FontSelector from './FontSelector'
 import { BrandingSection, SaveBar } from './BrandingShared'
 import { PublicHeaderVignette } from './BrandingVignettes'
 
-const SWATCHES = ['#111827', '#1d4ed8', '#0f766e', '#7c3aed', '#be123c', '#d97706', '#f5f5f4']
+const SWATCHES = ['#111827', '#1d4ed8', '#0f766e', '#ea580c', '#be123c', '#d97706', '#f5f5f4']
 
 export default function ThemeTab() {
   const { t } = useTranslation()
   const router = useRouter()
   const queryClient = useQueryClient()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const general = org?.config?.config?.customization?.general || org?.config?.config?.general || {}
 

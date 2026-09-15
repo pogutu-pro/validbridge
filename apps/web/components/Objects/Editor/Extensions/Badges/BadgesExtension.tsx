@@ -123,11 +123,11 @@ const BadgesExtension: React.FC = (props: any) => {
       case 'green': return 'bg-green-400 text-green-50';
       case 'yellow': return 'bg-yellow-400 text-black';
       case 'red': return 'bg-red-500 text-red-50';
-      case 'purple': return 'bg-purple-400 text-purple-50';
+      case 'purple': return 'bg-orange-400 text-orange-50';
       case 'pink': return 'bg-pink-400 text-pink-50';
       case 'teal': return 'bg-teal-400 text-teal-900';
       case 'amber': return 'bg-amber-600 text-amber-100';
-      case 'indigo': return 'bg-indigo-400 text-indigo-50';
+      case 'indigo': return 'bg-orange-400 text-orange-50';
       case 'neutral': return 'bg-neutral-800 text-white';
       default: return 'bg-sky-400 text-white';
     }

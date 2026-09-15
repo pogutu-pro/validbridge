@@ -51,7 +51,7 @@ export default function CaptionsSettings({
     <div className="rounded-xl nice-shadow p-4 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-sm font-medium text-gray-700">
-          <ClosedCaptioning size={18} weight="duotone" className="text-violet-400" />
+          <ClosedCaptioning size={18} weight="duotone" className="text-orange-400" />
           AI Closed Captions
         </h3>
         <label className="flex items-center gap-2 cursor-pointer">
@@ -97,7 +97,7 @@ export default function CaptionsSettings({
                     onClick={() => toggleLang(l.code, l.nativeName)}
                     className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                       on
-                        ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
+                        ? 'bg-orange-100 text-orange-700 ring-1 ring-orange-200'
                         : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
                     }`}
                   >

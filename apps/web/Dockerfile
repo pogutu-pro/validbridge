@@ -19,8 +19,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN rm -f .env*
 
 # Remove Enterprise Edition folder for public/OSS builds
-ARG LEARNHOUSE_PUBLIC=false
-RUN if [ "$LEARNHOUSE_PUBLIC" = "true" ]; then rm -rf /app/ee; fi
+ARG VALIDBRIDGE_PUBLIC=false
+RUN if [ "$VALIDBRIDGE_PUBLIC" = "true" ]; then rm -rf /app/ee; fi
 
 RUN bun run build
 

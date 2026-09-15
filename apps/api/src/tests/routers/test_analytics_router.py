@@ -95,7 +95,7 @@ class TestAnalyticsHelpers:
     def test_get_read_client_handles_missing_and_configured_tinybird(self, monkeypatch):
         monkeypatch.setattr(analytics_router_module, "_read_client", None)
         monkeypatch.setattr(
-            "src.routers.analytics.get_learnhouse_config",
+            "src.routers.analytics.get_validbridge_config",
             lambda: SimpleNamespace(tinybird_config=None),
         )
         assert _get_read_client() is None
@@ -103,7 +103,7 @@ class TestAnalyticsHelpers:
         fake_client = SimpleNamespace()
         monkeypatch.setattr(analytics_router_module, "_read_client", None)
         monkeypatch.setattr(
-            "src.routers.analytics.get_learnhouse_config",
+            "src.routers.analytics.get_validbridge_config",
             lambda: SimpleNamespace(
                 tinybird_config=SimpleNamespace(
                     api_url="https://tinybird.test",
@@ -302,7 +302,7 @@ class TestAnalyticsHelpers:
 
 class TestAnalyticsRouter:
     async def test_status_and_plan_info(self, client, app):
-        with patch("src.routers.analytics.get_learnhouse_config", return_value=SimpleNamespace(tinybird_config=None)):
+        with patch("src.routers.analytics.get_validbridge_config", return_value=SimpleNamespace(tinybird_config=None)):
             response = await client.get("/api/v1/analytics/status")
         assert response.status_code == 200
         assert response.json()["configured"] is False

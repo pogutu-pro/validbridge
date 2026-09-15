@@ -4,7 +4,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider, usePostHog } from 'posthog-js/react'
 import { getPOSTHOG_KEY_VAL } from '@services/config/config'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 
 let initialized = false
 
@@ -78,7 +78,7 @@ function PostHogPageView() {
  */
 function PostHogIdentify() {
   const posthogClient = usePostHog()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const status = session?.status
   const user = session?.data?.user
   const identifiedRef = useRef<string | null>(null)

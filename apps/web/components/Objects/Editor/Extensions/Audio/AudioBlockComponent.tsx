@@ -13,7 +13,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { constructAcceptValue } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { getOrgPodcasts, getPodcastMeta, type Podcast, type PodcastEpisode, type PodcastMeta } from '@services/podcasts/podcasts'
@@ -319,7 +319,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
   const { orgslug } = useOrgMembership()
   const course = useCourse() as Course | null
   const editorState = useEditorProvider() as EditorState
-  const session = useLHSession() as Session
+  const session = useVBSession() as Session
 
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const uploadZoneRef = React.useRef<HTMLDivElement>(null)

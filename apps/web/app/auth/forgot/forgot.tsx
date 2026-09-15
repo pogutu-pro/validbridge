@@ -12,7 +12,7 @@ import { getErrorMessage } from '@services/utils/ts/errorMessage'
 import { useTranslation } from 'react-i18next'
 import AuthLayout from '@components/Auth/AuthLayout'
 import TurnstileWidget, { useTurnstileRequired, verifyTurnstileToken, type TurnstileWidgetHandle } from '@components/Auth/TurnstileWidget'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const validate = (values: any, t: any) => {
     const errors: any = {}
@@ -32,7 +32,7 @@ interface ForgotPasswordClientProps {
 
 function ForgotPasswordClient({ org }: ForgotPasswordClientProps) {
     const { t } = useTranslation();
-    const { track } = useLHAnalytics('public')
+    const { track } = useVBAnalytics('public')
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [error, setError] = React.useState('')
     const [message, setMessage] = React.useState('')

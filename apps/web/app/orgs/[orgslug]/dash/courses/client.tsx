@@ -5,7 +5,7 @@ import CourseCreationTypeSelector from '@components/Objects/Modals/Course/Create
 import AICourseCreationModal from '@components/Objects/Modals/Course/Create/AICourse/AICourseCreationModal'
 import { BookCopy, Search, X, Trash2, Users, Info } from 'lucide-react'
 import ScormCourseImport from '../../../../../ee/components/Modals/ScormCourseImport'
-import { ImportTypeSelector, LearnHouseCourseImport } from '@components/Objects/Modals/Course/Import'
+import { ImportTypeSelector, ValidBridgeCourseImport } from '@components/Objects/Modals/Course/Import'
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton'
@@ -19,7 +19,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { Download, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { OrgUsageResponse, orgUsageFetcher } from '@services/orgs/usage'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { deleteCourseFromBackend, cloneCourse } from '@services/courses/courses'
 import { exportCoursesBatch, downloadBlob, ExportStatus } from '@services/courses/transfer'
 import { exportToast } from '@components/Objects/StyledElements/Toast/ExportToast'
@@ -31,7 +31,7 @@ import toast from 'react-hot-toast'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import { usePlan } from '@components/Hooks/usePlan'
 import { searchMatchesAny } from '@/lib/search/normalize'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import CatalogPagination, { useCatalogPagination } from '@components/Objects/Catalog/CatalogPagination'
 
 type CourseProps = {
@@ -40,12 +40,12 @@ type CourseProps = {
 
 function CoursesHome(params: CourseProps) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const searchParams = useSearchParams()
   const isCreatingCourse = searchParams.get('new') ? true : false
   const [newCourseModal, setNewCourseModal] = React.useState(isCreatingCourse)
   const [importCourseModal, setImportCourseModal] = React.useState(false)
-  const [importType, setImportType] = React.useState<'select' | 'scorm' | 'learnhouse'>('select')
+  const [importType, setImportType] = React.useState<'select' | 'scorm' | 'validbridge'>('select')
   const [creationType, setCreationType] = React.useState<'select' | 'scratch' | 'ai'>('select')
   const [aiCourseModalOpen, setAiCourseModalOpen] = React.useState(false)
   const orgslug = params.orgslug
@@ -53,7 +53,7 @@ function CoursesHome(params: CourseProps) {
   const org = useOrg() as any
   const orgId = org?.id as number | undefined
   const currentPlan = usePlan()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session.data?.tokens?.access_token
 
   // Check if courses feature is enabled
@@ -102,7 +102,7 @@ function CoursesHome(params: CourseProps) {
   const [usergroups, setUsergroups] = useState<any[]>([])
   const [selectedUsergroupId, setSelectedUsergroupId] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('lh_course_usergroup_filter') || ''
+      return localStorage.getItem('vb_course_usergroup_filter') || ''
     }
     return ''
   })
@@ -119,7 +119,7 @@ function CoursesHome(params: CourseProps) {
         // Clear saved selection if the usergroup no longer exists
         if (selectedUsergroupId && !list.some((ug: any) => String(ug.id) === selectedUsergroupId)) {
           setSelectedUsergroupId('')
-          localStorage.removeItem('lh_course_usergroup_filter')
+          localStorage.removeItem('vb_course_usergroup_filter')
         }
       })
       .catch(() => setUsergroups([]))
@@ -142,9 +142,9 @@ function CoursesHome(params: CourseProps) {
   const handleUsergroupChange = (value: string) => {
     setSelectedUsergroupId(value)
     if (value) {
-      localStorage.setItem('lh_course_usergroup_filter', value)
+      localStorage.setItem('vb_course_usergroup_filter', value)
     } else {
-      localStorage.removeItem('lh_course_usergroup_filter')
+      localStorage.removeItem('vb_course_usergroup_filter')
     }
   }
 
@@ -252,7 +252,7 @@ function CoursesHome(params: CourseProps) {
     mutateCourses()
   }
 
-  const handleImportTypeSelect = (type: 'scorm' | 'learnhouse') => {
+  const handleImportTypeSelect = (type: 'scorm' | 'validbridge') => {
     setImportType(type)
   }
 
@@ -268,9 +268,9 @@ function CoursesHome(params: CourseProps) {
             />
           </FeatureGate>
         )
-      case 'learnhouse':
+      case 'validbridge':
         return (
-          <LearnHouseCourseImport
+          <ValidBridgeCourseImport
             orgId={orgId!}
             orgslug={orgslug}
             closeModal={closeImportCourseModal}
@@ -285,8 +285,8 @@ function CoursesHome(params: CourseProps) {
     switch (importType) {
       case 'scorm':
         return t('dashboard.courses.import_scorm')
-      case 'learnhouse':
-        return t('dashboard.courses.import_learnhouse')
+      case 'validbridge':
+        return t('dashboard.courses.import_validbridge')
       default:
         return t('dashboard.courses.import_course')
     }
@@ -296,8 +296,8 @@ function CoursesHome(params: CourseProps) {
     switch (importType) {
       case 'scorm':
         return t('dashboard.courses.import_scorm_description')
-      case 'learnhouse':
-        return t('dashboard.courses.import_learnhouse_description')
+      case 'validbridge':
+        return t('dashboard.courses.import_validbridge_description')
       default:
         return t('dashboard.courses.import_select_type')
     }
@@ -395,7 +395,7 @@ function CoursesHome(params: CourseProps) {
         }
       )
       const timestamp = new Date().toISOString().split('T')[0]
-      downloadBlob(blob, `learnhouse-courses-export-${timestamp}.zip`)
+      downloadBlob(blob, `validbridge-courses-export-${timestamp}.zip`)
       exportToast.complete(toastId, undefined, count, 'batch')
     } catch (error: any) {
       exportToast.error(toastId, error.message || t('courses.courses_exported_error'), undefined, count, 'batch')

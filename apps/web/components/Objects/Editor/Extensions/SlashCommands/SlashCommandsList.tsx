@@ -19,11 +19,11 @@ import {
 } from './slashCommandsConfig'
 import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { planMeetsRequirement } from '@services/plans/plans'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const SlashCommandsList = forwardRef<SlashCommandsListRef, SlashCommandsListProps>(
   ({ items, command, currentPlan = 'free' }, ref) => {
-    const { track } = useLHAnalytics('editor')
+    const { track } = useVBAnalytics('editor')
     const [selectedIndex, setSelectedIndex] = useState(0)
     const containerRef = useRef<HTMLDivElement>(null)
     const itemRefs = useRef<Map<number, HTMLButtonElement>>(new Map())

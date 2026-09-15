@@ -87,7 +87,7 @@ class TestInvitedUsersListAuthz:
         self, mock_request, db, org, anonymous_user
     ):
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=_redis_config(),
         ), patch(
             "src.services.orgs.users.redis.Redis.from_url"
@@ -105,7 +105,7 @@ class TestInvitedUsersListAuthz:
         self, mock_request, db, org, regular_user
     ):
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=_redis_config(),
         ), patch(
             "src.services.orgs.users.redis.Redis.from_url"
@@ -123,7 +123,7 @@ class TestInvitedUsersListAuthz:
     ):
         # admin_user administers org 1 only; org 2 must be opaque to them.
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=_redis_config(),
         ), patch(
             "src.services.orgs.users.redis.Redis.from_url"
@@ -142,7 +142,7 @@ class TestInvitedUsersListAuthz:
         fake_redis = _fake_redis(["a@test.com", "b@test.com"])
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=_redis_config(),
         ), patch(
             "src.services.orgs.users.redis.Redis.from_url",
@@ -163,7 +163,7 @@ class TestInvitedUsersListAuthz:
         fake_redis = _fake_redis(["c@test.com"])
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=_redis_config(),
         ), patch(
             "src.services.orgs.users.redis.Redis.from_url",

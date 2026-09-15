@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { ChatCenteredText, Moon, PaintBrush, Sun, TextAa, UploadSimple } from '@phosphor-icons/react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { constructAcceptValue } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { AuthBrandingConfig, updateOrgAuthBrandingConfig, uploadOrgAuthBackground } from '@services/settings/org'
@@ -28,9 +28,9 @@ export default function AuthBrandingTab() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
-  // Enterprise orgs do not show the LearnHouse mark on the sign-in panel.
+  // Enterprise orgs do not show the ValidBridge mark on the sign-in panel.
   const isEnterprise = usePlan() === 'enterprise'
 
   const [state, setState] = useState<AuthBrandingState>(() => readAuthBranding(org))
@@ -212,7 +212,7 @@ export default function AuthBrandingTab() {
           backgroundStyle={backgroundStyle}
           textColor={state.text_color}
           scrim={scrim}
-          showLearnHouseMark={!isEnterprise}
+          showValidBridgeMark={!isEnterprise}
           label={t('dashboard.organization.branding.vignettes.sign_in')}
         />
         <p className="mt-3 text-xs text-gray-400">{t('dashboard.organization.branding.auth.preview_note')}</p>

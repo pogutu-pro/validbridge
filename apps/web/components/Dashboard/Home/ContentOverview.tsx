@@ -12,7 +12,7 @@ import {
 } from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { apiFetch } from '@services/utils/ts/requests'
 import { getAPIUrl } from '@services/config/config'
 import { getCommunities } from '@services/communities/communities'
@@ -23,7 +23,7 @@ import { getOrgPodcasts } from '@services/podcasts/podcasts'
 export default function ContentOverview() {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const token = session?.data?.tokens?.access_token
   const orgslug = org?.slug
   const orgId = org?.id
@@ -103,8 +103,8 @@ export default function ContentOverview() {
       value: totalMembers,
       sub: t('dashboard.home.total_users'),
       icon: Users,
-      iconColor: 'text-indigo-500',
-      iconBg: 'bg-indigo-50',
+      iconColor: 'text-orange-500',
+      iconBg: 'bg-orange-50',
       href: '/dash/users/settings/users',
       show: true,
     },
@@ -113,8 +113,8 @@ export default function ContentOverview() {
       value: communities.length,
       sub: `${communities.filter((c: any) => c.public).length} ${t('dashboard.home.public')}`,
       icon: ChatCircle,
-      iconColor: 'text-violet-500',
-      iconBg: 'bg-violet-50',
+      iconColor: 'text-orange-500',
+      iconBg: 'bg-orange-50',
       href: '/dash/communities',
       show: communitiesEnabled,
     },

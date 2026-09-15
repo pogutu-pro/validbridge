@@ -39,7 +39,7 @@ async def _fake_base_url(org_slug, db_session=None, org_id=None):
 
 @pytest.fixture(autouse=True)
 def _gates(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+    monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
     monkeypatch.setattr(runner_module, "get_deployment_mode", lambda: "saas")
     monkeypatch.setattr(runner_module.links, "org_base_url", _fake_base_url)
     monkeypatch.setattr(

@@ -98,11 +98,11 @@ class TestWhiteLabelTranslations:
         "account_creation.body_in_org",
     )
 
-    def test_org_scoped_keys_never_name_learnhouse(self):
+    def test_org_scoped_keys_never_name_validbridge(self):
         for lang, bundle in EMAIL_TRANSLATIONS.items():
             for key, value in bundle.items():
                 if key.startswith(self.ORG_SCOPED_PREFIXES):
-                    assert "LearnHouse" not in value, f"{lang}:{key}"
+                    assert "ValidBridge" not in value, f"{lang}:{key}"
 
     def test_every_locale_ships_magic_login_copy(self):
         for lang in SUPPORTED_LANGUAGES:
@@ -123,4 +123,4 @@ class TestWhiteLabelTranslations:
 
     def test_powered_by_line_exists_everywhere(self):
         for lang in SUPPORTED_LANGUAGES:
-            assert "LearnHouse" in EMAIL_TRANSLATIONS[lang]["common.powered_by"]
+            assert "ValidBridge" in EMAIL_TRANSLATIONS[lang]["common.powered_by"]

@@ -6,7 +6,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } f
 // Client-side Cloudflare Turnstile widget. Reads the PUBLIC site key from the
 // runtime config (getConfig — this is a prebuilt image, so process.env.NEXT_PUBLIC_*
 // isn't reliable at runtime). Turnstile is active ONLY when BOTH the site key is
-// set AND the deployment is SaaS (LH_mode cookie) — never on OSS/self-hosted.
+// set AND the deployment is SaaS (VB_mode cookie) — never on OSS/self-hosted.
 // When inactive the widget renders NOTHING and forms treat a null token as
 // "allowed". The server enforces the same SaaS + TURNSTILE_SECRET_KEY gate.
 
@@ -17,19 +17,19 @@ export function getTurnstileSiteKey(): string {
 
 /**
  * True when the page is served on an org CUSTOM DOMAIN (the proxy sets the
- * LH_custom_domain cookie). Cloudflare Turnstile site keys are hostname-locked to
+ * VB_custom_domain cookie). Cloudflare Turnstile site keys are hostname-locked to
  * the platform domain, so the widget can't render/validate on arbitrary customer
  * domains — we disable it there rather than show a broken challenge that blocks
  * the form. The server (turnstile verify + signup) skips it on custom domains too.
  */
 function isOnCustomDomain(): boolean {
   if (typeof document === 'undefined') return false
-  return document.cookie.split('; ').some((c) => c.startsWith('LH_custom_domain='))
+  return document.cookie.split('; ').some((c) => c.startsWith('VB_custom_domain='))
 }
 
 /**
  * True when Turnstile should be active on the client: a site key is present AND
- * we're on the SaaS deployment. NOTE: `getDeploymentMode()` reads the LH_mode
+ * we're on the SaaS deployment. NOTE: `getDeploymentMode()` reads the VB_mode
  * cookie, which isn't available during SSR — call this only after mount (see
  * `useTurnstileRequired`) to avoid hydration mismatches.
  */

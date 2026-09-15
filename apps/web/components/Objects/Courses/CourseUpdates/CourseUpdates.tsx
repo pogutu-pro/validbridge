@@ -21,7 +21,7 @@ import toast from 'react-hot-toast'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useTranslation } from 'react-i18next'
 
 dayjs.extend(relativeTime);
@@ -29,7 +29,7 @@ dayjs.extend(relativeTime);
 function CourseUpdates() {
   const { t } = useTranslation();
   const course = useCourse() as any;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useQuery({
     queryKey: queryKeys.courses.updates(course?.courseStructure?.course_uuid ?? ''),
@@ -110,7 +110,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
   const { t } = useTranslation()
   const org = useOrg() as any;
   const course = useCourse() as any;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const queryClient = useQueryClient();
 
   const validate = (values: any) => {
@@ -208,7 +208,7 @@ const UpdatesListView = () => {
   const { t } = useTranslation()
   const course = useCourse() as any;
   const adminStatus = useAdminStatus() ;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useQuery({
     queryKey: queryKeys.courses.updates(course?.courseStructure?.course_uuid ?? ''),
@@ -246,7 +246,7 @@ const UpdatesListView = () => {
 
 const DeleteUpdateButton = ({ update }: any) => {
   const { t } = useTranslation()
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const course = useCourse() as any;
   const org = useOrg() as any;
   const queryClient = useQueryClient();

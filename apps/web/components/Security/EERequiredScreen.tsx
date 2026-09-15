@@ -10,13 +10,13 @@ import React from 'react'
  */
 export default function EERequiredScreen() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#0f0f10] px-6">
+    <div className="flex justify-center items-center min-h-screen bg-[#F8F7F2] px-6">
       <div className="text-center max-w-md">
-        <h1 className="text-2xl font-bold text-white mb-2">
+        <h1 className="text-2xl font-bold text-[#262626] mb-2">
           Enterprise Edition license required
         </h1>
-        <p className="text-white/50 text-sm leading-relaxed">
-          The superadmin dashboard is part of LearnHouse Enterprise Edition and
+        <p className="text-[#737373]/80 text-sm leading-relaxed">
+          The superadmin dashboard is part of ValidBridge Enterprise Edition and
           is not available on this deployment.
         </p>
       </div>

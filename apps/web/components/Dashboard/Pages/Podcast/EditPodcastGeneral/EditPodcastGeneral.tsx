@@ -1,10 +1,10 @@
 'use client'
 import React, { useState } from 'react'
 import { usePodcast } from '@components/Contexts/PodcastContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { updatePodcast, updatePodcastThumbnail } from '@services/podcasts/podcasts'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { getPodcastThumbnailMediaDirectory } from '@services/media/media'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useQueryClient } from '@tanstack/react-query'
@@ -29,10 +29,10 @@ interface EditPodcastGeneralProps {
 function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
   const { t } = useTranslation()
   const { podcast, refreshPodcast, isLoading } = usePodcast()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const [isSaving, setIsSaving] = useState(false)
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)

@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid redirect_uri' }, { status: 400 })
     }
 
-    const clientId = process.env.LEARNHOUSE_GOOGLE_CLIENT_ID
-    const clientSecret = process.env.LEARNHOUSE_GOOGLE_CLIENT_SECRET
+    const clientId = process.env.VALIDBRIDGE_GOOGLE_CLIENT_ID
+    const clientSecret = process.env.VALIDBRIDGE_GOOGLE_CLIENT_SECRET
 
     if (!clientId || !clientSecret) {
       return NextResponse.json(

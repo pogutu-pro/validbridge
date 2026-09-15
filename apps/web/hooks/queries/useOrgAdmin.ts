@@ -1,14 +1,14 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { queryKeys } from '@lib/query/keys'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { getOrgUsage } from '@services/orgs/usage'
 
 export function useOrgUsers(orgId: number | undefined, page = 1) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({
@@ -24,7 +24,7 @@ export function useOrgUsers(orgId: number | undefined, page = 1) {
 }
 
 export function useOrgUsage(orgId: number | undefined) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({
@@ -36,7 +36,7 @@ export function useOrgUsage(orgId: number | undefined) {
 }
 
 export function useOrgAdmins(orgId: number | undefined) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({
@@ -52,7 +52,7 @@ export function useOrgAdmins(orgId: number | undefined) {
 }
 
 export function useInviteCodes(orgId: number | undefined) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({

@@ -12,7 +12,7 @@ from typing import Optional
 
 import redis
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ _pool: Optional[redis.ConnectionPool] = None
 
 def _build_pool() -> Optional[redis.ConnectionPool]:
     try:
-        config = get_learnhouse_config()
+        config = get_validbridge_config()
         conn_string = config.redis_config.redis_connection_string
         if not conn_string:
             return None

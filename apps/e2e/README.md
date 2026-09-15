@@ -1,9 +1,9 @@
-# LearnHouse E2E — UI acceptance tests
+# ValidBridge E2E — UI acceptance tests
 
-Browser-driven, human-like end-to-end tests for LearnHouse. The suite boots a
-real **self-host via the LearnHouse CLI** (`setup --ci`, pulling the published
-image) and drives the UI with Playwright like a real user. It validates the
-**shipped self-host product**.
+Browser-driven, human-like end-to-end tests for ValidBridge. The suite runs
+against a **running ValidBridge instance** (started with `docker compose up -d`
+at the repo root, or any dev stack) and drives the UI with Playwright like a
+real user.
 
 It is organized as a **modular, multi-feature** harness: shared infrastructure
 lives in `core/`, and each product area is a self-contained module under
@@ -30,8 +30,8 @@ apps/e2e/
         teacher.ts           # TeacherSubmissionsPage / AssignmentEditorPage / GradingModal
       fixtures/              # static test assets (e.g. an upload sample)
       tests/                 # *.spec.ts for this feature
-  global-setup.ts            # boot self-host + create shared admin/student sessions
-  global-teardown.ts         # docker compose down -v on the generated compose file
+  global-setup.ts            # wait for the running instance + create shared admin/student sessions
+  global-teardown.ts         # no-op (the instance is managed externally)
   playwright.config.ts       # testDir: './features' (auto-discovers every module)
 ```
 
@@ -51,16 +51,20 @@ feature-local things relatively. Specs never reach into another feature.
 
 ## Running locally
 
-Requires Docker running, plus Node 20+ / bun.
+Requires a running ValidBridge instance, plus Node 20+ / bun.
 
 ```bash
+# 1. Start the stack from the repo root:
+docker compose up -d
+
+# 2. Run the suite against it:
 cd apps/e2e
 bun install
 bunx playwright install chromium
-bun run test                              # boots a self-host, runs all features, tears it down
-E2E_BASE_URL=http://localhost:8080 bun run test   # reuse a running instance (fast iteration)
-bun run test:headed                       # watch it drive the UI
-bun run report                            # open the HTML report after a run
+bun run test                                # run all features against http://localhost:3000
+E2E_BASE_URL=http://localhost:8080 bun run test   # point at a different instance
+bun run test:headed                         # watch it drive the UI
+bun run report                              # open the HTML report after a run
 ```
 
 Run a single module or spec:
@@ -74,13 +78,11 @@ bunx playwright test 06-manual-grading            # one spec by name
 
 | Var | Default | Purpose |
 | --- | --- | --- |
-| `E2E_BASE_URL` | — | Use an existing instance; skips boot + teardown. |
-| `E2E_PORT` | `8080` | HTTP port for the self-host. |
-| `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD` | `admin@school.dev` / `E2eTestAdmin!234` | Bootstrapped admin. |
-| `E2E_ORG_SLUG` | `default` | Bootstrapped org slug. |
-| `E2E_CLI` | `npx --yes learnhouse@latest` | CLI used to boot (override for a local build). |
-| `E2E_SKIP_BOOT` | — | `1` to skip booting (assumes instance already up). |
-| `E2E_KEEP` | — | `1` to keep the instance running after the suite. |
+| `E2E_BASE_URL` | `http://localhost:3000` | Base URL of the running instance. |
+| `E2E_PORT` | `3000` | HTTP port used when E2E_BASE_URL is unset. |
+| `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD` | `admin@school.dev` / `E2eTestAdmin!234` | Bootstraped admin. |
+| `E2E_ORG_SLUG` | `default` | Bootstraped org slug. |
+| `E2E_KEEP` | — | Accepted for backwards compatibility (the suite never tears down). |
 
 ### Reliability notes
 
@@ -130,8 +132,8 @@ server-verify dispatch, CODE grading, retry caps, due dates, permissions).
    students couldn't save new answers. Fixed in `apps/web/.../AssignmentBoxUI.tsx`
    (gate on submission status).
 
-> The two fixes are not in the published `:latest` image yet, so the
+> The two fixes are not in a released image yet, so the
 > manual-grading grade assertion requires this branch's code in the running
-> instance (it passes against `learnhouse dev` / a branch-built image).
+> instance (it passes against a locally-built stack).
 > CODE task type is covered by backend tests only (Judge0 isn't available on a
 > self-host).

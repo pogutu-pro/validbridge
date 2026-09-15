@@ -1,5 +1,5 @@
 'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import AddRole from '@components/Objects/Modals/Dash/OrgRoles/AddRole'
 import EditRole from '@components/Objects/Modals/Dash/OrgRoles/EditRole'
@@ -22,7 +22,7 @@ import { usePlan } from '@components/Hooks/usePlan'
 function OrgRoles() {
     const { t } = useTranslation()
     const org = useOrg() as any
-    const session = useLHSession() as any
+    const session = useVBSession() as any
     const access_token = session?.data?.tokens?.access_token;
     const queryClient = useQueryClient()
     const currentPlan = usePlan()
@@ -235,7 +235,7 @@ function OrgRoles() {
                                         <Shield className="w-4 h-4 text-gray-400" />
                                         <span className="font-medium text-sm">{role.name}</span>
                                         {isSystem && (
-                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                                 <Globe className="w-3 h-3 me-1" />
                                                 {t('dashboard.users.roles.system_wide')}
                                             </span>
@@ -358,7 +358,7 @@ function OrgRoles() {
                                                 <Shield className="w-4 h-4 text-gray-400" />
                                                 <span className="font-semibold text-gray-800 text-sm">{role.name}</span>
                                                 {isSystem && (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                                         <Globe className="w-3 h-3" />
                                                         {t('dashboard.users.roles.system_wide')}
                                                     </span>

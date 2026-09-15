@@ -5,7 +5,7 @@ import redis
 import json
 import base64
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.ai.llm import generate_stream, attachments_to_parts, model_for_tier
 from src.services.ai.schemas.courseplanning import (
     CoursePlan,
@@ -16,7 +16,7 @@ from src.services.ai.schemas.courseplanning import (
 
 logger = logging.getLogger(__name__)
 
-LH_CONFIG = get_learnhouse_config()
+VB_CONFIG = get_validbridge_config()
 
 # Redis key pattern for course planning sessions
 COURSE_PLANNING_SESSION_KEY = "course_planning_session:{session_uuid}"
@@ -32,7 +32,7 @@ ENABLE_ACTIVITY_CONTENT_GENERATION = True
 
 def get_redis_connection():
     """Get Redis connection if available"""
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
     if redis_conn_string:
         try:
             return redis.from_url(redis_conn_string)
@@ -214,7 +214,7 @@ IMPORTANT GUIDELINES:
 - Activity names should be descriptive (e.g., "Introduction to Variables", "Quiz: Testing Your Knowledge")
 
 ACTIVITY TYPES AND SUGGESTED BLOCKS:
-Activities in LearnHouse use a rich content editor with various block types. For each activity, suggest appropriate blocks:
+Activities in ValidBridge use a rich content editor with various block types. For each activity, suggest appropriate blocks:
 - paragraph: Regular text content
 - heading: Section headers (levels 1-3)
 - bulletList: Unordered lists

@@ -3,7 +3,7 @@ import React from 'react'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
-const COLORS = ['#6b8de3', '#818cf8', '#a78bfa', '#c4b5fd']
+const COLORS = ['#6b8de3', '#818cf8', '#fb923c', '#fdba74']
 const kFormatter = (v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
 
 export default function FunnelChart({ days = '30' }: { days?: string }) {

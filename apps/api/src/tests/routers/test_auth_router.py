@@ -43,8 +43,8 @@ def _mock_config(tenancy: str = "multi"):
     return SimpleNamespace(
         hosting_config=SimpleNamespace(
             tenancy=tenancy,
-            domain="learnhouse.test",
-            cookie_config=SimpleNamespace(domain=".learnhouse.test"),
+            domain="validbridge.test",
+            cookie_config=SimpleNamespace(domain=".validbridge.test"),
         )
     )
 
@@ -89,13 +89,13 @@ class TestAuthHelpers:
     def test_get_cookie_domain_for_configured_subdomain(self):
         request = Mock()
         request.headers = {
-            "origin": "https://app.learnhouse.test",
+            "origin": "https://app.validbridge.test",
             "referer": "",
             "host": "",
         }
 
-        with patch("src.routers.auth.get_learnhouse_config", return_value=_mock_config()):
-            assert get_cookie_domain_for_request(request) == ".learnhouse.test"
+        with patch("src.routers.auth.get_validbridge_config", return_value=_mock_config()):
+            assert get_cookie_domain_for_request(request) == ".validbridge.test"
 
     def test_get_cookie_domain_for_custom_domain_and_localhost(self):
         custom_request = Mock()
@@ -111,7 +111,7 @@ class TestAuthHelpers:
             "host": "",
         }
 
-        with patch("src.routers.auth.get_learnhouse_config", return_value=_mock_config()):
+        with patch("src.routers.auth.get_validbridge_config", return_value=_mock_config()):
             assert get_cookie_domain_for_request(custom_request) is None
             assert get_cookie_domain_for_request(localhost_request) is None
 
@@ -119,7 +119,7 @@ class TestAuthHelpers:
         # In single tenancy the same code path serves localhost dev and any
         # self-hosted VPS hostname — cookies are always host-only.
         for origin in (
-            "https://app.learnhouse.test",  # would be subdomain match in multi
+            "https://app.validbridge.test",  # would be subdomain match in multi
             "https://learn.someschool.edu",  # arbitrary VPS host
             "http://localhost:3000",
             "",
@@ -127,7 +127,7 @@ class TestAuthHelpers:
             request = Mock()
             request.headers = {"origin": origin, "referer": "", "host": ""}
             with patch(
-                "src.routers.auth.get_learnhouse_config",
+                "src.routers.auth.get_validbridge_config",
                 return_value=_mock_config(tenancy="single"),
             ):
                 assert get_cookie_domain_for_request(request) is None, (
@@ -161,10 +161,10 @@ class TestAuthHelpers:
         response = Response()
         request = Mock()
         request.client = SimpleNamespace(host="127.0.0.1")
-        request.headers = {"origin": "https://app.learnhouse.test"}
+        request.headers = {"origin": "https://app.validbridge.test"}
         request.url = SimpleNamespace(scheme="https")
 
-        with patch("src.routers.auth.get_learnhouse_config", return_value=_mock_config()):
+        with patch("src.routers.auth.get_validbridge_config", return_value=_mock_config()):
             set_auth_cookies(response, "access-token", "refresh-token", request)
             cookie_header = "\n".join(response.headers.getlist("set-cookie"))
             assert JWT_COOKIE_NAME in cookie_header
@@ -204,11 +204,11 @@ class TestAuthHelpers:
         http_proxy_request.headers = {"x-forwarded-proto": "http"}
         http_proxy_request.url = SimpleNamespace(scheme="https")
 
-        with patch("src.routers.auth.get_learnhouse_config", return_value=_mock_config()), patch(
+        with patch("src.routers.auth.get_validbridge_config", return_value=_mock_config()), patch(
             "src.routers.auth.isDevModeEnabled",
             return_value=False,
         ):
-            assert get_cookie_domain_for_request(empty_request) == ".learnhouse.test"
+            assert get_cookie_domain_for_request(empty_request) == ".validbridge.test"
             assert is_request_secure(None) is True
             assert is_request_secure(invalid_ip_request) is True
             assert is_request_secure(http_proxy_request) is False
@@ -557,7 +557,7 @@ class TestAuthRouter:
         assert response.status_code == 401
 
     async def test_oauth_invalid_org_id_returns_400(self, client, db, org):
-        with patch("src.routers.auth.get_learnhouse_config"):
+        with patch("src.routers.auth.get_validbridge_config"):
             response = await client.post(
                 "/api/v1/auth/oauth",
                 params={"org_id": 9999},
@@ -598,7 +598,7 @@ class TestAuthRouter:
         mock_config = SimpleNamespace(
             redis_config=SimpleNamespace(redis_connection_string="redis://localhost:6379")
         )
-        with patch("src.routers.auth.get_learnhouse_config", return_value=mock_config), patch(
+        with patch("src.routers.auth.get_validbridge_config", return_value=mock_config), patch(
             "redis.Redis.from_url", return_value=mock_redis
         ), patch(
             "src.routers.auth.get_google_user_info",
@@ -627,7 +627,7 @@ class TestAuthRouter:
         mock_config = SimpleNamespace(
             redis_config=SimpleNamespace(redis_connection_string="redis://localhost:6379")
         )
-        with patch("src.routers.auth.get_learnhouse_config", return_value=mock_config), patch(
+        with patch("src.routers.auth.get_validbridge_config", return_value=mock_config), patch(
             "redis.Redis.from_url", side_effect=RuntimeError("Redis down")
         ), patch(
             "src.routers.auth.get_google_user_info",
@@ -689,7 +689,7 @@ class TestAuthRouter:
             new_callable=AsyncMock,
             return_value={"email": "User@Test.com", "email_verified": True},
         ), patch(
-            "src.routers.auth.get_learnhouse_config", return_value=mock_config
+            "src.routers.auth.get_validbridge_config", return_value=mock_config
         ), patch(
             "redis.Redis.from_url", return_value=mock_redis
         ) as from_url_mock, patch(
@@ -750,7 +750,7 @@ class TestRefreshOutcomeTelemetry:
         with patch(
             "src.routers.auth.check_refresh_rate_limit", return_value=(True, None)
         ):
-            with caplog.at_level(logging.INFO, logger="learnhouse.auth.refresh"):
+            with caplog.at_level(logging.INFO, logger="validbridge.auth.refresh"):
                 response = await client.get("/api/v1/auth/refresh")
         assert response.status_code == 401
         assert any(getattr(r, "outcome", None) == "cookie_missing" for r in caplog.records)
@@ -759,7 +759,7 @@ class TestRefreshOutcomeTelemetry:
         with patch(
             "src.routers.auth.check_refresh_rate_limit", return_value=(False, 60)
         ):
-            with caplog.at_level(logging.INFO, logger="learnhouse.auth.refresh"):
+            with caplog.at_level(logging.INFO, logger="validbridge.auth.refresh"):
                 response = await client.get("/api/v1/auth/refresh")
         assert response.status_code == 429
         assert any(getattr(r, "outcome", None) == "rate_limited" for r in caplog.records)
@@ -768,7 +768,7 @@ class TestRefreshOutcomeTelemetry:
         with patch(
             "src.routers.auth.check_refresh_rate_limit", return_value=(True, None)
         ), patch("src.routers.auth.decode_refresh_token", return_value=None):
-            with caplog.at_level(logging.INFO, logger="learnhouse.auth.refresh"):
+            with caplog.at_level(logging.INFO, logger="validbridge.auth.refresh"):
                 response = await client.get(
                     "/api/v1/auth/refresh",
                     cookies={JWT_REFRESH_COOKIE_NAME: "refresh-token"},
@@ -806,7 +806,7 @@ class TestRefreshOutcomeTelemetry:
         ), patch(
             "src.routers.auth.revoke_user_sessions_before"
         ):
-            with caplog.at_level(logging.INFO, logger="learnhouse.auth.refresh"):
+            with caplog.at_level(logging.INFO, logger="validbridge.auth.refresh"):
                 response = await client.get(
                     "/api/v1/auth/refresh",
                     cookies={JWT_REFRESH_COOKIE_NAME: "refresh-token"},
@@ -846,7 +846,7 @@ class TestRefreshOutcomeTelemetry:
         ), patch(
             "src.routers.auth.is_request_secure", return_value=False
         ):
-            with caplog.at_level(logging.INFO, logger="learnhouse.auth.refresh"):
+            with caplog.at_level(logging.INFO, logger="validbridge.auth.refresh"):
                 response = await client.get(
                     "/api/v1/auth/refresh",
                     cookies={JWT_REFRESH_COOKIE_NAME: "refresh-token"},

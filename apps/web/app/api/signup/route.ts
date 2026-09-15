@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
   const data = await backendRes.json().catch(() => ({}))
 
   // On success, sync the marketing contact (SaaS-only, fire-and-forget) — but
-  // ONLY for ORG-LESS signups (learnhouse.io self-serve prospects). Members
+  // ONLY for ORG-LESS signups (validbridge.co.ke self-serve prospects). Members
   // signing up INTO an existing org (org_id present) are that org's learners,
   // not people we market to, so they are not added. Org admins are recorded
   // separately when they create/administer an org (see /api/loops/admin).

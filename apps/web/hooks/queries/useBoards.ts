@@ -1,12 +1,12 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { queryKeys } from '@lib/query/keys'
 import { getBoard, getBoards } from '@services/boards/boards'
 
 export function useBoards(orgId: number) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({
@@ -18,7 +18,7 @@ export function useBoards(orgId: number) {
 }
 
 export function useBoard(boardUuid: string) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({

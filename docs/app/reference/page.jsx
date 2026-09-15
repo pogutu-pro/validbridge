@@ -14,7 +14,7 @@ export const revalidate = 3600
 export const metadata = {
   title: 'API Reference',
   description:
-    'Complete reference for the LearnHouse REST API — endpoints, request and response schemas, code examples and a live playground.',
+    'Complete reference for the ValidBridge REST API — endpoints, request and response schemas, code examples and a live playground.',
   alternates: { canonical: '/reference' },
 }
 
@@ -48,9 +48,9 @@ export default async function ReferenceOverviewPage() {
     <div className="lh-ref-overview">
       <header className="lh-ref-overview-head">
         <p className="lh-ref-overview-kicker">API Reference</p>
-        <h1 className="lh-ref-overview-title">The LearnHouse API</h1>
+        <h1 className="lh-ref-overview-title">The ValidBridge API</h1>
         <p className="lh-ref-overview-lede">
-          A REST API for driving LearnHouse programmatically — {totalOps} documented endpoints
+          A REST API for driving ValidBridge programmatically — {totalOps} documented endpoints
           across courses, learners, assignments, payments and more. This reference is generated
           directly from the live OpenAPI specification, so it is always in sync with the API.
         </p>
@@ -72,12 +72,12 @@ export default async function ReferenceOverviewPage() {
           <section className="lh-ref-section">
             <h2 className="lh-ref-overview-h2">Authentication</h2>
             <p className="lh-ref-op-desc">
-              Programmatic access uses organization API tokens, prefixed <code>lh_</code>. Create
+              Programmatic access uses organization API tokens, prefixed <code>vb_</code>. Create
               them in your dashboard under <strong>Developers → API Access</strong> (Pro plan) —
               the full token is shown once, at creation, and can be scoped to least-privilege
               rights. Send it as a bearer token on every request:
             </p>
-            <pre className="lh-ref-baseurl">Authorization: Bearer lh_…</pre>
+            <pre className="lh-ref-baseurl">Authorization: Bearer vb_…</pre>
             <p className="lh-ref-op-desc">
               User-context flows can instead use the JWT returned by{' '}
               <Link href="/reference/auth">the login endpoint</Link> (form-encoded, not JSON) as

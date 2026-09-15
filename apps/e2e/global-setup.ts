@@ -1,25 +1,19 @@
 /**
  * Playwright global setup.
  *
- * Boots a real LearnHouse self-host using the LearnHouse CLI (`setup --ci`,
- * pulling the published image) unless we've been pointed at an already-running
- * instance via E2E_BASE_URL / E2E_SKIP_BOOT. Then it waits until the API
- * health endpoint and the bootstrapped organization are both reachable before
- * any test runs — so specs never start against a half-booted stack.
+ * Assumes a ValidBridge instance is already running (start it with
+ * `docker compose up -d` at the repo root, or point the suite at any instance
+ * via E2E_BASE_URL). Waits until the API health endpoint and the bootstrapped
+ * organization are both reachable before any test runs — so specs never start
+ * against a half-booted stack.
  */
-import { spawnSync } from 'node:child_process'
 import { chromium } from '@playwright/test'
 import {
   ADMIN_EMAIL,
   ADMIN_PASSWORD,
   API_URL,
   BASE_URL,
-  CLI,
-  DOMAIN,
-  INSTALL_NAME,
   ORG_SLUG,
-  PORT,
-  SKIP_BOOT,
   makeStudent,
 } from './core/instance'
 import * as api from './core/client'
@@ -30,7 +24,7 @@ import {
   writeSharedStudent,
 } from './core/sharedAuth'
 
-const BOOT_TIMEOUT_MS = 8 * 60 * 1000 // image pull + first-run install can be slow
+const BOOT_TIMEOUT_MS = 8 * 60 * 1000 // first-run install can be slow
 const POLL_INTERVAL_MS = 3000
 
 function sleep(ms: number): Promise<void> {
@@ -56,47 +50,10 @@ async function waitForOk(url: string, timeoutMs: number, label: string): Promise
   throw new Error(`Timed out waiting for ${label} at ${url}: ${lastErr}`)
 }
 
-function bootSelfHost(): void {
-  console.log(`Booting LearnHouse self-host via CLI (install "${INSTALL_NAME}")…`)
-  const cmd = [
-    CLI,
-    'setup',
-    '--ci',
-    `--name ${INSTALL_NAME}`,
-    `--domain ${DOMAIN}`,
-    `--port ${PORT}`,
-    `--admin-email ${ADMIN_EMAIL}`,
-    `--admin-password ${ADMIN_PASSWORD}`,
-    `--org-name "E2E Org"`,
-    `--org-slug ${ORG_SLUG}`,
-  ].join(' ')
-
-  const result = spawnSync(cmd, {
-    shell: true,
-    stdio: 'inherit',
-    timeout: BOOT_TIMEOUT_MS,
-    env: process.env,
-  })
-
-  if (result.status !== 0) {
-    throw new Error(
-      `CLI setup failed (exit ${result.status}). ` +
-        `Command: ${cmd}\n` +
-        `If you already have an instance running, set E2E_BASE_URL to skip booting.`,
-    )
-  }
-}
-
 export default async function globalSetup(): Promise<void> {
-  if (SKIP_BOOT) {
-    console.log(`Reusing existing instance at ${BASE_URL} (boot skipped).`)
-  } else {
-    bootSelfHost()
-  }
-
-  await waitForOk(`${API_URL}/health`, SKIP_BOOT ? 60_000 : BOOT_TIMEOUT_MS, 'API health')
+  await waitForOk(`${API_URL}/health`, BOOT_TIMEOUT_MS, 'API health')
   await waitForOk(`${API_URL}/orgs/slug/${ORG_SLUG}`, 60_000, `org "${ORG_SLUG}"`)
-  console.log(`LearnHouse is ready at ${BASE_URL}. Admin: ${ADMIN_EMAIL}`)
+  console.log(`ValidBridge is ready at ${BASE_URL}. Admin: ${ADMIN_EMAIL}`)
 
   await generateSharedAuth()
 }
@@ -152,7 +109,7 @@ async function saveLogin(
   await page.evaluate(() => {
     try {
       window.localStorage.setItem(
-        'lh_onboarding',
+        'vb_onboarding',
         JSON.stringify({
           completedSteps: [
             'create_course', 'add_activities', 'experience_editor', 'try_playgrounds',

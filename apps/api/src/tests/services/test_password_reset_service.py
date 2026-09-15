@@ -57,7 +57,7 @@ class TestPasswordResetService:
 
     def test_get_redis_connection_errors(self):
         with patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="")
             ),
@@ -69,7 +69,7 @@ class TestPasswordResetService:
         fake_redis = MagicMock()
         fake_redis.__bool__.return_value = False
         with patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -98,7 +98,7 @@ class TestPasswordResetService:
             "src.services.users.password_reset.generate_secure_reset_code",
             return_value="RESET123",
         ), patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -109,7 +109,7 @@ class TestPasswordResetService:
             return_value=fake_redis,
         ), patch(
             "src.services.users.password_reset.get_base_url_from_request",
-            return_value="https://learnhouse.test",
+            return_value="https://validbridge.test",
         ), patch(
             "src.services.users.password_reset.send_password_reset_email",
             return_value=True,
@@ -149,7 +149,7 @@ class TestPasswordResetService:
             return_value=fake_redis,
         ), patch(
             "src.services.users.password_reset.get_base_url_from_request",
-            return_value="https://learnhouse.test",
+            return_value="https://validbridge.test",
         ), patch(
             "src.services.users.password_reset.send_password_reset_email_platform",
             return_value=True,
@@ -206,7 +206,7 @@ class TestPasswordResetService:
         assert missing.startswith("If an account")
 
         with patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="")
             ),
@@ -224,7 +224,7 @@ class TestPasswordResetService:
         fake_redis = MagicMock()
         fake_redis.__bool__.return_value = False
         with patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -248,7 +248,7 @@ class TestPasswordResetService:
             "src.services.users.password_reset.generate_secure_reset_code",
             return_value="RESET999",
         ), patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -259,7 +259,7 @@ class TestPasswordResetService:
             return_value=Mock(set=Mock()),
         ), patch(
             "src.services.users.password_reset.get_base_url_from_request",
-            return_value="https://learnhouse.test",
+            return_value="https://validbridge.test",
         ), patch(
             "src.services.users.password_reset.send_password_reset_email",
             return_value=False,
@@ -301,7 +301,7 @@ class TestPasswordResetService:
             "src.services.users.password_reset.validate_password_complexity",
             return_value=SimpleNamespace(is_valid=True, errors=[], requirements={}),
         ), patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -373,7 +373,7 @@ class TestPasswordResetService:
             "src.services.users.password_reset.validate_password_complexity",
             return_value=SimpleNamespace(is_valid=True, errors=[], requirements={}),
         ), patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -411,7 +411,7 @@ class TestPasswordResetService:
             "src.services.users.password_reset.validate_password_complexity",
             return_value=SimpleNamespace(is_valid=True, errors=[], requirements={}),
         ), patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -439,7 +439,7 @@ class TestPasswordResetService:
             "src.services.users.password_reset.validate_password_complexity",
             return_value=SimpleNamespace(is_valid=True, errors=[], requirements={}),
         ), patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -474,7 +474,7 @@ class TestPasswordResetService:
             "src.services.users.password_reset.validate_password_complexity",
             return_value=SimpleNamespace(is_valid=True, errors=[], requirements={}),
         ), patch(
-            "src.services.users.password_reset.get_learnhouse_config",
+            "src.services.users.password_reset.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -514,7 +514,7 @@ class TestPasswordResetService:
             return_value=fake_redis,
         ), patch(
             "src.services.users.password_reset.get_base_url_from_request",
-            return_value="https://learnhouse.test",
+            return_value="https://validbridge.test",
         ), patch(
             "src.services.users.password_reset.send_password_reset_email_platform",
             return_value=True,
@@ -687,7 +687,7 @@ class TestPasswordResetService:
         ok_rate_redis = Mock()
         ok_rate_redis.incr.return_value = 1
         with patch("src.services.users.password_reset._get_redis_connection", return_value=ok_rate_redis), \
-             patch("src.services.users.password_reset.get_learnhouse_config",
+             patch("src.services.users.password_reset.get_validbridge_config",
                    return_value=SimpleNamespace(redis_config=SimpleNamespace(redis_connection_string=""))):
             with pytest.raises(HTTPException) as exc120:
                 await send_reset_password_code(mock_request, db, AnonymousUser(), org.id, regular_user.email)
@@ -697,7 +697,7 @@ class TestPasswordResetService:
         falsy = Mock()
         falsy.__bool__ = Mock(return_value=False)
         with patch("src.services.users.password_reset._get_redis_connection", return_value=ok_rate_redis), \
-             patch("src.services.users.password_reset.get_learnhouse_config",
+             patch("src.services.users.password_reset.get_validbridge_config",
                    return_value=SimpleNamespace(redis_config=SimpleNamespace(redis_connection_string="redis://test"))), \
              patch("src.services.users.password_reset.redis.Redis.from_url", return_value=falsy):
             with pytest.raises(HTTPException) as exc129:
@@ -707,7 +707,7 @@ class TestPasswordResetService:
         # Line 237: change_password_with_reset_code - no redis_conn_string
         with patch("src.services.users.password_reset.validate_password_complexity",
                    return_value=SimpleNamespace(is_valid=True, errors=[], requirements={})), \
-             patch("src.services.users.password_reset.get_learnhouse_config",
+             patch("src.services.users.password_reset.get_validbridge_config",
                    return_value=SimpleNamespace(redis_config=SimpleNamespace(redis_connection_string=""))):
             with pytest.raises(HTTPException) as exc237:
                 await change_password_with_reset_code(mock_request, db, AnonymousUser(), "NewPass123!", org.id, regular_user.email, "RESET123")
@@ -716,7 +716,7 @@ class TestPasswordResetService:
         # Line 246: change_password_with_reset_code - falsy Redis connection
         with patch("src.services.users.password_reset.validate_password_complexity",
                    return_value=SimpleNamespace(is_valid=True, errors=[], requirements={})), \
-             patch("src.services.users.password_reset.get_learnhouse_config",
+             patch("src.services.users.password_reset.get_validbridge_config",
                    return_value=SimpleNamespace(redis_config=SimpleNamespace(redis_connection_string="redis://test"))), \
              patch("src.services.users.password_reset.redis.Redis.from_url", return_value=falsy):
             with pytest.raises(HTTPException) as exc246:

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { updateDiscussion, DISCUSSION_LABELS, DiscussionWithAuthor } from '@services/communities/discussions'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { DiscussionEditor } from '@components/Objects/Communities/DiscussionEditor'
@@ -58,7 +58,7 @@ export function EditDiscussionModal({
   allowRichContent = false,
 }: EditDiscussionModalProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [title, setTitle] = useState('')

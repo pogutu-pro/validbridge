@@ -90,7 +90,7 @@ export default function PricingGrid({
         {plan.popular && (
           <span
             className={`absolute top-4 end-4 text-[10px] font-bold px-2 py-0.5 rounded-md text-white ${
-              isPersonal ? 'bg-amber-500' : plan.id === 'pro' ? 'bg-purple-600' : 'bg-blue-600'
+              isPersonal ? 'bg-amber-500' : plan.id === 'pro' ? 'bg-orange-600' : 'bg-blue-600'
             }`}
           >
             {isPersonal ? 'Best value' : 'Popular'}
@@ -254,7 +254,7 @@ export default function PricingGrid({
                         {ENTERPRISE_PLAN.tagline}
                       </p>
                       <a
-                        href="https://learnhouse.app/contact?subject=business"
+                        href="https://validbridge.co.ke/contact?subject=business"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-block mt-6 px-5 py-2.5 text-[14px] font-bold bg-white text-black rounded-lg hover:bg-white/90 transition-colors"

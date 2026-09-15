@@ -2,11 +2,11 @@
 import React, { useState, useCallback } from 'react'
 import { ChevronUp } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { upvoteComment, removeCommentUpvote } from '@services/communities/discussions'
 import { cn } from '@/lib/utils'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CommentUpvoteButtonProps {
   commentUuid: string
@@ -21,9 +21,9 @@ export function CommentUpvoteButton({
   initialHasVoted,
   onVoteChange,
 }: CommentUpvoteButtonProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const { isUserPartOfTheOrg } = useOrgMembership()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const [voteCount, setVoteCount] = useState(initialVoteCount)
   const [hasVoted, setHasVoted] = useState(initialHasVoted)
   const [isLoading, setIsLoading] = useState(false)
@@ -77,7 +77,7 @@ export function CommentUpvoteButton({
       className={cn(
         'flex items-center gap-1 px-2 py-1 rounded-md transition-all duration-200 text-xs',
         hasVoted
-          ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+          ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
           : 'bg-gray-50 text-gray-500 hover:bg-gray-100',
         !canVote && 'opacity-50 cursor-not-allowed',
         isLoading && 'opacity-70'
@@ -88,7 +88,7 @@ export function CommentUpvoteButton({
         size={14}
         className={cn(
           'transition-transform',
-          hasVoted && 'text-indigo-600',
+          hasVoted && 'text-orange-600',
           isLoading && 'animate-pulse'
         )}
       />

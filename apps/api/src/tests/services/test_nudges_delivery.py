@@ -262,7 +262,7 @@ class TestReconcileInsideARun:
         suppressed by the time this run decides who to mail."""
         from src.services.nudges import runner as runner_module
 
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(runner_module, "get_deployment_mode", lambda: "saas")
 
         called = AsyncMock(return_value={"checked": 0, "suppressed": 0})
@@ -288,7 +288,7 @@ class TestReconcileInsideARun:
         """Losing the delivery check is bad; losing the whole run is worse."""
         from src.services.nudges import runner as runner_module
 
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(runner_module, "get_deployment_mode", lambda: "saas")
         monkeypatch.setattr(
             "src.services.nudges.delivery.reconcile_delivery",
@@ -319,7 +319,7 @@ class TestReconcileFailureLeavesTheSessionUsable:
         _claim does not catch — and the whole run dies on one bad lookup."""
         from src.services.nudges import runner as runner_module
 
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(runner_module, "get_deployment_mode", lambda: "saas")
 
         async def poison(session, **kwargs):

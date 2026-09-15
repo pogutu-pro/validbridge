@@ -18,7 +18,7 @@ import { Cube } from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 
 import { searchOrgContent } from '@services/search/search'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import {
   getCourseThumbnailMediaDirectory,
@@ -30,7 +30,7 @@ import {
 import { getUriWithOrg } from '@services/config/config'
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 /**
  * Discussions store their body as a tiptap/ProseMirror JSON document
@@ -376,9 +376,9 @@ function SearchPage() {
   const { t } = useTranslation()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   const urlQuery = searchParams.get('q') ?? ''
   const urlPage = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)

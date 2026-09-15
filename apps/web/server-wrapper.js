@@ -16,7 +16,7 @@ const env = process.env;
 const runtimeConfig = {};
 
 // Additional non-NEXT_PUBLIC vars that need client-side access
-const EXTRA_CLIENT_VARS = ['LEARNHOUSE_PLATFORM_URL'];
+const EXTRA_CLIENT_VARS = ['VALIDBRIDGE_PLATFORM_URL'];
 
 Object.keys(env).forEach((key) => {
   if (key.startsWith('NEXT_PUBLIC_') || EXTRA_CLIENT_VARS.includes(key)) {

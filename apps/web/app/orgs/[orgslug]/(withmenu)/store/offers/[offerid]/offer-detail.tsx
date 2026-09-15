@@ -12,8 +12,8 @@ import {
   ArrowLeft, RefreshCcw, SquareCheck, Sparkles, BookOpen,
   Mic, Puzzle, AlertCircle, Loader2, ShoppingBag
 } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useLHAnalytics, useTrackView, AnalyticsEvent } from '@services/analytics'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
+import { useVBAnalytics, useTrackView, AnalyticsEvent } from '@services/analytics'
 import { meaningfulMessage } from '@lib/errors/classify'
 import toast from 'react-hot-toast'
 
@@ -36,7 +36,7 @@ interface OfferDetailClientProps {
 
 function resourceIcon(type: string, size = 14) {
   switch (type) {
-    case 'course': return <BookOpen size={size} className="text-indigo-500" />
+    case 'course': return <BookOpen size={size} className="text-orange-500" />
     case 'podcast': return <Mic size={size} className="text-pink-400" />
     default: return <Puzzle size={size} className="text-gray-400" />
   }
@@ -100,11 +100,11 @@ function ResourceCard({ resource, orgslug }: { resource: Resource; orgslug: stri
 
 export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, access_token }: OfferDetailClientProps) {
   const { i18n } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const token = session?.data?.tokens?.access_token ?? access_token
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   useTrackView(
     AnalyticsEvent.OfferViewed,
@@ -123,7 +123,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <AlertCircle size={32} className="text-gray-300 mb-3" />
           <h2 className="font-bold text-gray-600 text-lg">Offer not found</h2>
-          <Link href={getUriWithOrg(orgslug, '/store')} className="mt-4 text-sm text-indigo-600 hover:underline">
+          <Link href={getUriWithOrg(orgslug, '/store')} className="mt-4 text-sm text-orange-600 hover:underline">
             ← Back to store
           </Link>
         </div>
@@ -186,7 +186,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
             <div>
               <div className="flex items-center gap-2 mb-2.5">
                 {isSubscription ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full px-3 py-1">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full px-3 py-1">
                     <RefreshCcw size={11} /> Subscription
                   </span>
                 ) : (
@@ -220,7 +220,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
                 <ul className="space-y-2.5">
                   {benefits.map((b, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
-                      <Sparkles size={14} className="text-indigo-400 mt-0.5 shrink-0" />
+                      <Sparkles size={14} className="text-orange-400 mt-0.5 shrink-0" />
                       <span>{b}</span>
                     </li>
                   ))}
@@ -237,11 +237,11 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
                 <p className="text-xs text-gray-400 font-medium mb-1">
                   {offer.price_type === 'customer_choice' ? 'Pay what you want (min.)' : isSubscription ? 'Subscription price' : 'One-time price'}
                 </p>
-                <div className={`text-4xl font-black ${isSubscription ? 'text-indigo-700' : 'text-gray-900'}`}>
+                <div className={`text-4xl font-black ${isSubscription ? 'text-orange-700' : 'text-gray-900'}`}>
                   {formatCurrency(offer.amount, offer.currency, i18n.language)}
                 </div>
                 {isSubscription && (
-                  <p className="text-sm text-indigo-400 font-medium mt-0.5">recurring</p>
+                  <p className="text-sm text-orange-400 font-medium mt-0.5">recurring</p>
                 )}
               </div>
 
@@ -251,7 +251,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
                 disabled={loading}
                 className={`w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                   isSubscription
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    ? 'bg-orange-600 hover:bg-orange-700 text-white'
                     : 'bg-gray-900 hover:bg-gray-800 text-white'
                 }`}
               >

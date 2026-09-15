@@ -62,9 +62,9 @@ async def _last_event(provider_id: str) -> Optional[str]:
     """
     import resend
 
-    from config.config import get_learnhouse_config
+    from config.config import get_validbridge_config
 
-    resend.api_key = get_learnhouse_config().mailing_config.resend_api_key
+    resend.api_key = get_validbridge_config().mailing_config.resend_api_key
     email = await asyncio.to_thread(resend.Emails.get, provider_id)
     if isinstance(email, dict):
         return email.get("last_event")

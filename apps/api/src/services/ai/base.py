@@ -5,12 +5,12 @@ import logging
 import redis
 import json
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.ai.llm import generate, generate_stream, model_for_tier
 
 logger = logging.getLogger(__name__)
 
-LH_CONFIG = get_learnhouse_config()
+VB_CONFIG = get_validbridge_config()
 
 
 def _build_context_prompt(message_for_the_prompt: str, text_reference: str) -> str:
@@ -45,8 +45,8 @@ def get_chat_session_history(aichat_uuid: Optional[str] = None) -> Dict[str, Any
     """Get or create a new chat session history using Redis"""
     session_id = aichat_uuid if aichat_uuid else f"aichat_{uuid4()}"
     
-    LH_CONFIG = get_learnhouse_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    VB_CONFIG = get_validbridge_config()
+    redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
 
     message_history = []
     
@@ -76,8 +76,8 @@ def get_chat_session_history(aichat_uuid: Optional[str] = None) -> Dict[str, Any
 
 def save_message_to_history(aichat_uuid: str, user_message: str, ai_response: str, user_id: Optional[int] = None, course_uuid: Optional[str] = None, sources: Optional[list] = None, mode: str = "course_only", org_id: Optional[int] = None):
     """Save a message exchange to Redis history. Auto-creates session metadata on first message."""
-    LH_CONFIG = get_learnhouse_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    VB_CONFIG = get_validbridge_config()
+    redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         return
@@ -131,8 +131,8 @@ CHAT_TTL = 2160000  # 25 days in seconds
 
 def _get_redis():
     """Get a Redis connection."""
-    LH_CONFIG = get_learnhouse_config()
-    conn = LH_CONFIG.redis_config.redis_connection_string
+    VB_CONFIG = get_validbridge_config()
+    conn = VB_CONFIG.redis_config.redis_connection_string
     if not conn:
         return None
     return redis.from_url(conn, socket_connect_timeout=5, socket_timeout=5)

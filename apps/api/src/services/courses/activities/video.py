@@ -158,7 +158,7 @@ async def create_video_activity(
     await db_session.commit()
     await db_session.refresh(chapter_activity_object)
 
-    # Kick off HLS transcoding (no-op unless LEARNHOUSE_HLS_ENABLED). The MP4 is
+    # Kick off HLS transcoding (no-op unless VALIDBRIDGE_HLS_ENABLED). The MP4 is
     # served as the fallback until HLS is ready.
     try:
         from src.services.utils.hls_jobs import enqueue as enqueue_hls

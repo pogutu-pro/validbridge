@@ -64,7 +64,7 @@ export async function sendPurchaseCompleteMail(args: {
   await send(email, `Welcome to ${prettyPlan(plan)} 🎉`, {
     accentColor: planColor(plan),
     heading: "Payment received — you're all set!",
-    subtitle: `Your ${prettyPlan(plan)} plan is now active. Thanks for supporting LearnHouse.`,
+    subtitle: `Your ${prettyPlan(plan)} plan is now active. Thanks for supporting ValidBridge.`,
     card: {
       label: "Your plan",
       title: prettyPlan(plan),
@@ -85,14 +85,14 @@ export async function sendPackActivatedMail(args: {
 }): Promise<void> {
   const { email, packId, orgSlug } = args;
   await send(email, "Your add-on is active", {
-    accentColor: "#7c3aed",
+    accentColor: "#ea580c",
     heading: "Add-on activated ⚡",
     subtitle: "Your add-on pack is now active and ready to use.",
     card: {
       label: "Add-on",
       title: packId || "Pack",
       caption: orgSlug,
-      color: "#7c3aed",
+      color: "#ea580c",
     },
   });
 }

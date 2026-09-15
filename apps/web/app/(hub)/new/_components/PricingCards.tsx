@@ -162,7 +162,7 @@ export default function PricingCards({
         {plan.popular && (
           <span
             className={`absolute top-4 end-4 text-[10px] font-bold px-2 py-0.5 rounded-md text-white ${
-              isPersonal ? 'bg-amber-500' : plan.id === 'pro' ? 'bg-purple-600' : 'bg-blue-600'
+              isPersonal ? 'bg-amber-500' : plan.id === 'pro' ? 'bg-orange-600' : 'bg-blue-600'
             }`}
           >
             {isPersonal ? 'Best value' : 'Popular'}
@@ -342,7 +342,7 @@ export default function PricingCards({
                         renderEnterpriseCta()
                       ) : (
                         <a
-                          href="https://learnhouse.app/contact?subject=business"
+                          href="https://validbridge.co.ke/contact?subject=business"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-block mt-6 px-5 py-2.5 text-[14px] font-bold bg-white text-black rounded-lg hover:bg-white/90 transition-colors"
@@ -354,7 +354,7 @@ export default function PricingCards({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5 lg:pt-1">
                       <p className="text-xs font-semibold text-white/20 sm:col-span-2 flex items-center gap-1.5">
                         Everything in{' '}
-                        <span className="inline-flex px-1 py-px text-[9px] font-semibold rounded border bg-gradient-to-br from-purple-100 to-purple-200 text-purple-800 border-purple-200">
+                        <span className="inline-flex px-1 py-px text-[9px] font-semibold rounded border bg-gradient-to-br from-orange-100 to-orange-200 text-orange-800 border-orange-200">
                           Pro
                         </span>{' '}
                         plus:

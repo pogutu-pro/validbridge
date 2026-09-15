@@ -9,7 +9,7 @@ import { type FolderSortMode } from '@components/Dashboard/Library/FolderSortDro
 import LibrarySearchResults from '@components/Dashboard/Library/LibrarySearchResults'
 import { shareFolderLink } from '@components/Dashboard/Library/shareFolder'
 import { SECONDARY_BTN } from '@components/Dashboard/Library/LibraryToolbar'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { getFolderById, removeFolderContent, removeFolderPrefix, reorderFolders, reorderFolderContent, searchLibrary } from '@services/folders/folders'
@@ -30,7 +30,7 @@ type Props = {
 
 function FolderView({ orgslug, org_id, folderid, initialFolder }: Props) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
 

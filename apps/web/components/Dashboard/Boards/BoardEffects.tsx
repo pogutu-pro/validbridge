@@ -1076,7 +1076,7 @@ export default function BoardEffects({ ydoc, provider }: BoardEffectsProps) {
           className="flex items-center gap-1.5 rounded-[15px] px-3 py-2.5 nice-shadow pointer-events-auto transition-colors"
           style={frostedStyle}
         >
-          <Wand2 size={13} className={showPicker ? 'text-purple-500' : 'text-neutral-500'} />
+          <Wand2 size={13} className={showPicker ? 'text-orange-500' : 'text-neutral-500'} />
           <span className="text-xs font-medium text-neutral-600">{t('boards.effects.title')}</span>
         </button>
       </div>

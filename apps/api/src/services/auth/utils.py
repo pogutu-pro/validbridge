@@ -25,11 +25,11 @@ _LOGGED_MISSING_GOOGLE_CLIENT_ID = False
 
 # Accept either spelling. The API originally read only the _OAUTH_ name, while
 # the CLI env template and the web app provision the very same value as
-# LEARNHOUSE_GOOGLE_CLIENT_ID — so a deployment that had the client id all along
+# VALIDBRIDGE_GOOGLE_CLIENT_ID — so a deployment that had the client id all along
 # still ran with audience verification disabled.
 GOOGLE_CLIENT_ID_ENV_VARS = (
-    "LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID",
-    "LEARNHOUSE_GOOGLE_CLIENT_ID",
+    "VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID",
+    "VALIDBRIDGE_GOOGLE_CLIENT_ID",
 )
 
 
@@ -56,7 +56,7 @@ async def _verify_google_token_audience(access_token: str) -> None:
 
     If no client_id is configured we fail closed: Google sign-in is refused
     for the whole deployment until an operator sets one of
-    ``LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID`` / ``LEARNHOUSE_GOOGLE_CLIENT_ID``.
+    ``VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID`` / ``VALIDBRIDGE_GOOGLE_CLIENT_ID``.
     """
     global _LOGGED_MISSING_GOOGLE_CLIENT_ID
 
@@ -66,11 +66,11 @@ async def _verify_google_token_audience(access_token: str) -> None:
         # nothing in a stock deployment sets the variable — so any Google access
         # token, including one minted by an attacker's own OAuth client for a
         # victim who signed in on the attacker's site, was accepted as proof of
-        # identity and exchanged for a full LearnHouse session.
+        # identity and exchanged for a full ValidBridge session.
         if not _LOGGED_MISSING_GOOGLE_CLIENT_ID:
             logger.error(
-                "Google sign-in is refused: neither LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID "
-                "nor LEARNHOUSE_GOOGLE_CLIENT_ID is set, so the OAuth audience cannot "
+                "Google sign-in is refused: neither VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID "
+                "nor VALIDBRIDGE_GOOGLE_CLIENT_ID is set, so the OAuth audience cannot "
                 "be verified. Set one to your Google OAuth client_id to enable it."
             )
             _LOGGED_MISSING_GOOGLE_CLIENT_ID = True
@@ -136,7 +136,7 @@ async def signWithGoogle(
     # verified. Previously this fell back to the body-supplied ``email`` when
     # Google omitted it (which happens whenever the access token was minted
     # without the ``email`` scope), letting an attacker with any valid Google
-    # token impersonate any LearnHouse user whose address they knew. The body
+    # token impersonate any ValidBridge user whose address they knew. The body
     # ``email`` field is kept in the request schema for backward compatibility
     # but is no longer used for identity resolution.
     google_email = google_user.get("email")
@@ -147,7 +147,7 @@ async def signWithGoogle(
     # native boolean. A plain truthiness test (``not google_email_verified``)
     # treats the string ``"false"`` as verified, which would let an attacker
     # who controls an *unverified* Google account matching a victim's address
-    # take over the LearnHouse account. Accept only an explicit boolean ``True``
+    # take over the ValidBridge account. Accept only an explicit boolean ``True``
     # or the string ``"true"`` (case-insensitive).
     if isinstance(google_email_verified, str):
         email_is_verified = google_email_verified.strip().lower() == "true"
@@ -245,7 +245,7 @@ async def signWithGoogle(
     # an ``org_id``, an *existing* user signing in with Google must still be
     # added to that organization. The new-user branch above does this through
     # ``create_user``; previously the existing-user branch dropped ``org_id``
-    # entirely, so a person who already had a LearnHouse account and accepted
+    # entirely, so a person who already had a ValidBridge account and accepted
     # an org invite via Google was authenticated but never actually joined the
     # org. We mirror create_user's behaviour: enforce the member quota, avoid
     # double-counting on repeat logins, then create the membership link.

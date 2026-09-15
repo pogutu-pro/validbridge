@@ -173,16 +173,16 @@ class TestSendMagicLoginEmail:
         assert "https://academy.example.com/auth/magic?token=raw.jwt.token" in body
         assert send_mock.call_args.kwargs["to"] == "learner@example.com"
 
-    def test_platform_mail_is_learnhouse_branded(self):
+    def test_platform_mail_is_validbridge_branded(self):
         with patch.object(ml, "send_email", return_value=True) as send_mock:
             send_magic_login_email(
                 _fake_user_read(), "learner@example.com", "https://app.test", "tok"
             )
         call = send_mock.call_args.kwargs
-        assert call["subject"] == "Your LearnHouse login link"
-        assert "Sign in to LearnHouse" in call["body"]
+        assert call["subject"] == "Your ValidBridge login link"
+        assert "Sign in to ValidBridge" in call["body"]
         assert "<svg" in call["body"]
-        assert "Powered by LearnHouse" not in call["body"]
+        assert "Powered by ValidBridge" not in call["body"]
         assert call["sender_name"] is None
 
     def test_org_mail_is_the_orgs_own(self):
@@ -205,7 +205,7 @@ class TestSendMagicLoginEmail:
         assert "Connectez-vous à Acme &amp; Co" in call["body"]
         assert '<img src="https://api.test/content/orgs/o/logos/l.png"' in call["body"]
         assert "background-color: #1d4ed8;" in call["body"]
-        assert "LearnHouse" not in call["body"]
+        assert "ValidBridge" not in call["body"]
         assert "<svg" not in call["body"]
         assert call["sender_name"] == "Acme Academy"
         assert "https://academy.example.com/auth/magic?token=tok" in call["body"]

@@ -1,22 +1,22 @@
-site_name: LearnHouse
-site_description: LearnHouse is an open-source platform tailored for learning experiences.
-contact_email: hello@learnhouse.app
+site_name: ValidBridge
+site_description: ValidBridge is an open-source platform tailored for learning experiences.
+contact_email: hello@validbridge.co.ke
 
 # This config is optimized for local development. You can change the values according to your needs.
 
 general:
-  # SECURITY: default to production-safe; enable with LEARNHOUSE_DEVELOPMENT_MODE=true for local dev.
+  # SECURITY: default to production-safe; enable with VALIDBRIDGE_DEVELOPMENT_MODE=true for local dev.
   development_mode: false
 
 security:
-  # SECURITY: Set via LEARNHOUSE_AUTH_JWT_SECRET_KEY env var (required, min 32 chars).
+  # SECURITY: Set via VALIDBRIDGE_AUTH_JWT_SECRET_KEY env var (required, min 32 chars).
   # Generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
   auth_jwt_secret_key: ""
 
 hosting_config:
   # tenancy: "single" (default) serves the default org on any host (localhost
   # or self-hosted VPS). "multi" enables slug.{domain} subdomain detection and
-  # requires the EE folder. Override with LEARNHOUSE_TENANCY.
+  # requires the EE folder. Override with VALIDBRIDGE_TENANCY.
   tenancy: single
   domain: localhost:3000
   frontend_domain: localhost:3000
@@ -31,7 +31,7 @@ hosting_config:
   # CSRF (security/csrf.py) and the base URL of emailed login / verification
   # links (services/email/utils.py). The default below is a catch-all, which
   # means CORS and CSRF are effectively open unless you scope it — set
-  # LEARNHOUSE_ALLOWED_REGEXP to your own domain in any real deployment, e.g.
+  # VALIDBRIDGE_ALLOWED_REGEXP to your own domain in any real deployment, e.g.
   # '^https://(?:[a-z0-9-]+\.)*example\.com$'.
   #
   # Narrowing this default is deliberately NOT done here: it would CORS-block
@@ -57,10 +57,10 @@ mailing_config:
   smtp_use_tls: true
 
 database_config:
-  sql_connection_string: postgresql://learnhouse:learnhouse@localhost:5432/learnhouse
+  sql_connection_string: postgresql://validbridge:validbridge@localhost:5432/validbridge
 
 redis_config:
-  redis_connection_string: redis://localhost:6379/learnhouse
+  redis_connection_string: redis://localhost:6379/validbridge
 
 payments_config:
   # See ee/services/payments/README.md for full setup instructions.

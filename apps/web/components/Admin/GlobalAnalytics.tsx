@@ -3,13 +3,13 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import { ChartBar } from '@phosphor-icons/react'
 import { queryKeys } from '@/lib/query/keys'
 
 export default function GlobalAnalytics({ days = 30 }: { days?: number }) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
   const { data, isLoading, error } = useQuery({

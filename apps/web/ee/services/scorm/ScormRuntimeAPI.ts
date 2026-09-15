@@ -1,7 +1,7 @@
 /**
  * SCORM Runtime API Bridge
  * Implements JavaScript API for SCORM 1.2 and SCORM 2004
- * Handles communication between SCORM content and the LearnHouse backend
+ * Handles communication between SCORM content and the ValidBridge backend
  */
 
 // SCORM 1.2 Error Codes

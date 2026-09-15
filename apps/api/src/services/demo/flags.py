@@ -9,7 +9,7 @@ deployment; nothing here reads the database.
 import os
 
 # The demo is a product feature, not a SaaS-only one — a self-hosted install
-# showing off LearnHouse to its own stakeholders wants it too. So, unlike the
+# showing off ValidBridge to its own stakeholders wants it too. So, unlike the
 # nudge scheduler, none of this is gated on deployment mode.
 
 DEFAULT_SLUG = "demo"
@@ -59,21 +59,21 @@ def _int_flag(name: str, default: int, minimum: int = 1) -> int:
 
 
 def demo_enabled() -> bool:
-    return _flag("LEARNHOUSE_DEMO_ENABLED", False)
+    return _flag("VALIDBRIDGE_DEMO_ENABLED", False)
 
 
 def demo_slug() -> str:
-    raw = (os.environ.get("LEARNHOUSE_DEMO_SLUG") or "").strip().lower()
+    raw = (os.environ.get("VALIDBRIDGE_DEMO_SLUG") or "").strip().lower()
     return raw or DEFAULT_SLUG
 
 
 def refresh_minutes() -> int:
-    return _int_flag("LEARNHOUSE_DEMO_REFRESH_MINUTES", DEFAULT_REFRESH_MINUTES)
+    return _int_flag("VALIDBRIDGE_DEMO_REFRESH_MINUTES", DEFAULT_REFRESH_MINUTES)
 
 
 def scheduler_disabled() -> bool:
     """For deployments that would rather drive ``demo-refresh`` from their own cron."""
-    return _flag("LEARNHOUSE_DEMO_NO_SCHEDULER", False)
+    return _flag("VALIDBRIDGE_DEMO_NO_SCHEDULER", False)
 
 
 def is_demo_email(email: str | None) -> bool:

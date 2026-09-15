@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test'
 import { BASE_URL } from './core/instance'
 
 /**
- * E2E config for the LearnHouse UI acceptance suite.
+ * E2E config for the ValidBridge UI acceptance suite.
  *
  * Specs live under feature modules (apps/e2e/features/<area>/tests) and drive a
  * real self-host (booted in global-setup) like a human would. They run serially

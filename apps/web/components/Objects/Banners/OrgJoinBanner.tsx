@@ -1,6 +1,6 @@
 'use client'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import { UserPlus } from 'lucide-react'
 import React, { createContext, useContext } from 'react'
@@ -18,7 +18,7 @@ export function useJoinBannerVisible() {
 
 export function OrgJoinBannerProvider({ children }: { children: React.ReactNode }) {
   const { isUserPartOfTheOrg } = useOrgMembership()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
 
   const shouldShow = session.status === 'authenticated' && !isUserPartOfTheOrg
 
@@ -32,7 +32,7 @@ export function OrgJoinBannerProvider({ children }: { children: React.ReactNode 
 export function OrgJoinBanner() {
   const { t } = useTranslation()
   const { org, isUserPartOfTheOrg, orgslug } = useOrgMembership()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
 
   // Only show banner for authenticated users who are not part of the org
   if (session.status !== 'authenticated' || isUserPartOfTheOrg) {

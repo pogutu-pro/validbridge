@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from typing import Optional, Union
 import httpx
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
 from src.db.users import APITokenUser, PublicUser
@@ -68,11 +68,11 @@ class ExecuteBatchRequest(BaseModel):
 
 
 def _get_judge0_config():
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     if not config.judge0_config:
         raise HTTPException(
             status_code=503,
-            detail="Code execution is not configured. Set LEARNHOUSE_JUDGE0_API_URL.",
+            detail="Code execution is not configured. Set VALIDBRIDGE_JUDGE0_API_URL.",
         )
     return config.judge0_config
 
@@ -161,7 +161,7 @@ def _canonical_sqlite_path(file_path: str) -> str:
     so access is checked for the file's actual owner.
     """
     storage_path = _validate_storage_path(file_path)
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     if config.hosting_config.content_delivery.type == "filesystem":
         base_real = os.path.realpath("content")
         resolved = os.path.realpath(storage_path)
@@ -194,7 +194,7 @@ async def _require_course_access(
 
 def _read_storage_file(file_path: str) -> bytes:
     """Read a file from storage (filesystem or S3)."""
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     content_delivery = config.hosting_config.content_delivery.type
     safe_path = _validate_storage_path(file_path)
 
@@ -220,7 +220,7 @@ def _read_storage_file(file_path: str) -> bytes:
             "s3",
             endpoint_url=config.hosting_config.content_delivery.s3api.endpoint_url,
         )
-        bucket = config.hosting_config.content_delivery.s3api.bucket_name or "learnhouse-media"
+        bucket = config.hosting_config.content_delivery.s3api.bucket_name or "validbridge-media"
         try:
             response = s3.get_object(Bucket=bucket, Key=safe_path)
             return response["Body"].read()

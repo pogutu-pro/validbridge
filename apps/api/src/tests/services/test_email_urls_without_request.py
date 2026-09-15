@@ -14,7 +14,7 @@ from src.services.email import utils as email_utils
 
 
 def _config(
-    tenancy="multi", domain="learnhouse.io", frontend_domain="", ssl=True
+    tenancy="multi", domain="validbridge.co.ke", frontend_domain="", ssl=True
 ):
     return SimpleNamespace(
         hosting_config=SimpleNamespace(
@@ -30,24 +30,24 @@ def _config(
 @pytest.fixture
 def clean_env(monkeypatch):
     for var in (
-        "LEARNHOUSE_PLATFORM_URL",
-        "LEARNHOUSE_MEDIA_URL",
-        "LEARNHOUSE_BACKEND_URL",
+        "VALIDBRIDGE_PLATFORM_URL",
+        "VALIDBRIDGE_MEDIA_URL",
+        "VALIDBRIDGE_BACKEND_URL",
     ):
         monkeypatch.delenv(var, raising=False)
 
 
 class TestConfiguredFrontendBaseUrl:
     def test_platform_url_wins(self, monkeypatch, clean_env):
-        monkeypatch.setenv("LEARNHOUSE_PLATFORM_URL", "https://app.example.com/")
-        monkeypatch.setattr(email_utils, "get_learnhouse_config", _config)
+        monkeypatch.setenv("VALIDBRIDGE_PLATFORM_URL", "https://app.example.com/")
+        monkeypatch.setattr(email_utils, "get_validbridge_config", _config)
 
         assert email_utils._configured_frontend_base_url() == "https://app.example.com"
 
     def test_falls_back_to_frontend_domain(self, monkeypatch, clean_env):
         monkeypatch.setattr(
             email_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             lambda: _config(frontend_domain="app.example.com"),
         )
 
@@ -55,7 +55,7 @@ class TestConfiguredFrontendBaseUrl:
 
     def test_falls_back_to_base_domain(self, monkeypatch, clean_env):
         monkeypatch.setattr(
-            email_utils, "get_learnhouse_config", lambda: _config(domain="example.com")
+            email_utils, "get_validbridge_config", lambda: _config(domain="example.com")
         )
 
         assert email_utils._configured_frontend_base_url() == "https://example.com"
@@ -63,7 +63,7 @@ class TestConfiguredFrontendBaseUrl:
     def test_respects_the_ssl_setting(self, monkeypatch, clean_env):
         monkeypatch.setattr(
             email_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             lambda: _config(domain="example.com", ssl=False),
         )
 
@@ -74,7 +74,7 @@ class TestConfiguredFrontendBaseUrl:
         """A localhost link in an email is dead on arrival for the recipient."""
         monkeypatch.setattr(
             email_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             lambda: _config(domain=value, frontend_domain=value),
         )
 
@@ -83,15 +83,15 @@ class TestConfiguredFrontendBaseUrl:
 
 class TestOrgSignupBaseUrlWithoutRequest:
     async def test_multi_tenant_builds_the_org_subdomain(self, monkeypatch, clean_env):
-        monkeypatch.setattr(email_utils, "get_learnhouse_config", _config)
+        monkeypatch.setattr(email_utils, "get_validbridge_config", _config)
 
         url = await email_utils.get_org_signup_base_url("acme")
-        assert url == "https://acme.learnhouse.io"
+        assert url == "https://acme.validbridge.co.ke"
 
     async def test_single_tenant_uses_configured_url(self, monkeypatch, clean_env):
-        monkeypatch.setenv("LEARNHOUSE_PLATFORM_URL", "https://school.example.com")
+        monkeypatch.setenv("VALIDBRIDGE_PLATFORM_URL", "https://school.example.com")
         monkeypatch.setattr(
-            email_utils, "get_learnhouse_config", lambda: _config(tenancy="single")
+            email_utils, "get_validbridge_config", lambda: _config(tenancy="single")
         )
 
         assert await email_utils.get_org_signup_base_url("acme") == (
@@ -104,7 +104,7 @@ class TestOrgSignupBaseUrlWithoutRequest:
         """Better an obviously-empty base than a link to the wrong host."""
         monkeypatch.setattr(
             email_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             lambda: _config(tenancy="single", domain="", frontend_domain=""),
         )
 
@@ -113,10 +113,10 @@ class TestOrgSignupBaseUrlWithoutRequest:
     async def test_multi_tenant_with_localhost_domain_falls_back(
         self, monkeypatch, clean_env
     ):
-        monkeypatch.setenv("LEARNHOUSE_PLATFORM_URL", "https://app.example.com")
+        monkeypatch.setenv("VALIDBRIDGE_PLATFORM_URL", "https://app.example.com")
         monkeypatch.setattr(
             email_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             lambda: _config(domain="localhost:3000"),
         )
 
@@ -129,7 +129,7 @@ class TestOrgSignupBaseUrlWithoutRequest:
     ):
         monkeypatch.setattr(
             email_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             lambda: _config(domain="", frontend_domain=""),
         )
 
@@ -138,7 +138,7 @@ class TestOrgSignupBaseUrlWithoutRequest:
     async def test_a_verified_custom_domain_still_wins(self, monkeypatch, clean_env):
         """An org on a custom domain keeps its session there — linking to the
         generic subdomain would land the reader cross-origin."""
-        monkeypatch.setattr(email_utils, "get_learnhouse_config", _config)
+        monkeypatch.setattr(email_utils, "get_validbridge_config", _config)
 
         async def fake_custom_domain(_db, _org_id):
             return "learn.acme.com"
@@ -155,22 +155,22 @@ class TestOrgSignupBaseUrlWithoutRequest:
 
 class TestMediaBaseUrlWithoutRequest:
     def test_explicit_override_wins(self, monkeypatch, clean_env):
-        monkeypatch.setenv("LEARNHOUSE_MEDIA_URL", "https://media.example.com/")
+        monkeypatch.setenv("VALIDBRIDGE_MEDIA_URL", "https://media.example.com/")
         assert email_utils.get_media_base_url(None) == "https://media.example.com"
 
     def test_backend_url_is_also_honoured(self, monkeypatch, clean_env):
-        monkeypatch.setenv("LEARNHOUSE_BACKEND_URL", "https://api.example.com")
+        monkeypatch.setenv("VALIDBRIDGE_BACKEND_URL", "https://api.example.com")
         assert email_utils.get_media_base_url(None) == "https://api.example.com"
 
     def test_saas_convention_is_derived_from_the_domain(self, monkeypatch, clean_env):
-        monkeypatch.setattr(email_utils, "get_learnhouse_config", _config)
-        assert email_utils.get_media_base_url(None) == "https://api.learnhouse.io"
+        monkeypatch.setattr(email_utils, "get_validbridge_config", _config)
+        assert email_utils.get_media_base_url(None) == "https://api.validbridge.co.ke"
 
     def test_no_request_and_nothing_configured_returns_empty(
         self, monkeypatch, clean_env
     ):
         monkeypatch.setattr(
-            email_utils, "get_learnhouse_config", lambda: _config(domain="localhost")
+            email_utils, "get_validbridge_config", lambda: _config(domain="localhost")
         )
         assert email_utils.get_media_base_url(None) == ""
 
@@ -179,26 +179,26 @@ class TestOrgLogoUrlWithoutRequest:
     ORG = SimpleNamespace(logo_image="logo.png", org_uuid="org_abc")
 
     def test_builds_an_absolute_url(self, monkeypatch, clean_env):
-        monkeypatch.setattr(email_utils, "get_learnhouse_config", _config)
+        monkeypatch.setattr(email_utils, "get_validbridge_config", _config)
 
         assert email_utils.get_org_logo_url(self.ORG, None) == (
-            "https://api.learnhouse.io/content/orgs/org_abc/logos/logo.png"
+            "https://api.validbridge.co.ke/content/orgs/org_abc/logos/logo.png"
         )
 
     def test_unresolvable_media_host_falls_back_to_the_default_mark(
         self, monkeypatch, clean_env
     ):
         """A relative src renders broken in every mail client, so returning
-        None (and letting the caller use the LearnHouse wordmark) is the only
+        None (and letting the caller use the ValidBridge wordmark) is the only
         acceptable outcome."""
         monkeypatch.setattr(
-            email_utils, "get_learnhouse_config", lambda: _config(domain="localhost")
+            email_utils, "get_validbridge_config", lambda: _config(domain="localhost")
         )
 
         assert email_utils.get_org_logo_url(self.ORG, None) is None
 
     def test_org_without_a_logo_returns_none(self, monkeypatch, clean_env):
-        monkeypatch.setattr(email_utils, "get_learnhouse_config", _config)
+        monkeypatch.setattr(email_utils, "get_validbridge_config", _config)
         bare = SimpleNamespace(logo_image="", org_uuid="org_abc")
 
         assert email_utils.get_org_logo_url(bare, None) is None

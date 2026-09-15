@@ -51,7 +51,7 @@ function HeatmapGrid({
             {dayRow.map((count, h) => (
               <div
                 key={h}
-                className={`flex-1 ${compact ? 'h-3' : 'h-5'} rounded-sm bg-violet-500 transition-opacity`}
+                className={`flex-1 ${compact ? 'h-3' : 'h-5'} rounded-sm bg-orange-500 transition-opacity`}
                 style={{ opacity: getOpacity(count) }}
                 title={eventsTooltip(dayLabels[dow], HOUR_LABELS[h], count)}
               />
@@ -65,7 +65,7 @@ function HeatmapGrid({
         {[0.1, 0.3, 0.5, 0.7, 1].map((op, i) => (
           <div
             key={i}
-            className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} rounded-sm bg-violet-500`}
+            className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} rounded-sm bg-orange-500`}
             style={{ opacity: op }}
           />
         ))}
@@ -121,7 +121,7 @@ export default function CoursePeakHours({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Clock} bg="bg-violet-50" color="text-violet-500" />}
+      icon={<WidgetIcon icon={Clock} bg="bg-orange-50" color="text-orange-500" />}
       title={t('analytics.course_analytics.peak_hours.title')}
       subtitle={t('analytics.course_analytics.peak_hours.subtitle')}
       modalContent={
@@ -134,7 +134,7 @@ export default function CoursePeakHours({
             <div className="flex gap-6 text-sm">
               <div>
                 <p className="text-gray-400 text-xs">{t('analytics.course_analytics.peak_hours.peak_time')}</p>
-                <p className="text-xl font-bold text-violet-600">
+                <p className="text-xl font-bold text-orange-600">
                   {DAY_LABELS[peakDay]} {HOUR_LABELS[peakHour]}
                 </p>
               </div>
@@ -165,7 +165,7 @@ export default function CoursePeakHours({
         <div className="h-40">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <span className="text-lg font-bold text-violet-600">
+              <span className="text-lg font-bold text-orange-600">
                 {DAY_LABELS[peakDay]} {HOUR_LABELS[peakHour]}
               </span>
               <p className="text-[10px] text-gray-400">{t('analytics.course_analytics.units.busiest_time')}</p>

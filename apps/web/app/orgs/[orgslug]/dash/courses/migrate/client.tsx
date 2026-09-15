@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
@@ -37,7 +37,7 @@ interface MigrationClientProps {
 export default function MigrationClient({ orgslug }: MigrationClientProps) {
   const { t } = useTranslation()
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const access_token = session?.data?.tokens?.access_token
   const org_id = org?.id

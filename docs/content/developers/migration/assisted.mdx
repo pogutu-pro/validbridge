@@ -2,16 +2,16 @@ import { Callout } from 'nextra/components'
 
 # AI-Assisted Migration
 
-LearnHouse exposes a three-call API that uploads a folder of media files, asks Gemini to organise them into chapters and activities, and then creates the entire course in a single transaction. This is the right path when you have a directory full of legacy lecture recordings, PDFs, and images but no existing structure.
+ValidBridge exposes a three-call API that uploads a folder of media files, asks Gemini to organise them into chapters and activities, and then creates the entire course in a single transaction. This is the right path when you have a directory full of legacy lecture recordings, PDFs, and images but no existing structure.
 
 All three endpoints live under `/api/v1/courses/migrate/`. They require an **authenticated user session (JWT)** with permission to create courses in the target organization.
 
 <Callout type="warning">
-**API tokens are blocked here.** Unlike the standard course/chapter/activity endpoints, the migration endpoints reject requests authenticated with an `lh_*` API token (`HTTP 403: API tokens cannot access this resource. Only user authentication is allowed.`). If you only have an API token, use the **admin token-swap** to mint a JWT first:
+**API tokens are blocked here.** Unlike the standard course/chapter/activity endpoints, the migration endpoints reject requests authenticated with an `vb_*` API token (`HTTP 403: API tokens cannot access this resource. Only user authentication is allowed.`). If you only have an API token, use the **admin token-swap** to mint a JWT first:
 
 ```bash
 JWT=$(curl -s -X POST 'http://localhost:1338/api/v1/admin/{org_slug}/auth/token' \
-  -H 'Authorization: Bearer lh_your_api_token' \
+  -H 'Authorization: Bearer vb_your_api_token' \
   -H 'Content-Type: application/json' \
   -d '{"user_id": 1}' | jq -r .access_token)
 
@@ -29,7 +29,7 @@ The token-swap endpoint requires the API token to have the `users.action_read` p
 | --- | --- |
 | You have a clean export from another LMS with a known chapter / activity layout | [Programmatic Migration](/developers/migration/programmatic) |
 | You need every detail of the resulting tree to be exact (titles, ordering, types) | Programmatic |
-| You have a pile of files and want LearnHouse to propose a structure | AI-assisted (this page) |
+| You have a pile of files and want ValidBridge to propose a structure | AI-assisted (this page) |
 | You want to author rich-text dynamic pages | Programmatic (AI-assisted produces media-only activities) |
 
 <Callout type="warning">
@@ -64,7 +64,7 @@ Upload up to 20 GB of files in one or more requests. Pass `temp_id` on subsequen
 ```bash
 # First batch -- creates a new temp_id
 curl -X POST "http://localhost:1338/api/v1/courses/migrate/upload?org_id=1" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -F 'files=@./lectures/lesson-01.mp4' \
   -F 'files=@./lectures/lesson-02.mp4' \
   -F 'files=@./handouts/syllabus.pdf'
@@ -93,7 +93,7 @@ Append more files to the same `temp_id`:
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/courses/migrate/upload?org_id=1&temp_id=9c4e3...-d8f1-4..." \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -F 'files=@./images/diagram-01.png'
 ```
 
@@ -109,7 +109,7 @@ Send the `temp_id` and a course name; Gemini groups the files into chapters and 
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/courses/migrate/suggest?org_id=1" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "temp_id": "9c4e3...-d8f1-4...",
@@ -172,7 +172,7 @@ Post the (possibly edited) structure back with the same `temp_id`. The server cr
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/courses/migrate/create?org_id=1" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{
     "temp_id": "9c4e3...-d8f1-4...",
@@ -220,7 +220,7 @@ If anything fails (database error, file copy failure, missing files), the entire
 set -euo pipefail
 
 API=http://localhost:1338/api/v1
-API_TOKEN=lh_your_api_token        # Pro-plan API token
+API_TOKEN=vb_your_api_token        # Pro-plan API token
 ORG_SLUG=default
 ORG_ID=1
 USER_ID=1                          # the user to act as

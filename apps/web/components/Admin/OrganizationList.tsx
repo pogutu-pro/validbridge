@@ -6,7 +6,7 @@ import { queryKeys } from '@/lib/query/keys'
 import { getAPIUrl, getDeploymentMode } from '@services/config/config'
 import { getOrgLogoMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media'
 import { apiFetch } from '@services/utils/ts/requests'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import Link from 'next/link'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Buildings, Globe, User, CaretLeft, CaretRight, BookOpen, MagnifyingGlass, ArrowSquareOut, Plus } from '@phosphor-icons/react'
@@ -66,7 +66,7 @@ function getFrontendDomain(): string {
   return (
     document.cookie
       .split('; ')
-      .find((c) => c.startsWith('LH_frontend_domain='))
+      .find((c) => c.startsWith('VB_frontend_domain='))
       ?.split('=')[1] || 'localhost:3000'
   )
 }
@@ -75,7 +75,7 @@ const PLANS_SAAS = ['all', 'free', 'paid', 'standard', 'pro', 'enterprise'] as c
 const PAGE_SIZE = 20
 
 function Sparkline({ data, max }: { data: number[]; max: number }) {
-  if (data.length === 0) return <span className="text-white/20 text-xs">—</span>
+  if (data.length === 0) return <span className="text-[#262626]/20 text-xs">—</span>
   const h = 20
   const w = 56
   const step = w / Math.max(data.length - 1, 1)
@@ -97,7 +97,7 @@ function Sparkline({ data, max }: { data: number[]; max: number }) {
           strokeLinecap="round"
         />
       </svg>
-      <span className="text-xs text-white/50 tabular-nums">{total.toLocaleString()}</span>
+      <span className="text-xs text-[#737373]/80 tabular-nums">{total.toLocaleString()}</span>
     </div>
   )
 }
@@ -118,7 +118,7 @@ function AdminUserTooltip({ users }: { users: AdminUserInfo[] }) {
   }, [open])
 
   if (users.length === 0) {
-    return <span className="text-white/25 text-xs">None</span>
+    return <span className="text-[#262626]/25 text-xs">None</span>
   }
 
   return (
@@ -127,13 +127,13 @@ function AdminUserTooltip({ users }: { users: AdminUserInfo[] }) {
         ref={btnRef}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
-        className="text-sm text-white/60 hover:text-white/80 transition-colors underline decoration-dotted underline-offset-2"
+        className="text-sm text-[#737373]/80 hover:text-[#262626]/80 transition-colors underline decoration-dotted underline-offset-2"
       >
         {users.length} admin{users.length !== 1 ? 's' : ''}
       </button>
       {open && pos && (
         <div
-          className="fixed z-[9999] w-64 bg-[#1a1a1b] border border-white/[0.12] rounded-lg shadow-xl p-2 space-y-1"
+          className="fixed z-[9999] w-64 bg-[#262626] border border-white/[0.12] rounded-lg shadow-xl p-2 space-y-1"
           style={{ top: pos.top, ...(pos.rtl ? { right: pos.left } : { left: pos.left }), transform: 'translateY(-100%)' }}
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
@@ -151,12 +151,12 @@ function AdminUserTooltip({ users }: { users: AdminUserInfo[] }) {
                 />
               ) : (
                 <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                  <User size={10} weight="fill" className="text-white/40" />
+                  <User size={10} weight="fill" className="text-[#737373]/70" />
                 </div>
               )}
               <div className="min-w-0">
-                <p className="text-xs font-medium text-white/90 truncate">{u.username}</p>
-                <p className="text-[10px] text-white/40 truncate">{u.email}</p>
+                <p className="text-xs font-medium text-[#262626]/90 truncate">{u.username}</p>
+                <p className="text-[10px] text-[#737373]/70 truncate">{u.email}</p>
               </div>
             </div>
           ))}
@@ -190,7 +190,7 @@ function ImgWithFallback({
 }
 
 export default function OrganizationList() {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -321,8 +321,8 @@ export default function OrganizationList() {
   const isSaaS = getDeploymentMode() === 'saas'
   const [createOpen, setCreateOpen] = useState(false)
   const logoFallback = (
-    <div className="h-8 w-8 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0">
-      <Buildings size={16} weight="fill" className="text-white/30" />
+    <div className="h-8 w-8 rounded-lg bg-[#FFF0E8] flex items-center justify-center shrink-0">
+      <Buildings size={16} weight="fill" className="text-[#737373]/60" />
     </div>
   )
 
@@ -332,22 +332,22 @@ export default function OrganizationList() {
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex items-center justify-between">
           <div className="relative">
-            <MagnifyingGlass size={14} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-white/30" />
+            <MagnifyingGlass size={14} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-[#737373]/60" />
             <input
               type="text"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search organizations..."
-              className="bg-white/[0.05] border border-white/[0.08] rounded-lg ps-8 pe-3 py-1.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-white/20 w-64"
+              className="bg-white/[0.05] border border-[#E7E5E4] rounded-lg ps-8 pe-3 py-1.5 text-sm text-[#262626] placeholder:text-[#262626]/25 focus:outline-none focus:border-white/20 w-64"
             />
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-white/30">
+            <span className="text-xs text-[#737373]/60">
               {totalCount} org{totalCount !== 1 ? 's' : ''}
             </span>
             <button
               onClick={() => setCreateOpen(true)}
-              className="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-1.5 rounded-md transition-colors"
+              className="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-[#262626] text-xs font-medium px-3 py-1.5 rounded-md transition-colors"
             >
               <Plus size={12} weight="bold" />
               New organization
@@ -357,15 +357,15 @@ export default function OrganizationList() {
         <div className="flex items-center justify-between">
           {isSaaS ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-white/40 me-1">Plan:</span>
+              <span className="text-xs text-[#737373]/70 me-1">Plan:</span>
               {PLANS_SAAS.map((p) => (
                 <button
                   key={p}
                   onClick={() => handleFilterChange(p)}
                   className={`text-xs px-2.5 py-1 rounded-md transition-colors capitalize ${
                     planFilter === p
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
+                      ? 'bg-white/10 text-[#262626]'
+                      : 'text-[#737373]/70 hover:text-[#737373]/80 hover:bg-white/[0.05]'
                   }`}
                 >
                   {p}
@@ -376,7 +376,7 @@ export default function OrganizationList() {
             <div />
           )}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-white/40 me-1">Sort:</span>
+            <span className="text-xs text-[#737373]/70 me-1">Sort:</span>
             {([
               ['id', 'Default'],
               ['newest', 'Newest'],
@@ -395,8 +395,8 @@ export default function OrganizationList() {
                 onClick={() => handleSortChange(key)}
                 className={`text-xs px-2.5 py-1 rounded-md transition-colors ${
                   sortBy === key
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
+                    ? 'bg-white/10 text-[#262626]'
+                    : 'text-[#737373]/70 hover:text-[#737373]/80 hover:bg-white/[0.05]'
                 }`}
               >
                 {label}
@@ -409,7 +409,7 @@ export default function OrganizationList() {
       {/* Table */}
       <div className="relative">
         {isValidating && !isLoading && (
-          <div className="absolute inset-0 bg-[#0f0f10]/50 z-10 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-[#F8F7F2]/50 z-10 flex items-center justify-center pointer-events-none">
             <div className="h-5 w-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
           </div>
         )}
@@ -420,7 +420,7 @@ export default function OrganizationList() {
             <div className="h-6 w-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
           </div>
         ) : !orgs || orgs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-white/40">
+          <div className="flex flex-col items-center justify-center py-20 text-[#737373]/70">
             <Buildings size={48} weight="fill" />
             <p className="mt-4 text-lg">No organizations found</p>
           </div>
@@ -428,17 +428,17 @@ export default function OrganizationList() {
           <>
       <table className="w-full text-start">
         <thead>
-          <tr className="border-b border-white/[0.08]">
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Organization</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">URL</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Visits (7d)</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Users</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Courses</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Admins</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Plan</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Created</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Updated</th>
-            <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider"></th>
+          <tr className="border-b border-[#E7E5E4]">
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">Organization</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">URL</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">Visits (7d)</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">Users</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">Courses</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">Admins</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">Plan</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">Created</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">Updated</th>
+            <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider"></th>
           </tr>
         </thead>
         <tbody>
@@ -447,7 +447,7 @@ export default function OrganizationList() {
             const sparkData = visitsByOrg.map[org.id] || []
 
             return (
-              <tr key={org.id} className="border-b border-white/[0.05] hover:bg-white/[0.03] transition-colors">
+              <tr key={org.id} className="border-b border-[#E7E5E4] hover:bg-white/[0.03] transition-colors">
                 <td className="px-4 py-3">
                   <Link href={`/admin/organizations/${org.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                     {org.logo_image ? (
@@ -461,11 +461,11 @@ export default function OrganizationList() {
                       logoFallback
                     )}
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white">{org.name}</p>
+                      <p className="text-sm font-medium text-[#262626]">{org.name}</p>
                       {org.description ? (
-                        <p className="text-xs text-white/30 truncate max-w-[260px]">{org.description}</p>
+                        <p className="text-xs text-[#737373]/60 truncate max-w-[260px]">{org.description}</p>
                       ) : (
-                        <p data-ltr-content className="text-xs text-white/40 font-mono">{org.slug}</p>
+                        <p data-ltr-content className="text-xs text-[#737373]/70 font-mono">{org.slug}</p>
                       )}
                     </div>
                   </Link>
@@ -488,12 +488,12 @@ export default function OrganizationList() {
                   <Sparkline data={sparkData} max={visitsByOrg.globalMax} />
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-sm text-white/60">{org.user_count}</span>
+                  <span className="text-sm text-[#737373]/80">{org.user_count}</span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1.5">
-                    <BookOpen size={13} weight="fill" className="text-white/20 shrink-0" />
-                    <span className="text-sm text-white/60">{org.course_count}</span>
+                    <BookOpen size={13} weight="fill" className="text-[#262626]/20 shrink-0" />
+                    <span className="text-sm text-[#737373]/80">{org.course_count}</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -502,24 +502,24 @@ export default function OrganizationList() {
                 <td className="px-4 py-3">
                   <span className={`text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded ${
                     org.plan === 'enterprise' ? 'bg-amber-400/10 text-amber-400'
-                      : org.plan === 'pro' ? 'bg-purple-400/10 text-purple-400'
+                      : org.plan === 'pro' ? 'bg-orange-400/10 text-orange-400'
                       : org.plan === 'standard' ? 'bg-blue-400/10 text-blue-400'
-                      : 'bg-white/[0.06] text-white/40'
+                      : 'bg-white/[0.06] text-[#737373]/70'
                   }`}>
                     {org.plan}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-sm text-white/40">{new Date(org.creation_date).toLocaleDateString()}</span>
+                  <span className="text-sm text-[#737373]/70">{new Date(org.creation_date).toLocaleDateString()}</span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-sm text-white/40">{new Date(org.update_date).toLocaleDateString()}</span>
+                  <span className="text-sm text-[#737373]/70">{new Date(org.update_date).toLocaleDateString()}</span>
                 </td>
                 <td className="px-4 py-3">
                   <a
                     href={safeHref(`${orgUrl}/dash`)}
                     rel="noopener"
-                    className="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-white hover:bg-white/[0.08] px-2.5 py-1.5 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs text-[#737373]/70 hover:text-[#262626] hover:bg-black/[0.04] px-2.5 py-1.5 rounded-lg transition-colors"
                     title="Open org dashboard"
                   >
                     <ArrowSquareOut size={14} weight="bold" />
@@ -535,14 +535,14 @@ export default function OrganizationList() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4 px-4">
-          <span className="text-xs text-white/30">
+          <span className="text-xs text-[#737373]/60">
             Page {page} of {totalPages}
           </span>
           <div className="flex items-center gap-1">
             <button
               onClick={() => handlePageChange(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+              className="p-1.5 rounded text-[#737373]/70 hover:text-[#262626] hover:bg-black/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
             >
               <CaretLeft size={14} weight="bold" data-dir-flip />
             </button>
@@ -551,14 +551,14 @@ export default function OrganizationList() {
               .map((p, idx, arr) => (
                 <React.Fragment key={p}>
                   {idx > 0 && arr[idx - 1] !== p - 1 && (
-                    <span className="text-white/20 text-xs px-1">...</span>
+                    <span className="text-[#262626]/20 text-xs px-1">...</span>
                   )}
                   <button
                     onClick={() => handlePageChange(p)}
                     className={`text-xs min-w-[28px] h-7 rounded transition-colors ${
                       p === page
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/40 hover:text-white hover:bg-white/[0.05]'
+                        ? 'bg-white/10 text-[#262626]'
+                        : 'text-[#737373]/70 hover:text-[#262626] hover:bg-white/[0.05]'
                     }`}
                   >
                     {p}
@@ -568,7 +568,7 @@ export default function OrganizationList() {
             <button
               onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+              className="p-1.5 rounded text-[#737373]/70 hover:text-[#262626] hover:bg-black/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
             >
               <CaretRight size={14} weight="bold" data-dir-flip />
             </button>

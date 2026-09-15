@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getCourseCertifications } from '@services/courses/certifications'
 import { getCourseCertificationStatus } from '@/lib/certifications/enabled'
 import type { CourseCertificationStatus } from '@/lib/certifications/enabled'
@@ -17,7 +17,7 @@ import type { CourseCertificationStatus } from '@/lib/certifications/enabled'
  */
 export function useCourseCertification(course_uuid?: string) {
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   // Call sites pass the uuid with or without the `course_` prefix; the API and

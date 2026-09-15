@@ -150,10 +150,10 @@ const FlipcardExtension: React.FC = (props: any) => {
       green: isBack ? 'bg-emerald-600 border-emerald-700' : 'bg-emerald-500 border-emerald-600',
       yellow: isBack ? 'bg-amber-600 border-amber-700' : 'bg-amber-500 border-amber-600',
       red: isBack ? 'bg-red-600 border-red-700' : 'bg-red-500 border-red-600',
-      purple: isBack ? 'bg-purple-600 border-purple-700' : 'bg-purple-500 border-purple-600',
+      purple: isBack ? 'bg-orange-600 border-orange-700' : 'bg-orange-500 border-orange-600',
       teal: isBack ? 'bg-teal-600 border-teal-700' : 'bg-teal-500 border-teal-600',
       amber: isBack ? 'bg-orange-600 border-orange-700' : 'bg-orange-500 border-orange-600',
-      indigo: isBack ? 'bg-indigo-600 border-indigo-700' : 'bg-indigo-500 border-indigo-600',
+      indigo: isBack ? 'bg-orange-600 border-orange-700' : 'bg-orange-500 border-orange-600',
       neutral: isBack ? 'bg-neutral-700 border-neutral-800' : 'bg-neutral-600 border-neutral-700',
       blue: isBack ? 'bg-blue-600 border-blue-700' : 'bg-blue-500 border-blue-600',
     }

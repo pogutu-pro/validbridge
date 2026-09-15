@@ -12,8 +12,8 @@ import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/Ge
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle'
 import PlaygroundCard from '@components/Playground/PlaygroundCard'
 import { Playground, createPlayground } from '@services/playgrounds/playgrounds'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { searchMatchesAny } from '@/lib/search/normalize'
@@ -31,11 +31,11 @@ export default function PlaygroundsClient({
   initialPlaygrounds,
 }: PlaygroundsClientProps) {
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const { isAdmin: isUserAdmin } = useAdminStatus()
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   const [playgrounds, setPlaygrounds] = useState<Playground[]>(initialPlaygrounds)
   const [searchQuery, setSearchQuery] = useState('')

@@ -4,7 +4,7 @@ import LibraryItemCard from '@components/Dashboard/Library/LibraryItemCard'
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail'
 import { getUriWithOrg } from '@services/config/config'
 import { removeFolderContent, removeOrgRootContent } from '@services/folders/folders'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { FolderSimple, MagnifyingGlass } from '@phosphor-icons/react'
 import React from 'react'
 import toast from 'react-hot-toast'
@@ -31,7 +31,7 @@ function ContextPath({ path }: { path: any[] }) {
 
 export default function LibrarySearchResults({ results, isLoading, orgslug, org_id, onChanged }: Props) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const folders = results?.folders || []

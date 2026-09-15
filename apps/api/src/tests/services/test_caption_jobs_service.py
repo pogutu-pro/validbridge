@@ -46,9 +46,9 @@ async def _add_caption_activity(db, org, course, uuid, *, filename="v.mp4", capt
 # --- concurrency / enqueue -------------------------------------------------
 
 def test_concurrency_parsing(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_CAPTIONS_CONCURRENCY", "4")
+    monkeypatch.setenv("VALIDBRIDGE_CAPTIONS_CONCURRENCY", "4")
     assert cj.concurrency() == 4
-    monkeypatch.setenv("LEARNHOUSE_CAPTIONS_CONCURRENCY", "bad")
+    monkeypatch.setenv("VALIDBRIDGE_CAPTIONS_CONCURRENCY", "bad")
     assert cj.concurrency() == 1
 
 

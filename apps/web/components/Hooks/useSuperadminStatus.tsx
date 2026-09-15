@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getSuperadminStatus } from '@services/ee/superadmin'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 
 export default function useSuperadminStatus() {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
   const { data, error, isLoading } = useQuery({

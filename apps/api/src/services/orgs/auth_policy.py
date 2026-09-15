@@ -8,7 +8,7 @@ Two independent controls, both living in the org config blob (no migration):
   with an allowed one. The default lists every method, i.e. no restriction.
 
 * **allow_central_session_sharing** — whether a session established on the
-  central apex (``learnhouse.io``) or for a *different* org may be used to reach
+  central apex (``validbridge.co.ke``) or for a *different* org may be used to reach
   this org directly. A session records which org it was minted for (``sorg``).
   When sharing is off, a member arriving with a foreign/central session is
   refused and must re-authenticate from this org. Default on = today's behavior.

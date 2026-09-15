@@ -28,7 +28,7 @@ def _stored(days_ago: float) -> str:
 @pytest.fixture(autouse=True)
 def _saas_and_enabled(monkeypatch):
     """Both gates open by default; individual tests close one to assert it."""
-    monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+    monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
     monkeypatch.setattr(runner_module, "get_deployment_mode", lambda: "saas")
     monkeypatch.setattr(
         runner_module.links, "org_base_url", _fake_base_url
@@ -114,7 +114,7 @@ class TestGates:
     async def test_kill_switch_off_sends_nothing(
         self, db, activation_org, sender, monkeypatch
     ):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "false")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "false")
 
         stats = await run_nudges(db, now=NOW)
 
@@ -125,7 +125,7 @@ class TestGates:
         self, db, activation_org, sender, monkeypatch
     ):
         monkeypatch.setattr(runner_module, "get_deployment_mode", lambda: "oss")
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "false")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "false")
 
         stats = await run_nudges(db, now=NOW, force=True)
 
@@ -247,7 +247,7 @@ class TestDryRun:
         self, db, activation_org, sender, monkeypatch
     ):
         """Rehearsing against production must not require arming the system."""
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "false")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "false")
 
         stats = await run_nudges(db, now=NOW, dry_run=True)
         assert stats.by_nudge == {"activation.first_course_d1": 1}
@@ -499,7 +499,7 @@ class TestBackfillGuard:
     async def test_backfill_off_excludes_preexisting_orgs(
         self, db, legacy_org, sender, monkeypatch
     ):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_BACKFILL_MODE", "off")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_BACKFILL_MODE", "off")
 
         stats = await run_nudges(db, now=NOW)
 
@@ -509,7 +509,7 @@ class TestBackfillGuard:
     async def test_winback_mode_admits_the_winback_tracks(
         self, db, legacy_org, sender, monkeypatch
     ):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_BACKFILL_MODE", "winback")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_BACKFILL_MODE", "winback")
 
         stats = await run_nudges(db, now=NOW)
 
@@ -520,7 +520,7 @@ class TestBackfillGuard:
         }
 
     async def test_full_mode_admits_everything(self, db, legacy_org, sender, monkeypatch):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_BACKFILL_MODE", "full")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_BACKFILL_MODE", "full")
 
         stats = await run_nudges(db, now=NOW)
         assert stats.sent == 1
@@ -568,12 +568,12 @@ class TestEnvHelpers:
         [("true", True), ("1", True), ("YES", True), ("off", False), ("", False)],
     )
     def test_flag_parsing(self, monkeypatch, value, expected):
-        monkeypatch.setenv("LEARNHOUSE_TEST_FLAG", value)
-        assert runner_module._flag("LEARNHOUSE_TEST_FLAG") is expected
+        monkeypatch.setenv("VALIDBRIDGE_TEST_FLAG", value)
+        assert runner_module._flag("VALIDBRIDGE_TEST_FLAG") is expected
 
     def test_flag_default_when_unset(self, monkeypatch):
-        monkeypatch.delenv("LEARNHOUSE_TEST_FLAG", raising=False)
-        assert runner_module._flag("LEARNHOUSE_TEST_FLAG", True) is True
+        monkeypatch.delenv("VALIDBRIDGE_TEST_FLAG", raising=False)
+        assert runner_module._flag("VALIDBRIDGE_TEST_FLAG", True) is True
 
     def test_stats_serialise(self):
         stats = RunStats()
@@ -596,7 +596,7 @@ class TestRepeatKeys:
     def test_full_backfill_mode_admits_every_track(self, monkeypatch):
         """Documented as unsupported, but it exists as an escape hatch and
         must do what it says."""
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_BACKFILL_MODE", "full")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_BACKFILL_MODE", "full")
         spec = get_spec("activation.first_course_d1")
         snapshot = type(
             "S", (), {"created_at": NOW - timedelta(days=400)}
@@ -813,7 +813,7 @@ class TestExplicitActivationDate:
     async def test_an_explicit_date_wins(self, db, monkeypatch):
         from src.services.nudges.runner import activation_date
 
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ACTIVATION_DATE", "2020-01-01")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ACTIVATION_DATE", "2020-01-01")
         boundary = await activation_date(db, now=NOW)
 
         assert boundary.year == 2020
@@ -827,7 +827,7 @@ class TestExplicitActivationDate:
         from src.services.nudges.runner import _is_preexisting, activation_date
         from src.services.nudges.eligibility import build_snapshots
 
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ACTIVATION_DATE", "2000-01-01")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ACTIVATION_DATE", "2000-01-01")
         cutoff = await activation_date(db, now=NOW)
         snap = (await build_snapshots(db, [activation_org], now=NOW))[0]
 
@@ -836,7 +836,7 @@ class TestExplicitActivationDate:
     async def test_garbage_falls_back_to_the_ledger(self, db, monkeypatch):
         from src.services.nudges.runner import activation_date
 
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ACTIVATION_DATE", "not-a-date")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ACTIVATION_DATE", "not-a-date")
         assert (await activation_date(db, now=NOW)) == NOW - timedelta(days=400)
 
     async def test_dry_run_rows_do_not_pin_the_boundary(self, db, monkeypatch):
@@ -845,7 +845,7 @@ class TestExplicitActivationDate:
 
         from src.services.nudges.runner import _ledger_has_rows, activation_date
 
-        monkeypatch.delenv("LEARNHOUSE_NUDGES_ACTIVATION_DATE", raising=False)
+        monkeypatch.delenv("VALIDBRIDGE_NUDGES_ACTIVATION_DATE", raising=False)
         await db.execute(delete(NudgeSend))
         db.add(
             NudgeSend(

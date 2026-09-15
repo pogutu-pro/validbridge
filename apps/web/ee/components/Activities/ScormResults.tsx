@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { RefreshCw, AlertCircle, CheckCircle2, Circle, Clock, Award } from 'lucide-react'
 
@@ -56,7 +56,7 @@ function humanizeDuration(iso: string): string {
 }
 
 function ScormResults({ activityUuid }: { activityUuid: string }) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const token = session?.data?.tokens?.access_token
   const [rows, setRows] = useState<ScormResult[]>([])
   const [isLoading, setIsLoading] = useState(true)

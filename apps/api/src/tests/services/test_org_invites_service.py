@@ -67,7 +67,7 @@ class TestOrgInvitesService:
         fake_redis = _fake_redis()
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -101,7 +101,7 @@ class TestOrgInvitesService:
         self, mock_request, db, org, admin_user
     ):
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(None),
         ):
             with pytest.raises(HTTPException) as exc_info:
@@ -109,7 +109,7 @@ class TestOrgInvitesService:
         assert exc_info.value.status_code == 500
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -123,7 +123,7 @@ class TestOrgInvitesService:
         assert limit_exc.value.status_code == 400
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -147,7 +147,7 @@ class TestOrgInvitesService:
         self, mock_request, db, org, admin_user
     ):
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(None),
         ):
             with pytest.raises(HTTPException) as create_redis_exc:
@@ -177,7 +177,7 @@ class TestOrgInvitesService:
         assert delete_redis_exc.value.status_code == 500
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -213,7 +213,7 @@ class TestOrgInvitesService:
         assert delete_org_exc.value.status_code == 404
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -257,7 +257,7 @@ class TestOrgInvitesService:
             "created_by": admin_user.user_uuid,
         }
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -277,7 +277,7 @@ class TestOrgInvitesService:
         assert get_code_missing_exc.value.status_code == 404
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -316,7 +316,7 @@ class TestOrgInvitesService:
         )
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -350,7 +350,7 @@ class TestOrgInvitesService:
         )
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -383,7 +383,7 @@ class TestOrgInvitesService:
         )
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -403,7 +403,7 @@ class TestOrgInvitesService:
         assert result["invite_code"] == "ABC12345"
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -429,7 +429,7 @@ class TestOrgInvitesService:
         fake_redis = _fake_redis(scan_keys=[b"invite-key"])
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -450,7 +450,7 @@ class TestOrgInvitesService:
         fake_redis.delete.assert_called_once_with(b"invite-key")
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites.rbac_check",
@@ -483,7 +483,7 @@ class TestOrgInvitesService:
         )
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.orgs.invites._get_redis",
@@ -491,7 +491,7 @@ class TestOrgInvitesService:
         ), patch(
             "src.services.email.utils.get_org_signup_base_url",
             new_callable=AsyncMock,
-            return_value="https://test-org.learnhouse.io",
+            return_value="https://test-org.validbridge.co.ke",
         ), patch(
             "src.services.orgs.invites.send_invitation_email",
             return_value={"id": "email"},
@@ -507,12 +507,12 @@ class TestOrgInvitesService:
         assert result is True
 
         with patch(
-            "src.services.orgs.invites.get_learnhouse_config",
+            "src.services.orgs.invites.get_validbridge_config",
             return_value=_fake_config(),
         ), patch(
             "src.services.email.utils.get_org_signup_base_url",
             new_callable=AsyncMock,
-            return_value="https://test-org.learnhouse.io",
+            return_value="https://test-org.validbridge.co.ke",
         ), patch(
             "src.services.orgs.invites.send_invitation_email",
             side_effect=RuntimeError("boom"),
@@ -557,7 +557,7 @@ class TestSendInviteEmailLangLookup:
         with patch(
             "src.services.email.utils.get_org_signup_base_url",
             new_callable=AsyncMock,
-            return_value="https://test-org.learnhouse.io",
+            return_value="https://test-org.validbridge.co.ke",
         ), patch(
             "src.services.orgs.invites.send_invitation_email",
             return_value={"id": "email"},
@@ -584,7 +584,7 @@ class TestSendInviteEmailLangLookup:
         with patch(
             "src.services.email.utils.get_org_signup_base_url",
             new_callable=AsyncMock,
-            return_value="https://test-org.learnhouse.io",
+            return_value="https://test-org.validbridge.co.ke",
         ), patch(
             "src.services.orgs.invites.send_invitation_email",
             return_value={"id": "email"},
@@ -616,7 +616,7 @@ class TestSendInviteEmailExceptionBranch:
         with patch(
             "src.services.email.utils.get_org_signup_base_url",
             new_callable=AsyncMock,
-            return_value="https://test-org.learnhouse.io",
+            return_value="https://test-org.validbridge.co.ke",
         ), patch(
             "src.services.orgs.invites.send_invitation_email",
             return_value={"id": "email"},

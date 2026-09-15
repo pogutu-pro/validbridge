@@ -154,7 +154,7 @@ class TestImportHelpers:
         # (".." sanitizes to "" -> None) is skipped -> no valid courses.
         _set_import_temp_dir(monkeypatch, tmp_path)
         manifest = {
-            "format": "learnhouse-course-export",
+            "format": "validbridge-course-export",
             "version": "2.0.0",
             "courses": [{"course_uuid": "c1", "path": ".."}],
         }
@@ -180,7 +180,7 @@ class TestImportHelpers:
         # treated as "not contained" so the entry is skipped (defense in depth).
         _set_import_temp_dir(monkeypatch, tmp_path)
         manifest = {
-            "format": "learnhouse-course-export",
+            "format": "validbridge-course-export",
             "version": "2.0.0",
             "courses": [{"course_uuid": "c1", "path": "c1"}],
         }
@@ -250,7 +250,7 @@ class TestImportHelpers:
 
         manifest = {
             "version": "2.0.0",
-            "format": "learnhouse-course-export",
+            "format": "validbridge-course-export",
             "courses": [{"course_uuid": "c1", "path": "c1"}],
         }
         course_data = {"course_uuid": "c1", "name": "Test"}
@@ -311,7 +311,7 @@ class TestImportHelpers:
     async def test_analyze_import_package_success(self, db, org, admin_user, mock_request, tmp_path, monkeypatch):
         manifest = {
             "version": "2.0.0",
-            "format": "learnhouse-course-export",
+            "format": "validbridge-course-export",
             "courses": [
                 {"course_uuid": "course-1", "path": "course-1"},
             ],
@@ -364,13 +364,13 @@ class TestImportHelpers:
             (
                 {"manifest.json": json.dumps({"format": "wrong", "courses": []}).encode()},
                 400,
-                "Invalid package: Not a LearnHouse course export",
+                "Invalid package: Not a ValidBridge course export",
             ),
             (
                 {
                     "manifest.json": json.dumps(
                         {
-                            "format": "learnhouse-course-export",
+                            "format": "validbridge-course-export",
                             "courses": [{"course_uuid": "course-1", "path": "missing"}],
                         }
                     ).encode(),
@@ -431,7 +431,7 @@ class TestImportHelpers:
             {
                 "manifest.json": json.dumps(
                     {
-                        "format": "learnhouse-course-export",
+                        "format": "validbridge-course-export",
                         "courses": [{"course_uuid": "course-1", "path": "course-1"}],
                     }
                 ).encode(),
@@ -529,7 +529,7 @@ class TestImportHelpers:
                 "manifest.json",
                 json.dumps(
                     {
-                        "format": "learnhouse-course-export",
+                        "format": "validbridge-course-export",
                         "version": "2.0.0",
                         "courses": [{"course_uuid": "c1", "path": "c1"}],
                     }
@@ -570,7 +570,7 @@ class TestImportHelpers:
 
         manifest = {
             "version": "2.0.0",
-            "format": "learnhouse-course-export",
+            "format": "validbridge-course-export",
             "courses": [{"course_uuid": "course-1", "path": "course-1"}],
         }
         files = {
@@ -619,7 +619,7 @@ class TestImportHelpers:
     ):
         _set_import_temp_dir(monkeypatch, tmp_path)
         manifest = {
-            "format": "learnhouse-course-export",
+            "format": "validbridge-course-export",
             "courses": [{"course_uuid": "course-1", "path": "course-1"}],
         }
         package_bytes = _zip_bytes(
@@ -719,7 +719,7 @@ class TestImportHelpers:
         temp_dir = tmp_path / temp_id / "extracted"
         temp_dir.mkdir(parents=True)
         manifest = {
-            "format": "learnhouse-course-export",
+            "format": "validbridge-course-export",
             "courses": [
                 {"course_uuid": "course-success", "path": "course-success"},
                 {"course_uuid": "course-failure", "path": "course-failure"},

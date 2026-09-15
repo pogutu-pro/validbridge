@@ -41,7 +41,7 @@ export default function CourseEffectivenessMatrix({ days = '90' }: { days?: stri
             <YAxis dataKey="completion_rate" name="Completion %" tick={{ fontSize: 11 }} stroke="#9ca3af" tickFormatter={(v: number) => `${v}%`} label={{ value: 'Completion %', angle: -90, position: 'insideLeft', fontSize: 11 }} />
             <ZAxis dataKey="z" range={[40, 400]} />
             <Tooltip content={<CustomTooltip />} />
-            <Scatter data={rows} fill="rgba(139, 92, 246, 0.6)" stroke="#8b5cf6" strokeWidth={1} />
+            <Scatter data={rows} fill="rgba(139, 92, 246, 0.6)" stroke="#f97316" strokeWidth={1} />
           </ScatterChart>
         </ResponsiveContainer>
       )}

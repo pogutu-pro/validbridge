@@ -24,7 +24,7 @@ _KEY_PREFIX = "org_cache"
 # rolling, so old and new pods share this Redis for the length of a rollout.
 # On the old key an old pod would read the new trimmed blob and return it
 # verbatim, giving clients an /instance/info response with no `mode` at all —
-# which the frontend proxy writes into the LH_mode cookie, and which then
+# which the frontend proxy writes into the VB_mode cookie, and which then
 # reads back as "oss". EE surfaces and the SaaS billing guard would switch off
 # fleet-wide for up to the cache TTL. Bumping the key means neither version
 # ever sees the other's payload; the stale key simply expires.

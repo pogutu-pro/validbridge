@@ -1,9 +1,9 @@
 from fastapi import HTTPException
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 
 def isDevModeEnabled():
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     if config.general_config.development_mode:
         return True
     else:
@@ -11,7 +11,7 @@ def isDevModeEnabled():
 
 
 def isDevModeEnabledOrRaise():
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     if config.general_config.development_mode:
         return True
     else:

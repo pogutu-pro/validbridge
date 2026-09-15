@@ -1,6 +1,6 @@
 'use client'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
@@ -34,7 +34,7 @@ type PropsType = {
 function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChanged }: PropsType) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)

@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
 import { hexToRgba, isLightHex } from './BrandingShared'
 
 /**
- * Every vignette is a hand-drawn miniature of a real LearnHouse surface,
+ * Every vignette is a hand-drawn miniature of a real ValidBridge surface,
  * rendered with the admin's actual assets. They are not screenshots and
  * not CSS-scaled components: fixed pixel sizes keep them legible and let
  * a logo sit in the exact box it will occupy for real.
@@ -124,7 +124,7 @@ export function PublicHeaderVignette({ wideUrl, name, primaryColor, font, label,
             {wideUrl ? (
               <img src={wideUrl} alt="" className="h-full w-auto max-w-[110px] object-contain rounded-sm" />
             ) : (
-              <span className={cn('font-semibold truncate', ink, large ? 'text-sm' : 'text-[9px]')}>{name || 'LearnHouse'}</span>
+              <span className={cn('font-semibold truncate', ink, large ? 'text-sm' : 'text-[9px]')}>{name || 'ValidBridge'}</span>
             )}
           </span>
           <span className="flex items-center gap-1.5">
@@ -167,7 +167,7 @@ interface LoginPanelVignetteProps extends LogoSources {
   textColor: 'light' | 'dark'
   /** True when the background is a photo, which gets a dark scrim. */
   scrim?: boolean
-  showLearnHouseMark?: boolean
+  showValidBridgeMark?: boolean
   /** Larger variant for the sign-in tab's live preview. */
   large?: boolean
 }
@@ -181,7 +181,7 @@ export function LoginPanelVignette({
   backgroundStyle,
   textColor,
   scrim,
-  showLearnHouseMark = true,
+  showValidBridgeMark = true,
   label,
   large,
 }: LoginPanelVignetteProps) {
@@ -202,9 +202,9 @@ export function LoginPanelVignette({
         {/* branding side */}
         <div className={cn('relative flex-1', large ? 'm-3 rounded-xl' : 'm-1.5 rounded-md', 'overflow-hidden')} style={backgroundStyle}>
           {scrim && <span className="absolute inset-0 bg-black/30" />}
-          {showLearnHouseMark && (
+          {showValidBridgeMark && (
             <img
-              src="/lrn.svg"
+              src="/validbridge.svg"
               alt=""
               className={cn('absolute', large ? 'top-3 start-3 h-4' : 'top-1.5 start-1.5 h-2', light ? 'opacity-60 invert' : 'opacity-40')}
             />
@@ -217,7 +217,7 @@ export function LoginPanelVignette({
               className={cn('ring-1 ring-inset ring-white/10', large ? 'h-16 w-16 rounded-2xl' : 'h-9 w-9 rounded-lg')}
               insetClassName={large ? 'p-2' : 'p-1'}
             />
-            <span className={cn('font-black tracking-tight leading-tight', large ? 'text-lg' : 'text-[9px]')}>{name || 'LearnHouse'}</span>
+            <span className={cn('font-black tracking-tight leading-tight', large ? 'text-lg' : 'text-[9px]')}>{name || 'ValidBridge'}</span>
             {welcome && (
               <span className={cn('leading-snug', large ? 'text-xs max-w-[220px]' : 'text-[7px] max-w-[110px] line-clamp-2', light ? 'text-white/70' : 'text-gray-600')}>
                 {welcome}
@@ -340,7 +340,7 @@ export function BrowserTabVignette({ faviconUrl, name, label }: BrowserTabVignet
         <div className="flex items-center gap-2 bg-white px-2 py-1.5">
           <span className="text-[9px] text-gray-300">‹ ›</span>
           <span className="flex h-4 flex-1 items-center rounded-full bg-[#f1f3f4] px-2 text-[8px] text-gray-500">
-            {name ? `${name.toLowerCase().replace(/\s+/g, '')}.learnhouse.io` : 'your-school.learnhouse.io'}
+            {name ? `${name.toLowerCase().replace(/\s+/g, '')}.validbridge.co.ke` : 'your-school.validbridge.co.ke'}
           </span>
         </div>
         <div className="h-8 bg-[#f8f8f8]" />
@@ -388,7 +388,7 @@ interface ExploreCardVignetteProps {
   label: string
 }
 
-/** Your organization's card on the LearnHouse explore listing. */
+/** Your organization's card on the ValidBridge explore listing. */
 export function ExploreCardVignette({ thumbnailUrl, name, description, label }: ExploreCardVignetteProps) {
   return (
     <Vignette icon={Compass} label={label} size="w-[200px]">
@@ -426,7 +426,7 @@ export function LinkPreviewVignette({ thumbnailUrl, name, host, label }: LinkPre
           <Line w="w-12 h-1" />
         </div>
         <div className="ms-5 rounded-md border-s-2 border-gray-300 bg-[#f4f4f5] p-2">
-          <p className="truncate text-[8px] text-gray-400">{host || 'learnhouse.io'}</p>
+          <p className="truncate text-[8px] text-gray-400">{host || 'validbridge.co.ke'}</p>
           <p className="truncate text-[9px] font-semibold text-gray-900">{name || 'Your organization'}</p>
           <div className="mt-1.5 aspect-[1.91/1] w-full overflow-hidden rounded bg-gray-200">
             {thumbnailUrl && <img src={thumbnailUrl} alt="" className="h-full w-full object-cover" />}

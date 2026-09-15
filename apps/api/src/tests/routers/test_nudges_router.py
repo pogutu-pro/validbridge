@@ -201,7 +201,7 @@ class TestDeliveryEvents:
 
         from src.routers.nudges import internal_router
 
-        monkeypatch.setenv("LEARNHOUSE_RESEND_WEBHOOK_SECRET", SIGNING_SECRET)
+        monkeypatch.setenv("VALIDBRIDGE_RESEND_WEBHOOK_SECRET", SIGNING_SECRET)
         app = FastAPI()
         app.include_router(internal_router, prefix="/api/v1/internal/emails")
         app.dependency_overrides[get_db_session] = lambda: db
@@ -341,7 +341,7 @@ class TestDeliveryEvents:
     async def test_unset_secret_fails_closed(self, wclient, db, admin_user, monkeypatch):
         """An unauthenticated endpoint that suppresses addresses would be a
         denial of service on your own mail."""
-        monkeypatch.delenv("LEARNHOUSE_RESEND_WEBHOOK_SECRET", raising=False)
+        monkeypatch.delenv("VALIDBRIDGE_RESEND_WEBHOOK_SECRET", raising=False)
         r = await self._post(
             wclient, {"type": "email.complained", "data": {"to": admin_user.email}}
         )

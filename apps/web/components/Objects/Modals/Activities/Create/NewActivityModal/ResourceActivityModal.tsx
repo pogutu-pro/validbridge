@@ -48,7 +48,7 @@ function ResourceActivityModal({ submitActivity, chapterId, course, orgslug }: a
         }}
       >
         <span className="flex items-center gap-2 bg-white nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600">
-          <Package size={18} weight="duotone" className="text-indigo-400" />
+          <Package size={18} weight="duotone" className="text-orange-400" />
           Resource
         </span>
       </div>

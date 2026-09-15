@@ -1,142 +1,216 @@
-<p align="center">
-  <a href="https://learnhouse.app">
-    <img src=".github/images/learnhouse-github.png" alt="LearnHouse" width="600" />
-  </a>
-</p>
+# ValidBridge
 
-<h3 align="center">The next-gen open-source platform for world-class educational content.</h3>
+ValidBridge is an open-source learning platform for authoring and delivering educational content. Course building, assessment, communities, real-time collaboration, and AI-assisted learning are unified into a single, self-hostable system.
 
-<p align="center">
-  <a href="https://github.com/learnhouse/learnhouse/blob/main/LICENSE"><img src="https://img.shields.io/github/license/learnhouse/learnhouse?style=flat&color=blue" alt="License" /></a>
-  <a href="https://github.com/learnhouse/learnhouse/stargazers"><img src="https://img.shields.io/github/stars/learnhouse/learnhouse?style=flat" alt="Stars" /></a>
-  <a href="https://www.npmjs.com/package/learnhouse"><img src="https://img.shields.io/npm/v/learnhouse?style=flat&label=cli" alt="CLI Version" /></a>
-  <a href="https://app.codecov.io/gh/learnhouse/learnhouse"><img src="https://img.shields.io/codecov/c/github/learnhouse/learnhouse?flag=api&label=api%20coverage" alt="API Coverage" /></a>
-  <a href="https://github.com/learnhouse/learnhouse/commits"><img src="https://img.shields.io/github/last-commit/learnhouse/learnhouse?style=flat&label=last%20commit" alt="Last Commit" /></a>
-  <a href="https://github.com/learnhouse/learnhouse/issues"><img src="https://img.shields.io/github/issues/learnhouse/learnhouse?style=flat" alt="Issues" /></a>
-  <a href="https://github.com/learnhouse/learnhouse/pulls"><img src="https://img.shields.io/github/issues-pr/learnhouse/learnhouse?style=flat&label=PRs" alt="Pull Requests" /></a>
-</p>
+## Architecture
 
-<p align="center">
-📖 <b>Courses</b> — Create and manage courses with ease<br>
-✏️ <b>Editor</b> — Powerful block-based Notion-like content editor<br>
-📦 <b>Collections</b> — Organize courses into curated bundles<br>
-📝 <b>Assignments</b> — Create tasks and track student submissions<br>
-💬 <b>Discussions</b> — Community forums for your learners<br>
-🎙️ <b>Podcasts</b> — Audio content for on-the-go learning<br>
-📊 <b>Analytics</b> — Track engagement and course performance<br>
-🧊 <b>Playgrounds</b> — AI-generated interactive elements, simulations & diagrams<br>
-💻 <b>Code</b> — Real code execution with auto-grading in 30+ languages<br>
-📋 <b>Boards</b> — Real-time collaborative whiteboards<br>
-🧠 <b>AI</b> — Context-aware AI for learning & teaching<br>
-🎓 <b>Certificates</b> — Auto-generate certificates on course completion<br>
-👥 <b>User Groups</b> — Organize learners and control access<br>
-🔍 <b>SEO</b> — Built-in SEO optimization with metadata, sitemaps & open graph<br>
-🎨 <b>Customization</b> — Custom branding, landing pages & theming<br>
-💳 <b>Payments (Enterprise)</b> — Sell courses with no fees and no lock-in<br>
-🔐 <b>SSO (Enterprise)</b> — Single sign-on with OAuth providers<br>
-🏢 <b>Multi-Org (Enterprise)</b> — Run multiple organizations from a single instance<br>
-</p>
+The platform is composed of three independently deployable applications:
 
-## 🚀 Get Started
+| Application | Path          | Responsibility                                                           | Stack                                                 |
+| ----------- | ------------- | ------------------------------------------------------------------------ | ----------------------------------------------------- |
+| **API**     | `apps/api`    | REST backend: authentication, courses, assignments, analytics, AI, email | FastAPI, Python, SQLModel, Alembic, PostgreSQL, Redis |
+| **Web**     | `apps/web`    | Learner, instructor, and administrator interface                         | Next.js, React, Tailwind CSS, Tiptap                  |
+| **Collab**  | `apps/collab` | Real-time synchronization for course editing and boards                  | Hocuspocus, Yjs, WebSocket                            |
 
-LearnHouse has an official CLI that handles everything — self-hosting, updates, backups, and local development.
+## Capabilities
 
-### Self-host
+- **Courses** — structured programs composed of chapters and activities.
+- **Editor** — a block-based, Notion-style content editor.
+- **Assignments** — task creation, submission tracking, and grading.
+- **Communities** — discussion spaces for learners.
+- **Boards** — real-time collaborative whiteboards.
+- **Playgrounds** — interactive simulations, diagrams, and generated elements.
+- **Code** — in-browser execution with auto-grading across 30+ languages.
+- **AI** — context-aware assistance for learners and instructors.
+- **Certificates** — issued automatically on course completion.
+- **Analytics** — engagement and performance reporting.
+- **Customization** — organization branding, landing pages, and theming.
+- **SEO** — metadata, sitemaps, and Open Graph support.
 
-```bash
-npx learnhouse@latest setup
-```
+Payments, SSO, and multi-organization hosting are available in the Enterprise edition.
 
-The setup wizard walks you through domain, database, admin account, and optional features. Once done, it generates all config files and starts your instance.
+## Requirements
+
+| Dependency                       | Version                    |
+| -------------------------------- | -------------------------- |
+| Node.js                          | 20 or later                |
+| [Bun](https://bun.sh)            | 1.4.2 (see `.bun-version`) |
+| Python                           | 3.14.7                     |
+| [uv](https://docs.astral.sh/uv/) | latest                     |
+| PostgreSQL                       | 16                         |
+| Redis                            | 7                          |
+
+## Configuration
+
+Configuration is resolved from environment variables and, for the API, `apps/api/config/config.yaml`. Environment variables take precedence over the YAML file.
+
+Start from the example file at the repository root:
 
 ```bash
-npx learnhouse start       # Start services
-npx learnhouse stop        # Stop services
-npx learnhouse update      # Update to latest version
-npx learnhouse logs        # Stream logs
-npx learnhouse backup      # Backup database
-npx learnhouse doctor      # Diagnose issues
+cp .env.example .env
 ```
 
-### Development
+The root `.env` is consumed by Docker Compose. For a native backend run, the API reads `apps/api/.env` — create it with the backend-relevant values (see [Environment variables](#environment-variables)).
+
+At minimum, set:
+
+- `VALIDBRIDGE_AUTH_JWT_SECRET_KEY` — at least 32 characters.
+- `VALIDBRIDGE_SQL_CONNECTION_STRING` — PostgreSQL connection string.
+- `VALIDBRIDGE_REDIS_CONNECTION_STRING` — Redis connection string.
+- `VALIDBRIDGE_INITIAL_ADMIN_EMAIL` / `VALIDBRIDGE_INITIAL_ADMIN_PASSWORD` — used to seed the first administrator.
+- `VALIDBRIDGE_INITIAL_ORG_NAME` / `VALIDBRIDGE_INITIAL_ORG_SLUG` — used to seed the first organization.
+
+## Running the application
+
+### Quick start — run everything
+
+With PostgreSQL and Redis reachable (see step 1), run each service in its own terminal:
 
 ```bash
-git clone https://github.com/learnhouse/learnhouse.git
-cd learnhouse
-npx learnhouse dev
+# 1. Backend API — http://localhost:8000
+cd apps/api && uv sync && uv run python app.py
+
+# 2. Frontend — http://localhost:3000
+cd apps/web && bun install && bun run dev
+
+# 3. Collaboration server — ws://localhost:4000 (required for boards & real-time editing)
+cd apps/collab && bun install && node --import tsx src/index.ts
 ```
 
-This spins up PostgreSQL and Redis, installs dependencies, and starts the API, Web, and Collab servers with hot reload.
+Open <http://localhost:3000> and log in with an account from [Default accounts](#default-accounts).
 
-> See the full [CLI documentation](apps/cli/README.md) for all commands and options.
+### 1. Start PostgreSQL and Redis
 
-## 🛠️ Tech Stack
-
-<p align="center">
-<a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-000?style=flat&logo=nextdotjs&logoColor=white" alt="Next.js" /></a>
-<a href="https://react.dev"><img src="https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black" alt="React" /></a>
-<a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white" alt="TypeScript" /></a>
-<a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white" alt="TailwindCSS" /></a>
-<a href="https://www.radix-ui.com"><img src="https://img.shields.io/badge/Radix_UI-161618?style=flat&logo=radixui&logoColor=white" alt="Radix UI" /></a>
-<a href="https://tiptap.dev"><img src="https://img.shields.io/badge/Tiptap-1a1a2e?style=flat&logoColor=white" alt="Tiptap" /></a>
-<a href="https://codemirror.net"><img src="https://img.shields.io/badge/CodeMirror-D30707?style=flat&logo=codemirror&logoColor=white" alt="CodeMirror" /></a>
-<a href="https://yjs.dev"><img src="https://img.shields.io/badge/Yjs-6EEB83?style=flat&logoColor=black" alt="Yjs" /></a>
-<a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
-<a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" alt="Python" /></a>
-<a href="https://www.postgresql.org"><img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
-<a href="https://redis.io"><img src="https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white" alt="Redis" /></a>
-<a href="https://www.docker.com"><img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" alt="Docker" /></a>
-<a href="https://stripe.com"><img src="https://img.shields.io/badge/Stripe-635BFF?style=flat&logo=stripe&logoColor=white" alt="Stripe" /></a>
-<a href="https://ai.google.dev"><img src="https://img.shields.io/badge/Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white" alt="Gemini" /></a>
-<a href="https://www.llamaindex.ai"><img src="https://img.shields.io/badge/LlamaIndex-000?style=flat&logoColor=white" alt="LlamaIndex" /></a>
-<a href="https://aws.amazon.com/s3"><img src="https://img.shields.io/badge/AWS_S3-569A31?style=flat&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDIgN3YxMGwxMCA1IDEwLTVWN0wxMiAyem0wIDIuMThMMTkuMTggNyAxMiA5LjgyIDQuODIgNyAxMiA0LjE4ek00IDguNjRsNyAzLjVWMTkuNWwtNy0zLjVWOC42NHptMTAgMTAuODZWMTIuMTRsNy0zLjV2Ny4zNmwtNyAzLjV6Ii8+PC9zdmc+&logoColor=white" alt="AWS S3" /></a>
-<a href="https://www.tinybird.co"><img src="https://img.shields.io/badge/Tinybird-1A1A1A?style=flat&logoColor=white" alt="Tinybird" /></a>
-</p>
-
-## 📁 Project Structure
-
-| App | Path | Description | Technology | Used by |
-|-----|------|-------------|------------|---------|
-| **Web** | `apps/web` | Frontend application — dashboard, course player, editor, landing pages | Next.js, React, TailwindCSS, Tiptap | Teachers, Students, Admins |
-| **API** | `apps/api` | Backend REST API — auth, courses, payments, AI, analytics | FastAPI, Python, SQLModel, Alembic | Web, CLI, Collab |
-| **Collab** | `apps/collab` | Real-time collaboration server — live editing sync for courses & boards | Hocuspocus, Yjs, WebSocket | Web (editor, boards) |
-| **CLI** | `apps/cli` | Official CLI — setup wizard, dev environment, instance management | Commander, Node.js | Developers, Self-hosters |
-
-## 💬 Community
-
-- [Discord](https://discord.gg/CMyZjjYZ6x) — chat with the team and other users
-- [Documentation](https://docs.learnhouse.app) — guides and references
-
-## 🤝 Contributing
+Ensure both services are reachable. With Docker:
 
 ```bash
-git clone https://github.com/learnhouse/learnhouse.git
-cd learnhouse
-npx learnhouse dev
+docker compose up -d db redis
 ```
 
-- [Contributing Guide](CONTRIBUTING.md)
-- [Submit a bug](https://github.com/learnhouse/learnhouse/issues/new?assignees=&labels=bug%2Ctriage&projects=&template=bug.yml&title=%5BBug%5D%3A+)
-- [Good first issues](https://github.com/learnhouse/learnhouse/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
+Otherwise use a local PostgreSQL 16 and Redis 7 instance (a native `postgresql` + `redis-server` on `localhost:5432` / `localhost:6379` works out of the box).
 
-## 🔒 Security
+### 2. Backend API
 
-We take the security of LearnHouse and the data entrusted to us seriously. If you discover a vulnerability, please email **security@learnhouse.app** — do not disclose it publicly until we've had a chance to investigate.
+```bash
+cd apps/api
+uv sync
+uv run python app.py
+```
 
-Please include a clear description, steps to reproduce, affected endpoints, and any relevant screenshots or proof-of-concept code. We will acknowledge your report, keep you informed, and credit you once resolved if you wish.
+`app.py` starts Uvicorn on the configured port (`VALIDBRIDGE_PORT`, default `8000`). On first start the API creates any missing schema and seeds the default organization and administrator from the `VALIDBRIDGE_INITIAL_*` variables.
 
-See our full [Security Policy](https://learnhouse.app/security) for details on our practices, scope, and responsible disclosure guidelines.
+For a production deployment, apply migrations explicitly before starting:
 
-## ✍️ Author & Maintainer
+```bash
+uv run alembic upgrade head
+```
 
-Sweave (Badr B.) — [@swve](https://github.com/swve)
+### 3. Frontend Web
 
-## 💜 A Word
+```bash
+cd apps/web
+bun install
+bun run dev
+```
 
-LearnHouse is made with 💜, from the UI to the features it is carefully designed to make students and teachers lives easier and make education software more enjoyable.
+The web application listens on port **3000** and expects the API at `http://localhost:8000`.
 
-Thank you and have fun using/developing/testing LearnHouse !
+### 4. Collaboration server (optional)
 
-## 📄 License
+Required only for real-time course editing and boards:
 
-[AGPL-3.0](LICENSE) — Enterprise features are available under a separate Enterprise License.
+```bash
+cd apps/collab
+bun install
+node --import tsx src/index.ts
+```
+
+The collaboration server listens on port **4000**.
+
+> **Note:** run the collab server with `node --import tsx src/index.ts`, not `bun run dev`. The `tsx` CLI resolves its loader incorrectly under Bun (a Bun/`tsx` module-resolution bug), so the watcher exits with `Cannot find module './cjs/index.cjs'`. Node resolves it correctly.
+
+## Default accounts
+
+A clean install seeds one account per role in the default organization (`ValidBridge`, slug `default`). The credentials below are the defaults used by this development instance:
+
+| Role                       | Email                        | Password          |
+| -------------------------- | ---------------------------- | ----------------- |
+| Administrator (superadmin) | `admin@validbridge.dev`      | `ValidBridge123!` |
+| Maintainer                 | `maintainer@validbridge.dev` | `Maintainer123!`  |
+| Instructor                 | `instructor@validbridge.dev` | `Instructor123!`  |
+| Learner                    | `student@validbridge.dev`    | `Student123!`     |
+
+> **Security notice:** these accounts are for local development only. Change every password and the JWT secret before exposing an instance to any network.
+
+To provision the first administrator on a fresh database, set `VALIDBRIDGE_INITIAL_ADMIN_EMAIL` and `VALIDBRIDGE_INITIAL_ADMIN_PASSWORD` before the API's first start.
+
+## Environment variables
+
+| Variable                              | Purpose                                                 |
+| ------------------------------------- | ------------------------------------------------------- |
+| `VALIDBRIDGE_SQL_CONNECTION_STRING`   | PostgreSQL connection string.                           |
+| `VALIDBRIDGE_REDIS_CONNECTION_STRING` | Redis connection string.                                |
+| `VALIDBRIDGE_AUTH_JWT_SECRET_KEY`     | Signing key for session tokens (minimum 32 characters). |
+| `VALIDBRIDGE_PORT`                    | API listen port (default `1338`; `8000` in this setup). |
+| `VALIDBRIDGE_DOMAIN`                  | Public domain, e.g. `localhost:3000`.                   |
+| `VALIDBRIDGE_COOKIE_DOMAIN`           | Cookie scope; host-only in single-tenancy mode.         |
+| `VALIDBRIDGE_INITIAL_ADMIN_EMAIL`     | Email of the seeded administrator.                      |
+| `VALIDBRIDGE_INITIAL_ADMIN_PASSWORD`  | Password of the seeded administrator.                   |
+| `VALIDBRIDGE_INITIAL_ORG_NAME`        | Display name of the seeded organization.                |
+| `VALIDBRIDGE_INITIAL_ORG_SLUG`        | URL slug of the seeded organization.                    |
+| `NEXT_PUBLIC_VALIDBRIDGE_API_URL`     | API base URL used by the web client.                    |
+| `NEXT_PUBLIC_VALIDBRIDGE_BACKEND_URL` | Backend origin used by the web client.                  |
+| `NEXT_PUBLIC_VALIDBRIDGE_DOMAIN`      | Public domain used by the web client.                   |
+
+Refer to `.env.example` for the complete list.
+
+## Database
+
+The API owns the schema. On a fresh database it creates all tables automatically and seeds baseline data. Schema changes are tracked with Alembic:
+
+```bash
+cd apps/api
+uv run alembic upgrade head          # apply all migrations
+uv run alembic revision --autogenerate -m "describe change"   # create a migration
+```
+
+The schema-creation step also enables the `pgvector` extension; if it is unavailable the RAG features are disabled but the application continues to run.
+
+## Testing
+
+### Backend
+
+```bash
+cd apps/api
+uv run pytest                                  # full suite
+uv run pytest src/tests/routers                # a single directory
+uv run pytest src/tests/routers/test_auth.py   # a single file
+```
+
+The backend suite runs against an in-memory SQLite database and does not require PostgreSQL or Redis.
+
+### Frontend
+
+```bash
+cd apps/web
+bun test tests
+```
+
+## Project structure
+
+```
+apps/
+  api/      FastAPI backend — models, migrations, services, routers
+  web/      Next.js frontend — dashboard, course player, editor, landing pages
+  collab/   Real-time collaboration server
+  e2e/      End-to-end tests
+docs/       Documentation site
+scripts/    Repository tooling
+```
+
+## Troubleshooting
+
+- **"You appear to be offline" in the web app** — the API is unreachable. Confirm it is running on `http://localhost:8000` and that `NEXT_PUBLIC_VALIDBRIDGE_BACKEND_URL` points to it.
+- **API fails to start on the database step** — verify `VALIDBRIDGE_SQL_CONNECTION_STRING` and that PostgreSQL is reachable. The API retries transient connection failures on startup.
+- **Missing JWT secret** — set `VALIDBRIDGE_AUTH_JWT_SECRET_KEY` to a value of at least 32 characters.
+- **Collaborative editing stays on "connecting"** — start the collaboration server (`apps/collab`).

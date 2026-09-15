@@ -53,7 +53,7 @@ const statusConfig: Record<ExportStatus, { icon: React.ReactNode; label: string;
   compressing: {
     icon: <FileArchive className="w-5 h-5 animate-pulse" />,
     label: 'Compressing archive...',
-    color: 'text-indigo-500',
+    color: 'text-orange-500',
   },
   downloading: {
     icon: <Download className="w-5 h-5 animate-bounce" />,

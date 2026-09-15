@@ -1,36 +1,36 @@
 ---
 title: Agent Spec
-description: A self-contained, copy-paste specification a coding agent can follow to build a headless LearnHouse learning platform with Next.js, including the exact API contract and acceptance criteria.
+description: A self-contained, copy-paste specification a coding agent can follow to build a headless ValidBridge learning platform with Next.js, including the exact API contract and acceptance criteria.
 ---
 
 import { Callout } from 'nextra/components'
 
 # Agent Spec
 
-Copy everything in the block below, fill in the **Configuration** values at the top, and paste it into your coding agent (see [Let an Agent Build It](/guides/build-learning-platform/with-an-agent) for the workflow). It's written *for the model* and contains the real LearnHouse API contract, so the agent builds against the API that actually exists.
+Copy everything in the block below, fill in the **Configuration** values at the top, and paste it into your coding agent (see [Let an Agent Build It](/guides/build-learning-platform/with-an-agent) for the workflow). It's written *for the model* and contains the real ValidBridge API contract, so the agent builds against the API that actually exists.
 
 <Callout type="info">
 This spec mirrors the [Do It Yourself](/guides/build-learning-platform/do-it-yourself) build exactly. If you want to understand what the agent is doing, read that page alongside the generated code.
 </Callout>
 
 ````markdown
-# SPEC: Build a headless learning platform on the LearnHouse API
+# SPEC: Build a headless learning platform on the ValidBridge API
 
 ## Configuration (fill these in before starting)
-- API_BASE = http://localhost:1338/api/v1     # your LearnHouse API base URL
+- API_BASE = http://localhost:1338/api/v1     # your ValidBridge API base URL
 - ORG_SLUG = your-org-slug                     # your organization slug
 - TEST_EMAIL = you@example.com                 # optional, for verifying auth
 - TEST_PASSWORD = ********                      # optional
 
 ## Goal
 Build a web learning platform with Next.js (App Router + TypeScript + Tailwind)
-that reads courses and content from the LearnHouse REST API and supports user
+that reads courses and content from the ValidBridge REST API and supports user
 signup, login, enrollment, and progress tracking. Build it in two stages:
 Stage 1 is fully anonymous (no tokens); Stage 2 adds authentication on top
 without rewriting Stage 1.
 
 ## Hard rules
-- LearnHouse access/refresh tokens MUST NEVER reach the browser. Do all
+- ValidBridge access/refresh tokens MUST NEVER reach the browser. Do all
   authenticated calls from the server (Route Handlers / Server Actions) and
   store tokens in the Next.js app's own httpOnly cookie (a "BFF" pattern).
 - Read the API base and org slug from environment variables; never hardcode.
@@ -78,8 +78,8 @@ Auth (Stage 2):
     body: { email, password, username, first_name, last_name }  -> creates a user.
     (Resolve org_id via GET /orgs/slug/{ORG_SLUG}.)
 - GET  /auth/refresh
-    Reads the refresh token ONLY from the `LH_refresh` cookie — NOT a header or
-    body. To refresh from the server, send header: Cookie: LH_refresh={value}.
+    Reads the refresh token ONLY from the `VB_refresh` cookie — NOT a header or
+    body. To refresh from the server, send header: Cookie: VB_refresh={value}.
     -> { access_token, refresh_token, expiry }. The refresh token ROTATES: you
     MUST persist the returned refresh_token (and access_token) back into your
     session, or the next refresh is rejected as a replay (401).
@@ -97,13 +97,13 @@ Enrollment & progress (Stage 2, authenticated):
 - POST   /trail/add_activity/{activity_uuid}  mark an activity done (creates trail/run if needed).
 
 ## Required pages / files
-- src/lib/learnhouse.ts   : API_BASE/ORG_SLUG consts, `lhFetch` (public reads,
+- src/lib/validbridge.ts   : API_BASE/ORG_SLUG consts, `lhFetch` (public reads,
                             optional token), media-URL helpers that build the
                             backend-root org/course-scoped paths (see Media
                             above), shared types.
 - src/lib/session.ts      : httpOnly-cookie session (get/set/clear) + `authedFetch`
                             that retries once on 401 by refreshing (refresh token
-                            sent as a Cookie: LH_refresh header), persisting the
+                            sent as a Cookie: VB_refresh header), persisting the
                             rotated access+refresh tokens back to the session
                             before retrying — see contract.
 - src/app/page.tsx        : course catalogue (anonymous).
@@ -121,12 +121,12 @@ Enrollment & progress (Stage 2, authenticated):
 
 ## Environment
 Create .env.local:
-  NEXT_PUBLIC_LEARNHOUSE_API_URL=<API_BASE>
-  NEXT_PUBLIC_LEARNHOUSE_ORG_SLUG=<ORG_SLUG>
+  NEXT_PUBLIC_VALIDBRIDGE_API_URL=<API_BASE>
+  NEXT_PUBLIC_VALIDBRIDGE_ORG_SLUG=<ORG_SLUG>
 
 ## Build order
 1. Scaffold: npx create-next-app@latest . --typescript --app --tailwind --eslint --src-dir --use-npm
-2. Stage 1: lib/learnhouse.ts -> catalogue -> course page -> activity viewer.
+2. Stage 1: lib/validbridge.ts -> catalogue -> course page -> activity viewer.
    STOP and verify the public site renders before continuing.
 3. Stage 2: session.ts -> auth route handlers + login form -> authedFetch ->
    enroll action -> progress display.
@@ -158,4 +158,4 @@ The agent can build the structure and the happy path, but it can't see your inst
 
 ## After it runs
 
-Click through the acceptance criteria yourself, then continue with the same next steps as the manual build: real block rendering for dynamic activities, [webhooks](/guides/custom-features/webhooks), and the full [API Reference](/developers/api). Compare your result with [`learnhouse/headless-examples`](https://github.com/learnhouse/headless-examples).
+Click through the acceptance criteria yourself, then continue with the same next steps as the manual build: real block rendering for dynamic activities, [webhooks](/guides/custom-features/webhooks), and the full [API Reference](/developers/api). Compare your result with [`validbridge/headless-examples`](https://github.com/validbridge/headless-examples).

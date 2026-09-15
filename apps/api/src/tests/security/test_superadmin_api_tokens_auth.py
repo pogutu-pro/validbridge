@@ -1,7 +1,7 @@
 # ruff: noqa: E402
 """Tests for the superadmin API token auth path.
 
-Covers the new ``lh_sa_`` branch in ``get_current_user``, the
+Covers the new ``vb_sa_`` branch in ``get_current_user``, the
 ``require_superadmin`` extension that accepts ``SuperadminAPITokenUser``
 (while re-checking the minting user's ``is_superadmin``), and the
 ``reject_any_api_token`` dependency that blocks token-creates-token.
@@ -34,7 +34,7 @@ reject_any_api_token = ee_superadmin_tokens.reject_any_api_token
 def _enterprise_mode(monkeypatch):
     """Run these as an Enterprise deployment, which is what they describe.
 
-    conftest pins LEARNHOUSE_DISABLE_EE=1 for the whole suite, so
+    conftest pins VALIDBRIDGE_DISABLE_EE=1 for the whole suite, so
     get_deployment_mode() answers 'oss' and require_superadmin refuses with
     403 ee_required before any of the token logic below is reached. The module
     still imported (importorskip only asks whether the ee/ package is on disk),
@@ -70,10 +70,10 @@ def _sa_token_record(token_id=42, name="agency-test", created_by=7):
 
 
 class TestAuthDispatch:
-    """get_current_user must route lh_sa_ to the superadmin branch BEFORE the lh_ branch."""
+    """get_current_user must route vb_sa_ to the superadmin branch BEFORE the vb_ branch."""
 
-    async def test_lh_sa_token_returns_superadmin_principal(self):
-        request = _mock_request(auth_header="Bearer lh_sa_validvalue")
+    async def test_vb_sa_token_returns_superadmin_principal(self):
+        request = _mock_request(auth_header="Bearer vb_sa_validvalue")
         db = Mock(spec=Session)
 
         with patch(
@@ -87,9 +87,9 @@ class TestAuthDispatch:
         assert result.token_name == "agency-test"
         assert request.state.is_superadmin_api_token is True
 
-    async def test_lh_sa_skips_org_boundary_check(self):
+    async def test_vb_sa_skips_org_boundary_check(self):
         """Superadmin tokens are cross-org by design — boundary check must NOT run."""
-        request = _mock_request(auth_header="Bearer lh_sa_validvalue")
+        request = _mock_request(auth_header="Bearer vb_sa_validvalue")
         db = Mock(spec=Session)
 
         with patch(
@@ -103,8 +103,8 @@ class TestAuthDispatch:
 
         boundary.assert_not_awaited()
 
-    async def test_invalid_lh_sa_token_raises_401(self):
-        request = _mock_request(auth_header="Bearer lh_sa_invalid")
+    async def test_invalid_vb_sa_token_raises_401(self):
+        request = _mock_request(auth_header="Bearer vb_sa_invalid")
         db = Mock(spec=Session)
 
         with patch(
@@ -116,9 +116,9 @@ class TestAuthDispatch:
 
         assert exc.value.status_code == 401
 
-    async def test_regular_lh_token_still_hits_org_branch(self):
-        """Regression: a regular lh_ (org-scoped) token must NOT be routed to the SA branch."""
-        request = _mock_request(auth_header="Bearer lh_orgvalue")
+    async def test_regular_vb_token_still_hits_org_branch(self):
+        """Regression: a regular vb_ (org-scoped) token must NOT be routed to the SA branch."""
+        request = _mock_request(auth_header="Bearer vb_orgvalue")
         db = Mock(spec=Session)
 
         org_token = SimpleNamespace(
@@ -141,7 +141,7 @@ class TestAuthDispatch:
         ) as sa_validator:
             result = await get_current_user(request=request, db_session=db)
 
-        sa_validator.assert_not_awaited()  # SA branch never inspects an lh_ token
+        sa_validator.assert_not_awaited()  # SA branch never inspects an vb_ token
         boundary.assert_awaited_once()
         assert isinstance(result, APITokenUser)
         assert result.org_id == 5
@@ -154,7 +154,7 @@ class TestValidateSuperadminApiToken:
             "src.services.api_tokens.superadmin_api_tokens.validate_superadmin_token_for_auth",
             new=AsyncMock(return_value=_sa_token_record(token_id=99, created_by=12)),
         ):
-            result = await validate_superadmin_api_token("lh_sa_x", db)
+            result = await validate_superadmin_api_token("vb_sa_x", db)
         assert isinstance(result, SuperadminAPITokenUser)
         assert result.id == 99
         assert result.created_by_user_id == 12
@@ -165,7 +165,7 @@ class TestValidateSuperadminApiToken:
             "src.services.api_tokens.superadmin_api_tokens.validate_superadmin_token_for_auth",
             new=AsyncMock(return_value=None),
         ):
-            assert await validate_superadmin_api_token("lh_sa_x", db) is None
+            assert await validate_superadmin_api_token("vb_sa_x", db) is None
 
 
 class TestRequireSuperadminWithTokenPrincipal:

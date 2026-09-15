@@ -1,8 +1,8 @@
 function Logo() {
   return (
     <img
-      src="/img/logos/learnhouse-dark.svg"
-      alt="LearnHouse"
+      src="/img/logos/validbridge-dark.svg"
+      alt="ValidBridge"
       style={{ height: 20, width: 'auto' }}
     />
   )

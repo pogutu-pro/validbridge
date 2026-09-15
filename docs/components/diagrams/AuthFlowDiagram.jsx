@@ -4,7 +4,7 @@ import { Browser, Stack, SignIn, Cookie } from '@phosphor-icons/react/dist/ssr'
 import FlowDiagram from './FlowDiagram'
 
 // The BFF login flow: the browser talks only to your Next.js server, which
-// holds the LearnHouse tokens in its own httpOnly cookie.
+// holds the ValidBridge tokens in its own httpOnly cookie.
 const nodes = [
   { label: 'Browser', sub: 'Login form', icon: Browser, color: '#6366f1', bg: '#eef2ff', border: '#c7d2fe',
     edge: { label: 'email + password' } },
@@ -19,7 +19,7 @@ export default function AuthFlowDiagram() {
   return (
     <FlowDiagram
       nodes={nodes}
-      caption="The browser only ever holds your app's own session cookie — never the LearnHouse tokens. To refresh, your server re-sends the stored refresh token to GET /auth/refresh as a Cookie: LH_refresh=… header (the endpoint reads it only from that cookie)."
+      caption="The browser only ever holds your app's own session cookie — never the ValidBridge tokens. To refresh, your server re-sends the stored refresh token to GET /auth/refresh as a Cookie: VB_refresh=… header (the endpoint reads it only from that cookie)."
     />
   )
 }

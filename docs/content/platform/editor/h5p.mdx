@@ -4,17 +4,17 @@ The **H5P** block puts an interactive H5P activity — a course presentation, an
 
 ## Embed only
 
-LearnHouse does not host H5P. There is no upload field for `.h5p` packages and no H5P authoring tool built into the editor. You create the content on an H5P host you control, and the block renders it in a sandboxed iframe.
+ValidBridge does not host H5P. There is no upload field for `.h5p` packages and no H5P authoring tool built into the editor. You create the content on an H5P host you control, and the block renders it in a sandboxed iframe.
 
 That means:
 
 - The activity, its media and its user data stay on your H5P host.
-- Learner progress inside the activity is tracked by that host, not by LearnHouse.
+- Learner progress inside the activity is tracked by that host, not by ValidBridge.
 - If the host is unreachable, the block shows nothing — there is no local copy.
 
 ## Why we do not bundle H5P
 
-The H5P core — the player, the editor and the content types — is licensed under the **AGPL**. Shipping it inside LearnHouse would put LearnHouse itself under the AGPL, which does not match the licence the project is distributed under. Embedding a page that someone else serves carries no such obligation, so embedding is what the block does.
+The H5P core — the player, the editor and the content types — is licensed under the **AGPL**. Shipping it inside ValidBridge would put ValidBridge itself under the AGPL, which does not match the licence the project is distributed under. Embedding a page that someone else serves carries no such obligation, so embedding is what the block does.
 
 ## Supported hosts
 
@@ -53,6 +53,6 @@ A block that is not on Auto stays out of the height handshake entirely. That is 
 
 ## Notes for administrators
 
-- Your H5P host must allow being framed. If it sends `X-Frame-Options: DENY` or a restrictive `Content-Security-Policy: frame-ancestors`, the block will stay blank — allow your LearnHouse domain on the H5P side.
+- Your H5P host must allow being framed. If it sends `X-Frame-Options: DENY` or a restrictive `Content-Security-Policy: frame-ancestors`, the block will stay blank — allow your ValidBridge domain on the H5P side.
 - Serve the H5P host over HTTPS. A plain-HTTP frame inside an HTTPS course page is blocked by the browser as mixed content.
-- The frame is sandboxed and carries no LearnHouse session or credentials.
+- The frame is sandboxed and carries no ValidBridge session or credentials.

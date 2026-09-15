@@ -14,7 +14,7 @@ import {
   UploadSimple,
   CircleNotch,
 } from '@phosphor-icons/react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
@@ -122,7 +122,7 @@ function GeneralTab({
   orgslug: string
   onUpdated: (_p: Playground) => void
 }) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
 
@@ -217,7 +217,7 @@ function AccessTab({
   orgId: number
   onUpdated: (_p: Playground) => void
 }) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const queryClient = useQueryClient()
@@ -424,7 +424,7 @@ function ThumbnailTab({
   orgslug: string
   onUpdated: (_p: Playground) => void
 }) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)

@@ -25,8 +25,8 @@ def _always(value):
 
 @pytest.fixture
 def demo_on(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_DEMO_ENABLED", "1")
-    monkeypatch.setenv("LEARNHOUSE_DEMO_SLUG", "demo")
+    monkeypatch.setenv("VALIDBRIDGE_DEMO_ENABLED", "1")
+    monkeypatch.setenv("VALIDBRIDGE_DEMO_SLUG", "demo")
 
 
 @pytest.fixture
@@ -66,7 +66,7 @@ async def ready_demo(db, demo_on):
 # ---------------------------------------------------------------------------
 
 async def test_status_reports_disabled_when_the_flag_is_off(db, monkeypatch):
-    monkeypatch.delenv("LEARNHOUSE_DEMO_ENABLED", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_DEMO_ENABLED", raising=False)
     status = await demo_status(db_session=db)
     assert status.enabled is False
     assert status.ready is False
@@ -130,7 +130,7 @@ async def test_anonymous_users_are_rejected(db, ready_demo):
 
 
 async def test_entering_a_disabled_demo_is_a_404(db, admin_user, monkeypatch):
-    monkeypatch.delenv("LEARNHOUSE_DEMO_ENABLED", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_DEMO_ENABLED", raising=False)
     with pytest.raises(HTTPException) as exc:
         await enter_demo(db_session=db, current_user=admin_user)
     assert exc.value.status_code == 404

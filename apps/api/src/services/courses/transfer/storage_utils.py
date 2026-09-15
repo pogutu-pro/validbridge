@@ -15,7 +15,7 @@ from typing import Optional
 import boto3
 import botocore.config
 from botocore.exceptions import ClientError, NoCredentialsError
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +60,8 @@ def _validate_local_path(file_path: str) -> Optional[str]:
 @functools.cache
 def get_content_delivery_type() -> str:
     """Get the configured content delivery type (cached — config doesn't change at runtime)."""
-    learnhouse_config = get_learnhouse_config()
-    return learnhouse_config.hosting_config.content_delivery.type
+    validbridge_config = get_validbridge_config()
+    return validbridge_config.hosting_config.content_delivery.type
 
 
 def get_storage_client():
@@ -79,16 +79,16 @@ def get_storage_client():
     with _s3_client_lock:
         if _s3_client is not None:
             return _s3_client
-        learnhouse_config = get_learnhouse_config()
+        validbridge_config = get_validbridge_config()
         # Cloudflare R2 requires SigV4 and the "auto" region; without this,
         # botocore falls back to SigV2 for presigned URLs (the legacy
         # AWSAccessKeyId/Signature/Expires form), which R2 rejects with 401.
-        # Overridable via LEARNHOUSE_S3_API_REGION for real AWS S3 / MinIO, which
+        # Overridable via VALIDBRIDGE_S3_API_REGION for real AWS S3 / MinIO, which
         # validate the region against the endpoint.
-        region = os.environ.get("LEARNHOUSE_S3_API_REGION") or "auto"
+        region = os.environ.get("VALIDBRIDGE_S3_API_REGION") or "auto"
         _s3_client = boto3.client(
             "s3",
-            endpoint_url=learnhouse_config.hosting_config.content_delivery.s3api.endpoint_url,
+            endpoint_url=validbridge_config.hosting_config.content_delivery.s3api.endpoint_url,
             region_name=region,
             config=botocore.config.Config(
                 signature_version="s3v4",
@@ -103,8 +103,8 @@ def get_storage_client():
 @functools.cache
 def get_s3_bucket_name() -> str:
     """Get the S3 bucket name from config (cached — config doesn't change at runtime)."""
-    learnhouse_config = get_learnhouse_config()
-    return learnhouse_config.hosting_config.content_delivery.s3api.bucket_name or "learnhouse-media"
+    validbridge_config = get_validbridge_config()
+    return validbridge_config.hosting_config.content_delivery.s3api.bucket_name or "validbridge-media"
 
 
 @functools.cache

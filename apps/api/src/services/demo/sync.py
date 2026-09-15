@@ -517,7 +517,7 @@ async def _sync_org(
             # the demo would delete its content as drift on the next tick.
             raise RuntimeError(
                 f"organization {slug!r} already exists and is not a demo org; "
-                f"set LEARNHOUSE_DEMO_SLUG to something else"
+                f"set VALIDBRIDGE_DEMO_SLUG to something else"
             )
         # update_date is deliberately not part of the comparison — it is always
         # "now" and would make every field look changed, which is the exact

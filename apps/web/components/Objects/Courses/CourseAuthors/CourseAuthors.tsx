@@ -4,7 +4,7 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { useMediaQuery } from 'usehooks-ts'
 import { Rss, PencilLine, TentTree } from 'lucide-react'
 import { useCourse } from '@components/Contexts/CourseContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@lib/query/keys'
 import { getAPIUrl } from '@services/config/config'
@@ -151,7 +151,7 @@ const UpdatesSection = () => {
   const [selectedView, setSelectedView] = React.useState('list')
   const adminStatus = useAdminStatus()
   const course = useCourse() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const courseUuid = course?.courseStructure?.course_uuid
   const { data: updates } = useQuery({
@@ -215,7 +215,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
   const { t } = useTranslation()
   const org = useOrg() as any
   const course = useCourse() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const queryClient = useQueryClient()
   const courseUuid = course?.courseStructure?.course_uuid
 
@@ -299,7 +299,7 @@ const UpdatesListView = () => {
   const { t } = useTranslation()
   const course = useCourse() as any
   const adminStatus = useAdminStatus()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const courseUuid = course?.courseStructure?.course_uuid
   const { data: updates } = useQuery({
@@ -356,7 +356,7 @@ const UpdatesListView = () => {
 
 const DeleteUpdateButton = ({ update }: any) => {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const course = useCourse() as any
   const queryClient = useQueryClient()
   const courseUuid = course?.courseStructure?.course_uuid

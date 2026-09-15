@@ -3,7 +3,7 @@ import { getCourseMetadata } from '@services/courses/courses'
 import React, { createContext, useContext, useEffect, useReducer, useMemo, useCallback, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 
 
 // Debounce manager for coordinating saves across components
@@ -100,7 +100,7 @@ export function CourseProvider({
   withUnpublishedActivities = false,
   initialCourseStructure,
 }: any) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const lastServerDataRef = useRef<any>(null)
 

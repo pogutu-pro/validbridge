@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { SmilePlus } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import {
   getReactions,
   toggleReaction,
@@ -19,7 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@components/ui/tooltip'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 // Common emojis for reactions
 const REACTION_EMOJIS = ['👍', '❤️', '🎉', '🚀', '👀', '💯', '🔥', '💡', '👏', '🙌']
@@ -30,10 +30,10 @@ interface ReactionButtonProps {
 }
 
 export function ReactionButton({ discussionUuid, compact = false }: ReactionButtonProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const isAuthenticated = session?.status === 'authenticated'
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   const [reactions, setReactions] = useState<ReactionSummary[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -98,7 +98,7 @@ export function ReactionButton({ discussionUuid, compact = false }: ReactionButt
                 disabled={isLoading || !isAuthenticated}
                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all ${
                   reaction.has_reacted
-                    ? 'bg-indigo-100 border border-indigo-300 text-indigo-700'
+                    ? 'bg-orange-100 border border-orange-300 text-orange-700'
                     : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'
                 } ${!isAuthenticated ? 'cursor-default' : 'cursor-pointer'}`}
               >
@@ -142,7 +142,7 @@ export function ReactionButton({ discussionUuid, compact = false }: ReactionButt
                     disabled={isLoading}
                     className={`w-9 h-9 flex items-center justify-center text-xl rounded-lg transition-colors ${
                       existing?.has_reacted
-                        ? 'bg-indigo-100'
+                        ? 'bg-orange-100'
                         : 'hover:bg-gray-100'
                     }`}
                   >

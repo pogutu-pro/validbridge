@@ -12,14 +12,14 @@ const ToolbarButtons = dynamic(
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
+import validbridgeAI_icon from 'public/validbridge_ai.png'
 import {
   AIEditorStateTypes,
   useAIEditor,
   useAIEditorDispatch,
 } from '@components/Contexts/AI/AIEditorContext'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 // Extensions
 import InfoCallout from './Extensions/Callout/Info/InfoCallout'
@@ -106,7 +106,7 @@ interface EditorProps {
 
 function Editor(props: EditorProps) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('editor')
+  const { track } = useVBAnalytics('editor')
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' })
@@ -466,7 +466,7 @@ function Editor(props: EditorProps) {
             <div className="activity-editor-doc-section">
               <div className="activity-editor-info-wrapper">
                 <Link href="/">
-                  <EditorLearnHouseLogo />
+                  <EditorValidBridgeLogo />
                 </Link>
                 <Link target="_blank" href={`/course/${course_uuid}`}>
                   <img
@@ -514,7 +514,7 @@ function Editor(props: EditorProps) {
                         <Image
                           className=""
                           width={20}
-                          src={learnhouseAI_icon}
+                          src={validbridgeAI_icon}
                           alt=""
                         />
                       </i>{' '}
@@ -529,7 +529,7 @@ function Editor(props: EditorProps) {
                         <Image
                           className="opacity-50 grayscale"
                           width={20}
-                          src={learnhouseAI_icon}
+                          src={validbridgeAI_icon}
                           alt=""
                         />
                       </i>
@@ -706,7 +706,7 @@ const logoAnimations = [
   },
 ]
 
-const EditorLearnHouseLogo = () => {
+const EditorValidBridgeLogo = () => {
   const [animation] = React.useState(
     () => logoAnimations[Math.floor(Math.random() * logoAnimations.length)]
   )
@@ -719,8 +719,8 @@ const EditorLearnHouseLogo = () => {
         transition={animation.transition}
       >
         <Image
-          src="/lrn.svg"
-          alt="LearnHouse"
+          src="/validbridge.svg"
+          alt="ValidBridge"
           width={14}
           height={14}
           className="invert"

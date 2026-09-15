@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import ReactMarkdown from 'react-markdown'
@@ -22,7 +22,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { getOrgCourses } from '@services/courses/courses'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import {
   PaperPlaneRight,
   CaretDown,
@@ -88,12 +88,12 @@ export function groupSessionsByDate(sessions: RAGChatSession[]) {
 }
 
 export function CopilotChat({ orgslug }: CopilotProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const accessToken = session?.data?.tokens?.access_token
   const searchParams = useSearchParams()
   const initialChatUuid = searchParams.get('chat')
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   // All messages including the current streaming one (appended live)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -391,7 +391,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             <div className="flex items-center justify-between h-12 px-4 border-b border-neutral-100 dark:border-neutral-800/60">
               <button
                 onClick={handleNewChat}
-                className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-700 text-white transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg bg-orange-600 hover:bg-orange-700 text-white transition-colors"
               >
                 <Plus size={14} weight="bold" />
                 <span>New Chat</span>
@@ -473,7 +473,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           {/* Loading session */}
           {isLoadingSession && (
             <div className="flex flex-col items-center justify-center h-full">
-              <SpinnerGap size={20} className="animate-spin text-violet-400 mb-2" />
+              <SpinnerGap size={20} className="animate-spin text-orange-400 mb-2" />
               <span className="text-sm text-neutral-400 dark:text-neutral-500">Loading conversation...</span>
             </div>
           )}
@@ -481,12 +481,12 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           {/* Empty state */}
           {messages.length === 0 && !isLoadingSession && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-6 pb-10">
-              <div className="flex items-center justify-center p-3 rounded-xl border border-violet-300 dark:border-violet-500/40">
+              <div className="flex items-center justify-center p-3 rounded-xl border border-orange-300 dark:border-orange-500/40">
               <svg width="40" height="22" viewBox="0 37 304 152" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="lrn-icon-grad" x1="152" y1="30" x2="152" y2="200" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#c4b5fd" />
-                    <stop offset="1" stopColor="#7c3aed" />
+                    <stop stopColor="#fdba74" />
+                    <stop offset="1" stopColor="#ea580c" />
                   </linearGradient>
                 </defs>
                 <path d="M152 37C152 56.9609 148.068 76.7264 140.43 95.1679C132.791 113.609 121.595 130.366 107.48 144.48C93.3657 158.595 76.6094 169.791 58.1679 177.43C39.7264 185.068 19.9609 189 0 189L3.19349e-06 115.941C10.3667 115.941 20.632 113.9 30.2096 109.932C39.7872 105.965 48.4896 100.15 55.82 92.82C63.1504 85.4896 68.9652 76.7872 72.9324 67.2096C76.8996 57.632 78.9414 47.3667 78.9414 37H152Z" fill="url(#lrn-icon-grad)" />
@@ -531,7 +531,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     onClick={() => setCourseDropdownOpen(!courseDropdownOpen)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium rounded-xl bg-neutral-50 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 nice-shadow transition-all"
                   >
-                    {selectedCourse ? <Books size={17} weight="duotone" className="text-violet-500" /> : <Sparkle size={17} weight="duotone" className="text-violet-500" />}
+                    {selectedCourse ? <Books size={17} weight="duotone" className="text-orange-500" /> : <Sparkle size={17} weight="duotone" className="text-orange-500" />}
                     <span>{selectedCourseName}</span>
                     <CaretDown size={13} className={`text-neutral-400 transition-transform ${courseDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -546,7 +546,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             if (msg.role === 'user') {
               return (
                 <div key={i} className="flex justify-end">
-                  <div className="max-w-[85%] md:max-w-[75%] rounded-2xl rounded-se-sm px-4 py-2.5 bg-violet-600 text-white nice-shadow">
+                  <div className="max-w-[85%] md:max-w-[75%] rounded-2xl rounded-se-sm px-4 py-2.5 bg-orange-600 text-white nice-shadow">
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 </div>
@@ -578,9 +578,9 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     <button
                       key={i}
                       onClick={() => sendMessage(s)}
-                      className="group flex items-center gap-2.5 w-fit max-w-full text-start px-3.5 py-2.5 text-[13px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 nice-shadow transition-all"
+                      className="group flex items-center gap-2.5 w-fit max-w-full text-start px-3.5 py-2.5 text-[13px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-orange-50 dark:hover:bg-orange-500/10 hover:text-orange-700 dark:hover:text-orange-300 nice-shadow transition-all"
                     >
-                      <ArrowRight size={13} weight="bold" className="flex-shrink-0 text-neutral-400 group-hover:text-violet-500 transition-colors" data-dir-flip />
+                      <ArrowRight size={13} weight="bold" className="flex-shrink-0 text-neutral-400 group-hover:text-orange-500 transition-colors" data-dir-flip />
                       <span className="truncate">{s}</span>
                     </button>
                   ))}
@@ -614,7 +614,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             onClick={() => setChatMode(chatMode === 'course_only' ? 'general' : 'course_only')}
             className={`flex items-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg transition-all ${
               chatMode === 'general'
-                ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400'
+                ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400'
                 : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
             }`}
             title={chatMode === 'general' ? 'General Knowledge mode' : 'Course Only mode'}
@@ -628,7 +628,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                 onClick={() => setCourseDropdownOpen(!courseDropdownOpen)}
                 className="flex items-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
               >
-                {selectedCourse ? <Books size={13} weight="duotone" className="text-violet-500" /> : <Sparkle size={13} weight="duotone" className="text-violet-500" />}
+                {selectedCourse ? <Books size={13} weight="duotone" className="text-orange-500" /> : <Sparkle size={13} weight="duotone" className="text-orange-500" />}
                 <CaretDown size={10} className={`text-neutral-400 transition-transform ${courseDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {courseDropdownOpen && <CourseDropdown courses={courses} selectedCourse={selectedCourse} onSelect={(uuid) => { setSelectedCourse(uuid); setCourseDropdownOpen(false) }} position="top" />}
@@ -647,7 +647,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           <button
             onClick={() => sendMessage(input)}
             disabled={isInputDisabled || !input.trim()}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:cursor-not-allowed text-white transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-600 hover:bg-orange-700 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:cursor-not-allowed text-white transition-colors"
           >
             <PaperPlaneRight size={14} weight="fill" />
           </button>
@@ -707,12 +707,12 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
               if (e.key === 'Escape') { setEditValue(title); setIsEditing(false) }
             }}
             onBlur={handleSubmit}
-            className="flex-1 min-w-0 bg-neutral-50 dark:bg-neutral-800 rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-900 dark:text-white outline-none ring-1 ring-violet-300 dark:ring-violet-500/40"
+            className="flex-1 min-w-0 bg-neutral-50 dark:bg-neutral-800 rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-900 dark:text-white outline-none ring-1 ring-orange-300 dark:ring-orange-500/40"
             maxLength={80}
           />
           <button
             onClick={handleSubmit}
-            className="p-1 rounded-md text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-all"
+            className="p-1 rounded-md text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all"
           >
             <Check size={15} weight="bold" />
           </button>
@@ -761,7 +761,7 @@ export function SessionItem({ session, isActive, onSelect, onDelete }: {
       onMouseLeave={() => setHovered(false)}
       className={`group w-full text-start px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
         isActive
-          ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 font-medium'
+          ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 font-medium'
           : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
       }`}
     >
@@ -807,7 +807,7 @@ export const AssistantMessage = React.memo(function AssistantMessage({ content, 
       {/* Source course intro line */}
       {courseNames.length > 0 && !isWaiting && (
         <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 font-medium">
-          <BookOpen size={11} weight="bold" className="text-violet-400" />
+          <BookOpen size={11} weight="bold" className="text-orange-400" />
           <span>Answering from {courseNames.join(', ')}</span>
         </div>
       )}
@@ -832,9 +832,9 @@ export const AssistantMessage = React.memo(function AssistantMessage({ content, 
 export function ThinkingIndicator() {
   return (
     <div className="flex items-center gap-1.5 py-0.5">
-      <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:0ms]" />
-      <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:150ms]" />
-      <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:300ms]" />
+      <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce [animation-delay:0ms]" />
+      <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce [animation-delay:150ms]" />
+      <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce [animation-delay:300ms]" />
     </div>
   )
 }
@@ -860,7 +860,7 @@ function CitationBadge({ num, sources, orgslug }: { num: number; sources: Stream
 
   const badge = (
     <span
-      className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md bg-violet-100 dark:bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-400 align-middle mx-0.5 hover:bg-violet-200 dark:hover:bg-violet-500/25 cursor-pointer transition-colors"
+      className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md bg-orange-100 dark:bg-orange-500/15 text-[10px] font-bold text-orange-600 dark:text-orange-400 align-middle mx-0.5 hover:bg-orange-200 dark:hover:bg-orange-500/25 cursor-pointer transition-colors"
       title={[source.course_name, source.chapter_name, source.activity_name].filter(Boolean).join(' > ')}
     >
       {num}
@@ -1040,7 +1040,7 @@ export function CopilotMarkdown({ content, sources = [], orgslug, isStreaming = 
   }, [sources, orgslug])
 
   return (
-    <div className="relative z-10 prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-neutral-700 dark:prose-p:text-neutral-300 prose-headings:text-neutral-900 dark:prose-headings:text-white prose-a:text-violet-600 dark:prose-a:text-violet-400 prose-strong:text-neutral-900 dark:prose-strong:text-white prose-code:text-violet-700 dark:prose-code:text-violet-300 prose-code:bg-violet-50 dark:prose-code:bg-violet-500/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&_.katex-display]:py-1">
+    <div className="relative z-10 prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-neutral-700 dark:prose-p:text-neutral-300 prose-headings:text-neutral-900 dark:prose-headings:text-white prose-a:text-orange-600 dark:prose-a:text-orange-400 prose-strong:text-neutral-900 dark:prose-strong:text-white prose-code:text-orange-700 dark:prose-code:text-orange-300 prose-code:bg-orange-50 dark:prose-code:bg-orange-500/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&_.katex-display]:py-1">
       <ReactMarkdown
         remarkPlugins={mathPlugins ? mathPlugins.remark : BASE_REMARK_PLUGINS}
         rehypePlugins={mathPlugins ? mathPlugins.rehype : NO_REHYPE_PLUGINS}
@@ -1048,7 +1048,7 @@ export function CopilotMarkdown({ content, sources = [], orgslug, isStreaming = 
         {mathContent}
       </ReactMarkdown>
       {isStreaming && (
-        <span className="inline-block w-0.5 h-4 bg-violet-500 ms-0.5 align-middle rounded-full animate-pulse" />
+        <span className="inline-block w-0.5 h-4 bg-orange-500 ms-0.5 align-middle rounded-full animate-pulse" />
       )}
     </div>
   )
@@ -1066,10 +1066,10 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
       <button
         onClick={() => onSelect(null)}
         className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
-          !selectedCourse ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10' : 'text-neutral-700 dark:text-neutral-300'
+          !selectedCourse ? 'text-orange-600 dark:text-orange-400 font-medium bg-orange-50/60 dark:bg-orange-500/10' : 'text-neutral-700 dark:text-neutral-300'
         }`}
       >
-        <Sparkle size={15} weight="duotone" className="text-violet-500 flex-shrink-0" />
+        <Sparkle size={15} weight="duotone" className="text-orange-500 flex-shrink-0" />
         <span>All courses</span>
       </button>
       <div className="h-px bg-neutral-100 dark:bg-neutral-800 mx-2 my-1" />
@@ -1079,7 +1079,7 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
           onClick={() => onSelect(course.course_uuid)}
           className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
             selectedCourse === course.course_uuid
-              ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10'
+              ? 'text-orange-600 dark:text-orange-400 font-medium bg-orange-50/60 dark:bg-orange-500/10'
               : 'text-neutral-700 dark:text-neutral-300'
           }`}
         >
@@ -1102,11 +1102,11 @@ export function SourcesCompact({ sources, orgslug }: { sources: StreamSourceData
           : null
 
         const inner = (
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors group">
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-violet-100 dark:bg-violet-500/15 text-[9px] font-bold text-violet-600 dark:text-violet-400 flex-shrink-0">
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors group">
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-orange-100 dark:bg-orange-500/15 text-[9px] font-bold text-orange-600 dark:text-orange-400 flex-shrink-0">
               {i + 1}
             </span>
-            <span className="truncate max-w-xs font-medium text-neutral-500 dark:text-neutral-400 group-hover:text-violet-600 dark:group-hover:text-violet-400">
+            <span className="truncate max-w-xs font-medium text-neutral-500 dark:text-neutral-400 group-hover:text-orange-600 dark:group-hover:text-orange-400">
               {source.activity_name || 'Unknown'}
             </span>
           </span>

@@ -92,7 +92,7 @@ const BADGE = {
   free: "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 border-gray-200 shadow-sm shadow-gray-200/50",
   standard:
     "bg-gradient-to-br from-blue-100 to-blue-200 text-blue-800 border-blue-200 shadow-sm shadow-blue-200/50",
-  pro: "bg-gradient-to-br from-purple-100 to-purple-200 text-purple-800 border-purple-200 shadow-sm shadow-purple-200/50",
+  pro: "bg-gradient-to-br from-orange-100 to-orange-200 text-orange-800 border-orange-200 shadow-sm shadow-orange-200/50",
   personal:
     "bg-gradient-to-br from-amber-100 to-yellow-200 text-amber-800 border-amber-200 shadow-sm shadow-amber-200/50",
   enterprise:
@@ -149,10 +149,10 @@ export const GENERAL_PLANS: Plan[] = [
     monthlyPrice: 149,
     popular: true,
     badge: BADGE.pro,
-    ctaStyle: "bg-purple-600 text-white hover:bg-purple-700",
-    topGlow: "rgba(147,51,234,0.05)",
-    patternColor: "rgba(147,51,234,0.06)",
-    accentColor: "text-purple-600",
+    ctaStyle: "bg-orange-600 text-white hover:bg-orange-700",
+    topGlow: "rgba(234,88,12,0.05)",
+    patternColor: "rgba(234,88,12,0.06)",
+    accentColor: "text-orange-600",
     inheritsFrom: "Standard",
     inheritsBadge: BADGE.standard,
     features: [

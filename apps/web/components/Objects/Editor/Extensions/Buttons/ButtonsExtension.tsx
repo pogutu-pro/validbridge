@@ -86,10 +86,10 @@ const ButtonsExtension: React.FC = (props: any) => {
       case 'green': return 'bg-green-500 hover:bg-green-600';
       case 'yellow': return 'bg-yellow-500 hover:bg-yellow-600';
       case 'red': return 'bg-red-500 hover:bg-red-600';
-      case 'purple': return 'bg-purple-500 hover:bg-purple-600';
+      case 'purple': return 'bg-orange-500 hover:bg-orange-600';
       case 'teal': return 'bg-teal-500 hover:bg-teal-600';
       case 'amber': return 'bg-amber-500 hover:bg-amber-600';
-      case 'indigo': return 'bg-indigo-500 hover:bg-indigo-600';
+      case 'indigo': return 'bg-orange-500 hover:bg-orange-600';
       case 'neutral': return 'bg-neutral-500 hover:bg-neutral-600';
       default: return 'bg-blue-500 hover:bg-blue-600';
     }

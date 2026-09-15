@@ -10,7 +10,7 @@ import * as Form from '@radix-ui/react-form'
 import { createFolder, updateFolderThumbnail } from '@services/folders/folders'
 import FolderAppearance from '@components/Dashboard/Library/FolderAppearance'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { Globe, Lock } from 'lucide-react'
 import React from 'react'
 import { BarLoader } from 'react-spinners'
@@ -18,7 +18,7 @@ import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 type Props = {
   orgslug: string
@@ -30,9 +30,9 @@ type Props = {
 function CreateFolderModal({ parentFolderUuid, closeModal, onChanged }: Props) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   const [color, setColor] = React.useState('violet')
   const [file, setFile] = React.useState<File | null>(null)
@@ -111,7 +111,7 @@ function CreateFolderModal({ parentFolderUuid, closeModal, onChanged }: Props) {
             onClick={() => formik.setFieldValue('public', true)}
             className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${
               formik.values.public
-                ? 'bg-white border-indigo-200 ring-1 ring-indigo-100 text-gray-900'
+                ? 'bg-white border-orange-200 ring-1 ring-orange-100 text-gray-900'
                 : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
             }`}
           >
@@ -122,7 +122,7 @@ function CreateFolderModal({ parentFolderUuid, closeModal, onChanged }: Props) {
             onClick={() => formik.setFieldValue('public', false)}
             className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${
               !formik.values.public
-                ? 'bg-white border-indigo-200 ring-1 ring-indigo-100 text-gray-900'
+                ? 'bg-white border-orange-200 ring-1 ring-orange-100 text-gray-900'
                 : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
             }`}
           >

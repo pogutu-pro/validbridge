@@ -8,12 +8,12 @@ const originalWindow = globalThis.window
 const originalDocument = globalThis.document
 const originalFetch = globalThis.fetch
 
-function browserAt(origin = 'https://school.learnhouse.example', cookie = '') {
+function browserAt(origin = 'https://school.validbridge.example', cookie = '') {
   globalThis.window = {
     location: new URL(origin),
     __RUNTIME_CONFIG__: {
-      NEXT_PUBLIC_LEARNHOUSE_DOMAIN: 'learnhouse.example',
-      NEXT_PUBLIC_LEARNHOUSE_TOP_DOMAIN: 'learnhouse.example',
+      NEXT_PUBLIC_VALIDBRIDGE_DOMAIN: 'validbridge.example',
+      NEXT_PUBLIC_VALIDBRIDGE_TOP_DOMAIN: 'validbridge.example',
     },
   }
   globalThis.document = { cookie }
@@ -75,13 +75,13 @@ describe('organization and authentication redirects', () => {
   test('preserves same-origin paths and sibling organization navigation', () => {
     browserAt()
     expect(safeRedirectUrl('/dash?tab=users')).toBe('/dash?tab=users')
-    expect(safeRedirectUrl('https://other.learnhouse.example/dash')).toBe('https://other.learnhouse.example/dash')
-    expect(safeRedirectUrl('https://learnhouse.example/dash')).toBe('https://learnhouse.example/dash')
+    expect(safeRedirectUrl('https://other.validbridge.example/dash')).toBe('https://other.validbridge.example/dash')
+    expect(safeRedirectUrl('https://validbridge.example/dash')).toBe('https://validbridge.example/dash')
   })
 
   test('rejects external hosts, suffix tricks, ports and HTTPS downgrade', () => {
     browserAt()
-    for (const value of ['https://attacker.example', 'https://learnhouse.example.attacker.example', 'https://notlearnhouse.example', 'https://other.learnhouse.example:444', 'http://school.learnhouse.example/dash']) {
+    for (const value of ['https://attacker.example', 'https://validbridge.example.attacker.example', 'https://notvalidbridge.example', 'https://other.validbridge.example:444', 'http://school.validbridge.example/dash']) {
       expect(safeRedirectUrl(value, '/login')).toBe('/login')
     }
   })
@@ -94,18 +94,18 @@ describe('organization and authentication redirects', () => {
   })
 
   test('malformed cookies do not crash authentication', () => {
-    browserAt('https://school.learnhouse.example', 'LH_top_domain=%')
+    browserAt('https://school.validbridge.example', 'VB_top_domain=%')
     expect(safeRedirectUrl('https://attacker.example')).toBe('/')
   })
 
   test('organization links validate the slug and the path before building a hostname', () => {
-    browserAt('https://learnhouse.example', 'LH_tenancy=multi')
-    expect(getUriWithOrg('school', '/course/123')).toBe('https://school.learnhouse.example/course/123')
+    browserAt('https://validbridge.example', 'VB_tenancy=multi')
+    expect(getUriWithOrg('school', '/course/123')).toBe('https://school.validbridge.example/course/123')
     for (const slug of ['attacker.example/', 'attacker.example@', '../attacker', 'school\\attacker', 'a'.repeat(64)]) {
       expect(getUriWithOrg(slug, '/course/123')).toBe('/course/123')
     }
-    expect(getUriWithOrg('school', '//attacker.example')).toBe('https://school.learnhouse.example/')
-    browserAt('https://school.learnhouse.example', 'LH_tenancy=single')
+    expect(getUriWithOrg('school', '//attacker.example')).toBe('https://school.validbridge.example/')
+    browserAt('https://school.validbridge.example', 'VB_tenancy=single')
     expect(getUriWithOrg('school', '/\\attacker.example')).toBe('/')
   })
 

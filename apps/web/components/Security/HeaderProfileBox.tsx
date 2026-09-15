@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Crown, Shield, User, Users, SignOut, CaretDown, Globe, Check, ShoppingBag, House, Buildings, Plus, CreditCard } from '@phosphor-icons/react'
 import UserAvatar from '@components/Objects/UserAvatar'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg, getMainDomainUri, isMultiOrgModeEnabled } from '@services/config/config'
 import OrgSquareLogo from '@components/Objects/Org/OrgSquareLogo'
@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next'
 import { changeLanguage } from '@/lib/i18n'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import LanguageSwitcher from '@components/Utils/LanguageSwitcher'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
 interface RoleInfo {
@@ -44,11 +44,11 @@ interface CustomRoleInfo {
 }
 
 export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string }) => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const { userRoles, rights } = useAdminStatus()
   const org = useOrg() as any
   const { t, i18n } = useTranslation()
-  const { track } = useLHAnalytics()
+  const { track } = useVBAnalytics()
   const colors = getMenuColorClasses(primaryColor)
 
   // The user's organizations (deduped) from the session roles — used by the
@@ -93,7 +93,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
       'role_global_admin': {
         name: t('roles.role_admin'),
         icon: <Crown size={12} weight="fill" />,
-        bgColor: 'bg-purple-600',
+        bgColor: 'bg-orange-600',
         textColor: 'text-white',
         description: t('roles.role_admin_desc')
       },

@@ -2,7 +2,7 @@
 import { getCommunityRights } from '@services/communities/communities'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 
 export interface CommunityRights {
   community_uuid: string
@@ -22,7 +22,7 @@ export interface CommunityRights {
 }
 
 export function useCommunityRights(communityuuid: string) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const { data: rights, error, isLoading } = useQuery<CommunityRights>({

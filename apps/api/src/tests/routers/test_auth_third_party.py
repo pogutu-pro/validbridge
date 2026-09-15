@@ -113,7 +113,7 @@ async def test_invite_only_org_without_invite_is_rejected(db, org):
     )
 
     with patch(
-        "src.routers.auth.get_learnhouse_config", return_value=mock_config
+        "src.routers.auth.get_validbridge_config", return_value=mock_config
     ), patch("redis.Redis.from_url", return_value=mock_redis), patch(
         "src.routers.auth.get_google_user_info",
         AsyncMock(return_value={"email": "invitee@example.com", "email_verified": True}),
@@ -227,7 +227,7 @@ async def test_invite_only_org_fails_loudly_when_redis_is_down(db, org):
     )
 
     with patch(
-        "src.routers.auth.get_learnhouse_config", return_value=mock_config
+        "src.routers.auth.get_validbridge_config", return_value=mock_config
     ), patch("redis.Redis.from_url", side_effect=OSError("connection refused")), patch(
         "src.routers.auth.get_google_user_info",
         AsyncMock(return_value={"email": "invitee@example.com", "email_verified": True}),

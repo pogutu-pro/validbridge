@@ -16,7 +16,7 @@ import {
 import { Cube } from '@phosphor-icons/react'
 import { getPlaygroundThumbnailMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import {
@@ -32,7 +32,7 @@ import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import { searchMatchesAny } from '@/lib/search/normalize'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import CatalogPagination, { useCatalogPagination } from '@components/Objects/Catalog/CatalogPagination'
 
 interface PlaygroundsListClientProps {
@@ -42,12 +42,12 @@ interface PlaygroundsListClientProps {
 
 export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsListClientProps) {
   const _org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
   const router = useRouter()
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isCreating, setIsCreating] = useState(false)

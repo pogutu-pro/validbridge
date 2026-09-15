@@ -39,7 +39,7 @@ const TYPE_TONE: Record<string, string> = {
   media: 'bg-amber-50 text-amber-500',
   podcasts: 'bg-rose-50 text-rose-500',
   communities: 'bg-emerald-50 text-emerald-500',
-  boards: 'bg-indigo-50 text-indigo-500',
+  boards: 'bg-orange-50 text-orange-500',
   playgrounds: 'bg-fuchsia-50 text-fuchsia-500',
 }
 

@@ -4,7 +4,7 @@ import logging
 import redis
 import json
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.ai.llm import generate_stream, model_for_tier
 from src.services.ai.schemas.magicblocks import (
     MagicBlockContext,
@@ -14,7 +14,7 @@ from src.services.ai.schemas.magicblocks import (
 
 logger = logging.getLogger(__name__)
 
-LH_CONFIG = get_learnhouse_config()
+VB_CONFIG = get_validbridge_config()
 
 # Redis key pattern for MagicBlock sessions
 MAGICBLOCK_SESSION_KEY = "magicblock_session:{session_uuid}"
@@ -26,7 +26,7 @@ MAX_ITERATIONS = 6
 
 def get_redis_connection():
     """Get Redis connection if available"""
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
     if redis_conn_string:
         try:
             return redis.from_url(redis_conn_string)

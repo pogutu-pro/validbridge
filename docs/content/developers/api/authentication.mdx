@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 # API Authentication
 
-The LearnHouse API supports **JWT cookies** for browser sessions and **API tokens** for programmatic access.
+The ValidBridge API supports **JWT cookies** for browser sessions and **API tokens** for programmatic access.
 
 ## JWT Authentication
 
@@ -33,11 +33,11 @@ Logins are rate-limited by IP, and repeated failed attempts temporarily lock the
 API tokens are available on the **Pro plan**. Create and manage them in organization settings.
 </Callout>
 
-For programmatic access, use API tokens (prefixed with `lh_`):
+For programmatic access, use API tokens (prefixed with `vb_`):
 
 ```bash
 curl http://localhost:1338/api/v1/users/profile \
-  -H "Authorization: Bearer lh_your_api_token_here"
+  -H "Authorization: Bearer vb_your_api_token_here"
 ```
 
 ## Auth Endpoints

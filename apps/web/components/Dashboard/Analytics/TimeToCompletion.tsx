@@ -22,7 +22,7 @@ export default function TimeToCompletion({ days = '180' }: { days?: string }) {
             <XAxis dataKey="course_name" tick={{ fontSize: 10 }} stroke="#9ca3af" />
             <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" label={{ value: 'Days', angle: -90, position: 'insideLeft', fontSize: 11 }} />
             <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-            <Bar dataKey="median_days" name="Median Days" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="median_days" name="Median Days" fill="#f97316" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

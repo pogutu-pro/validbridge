@@ -54,8 +54,6 @@ apps/web/runtime-config.json
 # Tinybird CLI local state (contains tokens)
 .tinyb
 
-# LearnHouse CLI generated files
-.learnhouse/
 .ee-disabled
 
 # Enterprise Edition (private repo, overlaid at SaaS build time, symlinked locally)

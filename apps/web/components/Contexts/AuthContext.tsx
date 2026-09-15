@@ -10,8 +10,8 @@ import React, {
 } from 'react'
 import {
   getAPIUrl,
-  getLEARNHOUSE_TOP_DOMAIN_VAL,
-  getLEARNHOUSE_DOMAIN_VAL,
+  getVALIDBRIDGE_TOP_DOMAIN_VAL,
+  getVALIDBRIDGE_DOMAIN_VAL,
 } from '@services/config/config'
 import { isSubdomainOf, isSameHost, isLocalhost as isLocalhostCheck } from '@services/utils/ts/hostUtils'
 import { safeRedirectUrl } from '@services/auth/redirects'
@@ -104,8 +104,8 @@ interface SessionCache {
 // (the authenticated refetch interval is ~1 min).
 const SESSION_CACHE_TTL = 2 * 60 * 1000 // 2 minutes
 const TOKEN_REFRESH_THRESHOLD = 60 * 1000 // 1 minute before expiry
-const AUTH_BROADCAST_CHANNEL = 'learnhouse_auth_sync'
-const OAUTH_STATE_COOKIE = 'LH_oauth_state'
+const AUTH_BROADCAST_CHANNEL = 'validbridge_auth_sync'
+const OAUTH_STATE_COOKIE = 'VB_oauth_state'
 
 // Context
 interface AuthContextValue {
@@ -144,7 +144,7 @@ function generateSecureToken(length: number = 32): string {
 function isCustomDomain(): boolean {
   if (typeof window === 'undefined') return false
   const hostname = window.location.hostname
-  const domain = getLEARNHOUSE_DOMAIN_VAL()
+  const domain = getVALIDBRIDGE_DOMAIN_VAL()
   return !isSubdomainOf(hostname, domain) && !isSameHost(hostname, domain) && !isLocalhostCheck(hostname)
 }
 
@@ -152,7 +152,7 @@ function isCustomDomain(): boolean {
 function getCookieAttributes(): { secureAttr: string; domainAttr: string; sameSiteAttr: string } {
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
   const secureAttr = isSecure ? '; Secure' : ''
-  const topDomain = getLEARNHOUSE_TOP_DOMAIN_VAL()
+  const topDomain = getVALIDBRIDGE_TOP_DOMAIN_VAL()
 
   // For custom domains, don't set domain attribute (host-only cookie)
   // For localhost, don't set domain attribute
@@ -204,8 +204,8 @@ function clearSessionMarker(): void {
 
   const { secureAttr, domainAttr, sameSiteAttr } = getCookieAttributes()
   const expired = 'expires=Thu, 01 Jan 1970 00:00:00 GMT'
-  document.cookie = `LH_session=; path=/${sameSiteAttr}${secureAttr}${domainAttr}; ${expired}`
-  document.cookie = `LH_session=; path=/${sameSiteAttr}${secureAttr}; ${expired}`
+  document.cookie = `VB_session=; path=/${sameSiteAttr}${secureAttr}${domainAttr}; ${expired}`
+  document.cookie = `VB_session=; path=/${sameSiteAttr}${secureAttr}; ${expired}`
 }
 
 // Session Provider Component
@@ -280,9 +280,9 @@ export function SessionProvider({
         // a shared localStorage timestamp so N open tabs don't all fire
         // /api/auth/refresh at once on a single login.
         try {
-          const last = Number(localStorage.getItem('lh_xtab_refresh_at') || 0)
+          const last = Number(localStorage.getItem('vb_xtab_refresh_at') || 0)
           if (Date.now() - last < 3000) return
-          localStorage.setItem('lh_xtab_refresh_at', String(Date.now()))
+          localStorage.setItem('vb_xtab_refresh_at', String(Date.now()))
         } catch {
           /* localStorage unavailable — fall through and just refresh */
         }
@@ -332,11 +332,11 @@ export function SessionProvider({
   }, [])
 
   // Check if a session might exist (marker cookie is set alongside httpOnly auth cookies).
-  // Match the cookie name EXACTLY — `includes('LH_session')` also matched unrelated
-  // names like `LH_session_backup`, falsely reporting a session.
+  // Match the cookie name EXACTLY — `includes('VB_session')` also matched unrelated
+  // names like `VB_session_backup`, falsely reporting a session.
   const hasSessionMarker = useCallback((): boolean => {
     if (typeof document === 'undefined') return false
-    return document.cookie.split('; ').some((c) => c.startsWith('LH_session='))
+    return document.cookie.split('; ').some((c) => c.startsWith('VB_session='))
   }, [])
 
   // Refresh access token using refresh token cookie.
@@ -944,10 +944,10 @@ export function SessionProvider({
 
           if (options.orgSlug || options.orgId) {
             if (options.orgSlug) {
-              document.cookie = `LH_oauth_orgslug=${options.orgSlug}${baseAttributes}${domainAttr}`
+              document.cookie = `VB_oauth_orgslug=${options.orgSlug}${baseAttributes}${domainAttr}`
             }
             if (options.orgId) {
-              document.cookie = `LH_oauth_org_id=${options.orgId}${baseAttributes}${domainAttr}`
+              document.cookie = `VB_oauth_org_id=${options.orgId}${baseAttributes}${domainAttr}`
             }
           }
 
@@ -970,7 +970,7 @@ export function SessionProvider({
           setOAuthStateCookie(csrfToken)
 
           // Always use main domain for redirect URI — only one URI registered with Google
-          const redirectUri = `${window.location.protocol}//${getLEARNHOUSE_DOMAIN_VAL()}/auth/callback/google`
+          const redirectUri = `${window.location.protocol}//${getVALIDBRIDGE_DOMAIN_VAL()}/auth/callback/google`
 
           // Get Google OAuth URL from server (client ID lives server-side only)
           const authResponse = await fetch('/api/auth/google/authorize', {
@@ -1049,8 +1049,8 @@ export function SessionProvider({
     // Clear any auth cookies on client side
     const { secureAttr, domainAttr } = getCookieAttributes()
     const expireAttr = '; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-    document.cookie = `LH_oauth_orgslug=; path=/${expireAttr}${secureAttr}${domainAttr}`
-    document.cookie = `LH_oauth_org_id=; path=/${expireAttr}${secureAttr}${domainAttr}`
+    document.cookie = `VB_oauth_orgslug=; path=/${expireAttr}${secureAttr}${domainAttr}`
+    document.cookie = `VB_oauth_org_id=; path=/${expireAttr}${secureAttr}${domainAttr}`
 
     // Clear OAuth state
     clearOAuthStateCookie()
@@ -1226,7 +1226,7 @@ export async function signIn(
     setOAuthStateCookie(csrfToken)
 
     // Always use main domain for redirect URI — only one URI registered with Google
-    const redirectUri = `${window.location.protocol}//${getLEARNHOUSE_DOMAIN_VAL()}/auth/callback/google`
+    const redirectUri = `${window.location.protocol}//${getVALIDBRIDGE_DOMAIN_VAL()}/auth/callback/google`
 
     // Get Google OAuth URL from server (client ID lives server-side only)
     const authResponse = await fetch('/api/auth/google/authorize', {
@@ -1279,8 +1279,8 @@ export async function signOut(options?: SignOutOptions): Promise<void> {
   // Clear cookies
   const { secureAttr, domainAttr } = getCookieAttributes()
   const expireAttr = '; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-  document.cookie = `LH_oauth_orgslug=; path=/${expireAttr}${secureAttr}${domainAttr}`
-  document.cookie = `LH_oauth_org_id=; path=/${expireAttr}${secureAttr}${domainAttr}`
+  document.cookie = `VB_oauth_orgslug=; path=/${expireAttr}${secureAttr}${domainAttr}`
+  document.cookie = `VB_oauth_org_id=; path=/${expireAttr}${secureAttr}${domainAttr}`
 
   // Clear OAuth state
   clearOAuthStateCookie()

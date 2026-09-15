@@ -24,8 +24,8 @@ def _config(**overrides):
         allowed_regexp=overrides.pop("allowed_regexp", ""),
         self_hosted=overrides.pop("self_hosted", False),
         tenancy=overrides.pop("tenancy", "multi"),
-        domain=overrides.pop("domain", "learnhouse.app"),
-        frontend_domain=overrides.pop("frontend_domain", "app.learnhouse.app"),
+        domain=overrides.pop("domain", "validbridge.co.ke"),
+        frontend_domain=overrides.pop("frontend_domain", "app.validbridge.co.ke"),
         ssl=overrides.pop("ssl", True),
     )
     general = SimpleNamespace(
@@ -41,7 +41,7 @@ def _config(**overrides):
         smtp_password=overrides.pop("smtp_password", "pass"),
         smtp_use_tls=overrides.pop("smtp_use_tls", True),
         system_email_sender_name=overrides.pop(
-            "system_email_sender_name", "LearnHouse"
+            "system_email_sender_name", "ValidBridge"
         ),
     )
     return SimpleNamespace(
@@ -69,14 +69,14 @@ def _request(headers=None, scheme="https", server=("api.test", 443)):
 class TestEmailUtilsService:
     def test_is_allowed_base_url_matches_all_supported_sources(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 allowed_origins=["https://app.test/"],
                 allowed_regexp=r"^https://regex\.test$",
             ),
         ), patch.dict(
             "src.services.email.utils.os.environ",
-            {"LEARNHOUSE_PLATFORM_URL": "https://www.platform.test"},
+            {"VALIDBRIDGE_PLATFORM_URL": "https://www.platform.test"},
             clear=False,
         ):
             assert _is_allowed_base_url("https://app.test")
@@ -85,7 +85,7 @@ class TestEmailUtilsService:
 
     def test_is_allowed_base_url_accepts_localhost_in_development(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(development_mode=True),
         ):
             assert _is_allowed_base_url("http://localhost:3000")
@@ -93,7 +93,7 @@ class TestEmailUtilsService:
 
     def test_is_allowed_base_url_invalid_regex_and_rejects_unknown_origin(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(allowed_regexp="("),
         ), patch.dict(
             "src.services.email.utils.os.environ",
@@ -107,7 +107,7 @@ class TestEmailUtilsService:
         request = _request({"origin": "https://app.test"})
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(tenancy="single"),
         ), patch(
             "src.services.email.utils.get_base_url_from_request",
@@ -118,19 +118,19 @@ class TestEmailUtilsService:
 
     def test_is_allowed_base_url_pins_to_configured_host_in_single_tenancy(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(tenancy="single"),
         ):
-            assert _is_allowed_base_url("https://app.learnhouse.app")
-            assert _is_allowed_base_url("https://learnhouse.app")
-            assert _is_allowed_base_url("https://www.learnhouse.app")
+            assert _is_allowed_base_url("https://app.validbridge.co.ke")
+            assert _is_allowed_base_url("https://validbridge.co.ke")
+            assert _is_allowed_base_url("https://www.validbridge.co.ke")
             assert not _is_allowed_base_url("https://learn.example.org")
             assert not _is_allowed_base_url("javascript:alert(1)")
             assert not _is_allowed_base_url("https://")
             assert not _is_allowed_base_url("http://localhost:3000")
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(tenancy="single", development_mode=True),
         ):
             assert _is_allowed_base_url("http://localhost:3000")
@@ -140,7 +140,7 @@ class TestEmailUtilsService:
         # (e.g. "localhost:3000"). The configured host must still match the
         # always-port-less request host instead of being silently rejected.
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 tenancy="single",
                 frontend_domain="localhost:3000",
@@ -156,29 +156,29 @@ class TestEmailUtilsService:
         # Line 36: a blank/whitespace configured value (here frontend_domain) is
         # skipped via `continue`; only the non-empty `domain` is honored.
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 tenancy="single",
                 frontend_domain="   ",
-                domain="learnhouse.app",
+                domain="validbridge.co.ke",
             ),
         ):
-            assert _is_allowed_base_url("https://learnhouse.app")
+            assert _is_allowed_base_url("https://validbridge.co.ke")
             # The blank frontend_domain contributed no allowed host.
             assert not _is_allowed_base_url("https://other.example.org")
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
         "ssl,expected",
-        [(True, "https://acme.learnhouse.app"), (False, "http://acme.learnhouse.app")],
+        [(True, "https://acme.validbridge.co.ke"), (False, "http://acme.validbridge.co.ke")],
     )
     async def test_get_org_signup_base_url_builds_org_subdomain(self, ssl, expected):
         request = _request({"origin": "https://app.test"})
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
-                domain="learnhouse.app",
+                domain="validbridge.co.ke",
                 ssl=ssl,
             ),
         ):
@@ -191,7 +191,7 @@ class TestEmailUtilsService:
         request = _request({"origin": "https://app.test"})
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(domain="", ssl=True),
         ), patch(
             "src.services.email.utils.get_base_url_from_request",
@@ -201,7 +201,7 @@ class TestEmailUtilsService:
             mock_base_url.assert_called_once_with(request)
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(domain="localhost:3000", ssl=True),
         ), patch(
             "src.services.email.utils.get_base_url_from_request",
@@ -238,28 +238,28 @@ class TestEmailUtilsService:
 
     def test_get_base_url_from_request_uses_frontend_then_request_url(self):
         frontend_request = _request({"origin": "https://blocked.test"})
-        url_request = _request({}, scheme="http", server=("api.learnhouse.test", 8080))
+        url_request = _request({}, scheme="http", server=("api.validbridge.test", 8080))
 
         with patch(
             "src.services.email.utils._is_allowed_base_url",
             return_value=False,
         ), patch(
-            "src.services.email.utils.get_learnhouse_config",
-            return_value=_config(frontend_domain="frontend.learnhouse.app"),
+            "src.services.email.utils.get_validbridge_config",
+            return_value=_config(frontend_domain="frontend.validbridge.co.ke"),
         ):
             assert (
                 get_base_url_from_request(frontend_request)
-                == "https://frontend.learnhouse.app"
+                == "https://frontend.validbridge.co.ke"
             )
 
         with patch(
             "src.services.email.utils._is_allowed_base_url",
             return_value=False,
         ), patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(frontend_domain=""),
         ):
-            assert get_base_url_from_request(url_request) == "http://api.learnhouse.test:8080"
+            assert get_base_url_from_request(url_request) == "http://api.validbridge.test:8080"
 
     def test_get_base_url_from_request_warns_on_untrusted_referer(self):
         request = _request({"referer": "https://blocked.test/path"})
@@ -268,14 +268,14 @@ class TestEmailUtilsService:
             "src.services.email.utils._is_allowed_base_url",
             return_value=False,
         ), patch(
-            "src.services.email.utils.get_learnhouse_config",
-            return_value=_config(frontend_domain="frontend.learnhouse.app"),
+            "src.services.email.utils.get_validbridge_config",
+            return_value=_config(frontend_domain="frontend.validbridge.co.ke"),
         ), patch(
             "src.services.email.utils.logger.warning"
         ) as mock_warning:
             assert (
                 get_base_url_from_request(request)
-                == "https://frontend.learnhouse.app"
+                == "https://frontend.validbridge.co.ke"
             )
 
         mock_warning.assert_called_once_with(
@@ -285,7 +285,7 @@ class TestEmailUtilsService:
 
     def test_send_email_routes_to_resend_and_smtp(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 email_provider="resend",
                 system_email_address="system@test.com",
@@ -300,7 +300,7 @@ class TestEmailUtilsService:
         assert result == {"id": "msg-1"}
         assert send_email.__module__ == "src.services.email.utils"
         assert mock_resend_send.call_args.args[0] == {
-            "from": "LearnHouse <system@test.com>",
+            "from": "ValidBridge <system@test.com>",
             "to": ["to@test.com"],
             "subject": "Hello",
             "html": "<p>Body</p>",
@@ -308,11 +308,11 @@ class TestEmailUtilsService:
 
         smtp_client = Mock()
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 email_provider="smtp",
                 system_email_address="system@test.com",
-                smtp_host="smtp.learnhouse.test",
+                smtp_host="smtp.validbridge.test",
                 smtp_port=2525,
                 smtp_username="smtp-user",
                 smtp_password="smtp-pass",
@@ -325,7 +325,7 @@ class TestEmailUtilsService:
             result = send_email("to@test.com", "Hello", "<p>Body</p>")
 
         assert result == {"id": None, "to": "to@test.com"}
-        mock_smtp.assert_called_once_with("smtp.learnhouse.test", 2525, timeout=15)
+        mock_smtp.assert_called_once_with("smtp.validbridge.test", 2525, timeout=15)
         smtp_client.starttls.assert_called_once()
         smtp_client.login.assert_called_once_with("smtp-user", "smtp-pass")
         smtp_client.sendmail.assert_called_once()
@@ -334,11 +334,11 @@ class TestEmailUtilsService:
     def test_send_email_smtp_without_tls_or_login(self):
         smtp_client = Mock()
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 email_provider="smtp",
                 system_email_address="system@test.com",
-                smtp_host="smtp.learnhouse.test",
+                smtp_host="smtp.validbridge.test",
                 smtp_port=2525,
                 smtp_username="",
                 smtp_password="",
@@ -358,7 +358,7 @@ class TestEmailUtilsService:
 
     def test_send_email_resend_failure_raises_503(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(email_provider="resend", resend_api_key="key"),
         ), patch(
             "src.services.email.utils.resend.Emails.send",
@@ -383,7 +383,7 @@ class TestEmailUtilsService:
             code=400,
         )
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(email_provider="resend", resend_api_key="key"),
         ), patch(
             "src.services.email.utils.resend.Emails.send",
@@ -427,7 +427,7 @@ class TestEmailUtilsService:
         user, so they must stay at error level even though several carry a 4xx.
         """
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(email_provider="resend", resend_api_key="key"),
         ), patch(
             "src.services.email.utils.resend.Emails.send",
@@ -444,7 +444,7 @@ class TestEmailUtilsService:
         smtp_client.sendmail.side_effect = smtplib.SMTPException("SMTP error")
         smtp_client.quit.side_effect = Exception("quit failed")
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 email_provider="smtp",
                 smtp_use_tls=False,
@@ -461,7 +461,7 @@ class TestEmailUtilsService:
 
     def test_send_email_smtp_os_error_raises_503(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 email_provider="smtp",
                 smtp_use_tls=False,
@@ -492,8 +492,8 @@ class TestGetPrimaryVerifiedCustomDomain:
         mock_session = AsyncMock()
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
-            return_value=_config(tenancy="multi", ssl=True, domain="learnhouse.app"),
+            "src.services.email.utils.get_validbridge_config",
+            return_value=_config(tenancy="multi", ssl=True, domain="validbridge.co.ke"),
         ), patch(
             "src.services.email.utils._get_primary_verified_custom_domain",
             new_callable=AsyncMock,
@@ -516,8 +516,8 @@ class TestGetPrimaryVerifiedCustomDomain:
         mock_session = AsyncMock()
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
-            return_value=_config(tenancy="multi", ssl=True, domain="learnhouse.app"),
+            "src.services.email.utils.get_validbridge_config",
+            return_value=_config(tenancy="multi", ssl=True, domain="validbridge.co.ke"),
         ), patch(
             "src.services.email.utils._get_primary_verified_custom_domain",
             new_callable=AsyncMock,
@@ -527,7 +527,7 @@ class TestGetPrimaryVerifiedCustomDomain:
                 "myorg", request, db_session=mock_session, org_id=42
             )
 
-        assert url == "https://myorg.learnhouse.app"
+        assert url == "https://myorg.validbridge.co.ke"
 
     @pytest.mark.asyncio
     async def test_get_primary_verified_custom_domain_returns_primary(self):
@@ -595,7 +595,7 @@ class TestOrgLogoUrl:
 
         with patch.dict(
             "src.services.email.utils.os.environ",
-            {"LEARNHOUSE_MEDIA_URL": "https://cdn.acme.test/"},
+            {"VALIDBRIDGE_MEDIA_URL": "https://cdn.acme.test/"},
             clear=False,
         ):
             assert get_media_base_url(_request()) == "https://cdn.acme.test"
@@ -604,18 +604,18 @@ class TestOrgLogoUrl:
         from src.services.email.utils import get_media_base_url
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
-            return_value=_config(domain="learnhouse.io", ssl=True),
+            "src.services.email.utils.get_validbridge_config",
+            return_value=_config(domain="validbridge.co.ke", ssl=True),
         ), patch.dict(
             "src.services.email.utils.os.environ", {}, clear=True
         ):
-            assert get_media_base_url(_request()) == "https://api.learnhouse.io"
+            assert get_media_base_url(_request()) == "https://api.validbridge.co.ke"
 
     def test_media_base_falls_back_to_request_host_for_localhost(self):
         from src.services.email.utils import get_media_base_url
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(domain="localhost"),
         ), patch.dict(
             "src.services.email.utils.os.environ", {}, clear=True
@@ -629,10 +629,10 @@ class TestOrgLogoUrl:
         org = SimpleNamespace(org_uuid="org_abc", logo_image="uuid_logo.png")
         with patch(
             "src.services.email.utils.get_media_base_url",
-            return_value="https://api.learnhouse.io",
+            return_value="https://api.validbridge.co.ke",
         ):
             url = get_org_logo_url(org, _request())
-        assert url == "https://api.learnhouse.io/content/orgs/org_abc/logos/uuid_logo.png"
+        assert url == "https://api.validbridge.co.ke/content/orgs/org_abc/logos/uuid_logo.png"
 
     def test_org_logo_url_none_when_no_logo(self):
         from src.services.email.utils import get_org_logo_url
@@ -753,7 +753,7 @@ class TestFormatSender:
         from src.services.email.sender import format_sender
 
         assert format_sender(display_name, "system@test.com") == (
-            "LearnHouse <system@test.com>"
+            "ValidBridge <system@test.com>"
         )
         assert format_sender(display_name, "system@test.com", "Acme Platform") == (
             "Acme Platform <system@test.com>"
@@ -786,7 +786,7 @@ class TestSendEmailSenderName:
 
     def test_org_name_reaches_the_resend_payload(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(email_provider="resend"),
         ), patch(
             "src.services.email.utils.resend.Emails.send",
@@ -801,7 +801,7 @@ class TestSendEmailSenderName:
 
     def test_platform_send_keeps_the_deployment_default(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(email_provider="resend"),
         ), patch(
             "src.services.email.utils.resend.Emails.send",
@@ -811,12 +811,12 @@ class TestSendEmailSenderName:
 
         assert (
             mock_resend_send.call_args.args[0]["from"]
-            == "LearnHouse <system@test.com>"
+            == "ValidBridge <system@test.com>"
         )
 
     def test_deployment_default_is_configurable(self):
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(
                 email_provider="resend", system_email_sender_name="Acme Platform"
             ),
@@ -835,7 +835,7 @@ class TestSendEmailSenderName:
         """Deliverability rests on the From address staying on the verified
         domain — a name that looks like an address must not become one."""
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(email_provider="resend"),
         ), patch(
             "src.services.email.utils.resend.Emails.send",
@@ -858,7 +858,7 @@ class TestSendEmailSenderName:
 
         smtp_client = Mock()
         with patch(
-            "src.services.email.utils.get_learnhouse_config",
+            "src.services.email.utils.get_validbridge_config",
             return_value=_config(email_provider="smtp", smtp_use_tls=False,
                                  smtp_username="", smtp_password=""),
         ), patch(
@@ -888,7 +888,7 @@ class TestSendEmailSenderName:
         del config.mailing_config.system_email_sender_name
 
         with patch(
-            "src.services.email.utils.get_learnhouse_config", return_value=config
+            "src.services.email.utils.get_validbridge_config", return_value=config
         ), patch(
             "src.services.email.utils.resend.Emails.send",
             return_value={"id": "msg-1"},
@@ -897,5 +897,5 @@ class TestSendEmailSenderName:
 
         assert (
             mock_resend_send.call_args.args[0]["from"]
-            == "LearnHouse <system@test.com>"
+            == "ValidBridge <system@test.com>"
         )

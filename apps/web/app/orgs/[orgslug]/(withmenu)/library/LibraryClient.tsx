@@ -7,7 +7,7 @@ import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/Ge
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { queryKeys } from '@/lib/query/keys'
 import { sortLibrary } from '@lib/library/sort'
 import { type FolderSortMode } from '@components/Dashboard/Library/FolderSortDropdown'
@@ -19,7 +19,7 @@ import { useTrackView, AnalyticsEvent } from '@services/analytics'
 function LibraryClient({ orgslug }: { orgslug: string }) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const { data, isLoading, isError } = useQuery({

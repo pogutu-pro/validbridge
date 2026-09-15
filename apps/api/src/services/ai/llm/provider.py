@@ -11,7 +11,7 @@ import logging
 
 from pydantic_ai.models import Model
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +35,8 @@ def build_model(model_name: str) -> Model:
 
     Provider SDKs are imported lazily so an unused/uninstalled provider never breaks import.
     """
-    lh_config = get_learnhouse_config()
-    cfg = lh_config.ai_config
+    vb_config = get_validbridge_config()
+    cfg = vb_config.ai_config
     # Treat None / empty / whitespace-only as "unset" and fall back to the default provider.
     provider_id = (getattr(cfg, "provider", None) or "").strip().lower() or DEFAULT_PROVIDER
     api_key = getattr(cfg, "api_key", None)
@@ -53,7 +53,7 @@ def build_model(model_name: str) -> Model:
         )
 
     # AWS Bedrock: credentials come from the standard AWS chain (env vars, IAM role, or
-    # `~/.aws` profile) + AWS_REGION, so no LEARNHOUSE_AI_API_KEY is required. If one is set
+    # `~/.aws` profile) + AWS_REGION, so no VALIDBRIDGE_AI_API_KEY is required. If one is set
     # it is passed through as a Bedrock API key. Model names are Bedrock model IDs, e.g.
     # "anthropic.claude-sonnet-4-5-20250929-v1:0" or "us.anthropic.claude-...".
     if provider_id == "bedrock":
@@ -71,7 +71,7 @@ def build_model(model_name: str) -> Model:
 
     if not api_key:
         raise AINotConfiguredError(
-            "AI provider API key not configured (set LEARNHOUSE_AI_API_KEY)"
+            "AI provider API key not configured (set VALIDBRIDGE_AI_API_KEY)"
         )
 
     if provider_id in _GOOGLE_ALIASES:
@@ -91,7 +91,7 @@ def build_model(model_name: str) -> Model:
             model_name,
             provider=OpenRouterProvider(
                 api_key=api_key,
-                app_title=getattr(lh_config, "site_name", None) or "LearnHouse",
+                app_title=getattr(vb_config, "site_name", None) or "ValidBridge",
             ),
         )
 

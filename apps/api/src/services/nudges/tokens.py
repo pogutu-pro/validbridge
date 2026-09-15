@@ -19,7 +19,7 @@ import hashlib
 import hmac
 from typing import Optional
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 # Bumped if the token format ever changes, so old tokens fail closed rather
 # than being reinterpreted under new rules.
@@ -40,8 +40,8 @@ def _unsub_secret() -> bytes:
     Domain-separated from every other JWT-secret-derived credential (e.g. the
     webhook Fernet key) so a token from one subsystem is meaningless in another.
     """
-    secret = get_learnhouse_config().security_config.auth_jwt_secret_key
-    return hashlib.sha256(f"learnhouse.unsubscribe.{_TOKEN_VERSION}|".encode() + secret.encode()).digest()
+    secret = get_validbridge_config().security_config.auth_jwt_secret_key
+    return hashlib.sha256(f"validbridge.unsubscribe.{_TOKEN_VERSION}|".encode() + secret.encode()).digest()
 
 
 def _sign(user_uuid: str, category: str) -> str:

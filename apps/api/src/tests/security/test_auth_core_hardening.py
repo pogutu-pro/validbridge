@@ -44,8 +44,8 @@ from src.services.auth.session import (
 from src.services.users.users import update_user_password
 
 GOOGLE_ENV_VARS = (
-    "LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID",
-    "LEARNHOUSE_GOOGLE_CLIENT_ID",
+    "VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID",
+    "VALIDBRIDGE_GOOGLE_CLIENT_ID",
 )
 
 
@@ -154,8 +154,8 @@ class TestGoogleAudienceFailsClosed:
 
     async def test_blank_client_id_counts_as_unset(self, monkeypatch):
         monkeypatch.setattr(auth_utils, "_LOGGED_MISSING_GOOGLE_CLIENT_ID", False)
-        monkeypatch.setenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID", "   ")
-        monkeypatch.delenv("LEARNHOUSE_GOOGLE_CLIENT_ID", raising=False)
+        monkeypatch.setenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID", "   ")
+        monkeypatch.delenv("VALIDBRIDGE_GOOGLE_CLIENT_ID", raising=False)
 
         with pytest.raises(HTTPException) as exc_info:
             await auth_utils._verify_google_token_audience("tok")
@@ -167,7 +167,7 @@ class TestGoogleAudienceFailsClosed:
         self, monkeypatch, env_var
     ):
         """Deployments that followed the CLI template set
-        LEARNHOUSE_GOOGLE_CLIENT_ID; the API originally read only the _OAUTH_
+        VALIDBRIDGE_GOOGLE_CLIENT_ID; the API originally read only the _OAUTH_
         name. Both must enable the check, or fail-closed locks those operators
         out of their own Google button."""
         for name in GOOGLE_ENV_VARS:
@@ -183,8 +183,8 @@ class TestGoogleAudienceFailsClosed:
         assert fake.calls == ["https://oauth2.googleapis.com/tokeninfo"]
 
     async def test_mismatched_audience_is_rejected(self, monkeypatch):
-        monkeypatch.setenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID", "ours")
-        monkeypatch.delenv("LEARNHOUSE_GOOGLE_CLIENT_ID", raising=False)
+        monkeypatch.setenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID", "ours")
+        monkeypatch.delenv("VALIDBRIDGE_GOOGLE_CLIENT_ID", raising=False)
 
         fake = _FakeAsyncClient([_FakeResponse(200, {"aud": "attacker-app"})])
         with patch("src.services.auth.utils.httpx.AsyncClient", fake):
@@ -194,11 +194,11 @@ class TestGoogleAudienceFailsClosed:
         assert exc_info.value.status_code == 401
 
     async def test_expected_client_id_prefers_the_oauth_spelling(self, monkeypatch):
-        monkeypatch.setenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID", "primary")
-        monkeypatch.setenv("LEARNHOUSE_GOOGLE_CLIENT_ID", "secondary")
+        monkeypatch.setenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID", "primary")
+        monkeypatch.setenv("VALIDBRIDGE_GOOGLE_CLIENT_ID", "secondary")
         assert auth_utils.get_expected_google_client_id() == "primary"
 
-        monkeypatch.delenv("LEARNHOUSE_GOOGLE_OAUTH_CLIENT_ID")
+        monkeypatch.delenv("VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID")
         assert auth_utils.get_expected_google_client_id() == "secondary"
 
 

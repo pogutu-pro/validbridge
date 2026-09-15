@@ -6,7 +6,7 @@ import botocore.config
 from botocore.exceptions import BotoCoreError, ClientError
 import os
 from fastapi import HTTPException, UploadFile
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.security.file_validation import validate_upload
 from src.services.utils.video_processing import ensure_faststart
 
@@ -94,13 +94,13 @@ async def upload_content(
     file_and_format: str,
     allowed_formats: Optional[list[str]] = None,
 ):
-    # Get Learnhouse Config
-    learnhouse_config = get_learnhouse_config()
+    # Get ValidBridge Config
+    validbridge_config = get_validbridge_config()
 
     file_format = file_and_format.split(".")[-1].strip().lower()
 
     # Get content delivery method
-    content_delivery = learnhouse_config.hosting_config.content_delivery.type
+    content_delivery = validbridge_config.hosting_config.content_delivery.type
 
     # Check if format file is allowed
     if allowed_formats:
@@ -129,11 +129,11 @@ async def upload_content(
     elif content_delivery == "s3api":
         s3 = boto3.client(
             "s3",
-            endpoint_url=learnhouse_config.hosting_config.content_delivery.s3api.endpoint_url,
+            endpoint_url=validbridge_config.hosting_config.content_delivery.s3api.endpoint_url,
             config=botocore.config.Config(connect_timeout=10, read_timeout=60, retries={"max_attempts": 2}),
         )
 
-        bucket_name = learnhouse_config.hosting_config.content_delivery.s3api.bucket_name or "learnhouse-media"
+        bucket_name = validbridge_config.hosting_config.content_delivery.s3api.bucket_name or "validbridge-media"
         local_path = safe_path
         # The S3 key stays a clean relative content path.
         s3_key = f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}"
@@ -188,16 +188,16 @@ async def read_content(
     ):
         raise HTTPException(status_code=400, detail="Invalid file name")
 
-    learnhouse_config = get_learnhouse_config()
-    content_delivery = learnhouse_config.hosting_config.content_delivery.type
+    validbridge_config = get_validbridge_config()
+    content_delivery = validbridge_config.hosting_config.content_delivery.type
 
     if content_delivery == "s3api":
         s3 = boto3.client(
             "s3",
-            endpoint_url=learnhouse_config.hosting_config.content_delivery.s3api.endpoint_url,
+            endpoint_url=validbridge_config.hosting_config.content_delivery.s3api.endpoint_url,
             config=botocore.config.Config(connect_timeout=10, read_timeout=60, retries={"max_attempts": 2}),
         )
-        bucket_name = learnhouse_config.hosting_config.content_delivery.s3api.bucket_name or "learnhouse-media"
+        bucket_name = validbridge_config.hosting_config.content_delivery.s3api.bucket_name or "validbridge-media"
         s3_key = f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}"
         try:
             resp = await asyncio.to_thread(s3.get_object, Bucket=bucket_name, Key=s3_key)

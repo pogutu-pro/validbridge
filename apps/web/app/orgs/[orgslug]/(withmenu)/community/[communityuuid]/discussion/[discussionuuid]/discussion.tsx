@@ -12,7 +12,7 @@ import { isRichContentAllowed } from '@components/Objects/Communities/richConten
 import { DiscussionWithAuthor } from '@services/communities/discussions'
 import { MessageCircle } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
 
 interface DiscussionPageClientProps {
@@ -27,7 +27,7 @@ const DiscussionPageClient = ({
   orgslug,
 }: DiscussionPageClientProps) => {
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const [discussion, setDiscussion] = useState(initialDiscussion)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const allowRichContent = isRichContentAllowed(community)

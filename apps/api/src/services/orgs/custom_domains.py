@@ -29,16 +29,16 @@ logger = logging.getLogger(__name__)
 
 # Reserved domains that cannot be used as custom domains
 RESERVED_DOMAIN_PATTERNS = [
-    r'.*\.learnhouse\.io$',
-    r'.*\.learnhouse\.app$',
-    r'^learnhouse\.io$',
-    r'^learnhouse\.app$',
+    r'.*\.validbridge\.co\.ke$',
+    r'.*\.validbridge\.app$',
+    r'^validbridge\.co\.ke$',
+    r'^validbridge\.app$',
     r'^localhost$',
     r'^127\.0\.0\.1$',
 ]
 
-# Learnhouse domain for CNAME instructions
-LEARNHOUSE_DOMAIN = os.getenv('LEARNHOUSE_DOMAIN', 'learnhouse.io')
+# ValidBridge domain for CNAME instructions
+VALIDBRIDGE_DOMAIN = os.getenv('VALIDBRIDGE_DOMAIN', 'validbridge.co.ke')
 
 
 def generate_verification_token() -> str:
@@ -64,7 +64,7 @@ def is_reserved_domain(domain: str) -> bool:
 def is_own_agency_subdomain(domain: str, org_slug: str) -> bool:
     """True only if `domain` is THIS org's own slug host under the agency apex.
 
-    In agency (multi-tenant) deployments the whole `*.{LEARNHOUSE_DOMAIN}` space
+    In agency (multi-tenant) deployments the whole `*.{VALIDBRIDGE_DOMAIN}` space
     is under the operator's control (wildcard DNS + wildcard TLS served by Caddy
     via DNS-01). That proves the *operator* controls the namespace — it does NOT
     prove a given org owns an arbitrary label within it. Only `{slug}.{apex}` is
@@ -77,8 +77,8 @@ def is_own_agency_subdomain(domain: str, org_slug: str) -> bool:
     Guarded so we never auto-verify when no real agency domain is configured
     (the default/dev values), which would otherwise be unsafe.
     """
-    base = (LEARNHOUSE_DOMAIN or "").lower().strip().split(":")[0]
-    if not base or base in ("learnhouse.io", "localhost"):
+    base = (VALIDBRIDGE_DOMAIN or "").lower().strip().split(":")[0]
+    if not base or base in ("validbridge.co.ke", "localhost"):
         return False
     slug = (org_slug or "").lower().strip()
     if not slug:
@@ -105,14 +105,14 @@ def get_verification_instructions(domain: str, token: str, org_slug: str) -> Cus
     subdomain = _get_subdomain_prefix(domain)
 
     if subdomain:
-        txt_record_host = f"_learnhouse-verification.{subdomain}"
+        txt_record_host = f"_validbridge-verification.{subdomain}"
         cname_record_host = subdomain
     else:
-        txt_record_host = "_learnhouse-verification"
+        txt_record_host = "_validbridge-verification"
         cname_record_host = "@"
 
-    txt_record_value = f"learnhouse-verify={token}"
-    cname_record_value = f"{org_slug}.{LEARNHOUSE_DOMAIN}"
+    txt_record_value = f"validbridge-verify={token}"
+    cname_record_value = f"{org_slug}.{VALIDBRIDGE_DOMAIN}"
 
     instructions = f"""
 To verify your domain, add the following DNS records at your domain provider:
@@ -146,7 +146,7 @@ async def verify_domain_dns(domain: CustomDomain, db_session: AsyncSession, org_
     Returns (success, message) tuple.
     """
     # Development mode bypass
-    if os.getenv('LEARNHOUSE_CUSTOM_DOMAIN_DEV_MODE') == 'true':
+    if os.getenv('VALIDBRIDGE_CUSTOM_DOMAIN_DEV_MODE') == 'true':
         logger.warning(f"DEV MODE: Skipping DNS verification for {domain.domain}")
         domain.status = "verified"
         domain.verified_at = str(datetime.now())
@@ -160,7 +160,7 @@ async def verify_domain_dns(domain: CustomDomain, db_session: AsyncSession, org_
     # DNS+TLS), so there's nothing to prove via a DNS TXT record — verify it now.
     # Any other label still has to go through the TXT flow below.
     if is_own_agency_subdomain(domain.domain, org_slug):
-        logger.info(f"Auto-verifying {domain.domain} (own slug host under agency domain {LEARNHOUSE_DOMAIN})")
+        logger.info(f"Auto-verifying {domain.domain} (own slug host under agency domain {VALIDBRIDGE_DOMAIN})")
         domain.status = "verified"
         domain.verified_at = str(datetime.now())
         domain.last_check_at = str(datetime.now())
@@ -173,8 +173,8 @@ async def verify_domain_dns(domain: CustomDomain, db_session: AsyncSession, org_
         import dns.resolver
 
         # Check TXT record
-        txt_host = f"_learnhouse-verification.{domain.domain}"
-        expected_txt = f"learnhouse-verify={domain.verification_token}"
+        txt_host = f"_validbridge-verification.{domain.domain}"
+        expected_txt = f"validbridge-verify={domain.verification_token}"
 
         try:
             txt_answers = dns.resolver.resolve(txt_host, 'TXT')
@@ -333,7 +333,7 @@ async def add_custom_domain(
         update_date=now,
     )
     if auto_verified:
-        logger.info(f"Auto-verified {domain} on add (subdomain of agency domain {LEARNHOUSE_DOMAIN})")
+        logger.info(f"Auto-verified {domain} on add (subdomain of agency domain {VALIDBRIDGE_DOMAIN})")
 
     db_session.add(custom_domain)
     await db_session.commit()

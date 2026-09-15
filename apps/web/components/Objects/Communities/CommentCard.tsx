@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { MoreHorizontal, Pencil, Trash2, X, Check, Loader2, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import {
   DiscussionCommentWithAuthor,
   DiscussionAuthor,
@@ -48,7 +48,7 @@ interface CommentCardProps {
 
 export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }: CommentCardProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const currentUserId = session?.data?.user?.id
 

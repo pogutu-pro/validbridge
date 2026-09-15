@@ -2,11 +2,11 @@ import { Callout } from 'nextra/components'
 
 # Configuration Overview
 
-LearnHouse uses environment variables as its primary configuration method. When you run `learnhouse setup`, the CLI generates a `.env` file with all the necessary variables based on your choices.
+ValidBridge uses environment variables as its primary configuration method. Copy `.env.example` to `.env` and edit it with all the necessary variables for your environment.
 
 ## Configuration Methods
 
-LearnHouse supports two configuration methods:
+ValidBridge supports two configuration methods:
 
 1. **Environment variables** (via `.env` file) -- the primary and recommended method
 2. **Configuration file** (`config.yaml`) -- an alternative for advanced users
@@ -20,13 +20,13 @@ If both are present, environment variables always take precedence over values de
 You can modify your configuration at any time using the CLI:
 
 ```bash
-learnhouse config --edit
+validbridge config --edit
 ```
 
 Alternatively, edit the `.env` file directly and restart services:
 
 ```bash
-learnhouse restart
+validbridge restart
 ```
 
 ## Configuration Sections

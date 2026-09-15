@@ -2,14 +2,13 @@ import { Callout } from 'nextra/components'
 
 # Development Environment Setup
 
-The LearnHouse CLI provides a streamlined way to set up and run the entire development environment with a single command.
+This guide walks you through running the ValidBridge development environment from source.
 
 ## Prerequisites
 
 Make sure you have the following installed before proceeding:
 
 - **Docker** (with Docker Compose v2)
-- **Node.js 18+**
 - **[Bun](https://bun.sh/)** — used to install and run the web and collab workspaces
 - **[uv](https://docs.astral.sh/uv/)** — used to manage and run the Python API
 
@@ -17,31 +16,50 @@ Make sure you have the following installed before proceeding:
 Make sure Docker has at least **4GB of RAM** allocated. You can check and adjust this in Docker Desktop under Settings &gt; Resources.
 </Callout>
 
-<Callout type="info">
-`npx learnhouse dev` runs `bun install` and `uv sync` to install project dependencies, but it does **not** install `bun` or `uv` themselves — install them on your host first.
-</Callout>
-
 ## Setup Steps
 
-### 1. Clone the Repository and Start Development
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/learnhouse/learnhouse && cd learnhouse && npx learnhouse dev
+git clone https://github.com/pogutu-pro/validbridge.git
+cd validbridge
 ```
 
-That single command handles everything:
+### 2. Start backing services
 
-- **Starts backing services** -- PostgreSQL and Redis are launched via Docker Compose.
-- **Installs dependencies** -- Python dependencies are installed via `uv` and JavaScript dependencies via `bun`, all automatically.
-- **Starts the API** -- The FastAPI backend starts on port 1338 with hot reload.
-- **Starts the frontend** -- The Next.js development server starts with `--turbopack` and hot reload.
-- **Starts the collaboration server** -- The Hocuspocus collaboration server starts via `tsx watch`.
+PostgreSQL and Redis are launched via Docker Compose:
 
-All services are coordinated automatically so you do not need to manage them individually.
+```bash
+docker compose up -d db redis
+```
+
+### 3. Install dependencies
+
+```bash
+# Python API
+cd apps/api && uv sync && cd ../..
+
+# Web and collab workspaces
+cd apps/web && bun install && cd ../..
+cd apps/collab && bun install && cd ../..
+```
+
+### 4. Start the services
+
+Run each service in its own terminal:
+
+```bash
+# API — FastAPI backend with hot reload (port 1338)
+cd apps/api && uv run python app.py
+
+# Frontend — Next.js development server (port 3000)
+cd apps/web && bun run dev
+
+# Collaboration server — Hocuspocus (port 4000)
+cd apps/collab && bun run dev
+```
 
 ## Accessing the Application
-
-Once `npx learnhouse dev` is running, you can access:
 
 | Service | URL |
 | --- | --- |
@@ -55,10 +73,14 @@ The Swagger UI at `/docs` is only available in development mode. Production inst
 
 ## Stopping the Environment
 
-Press `Ctrl+C` in the terminal where `npx learnhouse dev` is running to stop all services.
+Press `Ctrl+C` in each service terminal to stop it, then stop the backing services:
+
+```bash
+docker compose down
+```
 
 ## Troubleshooting
 
 - **Port conflicts** -- Make sure ports 3000 (web), 1338 (API), 4000 (collab), 5432 (Postgres), and 6379 (Redis) are not in use by other applications.
-- **Docker not running** -- Ensure the Docker daemon is started before running `npx learnhouse dev`.
-- **Dependency issues** -- The CLI installs all dependencies automatically. If you encounter issues, try deleting `node_modules` and `.venv` directories and re-running `npx learnhouse dev`.
+- **Docker not running** -- Ensure the Docker daemon is started before running `docker compose up`.
+- **Dependency issues** -- If you encounter issues, try deleting `node_modules` and `.venv` directories and reinstalling.

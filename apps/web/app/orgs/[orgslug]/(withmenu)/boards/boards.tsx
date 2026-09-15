@@ -11,7 +11,7 @@ import { ChalkboardSimple } from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import { searchMatchesAny } from '@/lib/search/normalize'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import CatalogPagination, { useCatalogPagination } from '@components/Objects/Catalog/CatalogPagination'
 
 interface BoardsPublicClientProps {
@@ -151,7 +151,7 @@ export default function BoardsPublicClient({
 }
 
 function PublicBoardCard({ board, orgUuid, fromSearch }: { board: any; orgUuid: string; fromSearch: boolean }) {
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const thumbnailImage = board.thumbnail_image
     ? getBoardThumbnailMediaDirectory(orgUuid, board.board_uuid, board.thumbnail_image)
     : '/empty_thumbnail.png'

@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 # Backend Architecture
 
-The LearnHouse backend is a **FastAPI** application written in Python, located at `apps/api` in the project. It serves as the central API layer that handles all business logic and data management.
+The ValidBridge backend is a **FastAPI** application written in Python, located at `apps/api` in the project. It serves as the central API layer that handles all business logic and data management.
 
 ## Technology Stack
 
@@ -66,7 +66,7 @@ Redis is used for:
 FastAPI automatically generates interactive API documentation, but it is only available when running in development mode.
 
 <Callout type="info">
-Swagger UI (`/docs/`) and ReDoc (`/redoc/`) are only accessible when `LEARNHOUSE_DEVELOPMENT_MODE=True` is set. They are disabled in production.
+Swagger UI (`/docs/`) and ReDoc (`/redoc/`) are only accessible when `VALIDBRIDGE_DEVELOPMENT_MODE=True` is set. They are disabled in production.
 </Callout>
 
 ## Directory Structure
@@ -86,11 +86,11 @@ apps/api/
 
 ## Development
 
-The backend runs on **port 1338** by default during local development (configurable via `LEARNHOUSE_PORT`). In production Docker deployments, it runs on port 9000. Install dependencies and run the server:
+The backend runs on **port 1338** by default during local development (configurable via `VALIDBRIDGE_PORT`). In production Docker deployments, it runs on port 9000. Install dependencies and run the server:
 
 ```bash
 uv sync              # install dependencies
 uv run python app.py # start the dev server (which calls uvicorn internally)
 ```
 
-When using the LearnHouse CLI (`learnhouse dev`), the backend starts automatically with hot reload enabled.
+The backend starts with hot reload enabled in development mode.

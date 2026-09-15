@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { Award, ExternalLink, Calendar, Building } from 'lucide-react'
@@ -19,7 +19,7 @@ interface UserCertificatesProps {
 
 const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   const { t, i18n } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
 

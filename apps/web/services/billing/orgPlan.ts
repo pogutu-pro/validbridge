@@ -6,9 +6,9 @@ import "server-only";
 // stripping the @vercel/kv trial-status helper and the email coupling: billing
 // correctness only requires this authenticated internal plan PUT.
 import { getServerAPIUrl } from "@services/config/config";
-import type { LearnHousePlanType } from "./plans";
+import type { ValidBridgePlanType } from "./plans";
 
-export async function updateOrganizationConfigInternally(org_id: any, plan: LearnHousePlanType) {
+export async function updateOrganizationConfigInternally(org_id: any, plan: ValidBridgePlanType) {
   console.log(`[updateOrgConfig] Updating org ${org_id} to plan "${plan}"`);
 
   // The API guard (apps/api/.../orgs/org_plan.py) compares X-Internal-Key to env
@@ -20,11 +20,11 @@ export async function updateOrganizationConfigInternally(org_id: any, plan: Lear
   // mismatch. Fail loud instead: a missing credential is a deploy fault, and it
   // must not read as an authorization failure.
   const internalKey =
-    process.env.CLOUD_INTERNAL_KEY || process.env.LEARNHOUSE_CLOUD_INTERNAL_KEY || "";
+    process.env.CLOUD_INTERNAL_KEY || process.env.VALIDBRIDGE_CLOUD_INTERNAL_KEY || "";
   if (!internalKey) {
     throw new Error(
       "[updateOrgConfig] internal key unset — set CLOUD_INTERNAL_KEY (or " +
-        "LEARNHOUSE_CLOUD_INTERNAL_KEY) on the web deployment to match the API's " +
+        "VALIDBRIDGE_CLOUD_INTERNAL_KEY) on the web deployment to match the API's " +
         "CLOUD_INTERNAL_KEY; the plan write would 403 without it.",
     );
   }

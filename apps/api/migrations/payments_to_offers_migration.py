@@ -26,7 +26,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from sqlmodel import Session, select, create_engine
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 from src.db.usergroups import UserGroup
 from src.db.usergroup_resources import UserGroupResource
@@ -166,7 +166,7 @@ def run_migration(db_session: Session) -> None:
 
 
 if __name__ == "__main__":
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     db_url = config.database_config.database_connection_string
     engine = create_engine(db_url)
 

@@ -10,7 +10,7 @@ import React from 'react'
 import { updateUserGroup } from '@services/usergroups/usergroups'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
@@ -36,7 +36,7 @@ const getValidate = (t: any) => (values: any) => {
 function EditUserGroup(props: EditUserGroupProps) {
     const { t } = useTranslation()
     const org = useOrg() as any;
-    const session = useLHSession() as any
+    const session = useVBSession() as any
     const access_token = session?.data?.tokens?.access_token;
     const queryClient = useQueryClient()
     const [isSubmitting, setIsSubmitting] = React.useState(false)

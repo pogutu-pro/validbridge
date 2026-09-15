@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from migrations.orgconfigs.orgconfigs_migrations import migrate_to_v1_1, migrate_to_v1_2, migrate_v0_to_v1
 from src.core.events.database import get_db_session
 from src.db.organization_config import OrganizationConfig
@@ -23,8 +23,8 @@ def _require_superadmin(current_user: PublicUser):
 
 @router.get(
     "/config",
-    summary="Get LearnHouse runtime config",
-    description="Returns the current LearnHouse configuration with sensitive values redacted. Restricted to superadmin users.",
+    summary="Get ValidBridge runtime config",
+    description="Returns the current ValidBridge configuration with sensitive values redacted. Restricted to superadmin users.",
     responses={
         200: {"description": "Configuration dictionary with secrets redacted"},
         401: {"description": "Authentication required"},
@@ -35,7 +35,7 @@ async def config(
     current_user: PublicUser = Depends(get_authenticated_user),
 ):
     _require_superadmin(current_user)
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     config_dict = config.model_dump()
 
     # Redact sensitive values

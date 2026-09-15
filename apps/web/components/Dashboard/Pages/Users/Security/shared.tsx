@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, ShieldAlert } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { getAPIUrl } from '@services/config/config'
@@ -52,7 +52,7 @@ export type OrgSecurityPolicy = {
   exempt_external_auth: boolean
   // Which sign-in methods this org accepts. The full set = unrestricted.
   allowed_auth_methods: string[]
-  // When off, a central learnhouse.io session can't carry members into this org.
+  // When off, a central validbridge.co.ke session can't carry members into this org.
   allow_central_session_sharing: boolean
 }
 
@@ -193,7 +193,7 @@ const normalizePolicy = (raw: any): OrgSecurityPolicy => ({
 
 export function useOrgSecurityPolicy() {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const currentUserId = session?.data?.user?.id
   const org = useOrg() as any

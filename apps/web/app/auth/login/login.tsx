@@ -10,13 +10,13 @@ import { checkSSOEnabled, redirectToSSOLogin } from '@services/auth/sso'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@components/Contexts/AuthContext'
-import { getLEARNHOUSE_TOP_DOMAIN_VAL, getDeploymentMode, isOnCustomDomain } from '@services/config/config'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { getVALIDBRIDGE_TOP_DOMAIN_VAL, getDeploymentMode, isOnCustomDomain } from '@services/config/config'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useTranslation } from 'react-i18next'
 import { resendVerificationEmail } from '@services/auth/auth'
 import AuthLayout from '@components/Auth/AuthLayout'
 import TurnstileWidget, { useTurnstileRequired, verifyTurnstileToken, type TurnstileWidgetHandle } from '@components/Auth/TurnstileWidget'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { getAllowedAuthMethods } from '@services/auth/authMethods'
 
 interface LoginClientProps {
@@ -26,7 +26,7 @@ interface LoginClientProps {
 const LoginClient = (props: LoginClientProps) => {
   const { t } = useTranslation()
   const { signIn, completeMfaLogin, requestMagicLink } = useAuth()
-  const { track } = useLHAnalytics('public')
+  const { track } = useVBAnalytics('public')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ssoEnabled, setSsoEnabled] = useState(false)
   const [ssoLoading, setSsoLoading] = useState(false)
@@ -34,7 +34,7 @@ const LoginClient = (props: LoginClientProps) => {
   const turnstileRef = React.useRef<TurnstileWidgetHandle>(null)
   const turnstileRequired = useTurnstileRequired()
   const router = useRouter();
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const isAuthenticated = session?.status === 'authenticated'
 
   // The org's allowed sign-in methods. Offering a method the org has turned off
@@ -206,7 +206,7 @@ const LoginClient = (props: LoginClientProps) => {
     track(AnalyticsEvent.LoginGoogleClicked)
     // Store org context in cookies before OAuth redirect
     if (props.org?.slug) {
-      const topDomain = getLEARNHOUSE_TOP_DOMAIN_VAL();
+      const topDomain = getVALIDBRIDGE_TOP_DOMAIN_VAL();
       const isSecure = window.location.protocol === 'https:';
       const secureAttr = isSecure ? '; secure' : '';
       const baseAttributes = `; path=/; SameSite=Lax${secureAttr}`;
@@ -214,8 +214,8 @@ const LoginClient = (props: LoginClientProps) => {
       // from learn.acme.org (Domain not a suffix of host) → the browser drops it
       // and the callback loses org context. Omit the Domain there.
       const domainAttr = (topDomain === 'localhost' || isOnCustomDomain()) ? '' : `; domain=.${topDomain}`;
-      document.cookie = `LH_oauth_orgslug=${props.org.slug}${baseAttributes}${domainAttr}`;
-      document.cookie = `LH_oauth_org_id=${props.org.id}${baseAttributes}${domainAttr}`;
+      document.cookie = `VB_oauth_orgslug=${props.org.slug}${baseAttributes}${domainAttr}`;
+      document.cookie = `VB_oauth_org_id=${props.org.id}${baseAttributes}${domainAttr}`;
     }
     // Use absolute URL with current origin for custom domain support
     signIn('google', { callbackUrl: buildCallbackUrl() });
@@ -439,7 +439,7 @@ const LoginClient = (props: LoginClientProps) => {
     <AuthLayout
       org={props.org}
       welcomeText={t('auth.login_to')}
-      title={t('auth.image_title_login', { defaultValue: 'Welcome back to LearnHouse.' })}
+      title={t('auth.image_title_login', { defaultValue: 'Welcome back to ValidBridge.' })}
       subtitle={t('auth.image_subtitle_login', {
         defaultValue: 'Pick up where you left off — your courses, students, and tools are waiting.',
       })}

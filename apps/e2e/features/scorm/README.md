@@ -6,15 +6,11 @@ player.
 
 ## Requires Enterprise Edition
 
-SCORM is an EE-only feature, so these specs need an **EE** instance (the default
-`npx learnhouse@latest` self-host the suite boots is OSS and has no `/scorm`
-routes). Point the suite at a running EE stack instead of booting one:
+SCORM is an EE-only feature, so these specs need an **EE** instance (the OSS
+stack has no `/scorm` routes). Point the suite at a running EE stack:
 
 ```bash
-# From the repo root, in one terminal — start an isolated EE dev stack:
-learnhouse dev --ee
-
-# Then, against that instance:
+# Start an EE stack, then run the suite against it:
 cd apps/e2e
 E2E_BASE_URL=http://localhost:3000 \
 E2E_ADMIN_EMAIL=<admin email> E2E_ADMIN_PASSWORD=<admin password> \

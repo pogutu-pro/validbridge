@@ -31,8 +31,8 @@ RUN uv sync --frozen --no-dev --no-install-project --no-cache
 COPY . /app
 
 # Remove Enterprise Edition folder for public builds
-ARG LEARNHOUSE_PUBLIC=false
-RUN if [ "$LEARNHOUSE_PUBLIC" = "true" ]; then rm -rf /app/ee; fi
+ARG VALIDBRIDGE_PUBLIC=false
+RUN if [ "$VALIDBRIDGE_PUBLIC" = "true" ]; then rm -rf /app/ee; fi
 
 # Sync again so the lockfile is verified against the copied project
 RUN uv sync --frozen --no-dev --no-cache

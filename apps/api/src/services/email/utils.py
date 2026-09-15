@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 from pydantic import EmailStr
 from fastapi import Request
 import resend
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.email.sender import DEFAULT_SENDER_NAME, format_sender
 
 logger = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ def _is_verified_custom_domain(host: str) -> bool:
 
 def _is_allowed_base_url(url: str) -> bool:
     """Validate that a URL is an allowed origin for email links."""
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     url_stripped = url.rstrip("/")
 
     parsed = urlparse(url_stripped)
@@ -120,7 +120,7 @@ def _is_allowed_base_url(url: str) -> bool:
         if url_stripped == allowed.rstrip("/"):
             return True
 
-    # The platform domain and any org subdomain of it (slug.learnhouse.io).
+    # The platform domain and any org subdomain of it (slug.validbridge.co.ke).
     if req_host in configured_hosts:
         return True
     if base_domain and req_host.endswith(f".{base_domain}"):
@@ -136,8 +136,8 @@ def _is_allowed_base_url(url: str) -> bool:
     if _is_verified_custom_domain(parsed.hostname.lower()):
         return True
 
-    # Check against LEARNHOUSE_PLATFORM_URL (the main platform, e.g. https://www.learnhouse.app)
-    platform_url = os.environ.get("LEARNHOUSE_PLATFORM_URL", "").rstrip("/")
+    # Check against VALIDBRIDGE_PLATFORM_URL (the main platform, e.g. https://www.validbridge.co.ke)
+    platform_url = os.environ.get("VALIDBRIDGE_PLATFORM_URL", "").rstrip("/")
     if platform_url:
         platform_host = (
             (urlparse(platform_url).hostname or "").removeprefix("www.").lower()
@@ -163,11 +163,11 @@ def _configured_frontend_base_url() -> Optional[str]:
     Resolve from explicit config instead; returns None when nothing usable is
     configured, so callers can decide whether that is fatal.
     """
-    platform_url = os.environ.get("LEARNHOUSE_PLATFORM_URL")
+    platform_url = os.environ.get("VALIDBRIDGE_PLATFORM_URL")
     if platform_url:
         return platform_url.rstrip("/")
 
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     scheme = "https" if config.hosting_config.ssl else "http"
     frontend_domain = (config.hosting_config.frontend_domain or "").strip().rstrip("/")
     if frontend_domain and "localhost" not in frontend_domain:
@@ -205,7 +205,7 @@ async def get_org_signup_base_url(
     ``request`` is optional so background jobs can build links too; without
     one, the request-derived fallbacks resolve from config instead.
     """
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
 
     if config.hosting_config.tenancy == "single":
         if request is not None:
@@ -234,12 +234,12 @@ def get_media_base_url(request: Optional[Request] = None) -> str:
     Email HTML can't reference local assets, so an embedded org logo needs an
     absolute, publicly reachable URL. The host that serves ``/content`` is the
     backend/media host — which is normally configured only on the FRONTEND
-    (``NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL`` / ``..._MEDIA_URL``). The backend
+    (``NEXT_PUBLIC_VALIDBRIDGE_BACKEND_URL`` / ``..._MEDIA_URL``). The backend
     doesn't have that value, so resolve it in order:
 
-    1. An explicit backend override (``LEARNHOUSE_MEDIA_URL`` /
-       ``LEARNHOUSE_BACKEND_URL``) — set this if the media host isn't ``api.``.
-    2. The SaaS convention ``{scheme}://api.{domain}`` (e.g. api.learnhouse.io)
+    1. An explicit backend override (``VALIDBRIDGE_MEDIA_URL`` /
+       ``VALIDBRIDGE_BACKEND_URL``) — set this if the media host isn't ``api.``.
+    2. The SaaS convention ``{scheme}://api.{domain}`` (e.g. api.validbridge.co.ke)
        when a real domain is configured.
     3. The request's own host as a last resort (correct for single-tenant /
        self-hosted where API and content share the request origin).
@@ -247,13 +247,13 @@ def get_media_base_url(request: Optional[Request] = None) -> str:
     ``request`` is optional so background jobs can resolve a logo URL; without
     one, step 3 is unavailable and this returns "" rather than guessing.
     """
-    override = os.environ.get("LEARNHOUSE_MEDIA_URL") or os.environ.get(
-        "LEARNHOUSE_BACKEND_URL"
+    override = os.environ.get("VALIDBRIDGE_MEDIA_URL") or os.environ.get(
+        "VALIDBRIDGE_BACKEND_URL"
     )
     if override:
         return override.rstrip("/")
 
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     base_domain = (config.hosting_config.domain or "").strip().rstrip("/")
     if base_domain and "localhost" not in base_domain:
         scheme = "https" if config.hosting_config.ssl else "http"
@@ -270,7 +270,7 @@ def get_org_logo_url(org, request: Optional[Request] = None) -> Optional[str]:
 
     Mirrors the frontend's ``getOrgLogoMediaDirectory`` path shape
     (``content/orgs/{uuid}/logos/{file}``). Returns None so callers fall back
-    to the default LearnHouse mark.
+    to the default ValidBridge mark.
     """
     logo_image = getattr(org, "logo_image", None)
     org_uuid = getattr(org, "org_uuid", None)
@@ -280,7 +280,7 @@ def get_org_logo_url(org, request: Optional[Request] = None) -> Optional[str]:
     if not base:
         # No absolute media host resolvable (no request, nothing configured).
         # A relative src would render broken in every mail client, so fall
-        # back to the default LearnHouse mark instead.
+        # back to the default ValidBridge mark instead.
         return None
     return f"{base}/content/orgs/{org_uuid}/logos/{logo_image}"
 
@@ -401,7 +401,7 @@ def get_base_url_from_request(request: Request) -> str:
 
     # Fall back to configured frontend_domain (preferred over raw request URL
     # which would point to the API server, not the frontend)
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     frontend_domain = config.hosting_config.frontend_domain
     if frontend_domain:
         scheme = "https" if config.hosting_config.ssl else "http"
@@ -437,8 +437,8 @@ def send_email(
     """
     from fastapi import HTTPException
 
-    lh_config = get_learnhouse_config()
-    mailing = lh_config.mailing_config
+    vb_config = get_validbridge_config()
+    mailing = vb_config.mailing_config
     sender = format_sender(
         sender_name,
         mailing.system_email_address,

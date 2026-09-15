@@ -15,7 +15,7 @@ def test_export_path_rejects_symlink_outside_temp_directory(tmp_path, monkeypatc
     export_root.mkdir()
     private = tmp_path / "private.zip"
     private.write_bytes(b"private")
-    export = export_root / "learnhouse-export-example.zip"
+    export = export_root / "validbridge-export-example.zip"
     export.symlink_to(private)
     monkeypatch.setattr(tempfile, "gettempdir", lambda: str(export_root))
 
@@ -27,7 +27,7 @@ def test_export_path_rejects_symlink_outside_temp_directory(tmp_path, monkeypatc
 
 def test_server_created_export_path_is_accepted(tmp_path, monkeypatch):
     monkeypatch.setattr(tempfile, "gettempdir", lambda: str(tmp_path))
-    export = tmp_path / "learnhouse-export-example.zip"
+    export = tmp_path / "validbridge-export-example.zip"
     export.write_bytes(b"archive")
     assert _validated_export_path(str(export)) == str(export.resolve())
 

@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import AuthLayout from '@components/Auth/AuthLayout'
 import { PasswordStrengthIndicator, validatePasswordStrength } from '@components/Auth/PasswordStrengthIndicator'
 import TurnstileWidget, { useTurnstileRequired, verifyTurnstileToken, type TurnstileWidgetHandle } from '@components/Auth/TurnstileWidget'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const validate = (values: any, t: any) => {
     const errors: any = {}
@@ -54,7 +54,7 @@ interface ResetPasswordClientProps {
 
 function ResetPasswordClient({ org }: ResetPasswordClientProps) {
     const { t } = useTranslation();
-    const { track } = useLHAnalytics('public')
+    const { track } = useVBAnalytics('public')
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const searchParams = useSearchParams()
     const reset_code = searchParams.get('resetCode') || ''

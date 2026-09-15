@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { WarningCircle, Globe, FloppyDisk, SpinnerGap } from '@phosphor-icons/react'
 import { updateActivity } from '@services/courses/activities'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import toast from 'react-hot-toast'
 import { toEmbedUrl } from '@/lib/media/embedUrl'
 import { safeExternalUrl } from '@services/security/url'
@@ -14,7 +14,7 @@ interface EmbedActivityProps {
 }
 
 function EmbedActivity({ activity, editable = false, style }: EmbedActivityProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const embedUrl = activity.content?.embed_url || ''
 

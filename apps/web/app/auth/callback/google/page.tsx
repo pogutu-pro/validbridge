@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Loader2, AlertTriangle, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth, validateOAuthState } from '@components/Contexts/AuthContext'
-import { getLEARNHOUSE_DOMAIN_VAL, getLEARNHOUSE_TOP_DOMAIN_VAL, getAPIUrl } from '@services/config/config'
+import { getVALIDBRIDGE_DOMAIN_VAL, getVALIDBRIDGE_TOP_DOMAIN_VAL, getAPIUrl } from '@services/config/config'
 import { getErrorMessage } from '@services/utils/ts/errorMessage'
 
 export default function GoogleCallbackPage() {
@@ -42,7 +42,7 @@ export default function GoogleCallbackPage() {
 
       // Check if we need to bounce to a custom domain origin.
       // When OAuth was initiated from a custom domain (e.g., learn.mozilla.org),
-      // Google redirects to the main domain (dev.learnhouse.io). We detect this
+      // Google redirects to the main domain (dev.validbridge.co.ke). We detect this
       // via returnOrigin in the state and bounce the code+state to the custom domain
       // so CSRF validation and cookie-setting happen on the correct origin.
       try {
@@ -65,7 +65,7 @@ export default function GoogleCallbackPage() {
             const u = new URL(stateData.returnOrigin)
             if (u.protocol === 'http:' || u.protocol === 'https:') {
               const host = u.hostname
-              const topDomain = getLEARNHOUSE_TOP_DOMAIN_VAL()
+              const topDomain = getVALIDBRIDGE_TOP_DOMAIN_VAL()
               const isPlatformHost = !!topDomain && (host === topDomain || host.endsWith(`.${topDomain}`))
               if (isPlatformHost) {
                 bounceOrigin = u.origin
@@ -116,12 +116,12 @@ export default function GoogleCallbackPage() {
         const cookies = document.cookie.split(';')
         for (const cookie of cookies) {
           const [name, value] = cookie.trim().split('=')
-          if (name === 'LH_oauth_org_id' && value) {
+          if (name === 'VB_oauth_org_id' && value) {
             orgId = parseInt(value, 10)
             if (isNaN(orgId)) {
               orgId = undefined
             }
-          } else if (name === 'LH_oauth_invite_code' && value) {
+          } else if (name === 'VB_oauth_invite_code' && value) {
             inviteCode = decodeURIComponent(value)
           }
         }
@@ -132,9 +132,9 @@ export default function GoogleCallbackPage() {
       // Consume the OAuth org-context cookies once read, so a stale org id can't
       // bleed into a later OAuth attempt (both domain-scoped and host-only).
       try {
-        const topDomain = getLEARNHOUSE_TOP_DOMAIN_VAL()
+        const topDomain = getVALIDBRIDGE_TOP_DOMAIN_VAL()
         const domainAttr = topDomain && topDomain !== 'localhost' ? `; domain=.${topDomain}` : ''
-        for (const n of ['LH_oauth_org_id', 'LH_oauth_orgslug', 'LH_oauth_invite_code']) {
+        for (const n of ['VB_oauth_org_id', 'VB_oauth_orgslug', 'VB_oauth_invite_code']) {
           document.cookie = `${n}=; path=/; max-age=0`
           if (domainAttr) document.cookie = `${n}=; path=/; max-age=0${domainAttr}`
         }
@@ -144,7 +144,7 @@ export default function GoogleCallbackPage() {
 
       try {
         // redirect_uri must always match what was sent during authorization (main domain)
-        const domain = getLEARNHOUSE_DOMAIN_VAL()
+        const domain = getVALIDBRIDGE_DOMAIN_VAL()
         const oauthRedirectUri = `${window.location.protocol}//${domain}/auth/callback/google`
 
         // Exchange code for tokens with our backend

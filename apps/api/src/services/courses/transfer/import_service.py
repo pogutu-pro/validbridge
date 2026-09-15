@@ -199,7 +199,7 @@ async def analyze_import_package(
     db_session: AsyncSession,
 ) -> ImportAnalysisResponse:
     """
-    Analyze a LearnHouse course export package.
+    Analyze a ValidBridge course export package.
     Returns list of courses and stores package temporarily.
     """
     # Verify organization exists
@@ -347,10 +347,10 @@ async def analyze_import_package(
             manifest = json.load(f)
 
         # Validate manifest format
-        if manifest.get("format") != "learnhouse-course-export":
+        if manifest.get("format") != "validbridge-course-export":
             raise HTTPException(
                 status_code=400,
-                detail="Invalid package: Not a LearnHouse course export"
+                detail="Invalid package: Not a ValidBridge course export"
             )
 
         version = manifest.get("version", "1.0.0")

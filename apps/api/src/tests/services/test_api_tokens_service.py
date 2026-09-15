@@ -54,7 +54,7 @@ async def _make_token(db, org, **overrides):
         token_uuid=overrides.pop("token_uuid", "apitoken_test"),
         name=overrides.pop("name", "Test Token"),
         description=overrides.pop("description", "desc"),
-        token_prefix=overrides.pop("token_prefix", "lh_test"),
+        token_prefix=overrides.pop("token_prefix", "vb_test"),
         token_hash=overrides.pop("token_hash", "token_hash"),
         org_id=overrides.pop("org_id", org.id),
         created_by_user_id=overrides.pop("created_by_user_id", 1),
@@ -76,10 +76,10 @@ class TestTokenHelpersAndValidation:
         with patch("src.services.api_tokens.api_tokens.secrets.token_urlsafe", return_value="abc123"):
             full_token, prefix, token_hash = generate_api_token()
 
-        assert full_token == "lh_abc123"
-        assert prefix == "lh_abc123"
+        assert full_token == "vb_abc123"
+        assert prefix == "vb_abc123"
         assert verify_token(full_token, token_hash) is True
-        assert verify_token("lh_other", token_hash) is False
+        assert verify_token("vb_other", token_hash) is False
 
     def test_rights_getitem(self):
         """Covers Rights.__getitem__ (src/db/roles.py line 36 via DashboardPermission)."""
@@ -169,9 +169,9 @@ class TestApiTokenLifecycle:
         ), patch(
             "src.services.api_tokens.api_tokens.generate_api_token",
             side_effect=[
-                ("lh_created_one", "lh_created_o", "hash_created_one"),
-                ("lh_created_two", "lh_created_t", "hash_created_two"),
-                ("lh_regenerated", "lh_regenera", "hash_regenerated"),
+                ("vb_created_one", "vb_created_o", "hash_created_one"),
+                ("vb_created_two", "vb_created_t", "hash_created_two"),
+                ("vb_regenerated", "vb_regenera", "hash_regenerated"),
             ],
         ), patch(
             "src.services.api_tokens.api_tokens.validate_rights_structure",
@@ -207,7 +207,7 @@ class TestApiTokenLifecycle:
                 org,
                 token_uuid="apitoken_manual",
                 name="Manual Token",
-                token_prefix="lh_manual",
+                token_prefix="vb_manual",
                 token_hash="hash_manual",
                 creation_date=str(datetime.now() + timedelta(minutes=1)),
                 update_date=str(datetime.now() + timedelta(minutes=1)),
@@ -251,9 +251,9 @@ class TestApiTokenLifecycle:
                     admin_user,
                 )
 
-        assert created.token == "lh_created_one"
+        assert created.token == "vb_created_one"
         assert created.name == "Primary Token"
-        assert second.token == "lh_created_two"
+        assert second.token == "vb_created_two"
         assert listed[0].token_uuid == manual_token.token_uuid
         assert {listed[1].token_uuid, listed[2].token_uuid} == {
             created.token_uuid,
@@ -263,7 +263,7 @@ class TestApiTokenLifecycle:
         assert updated.name == "Updated Token"
         assert updated.rights["courses"]["action_create"] is True
         assert revoked == {"message": "API token revoked successfully"}
-        assert regenerated.token == "lh_regenerated"
+        assert regenerated.token == "vb_regenerated"
         assert revoked_exc.value.status_code == 400
 
     @pytest.mark.asyncio
@@ -280,7 +280,7 @@ class TestApiTokenLifecycle:
             org,
             token_uuid="apitoken_rights_obj",
             name="Rights Obj Token",
-            token_prefix="lh_ro",
+            token_prefix="vb_ro",
             token_hash="hash_ro",
             rights=rights_payload,
         )
@@ -327,7 +327,7 @@ class TestApiTokenLifecycle:
             org,
             name="Existing Token",
             token_uuid="apitoken_existing",
-            token_prefix="lh_exist",
+            token_prefix="vb_exist",
             token_hash="hash_existing",
         )
 
@@ -417,7 +417,7 @@ class TestApiTokenLifecycle:
 class TestValidateApiTokenForAuth:
     @pytest.mark.asyncio
     async def test_validate_api_token_for_auth_success_and_edge_paths(self, db, org):
-        valid_token = "lh_valid_tkn"
+        valid_token = "vb_valid_tkn"
         valid = await _make_token(
             db,
             org,
@@ -426,7 +426,7 @@ class TestValidateApiTokenForAuth:
             token_prefix=valid_token[:12],
             expires_at=(datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
         )
-        inactive_token = "lh_inactiv_a"
+        inactive_token = "vb_inactiv_a"
         _inactive = await _make_token(
             db,
             org,
@@ -435,7 +435,7 @@ class TestValidateApiTokenForAuth:
             token_prefix=inactive_token[:12],
             is_active=False,
         )
-        expired_token = "lh_expired_a"
+        expired_token = "vb_expired_a"
         _expired = await _make_token(
             db,
             org,
@@ -444,7 +444,7 @@ class TestValidateApiTokenForAuth:
             token_prefix=expired_token[:12],
             expires_at=(datetime.now(timezone.utc) - timedelta(days=1)).isoformat(),
         )
-        malformed_token = "lh_malformed"
+        malformed_token = "vb_malformed"
         malformed = await _make_token(
             db,
             org,
@@ -455,7 +455,7 @@ class TestValidateApiTokenForAuth:
         )
 
         assert await validate_api_token_for_auth("bad_prefix", db) is None
-        assert await validate_api_token_for_auth("lh_missing", db) is None
+        assert await validate_api_token_for_auth("vb_missing", db) is None
         assert await validate_api_token_for_auth(inactive_token, db) is None
         assert await validate_api_token_for_auth(expired_token, db) is None
 
@@ -507,7 +507,7 @@ class TestUpdateApiTokenRightsObject:
             org,
             token_uuid="apitoken_rights_dump",
             name="Rights Dump Token",
-            token_prefix="lh_rdump",
+            token_prefix="vb_rdump",
             token_hash="hash_rdump",
             rights=_token_rights(),
         )

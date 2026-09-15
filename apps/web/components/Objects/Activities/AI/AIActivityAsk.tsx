@@ -1,4 +1,4 @@
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import {
   sendActivityAIChatMessageStream,
   startActivityAIChatSessionStream,
@@ -8,8 +8,8 @@ import { AlertTriangle, BadgeInfo, NotebookTabs, Maximize2, Minimize2, PanelRigh
 import { motion, AnimatePresence } from 'motion/react'
 import { FlaskConical, MessageCircle, X } from 'lucide-react'
 import Image from 'next/image'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
-import learnhouseAI_logo_black from 'public/learnhouse_ai_black_logo.png'
+import validbridgeAI_icon from 'public/validbridge_ai.png'
+import validbridgeAI_logo_black from 'public/validbridge_ai_black.png'
 import React, { useEffect, useRef } from 'react'
 import {
   AIChatBotStateTypes,
@@ -65,7 +65,7 @@ function AIActivityAsk(props: AIActivityAskProps) {
               <Image
                 className="outline outline-1 outline-neutral-200/20 rounded-md"
                 width={20}
-                src={learnhouseAI_icon}
+                src={validbridgeAI_icon}
                 alt=""
               />
             </i>{' '}
@@ -89,7 +89,7 @@ type ActivityChatMessageBoxProps = {
 
 function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token;
   const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
   const dispatchAIChatBot = useAIChatBotDispatch() as any
@@ -332,7 +332,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                     className={`outline outline-1 outline-neutral-200/20 rounded-lg ${isInputDisabled ? 'animate-pulse' : ''
                       }`}
                     width={24}
-                    src={learnhouseAI_icon}
+                    src={validbridgeAI_icon}
                     alt=""
                   />
                   <span className="text-sm font-semibold text-white/70">
@@ -407,17 +407,17 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                         </div>
                         <div className="flex items-center space-x-1.5 px-2 py-2">
                           <motion.span
-                            className="w-2 h-2 bg-purple-400/80 rounded-full"
+                            className="w-2 h-2 bg-orange-400/80 rounded-full"
                             animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1, 0.85] }}
                             transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
                           />
                           <motion.span
-                            className="w-2 h-2 bg-purple-400/80 rounded-full"
+                            className="w-2 h-2 bg-orange-400/80 rounded-full"
                             animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1, 0.85] }}
                             transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
                           />
                           <motion.span
-                            className="w-2 h-2 bg-purple-400/80 rounded-full"
+                            className="w-2 h-2 bg-orange-400/80 rounded-full"
                             animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1, 0.85] }}
                             transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
                           />
@@ -603,7 +603,7 @@ const AIMessagePlaceHolder = (props: {
   sendMessage: any
   isFullscreen?: boolean
 }) => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
   const { t } = useTranslation()
 
@@ -627,7 +627,7 @@ const AIMessagePlaceHolder = (props: {
             <Image
               width={100}
               className="mx-auto"
-              src={learnhouseAI_logo_black}
+              src={validbridgeAI_logo_black}
               alt=""
             />
             <p className="pt-3 text-2xl font-semibold text-white/70 flex justify-center space-x-2 items-center">
@@ -707,7 +707,7 @@ type AISidePanelProps = {
 // Inline sticky side panel that sits next to content
 function AISidePanelInline(props: AISidePanelProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
   const dispatchAIChatBot = useAIChatBotDispatch() as any
@@ -932,7 +932,7 @@ function AISidePanelInline(props: AISidePanelProps) {
               <Image
                 className={`outline outline-1 outline-neutral-200/20 rounded-lg ${isInputDisabled ? 'animate-pulse' : ''}`}
                 width={24}
-                src={learnhouseAI_icon}
+                src={validbridgeAI_icon}
                 alt=""
               />
               <span className="text-sm font-semibold text-white/70">AI</span>
@@ -999,17 +999,17 @@ function AISidePanelInline(props: AISidePanelProps) {
                     </div>
                     <div className="flex items-center space-x-1.5 px-2 py-2">
                       <motion.span
-                        className="w-2 h-2 bg-purple-400/80 rounded-full"
+                        className="w-2 h-2 bg-orange-400/80 rounded-full"
                         animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1, 0.85] }}
                         transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
                       />
                       <motion.span
-                        className="w-2 h-2 bg-purple-400/80 rounded-full"
+                        className="w-2 h-2 bg-orange-400/80 rounded-full"
                         animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1, 0.85] }}
                         transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
                       />
                       <motion.span
-                        className="w-2 h-2 bg-purple-400/80 rounded-full"
+                        className="w-2 h-2 bg-orange-400/80 rounded-full"
                         animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1, 0.85] }}
                         transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
                       />
@@ -1149,7 +1149,7 @@ const AISidePanelPlaceholder = (props: {
   activity_uuid: string
   sendMessage: any
 }) => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
   const { t } = useTranslation()
 
@@ -1172,7 +1172,7 @@ const AISidePanelPlaceholder = (props: {
             <Image
               width={80}
               className="mx-auto"
-              src={learnhouseAI_logo_black}
+              src={validbridgeAI_logo_black}
               alt=""
             />
             <p className="pt-3 text-lg font-semibold text-white/70 flex flex-col justify-center items-center">

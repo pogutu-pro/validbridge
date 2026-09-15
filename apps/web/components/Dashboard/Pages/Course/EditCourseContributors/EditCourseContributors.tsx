@@ -1,5 +1,5 @@
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { bulkAddContributors, bulkRemoveContributors, editContributor, getCourseContributors } from '@services/courses/courses'
@@ -85,7 +85,7 @@ const formatDate = (dateString: string) => {
 
 function EditCourseContributors(_props: EditCourseContributorsProps) {
     const { t } = useTranslation()
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const course = useCourse() as any;
     const { isLoading, courseStructure } = course as any;

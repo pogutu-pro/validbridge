@@ -322,15 +322,15 @@ export default function EmbedBlockComponent({ node, updateAttributes, selected, 
       stopWheel
     >
       {/* Top gradient */}
-      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-violet-50/80 to-transparent rounded-t-2xl pointer-events-none z-0" />
+      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-orange-50/80 to-transparent rounded-t-2xl pointer-events-none z-0" />
 
       <DragHandle onMouseDown={handleDragStart} />
 
       {/* Header with icon + label + actions */}
       <div className="flex items-center px-4 pt-4 pb-0.5 relative z-[1]">
         <div className="flex items-center gap-1.5 flex-1">
-          <div className="w-5 h-5 rounded-md bg-violet-100 flex items-center justify-center">
-            <Code size={10} className="text-violet-500" />
+          <div className="w-5 h-5 rounded-md bg-orange-100 flex items-center justify-center">
+            <Code size={10} className="text-orange-500" />
           </div>
           <span className="text-[9px] font-semibold tracking-wider uppercase select-none text-neutral-400">
             {hasEmbed && !editing && embedType === 'url' ? extractDomain(embedUrl) : t('boards.embed_block.embed')}

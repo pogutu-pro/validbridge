@@ -10,7 +10,7 @@ const LinkedinIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CourseShareProps {
   courseName: string
@@ -19,7 +19,7 @@ interface CourseShareProps {
 
 function CourseShare({ courseName, courseUrl }: CourseShareProps) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const [isOpen, setIsOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)

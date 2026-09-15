@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import { getOffers, updateOffer, archiveOffer } from '@services/payments/offers';
@@ -35,7 +35,7 @@ const editValidationSchema = Yup.object().shape({
 
 function PaymentsOffersPage() {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const queryClient = useQueryClient();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingOfferId, setEditingOfferId] = useState<string | null>(null);
@@ -186,7 +186,7 @@ function PaymentsOffersPage() {
                   </div>
 
                   {offer.payments_group_id && (
-                    <div className="mt-1.5 flex items-center gap-1.5 text-xs text-violet-600">
+                    <div className="mt-1.5 flex items-center gap-1.5 text-xs text-orange-600">
                       <Layers size={12} />
                       <span>Payment Group #{offer.payments_group_id}</span>
                     </div>
@@ -195,7 +195,7 @@ function PaymentsOffersPage() {
                   <div className="mt-2">
                     <button
                       onClick={() => setResourcesPanelOffer(offer)}
-                      className="text-sm flex items-center space-x-1 text-indigo-600 hover:text-indigo-800"
+                      className="text-sm flex items-center space-x-1 text-orange-600 hover:text-orange-800"
                     >
                       <Users size={14} />
                       <span>Manage Resources</span>
@@ -248,7 +248,7 @@ const EditOfferForm = ({
   onCancel: () => void;
 }) => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const queryClient = useQueryClient();
   const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
 

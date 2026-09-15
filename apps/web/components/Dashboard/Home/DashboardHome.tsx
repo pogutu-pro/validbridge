@@ -11,7 +11,7 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useTranslation } from 'react-i18next'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getAPIUrl } from '@services/config/config'
 import { OrgUsageResponse, orgUsageFetcher } from '@services/orgs/usage'
@@ -27,13 +27,13 @@ const PLAN_COLORS: Record<string, { bg: string; text: string }> = {
   free: { bg: 'bg-gray-100', text: 'text-gray-600' },
   oss: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
   standard: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  pro: { bg: 'bg-purple-100', text: 'text-purple-700' },
+  pro: { bg: 'bg-orange-100', text: 'text-orange-700' },
   enterprise: { bg: 'bg-amber-100', text: 'text-amber-700' },
 }
 
 export default function DashboardHome() {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
 
   const token = session?.data?.tokens?.access_token

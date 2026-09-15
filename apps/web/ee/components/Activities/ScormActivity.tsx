@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { getScormContentUrl } from '@services/media/media'
 import { RefreshCw, AlertCircle } from 'lucide-react'
@@ -24,7 +24,7 @@ interface ScormActivityProps {
 
 function ScormActivity({ activity, course }: ScormActivityProps) {
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -347,7 +347,7 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
 
                 // Also inject stylesheet for other elements
                 const nestedStyle = nestedIframe.contentDocument.createElement('style')
-                nestedStyle.id = 'learnhouse-scorm-styles'
+                nestedStyle.id = 'validbridge-scorm-styles'
                 nestedStyle.textContent = `
                   html, html body, body {
                     margin: 0 !important;
@@ -373,8 +373,8 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
                     height: 0 !important;
                   }
                 `
-                // Remove any existing learnhouse styles first
-                const existing = nestedIframe.contentDocument.getElementById('learnhouse-scorm-styles')
+                // Remove any existing validbridge styles first
+                const existing = nestedIframe.contentDocument.getElementById('validbridge-scorm-styles')
                 if (existing) existing.remove()
                 // Append to end of head for higher cascade priority
                 nestedIframe.contentDocument.head.appendChild(nestedStyle)

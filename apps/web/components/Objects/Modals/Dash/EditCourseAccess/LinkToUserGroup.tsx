@@ -1,6 +1,6 @@
 'use client';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { getUserGroups, linkResourcesToUserGroup } from '@services/usergroups/usergroups';
@@ -21,7 +21,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
     const { t } = useTranslation()
     const course = useCourse() as any
     const org = useOrg() as any
-    const session = useLHSession() as any
+    const session = useVBSession() as any
     const access_token = session?.data?.tokens?.access_token;
     const queryClient = useQueryClient()
     const courseStructure = course.courseStructure

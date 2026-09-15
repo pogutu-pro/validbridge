@@ -62,7 +62,7 @@ class OrgSnapshot:
     sender_name: str = ""
     # Normalized ``#rrggbb`` accent for the CTA button, or None for the default.
     brand_color: Optional[str] = None
-    # Whether the mail carries the "Powered by LearnHouse" line (org watermark).
+    # Whether the mail carries the "Powered by ValidBridge" line (org watermark).
     powered_by: bool = True
 
     created_at: Optional[datetime] = None

@@ -1,6 +1,6 @@
 ---
 title: Let an Agent Build It
-description: Have a coding agent like Claude Code or Cursor build your headless LearnHouse platform for you, using a ready-made, self-contained specification.
+description: Have a coding agent like Claude Code or Cursor build your headless ValidBridge platform for you, using a ready-made, self-contained specification.
 ---
 
 import { Callout, Steps } from 'nextra/components'
@@ -9,7 +9,7 @@ import { Callout, Steps } from 'nextra/components'
 
 If you'd rather not type out every file, hand the work to a coding agent. This page explains how to drive an agent (Claude Code, Cursor, Windsurf, Copilot, etc.) to build the same headless learning platform described in [Do It Yourself](/guides/build-learning-platform/do-it-yourself), using the self-contained **[Agent Spec](/guides/build-learning-platform/agent-spec)**.
 
-The spec is written *for the model*: it states the goal, the exact API contract taken from the LearnHouse codebase, the file layout, the auth rules, and clear acceptance criteria. You supply three facts about your instance and let the agent do the rest.
+The spec is written *for the model*: it states the goal, the exact API contract taken from the ValidBridge codebase, the file layout, the auth rules, and clear acceptance criteria. You supply three facts about your instance and let the agent do the rest.
 
 <Callout type="info">
 This still produces **your** code on **your** machine — the agent is just doing the typing. Review the result the same way you'd review a teammate's PR.
@@ -18,7 +18,7 @@ This still produces **your** code on **your** machine — the agent is just doin
 ## What you'll need
 
 - A coding agent with file-writing and terminal access (e.g. **Claude Code**).
-- A running LearnHouse instance and its API base URL (e.g. `http://localhost:1338/api/v1`).
+- A running ValidBridge instance and its API base URL (e.g. `http://localhost:1338/api/v1`).
 - Your **organization slug** and at least one **public, published course**.
 - Test credentials (an email + password you can sign up with) if you want the agent to verify the authenticated flow.
 

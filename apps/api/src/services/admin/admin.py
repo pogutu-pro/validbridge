@@ -1409,9 +1409,9 @@ async def consume_magic_link_token(
     if jti:
         try:
             import redis as _redis
-            from config.config import get_learnhouse_config as _get_cfg
-            _lh_cfg = _get_cfg()
-            _redis_url = _lh_cfg.redis_config.redis_connection_string
+            from config.config import get_validbridge_config as _get_cfg
+            _vb_cfg = _get_cfg()
+            _redis_url = _vb_cfg.redis_config.redis_connection_string
             if _redis_url:
                 _r = _redis.Redis.from_url(
                     _redis_url, socket_connect_timeout=2, socket_timeout=2

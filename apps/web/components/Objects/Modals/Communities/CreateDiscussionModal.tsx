@@ -3,14 +3,14 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { createDiscussion, DISCUSSION_LABELS } from '@services/communities/discussions'
 import { useMutateDiscussions } from '@components/Hooks/useDiscussions'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { DiscussionEditor } from '@components/Objects/Communities/DiscussionEditor'
 import { EmojiPicker } from '@components/Objects/Communities/EmojiPicker'
 import { Loader2, AlertCircle, MessageSquare, HelpCircle, Lightbulb, Megaphone, Star, Check } from 'lucide-react'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CreateDiscussionModalProps {
   isOpen: boolean
@@ -44,10 +44,10 @@ export function CreateDiscussionModal({
   allowRichContent = false,
 }: CreateDiscussionModalProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const _router = useRouter()
   const mutateDiscussions = useMutateDiscussions()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [title, setTitle] = useState('')

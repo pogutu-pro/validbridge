@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 import importlib
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from fastapi import FastAPI
 from sqlmodel import SQLModel, Session
 from sqlalchemy import event
@@ -48,7 +48,7 @@ def import_all_models():
 # Import all models before creating engine
 import_all_models()
 
-learnhouse_config = get_learnhouse_config()
+validbridge_config = get_validbridge_config()
 
 # Check if we're in test mode
 is_testing = os.getenv("TESTING", "false").lower() == "true"
@@ -59,7 +59,7 @@ if is_testing:
         echo=False,
     )
 else:
-    sql_url = str(learnhouse_config.database_config.sql_connection_string)  # type: ignore
+    sql_url = str(validbridge_config.database_config.sql_connection_string)  # type: ignore
 
     # Ensure we use the asyncpg driver for PostgreSQL
     if sql_url.startswith("postgresql+psycopg2://"):
@@ -98,10 +98,12 @@ else:
         or ":6543/" in sql_url
         or ":6432/" in sql_url
         or "pgbouncer" in sql_url.lower()
-        or os.getenv("LEARNHOUSE_PGBOUNCER", "").lower() in ("1", "true", "yes")
+        or os.getenv("VALIDBRIDGE_PGBOUNCER", "").lower() in ("1", "true", "yes")
     )
 
-    if is_pooled:
+    if "sqlite" in sql_url:
+        engine_kwargs = {}
+    elif is_pooled:
         engine_kwargs = dict(
             pool_pre_ping=True,
             pool_size=5,
@@ -365,7 +367,7 @@ if not is_testing:
 # connections against the pooler that is already out of clients — the outage
 # feeds itself. Retry those, but keep failing fast on permanent errors
 # (bad password, unknown database) where retrying only delays the real signal.
-_STARTUP_CONNECT_ATTEMPTS = int(os.getenv("LEARNHOUSE_DB_STARTUP_ATTEMPTS", "5"))
+_STARTUP_CONNECT_ATTEMPTS = int(os.getenv("VALIDBRIDGE_DB_STARTUP_ATTEMPTS", "5"))
 _STARTUP_CONNECT_BACKOFF_SECONDS = 2.0
 _PERMANENT_CONNECT_ERROR_MARKERS = (
     "password authentication failed",
@@ -421,7 +423,7 @@ async def connect_to_db(app: FastAPI):
             await asyncio.sleep(delay)
 
     app.db_engine = engine  # type: ignore
-    logging.info("LearnHouse database has been started.")
+    logging.info("ValidBridge database has been started.")
 
 
 async def get_db_session() -> AsyncSession:  # type: ignore[override]
@@ -433,5 +435,5 @@ async def close_database(app: FastAPI):
     db_engine = getattr(app, "db_engine", None)
     if db_engine is not None and hasattr(db_engine, "dispose"):
         await db_engine.dispose()
-    logging.info("LearnHouse has been shut down.")
+    logging.info("ValidBridge has been shut down.")
     return app

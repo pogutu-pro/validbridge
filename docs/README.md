@@ -1,34 +1,34 @@
 <p align="center">
-  <a href="https://docs.learnhouse.app">
-    <img alt="LearnHouse" src=".github/images/learnhouse-github.png" width="600" />
+  <a href="https://docs.validbridge.co.ke">
+    <img alt="ValidBridge" src=".github/images/validbridge-github.png" width="600" />
   </a>
 </p>
 
 <p align="center">
-  <strong>LearnHouse Documentation</strong>
+  <strong>ValidBridge Documentation</strong>
 </p>
 
 <p align="center">
-  Official documentation for <a href="https://learnhouse.app">LearnHouse</a>, the open-source learning management system.
+  Official documentation for <a href="https://validbridge.co.ke">ValidBridge</a>, the open-source learning management system.
 </p>
 
 <p align="center">
-  <a href="https://docs.learnhouse.app">docs.learnhouse.app</a>
+  <a href="https://docs.validbridge.co.ke">docs.validbridge.co.ke</a>
 </p>
 
 ---
 
 ## Local Development
 
-This site lives in the [`learnhouse/learnhouse`](https://github.com/learnhouse/learnhouse)
+This site lives in the [`validbridge/validbridge`](https://github.com/pogutu-pro/validbridge)
 monorepo under `docs/`. Run all commands from that directory.
 
 **Prerequisites:** [Bun](https://bun.sh) installed.
 
 ```bash
 # Clone the monorepo and move into the docs app
-git clone https://github.com/learnhouse/learnhouse.git
-cd learnhouse/docs
+git clone https://github.com/pogutu-pro/validbridge.git
+cd validbridge/docs
 
 # Install dependencies
 bun install

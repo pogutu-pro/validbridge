@@ -9,7 +9,7 @@ import { isLocalhost as isLocalhostCheck } from './services/utils/ts/hostUtils'
 //
 // Three runtime behaviors selected by `instance.tenancy`:
 //
-//   1. multi (EE-only):   slug.{LEARNHOUSE_DOMAIN} subdomain detection +
+//   1. multi (EE-only):   slug.{VALIDBRIDGE_DOMAIN} subdomain detection +
 //                         per-org custom domains. The detection logic lives in
 //                         `./ee/services/tenancy/...` and is dynamic-imported
 //                         here — OSS proxy.ts never references subdomain or
@@ -152,14 +152,14 @@ function setOrgCookies(
 ) {
   const domain = cookieDomainFor(instance, resolved.customDomain)
   response.cookies.set({
-    name: 'LH_org',
+    name: 'VB_org',
     value: resolved.slug,
     domain,
     path: '/',
   })
   if (resolved.customDomain) {
     response.cookies.set({
-      name: 'LH_custom_domain',
+      name: 'VB_custom_domain',
       value: resolved.customDomain,
       path: '/',
     })
@@ -168,11 +168,11 @@ function setOrgCookies(
 }
 
 function setInstanceCookies(response: NextResponse, info: InstanceInfo) {
-  response.cookies.set({ name: 'LH_tenancy', value: info.tenancy, path: '/' })
-  response.cookies.set({ name: 'LH_default_org', value: info.default_org_slug, path: '/' })
-  response.cookies.set({ name: 'LH_frontend_domain', value: info.frontend_domain, path: '/' })
-  response.cookies.set({ name: 'LH_top_domain', value: info.top_domain, path: '/' })
-  response.cookies.set({ name: 'LH_mode', value: info.mode, path: '/' })
+  response.cookies.set({ name: 'VB_tenancy', value: info.tenancy, path: '/' })
+  response.cookies.set({ name: 'VB_default_org', value: info.default_org_slug, path: '/' })
+  response.cookies.set({ name: 'VB_frontend_domain', value: info.frontend_domain, path: '/' })
+  response.cookies.set({ name: 'VB_top_domain', value: info.top_domain, path: '/' })
+  response.cookies.set({ name: 'VB_mode', value: info.mode, path: '/' })
   return response
 }
 
@@ -181,7 +181,7 @@ function setInstanceCookies(response: NextResponse, info: InstanceInfo) {
  * Server Components on THIS request. Cookies set in the response only become
  * visible to RSC on the *next* request, so server-side helpers like
  * `getCanonicalUrl` can't rely on them on the first cold load. Reading the
- * `x-lh-*` headers via `next/headers` gives them an immediately-available
+ * `x-vb-*` headers via `next/headers` gives them an immediately-available
  * source of truth.
  */
 function tenantRequestHeaders(
@@ -190,13 +190,13 @@ function tenantRequestHeaders(
   instance: InstanceInfo,
 ): Headers {
   const headers = new Headers(req.headers)
-  headers.set('x-lh-tenancy', instance.tenancy)
-  headers.set('x-lh-org', resolved.slug)
-  headers.set('x-lh-top-domain', instance.top_domain)
-  headers.set('x-lh-frontend-domain', instance.frontend_domain)
-  headers.set('x-lh-mode', instance.mode)
+  headers.set('x-vb-tenancy', instance.tenancy)
+  headers.set('x-vb-org', resolved.slug)
+  headers.set('x-vb-top-domain', instance.top_domain)
+  headers.set('x-vb-frontend-domain', instance.frontend_domain)
+  headers.set('x-vb-mode', instance.mode)
   if (resolved.customDomain) {
-    headers.set('x-lh-custom-domain', resolved.customDomain)
+    headers.set('x-vb-custom-domain', resolved.customDomain)
   }
   return headers
 }
@@ -272,7 +272,7 @@ export default async function proxy(req: NextRequest) {
   // -------------------------------------------------------------------------
   // 1b. Legacy /dashboard/* → hub redirects
   //
-  //    The old platform (learnhouse.app) used /dashboard/{slug}/plan, /dashboard/
+  //    The old platform (validbridge.co.ke) used /dashboard/{slug}/plan, /dashboard/
   //    new, /dashboard/account, etc. Those paths do NOT exist on .io and would
   //    404. Old bookmarks, emails, and — critically — URLs Stripe has already
   //    stored on live checkout sessions can still point here, so permanently map
@@ -334,7 +334,7 @@ export default async function proxy(req: NextRequest) {
   // -------------------------------------------------------------------------
   const authPaths = ['/login', '/signup', '/reset', '/forgot', '/verify-email']
   if (authPaths.includes(pathname)) {
-    const hasSession = !!req.cookies.get('LH_session')?.value
+    const hasSession = !!req.cookies.get('VB_session')?.value
 
     // A logged-in user has no business on /login — bounce them to the hub (the
     // page itself re-verifies, so this is a best-effort UX shortcut).
@@ -451,7 +451,7 @@ export default async function proxy(req: NextRequest) {
     const rawNext = params.get('next')
     params.delete('next')
 
-    const customDomain = req.cookies.get('LH_custom_domain')?.value
+    const customDomain = req.cookies.get('VB_custom_domain')?.value
     const base = customDomain
       ? `${req.nextUrl.protocol}//${customDomain}`
       : req.url
@@ -515,13 +515,13 @@ export default async function proxy(req: NextRequest) {
   // -------------------------------------------------------------------------
   // 10. Apex root (multi tenancy only) — login-first, then org picker.
   //
-  //     The bare apex (learnhouse.io) is NOT org-scoped. An unauthenticated
+  //     The bare apex (validbridge.co.ke) is NOT org-scoped. An unauthenticated
   //     visitor lands on the login page; once signed in they get the /home org
   //     picker and choose an org — which lives on its own subdomain
-  //     ({slug}.learnhouse.io) or custom domain. Org content is ONLY served on
+  //     ({slug}.validbridge.co.ke) or custom domain. Org content is ONLY served on
   //     a subdomain/custom domain, never at the apex. Mirrors the platform's
   //     "log in, then choose an org" flow. We branch on the non-httpOnly
-  //     LH_session marker cookie (best-effort; the page itself re-verifies).
+  //     VB_session marker cookie (best-effort; the page itself re-verifies).
   // -------------------------------------------------------------------------
   if (
     instance.tenancy === 'multi'
@@ -532,7 +532,7 @@ export default async function proxy(req: NextRequest) {
   ) {
     const resolved = await resolveTenant(req, instance)
     if (resolved.source === 'default') {
-      const hasSession = !!req.cookies.get('LH_session')?.value
+      const hasSession = !!req.cookies.get('VB_session')?.value
       const target = hasSession ? `/home${search}` : `/auth/login${search}`
       const requestHeaders = tenantRequestHeaders(req, resolved, instance)
       const response = NextResponse.rewrite(new URL(target, req.url), {

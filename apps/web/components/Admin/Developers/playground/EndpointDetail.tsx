@@ -14,7 +14,7 @@ const METHOD_CLS: Record<HttpMethod, string> = {
   GET: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20',
   POST: 'bg-sky-400/10 text-sky-300 border-sky-400/20',
   PUT: 'bg-amber-400/10 text-amber-300 border-amber-400/20',
-  PATCH: 'bg-violet-400/10 text-violet-300 border-violet-400/20',
+  PATCH: 'bg-orange-400/10 text-orange-300 border-orange-400/20',
   DELETE: 'bg-red-400/10 text-red-300 border-red-400/20',
 }
 

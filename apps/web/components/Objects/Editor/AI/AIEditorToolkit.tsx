@@ -1,5 +1,5 @@
 import React from 'react'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
+import validbridgeAI_icon from 'public/validbridge_ai.png'
 import { motion, AnimatePresence } from 'motion/react'
 import Image from 'next/image'
 import {
@@ -24,7 +24,7 @@ import {
   startActivityAIChatSession,
 } from '@services/ai/ai'
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 
 type AIEditorToolkitProps = {
   editor: Editor
@@ -94,7 +94,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                           <Image
                             className="outline outline-1 outline-neutral-200/20 rounded-lg"
                             width={24}
-                            src={learnhouseAI_icon}
+                            src={validbridgeAI_icon}
                             alt=""
                           />
                           <div className="flex items-center">
@@ -142,7 +142,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
 const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token;
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -453,7 +453,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
           <Image
             className="outline outline-1 outline-neutral-200/20 rounded-lg"
             width={24}
-            src={learnhouseAI_icon}
+            src={validbridgeAI_icon}
             alt=""
           />
         </div>

@@ -37,7 +37,7 @@ from src.services.utils.hls_jobs import _fetch_source  # reuse the R2 download h
 
 logger = logging.getLogger(__name__)
 
-REDIS_QUEUE_KEY = "learnhouse:captions:queue"
+REDIS_QUEUE_KEY = "validbridge:captions:queue"
 JOB_TIMEOUT_SECONDS = 40 * 60
 CONSUMER_POLL_SECONDS = 2
 STALE_PROCESSING_SECONDS = 20 * 60
@@ -54,7 +54,7 @@ _inflight: set = set()
 
 def concurrency() -> int:
     try:
-        return max(1, int(os.environ.get("LEARNHOUSE_CAPTIONS_CONCURRENCY", "1")))
+        return max(1, int(os.environ.get("VALIDBRIDGE_CAPTIONS_CONCURRENCY", "1")))
     except (TypeError, ValueError):
         return 1
 

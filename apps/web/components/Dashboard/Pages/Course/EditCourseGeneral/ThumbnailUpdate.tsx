@@ -3,7 +3,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { updateCourseThumbnail } from '@services/courses/courses'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { ArrowBigUpDash, UploadCloud, Image as ImageIcon, Video } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import React, { useState, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@lib/query/keys'
@@ -31,7 +31,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const course = useCourse() as any
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const org = useOrg() as any
   const queryClient = useQueryClient()
   const [localThumbnail, setLocalThumbnail] = useState<{ file: File; url: string; type: 'image' | 'video' } | null>(null)

@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import '../lib/i18n'
 import { SessionProvider } from '@components/Contexts/AuthContext'
-import LHSessionProvider from '@components/Contexts/LHSessionContext'
+import VBSessionProvider from '@components/Contexts/VBSessionContext'
 import AuthFetchInterceptor from '@components/Contexts/AuthFetchInterceptor'
 import PostHogProvider from '@components/Contexts/PostHogProvider'
 import I18nProvider from '@components/Contexts/I18nContext'
@@ -20,7 +20,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <SessionProvider refetchInterval={600000}>
         <AuthFetchInterceptor />
-        <LHSessionProvider>
+        <VBSessionProvider>
           <PostHogProvider>
             <I18nProvider>
               {/* Inside I18nProvider so it re-renders when the language changes. */}
@@ -32,7 +32,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
               </DirectionProvider>
             </I18nProvider>
           </PostHogProvider>
-        </LHSessionProvider>
+        </VBSessionProvider>
       </SessionProvider>
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>

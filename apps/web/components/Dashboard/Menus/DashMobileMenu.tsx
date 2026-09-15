@@ -33,7 +33,7 @@ import { usePathname } from 'next/navigation'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import UserAvatar from '../../Objects/UserAvatar'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUriWithOrg, getDeploymentMode } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { changeLanguage } from '@/lib/i18n'
@@ -47,7 +47,7 @@ import { useCommandPalette } from '@components/Dashboard/CommandPalette/CommandP
 
 function DashMobileMenu() {
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const { t, i18n } = useTranslation()
   const pathname = usePathname() || ''
   const plan = usePlan()
@@ -93,17 +93,16 @@ function DashMobileMenu() {
           className="flex items-center gap-0.5 px-1.5 py-1.5 bg-[#111113]/90 backdrop-blur-xl rounded-full"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}
         >
-          {/* LearnHouse logo — links to home */}
+          {/* ValidBridge logo — links to home */}
           <Link
             href="/dash"
             className="flex items-center justify-center px-2.5 py-2.5 rounded-full transition-all duration-200"
             aria-label={t('common.home')}
           >
             <img
-              src="/lrn-dash.svg"
-              alt="LearnHouse"
-              className="h-[18px] w-[18px] opacity-60 hover:opacity-90 transition-opacity"
-              style={{ filter: 'brightness(0) invert(1)' }}
+              src="/validbridge-dash.svg"
+              alt="ValidBridge"
+              className="h-[18px] w-[18px] opacity-80 hover:opacity-100 transition-opacity"
             />
           </Link>
           {/* Progressive reveal — more icons as viewport widens */}
@@ -129,13 +128,13 @@ function DashMobileMenu() {
             <PillLink href="/dash/payments/overview" icon={<CurrencyCircleDollar size={18} weight="fill" />} active={isActive('/dash/payments')} className="hidden min-[750px]:flex" />
           )}
 
-          <span className="w-px h-4 bg-white/[0.15] mx-1 shrink-0" />
+          <span className="w-px h-4 bg-[#FFF0E8] mx-1 shrink-0" />
 
           {/* Search */}
           <button
             onClick={openSearch}
             aria-label={t('common.search')}
-            className="p-2.5 rounded-full transition-all duration-200 text-white/60 hover:text-white hover:bg-white/[0.1]"
+            className="p-2.5 rounded-full transition-all duration-200 text-[#737373]/80 hover:text-[#262626] hover:bg-white/[0.1]"
           >
             <MagnifyingGlass size={18} weight="bold" />
           </button>
@@ -147,7 +146,7 @@ function DashMobileMenu() {
             aria-expanded={menuOpen}
             className={cn(
               'p-2.5 rounded-full transition-all duration-200 overflow-hidden',
-              menuOpen ? 'bg-white text-[#111113]' : 'text-white/60 hover:text-white hover:bg-white/[0.1]'
+              menuOpen ? 'bg-white text-[#111113]' : 'text-[#737373]/80 hover:text-[#262626] hover:bg-white/[0.1]'
             )}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -171,7 +170,7 @@ function DashMobileMenu() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-[9997] bg-black/50 backdrop-blur-[3px]"
+              className="fixed inset-0 z-[9997] bg-[#F8F7F2]/50 backdrop-blur-[3px]"
               onClick={close}
             />
 
@@ -194,20 +193,20 @@ function DashMobileMenu() {
                     <OrgSquareLogo org={org} wideInsetClassName="p-0.5" fallback={null} />
                   </div>
                 ) : (
-                  <div className="h-7 w-7 flex items-center justify-center bg-white/[0.06] rounded-lg">
-                    <img src="/lrn-dash.svg" alt="LearnHouse" className="h-4 w-4" style={{ filter: 'brightness(0) invert(1)' }} />
+                  <div className="h-7 w-7 flex items-center justify-center bg-[#FFF0E8] rounded-lg">
+                    <img src="/validbridge-dash.svg" alt="ValidBridge" className="h-4 w-4" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate leading-none mb-0.5">{org?.name}</p>
+                  <p className="text-sm font-semibold text-[#262626] truncate leading-none mb-0.5">{org?.name}</p>
                   <p className={cn(
                     'text-[10px] font-medium',
                     mode === 'ee' ? 'text-amber-400' :
                     mode === 'oss' ? 'text-green-400' :
                     plan === 'enterprise' ? 'text-amber-400' :
-                    plan === 'pro' ? 'text-purple-400' :
+                    plan === 'pro' ? 'text-orange-400' :
                     plan === 'standard' ? 'text-blue-400' :
-                    'text-white/30'
+                    'text-[#737373]/60'
                   )}>{planLabel}</p>
                 </div>
               </div>
@@ -237,19 +236,19 @@ function DashMobileMenu() {
                 {/* Language picker */}
                 <button
                   onClick={() => setLangExpanded(v => !v)}
-                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
+                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-[#737373]/70 hover:text-[#262626]/80 hover:bg-white/[0.05] transition-all"
                 >
                   <Globe size={15} weight="fill" />
                   <span className="text-sm font-medium flex-1 text-start">{t('common.language')}</span>
                   <CaretDown size={10} weight="bold" className={cn('transition-transform', langExpanded && 'rotate-180')} />
                 </button>
                 {langExpanded && (
-                  <div className="ms-2 ps-3 border-s border-white/[0.05] space-y-px">
+                  <div className="ms-2 ps-3 border-s border-[#E7E5E4] space-y-px">
                     {AVAILABLE_LANGUAGES.map(lang => (
                       <button
                         key={lang.code}
                         onClick={() => { changeLanguage(lang.code); setLangExpanded(false) }}
-                        className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-sm text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
+                        className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-sm text-[#737373]/70 hover:text-[#262626]/80 hover:bg-white/[0.05] transition-all"
                       >
                         <span className="font-medium">{lang.nativeName}</span>
                         {i18n.language.split('-')[0] === lang.code && <Check size={11} weight="bold" className="text-green-500" />}
@@ -258,21 +257,21 @@ function DashMobileMenu() {
                   </div>
                 )}
 
-                <a href="https://docs.learnhouse.app" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
+                <a href="https://docs.validbridge.co.ke" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-[#737373]/70 hover:text-[#262626]/80 hover:bg-white/[0.05] transition-all"
                 >
                   <Book size={15} weight="fill" />
                   <span className="text-sm font-medium">{t('common.help_menu.documentation')}</span>
                 </a>
-                <a href="https://discord.gg/learnhouse" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
+                <a href="https://discord.gg/your-invite-link" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-[#737373]/70 hover:text-[#262626]/80 hover:bg-white/[0.05] transition-all"
                 >
                   <DiscordIcon size={15} />
                   <span className="text-sm font-medium">{t('common.help_menu.discord')}</span>
                 </a>
                 <button
                   onClick={() => { setFeedbackModalOpen(true); close() }}
-                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
+                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-[#737373]/70 hover:text-[#262626]/80 hover:bg-white/[0.05] transition-all"
                 >
                   <ChatCircleDots size={15} weight="fill" />
                   <span className="text-sm font-medium">{t('common.help_menu.report_feedback')}</span>
@@ -285,13 +284,13 @@ function DashMobileMenu() {
                 <div className="flex items-center gap-3">
                   <UserAvatar width={28} rounded="rounded-full" shadow="shadow-none" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white/90 truncate leading-none mb-0.5">{session?.data?.user?.username}</p>
-                    <p className="text-[10px] text-white/30 truncate">{session?.data?.user?.email}</p>
+                    <p className="text-sm font-semibold text-[#262626]/90 truncate leading-none mb-0.5">{session?.data?.user?.username}</p>
+                    <p className="text-[10px] text-[#737373]/60 truncate">{session?.data?.user?.email}</p>
                   </div>
                   <button
                     onClick={logOutUI}
                     aria-label={t('user.sign_out')}
-                    className="p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-white/[0.05] transition-all"
+                    className="p-1.5 rounded-lg text-[#737373]/60 hover:text-red-400 hover:bg-white/[0.05] transition-all"
                   >
                     <SignOut size={14} weight="fill" data-dir-flip />
                   </button>
@@ -329,7 +328,7 @@ const PillLink = ({
     href={href}
     className={cn(
       'flex items-center justify-center p-2.5 rounded-full transition-all duration-200',
-      active ? 'bg-white/[0.15] text-white' : 'text-white/50 hover:text-white hover:bg-white/[0.08]',
+      active ? 'bg-[#FFF0E8] text-[#262626]' : 'text-[#737373]/80 hover:text-[#262626] hover:bg-black/[0.04]',
       className
     )}
   >
@@ -356,7 +355,7 @@ const PanelItem = ({
     aria-current={active ? 'page' : undefined}
     className={cn(
       'relative flex items-center w-full rounded-lg px-2.5 py-2 gap-2 transition-all',
-      active ? 'text-white bg-white/[0.08]' : 'text-white/50 hover:text-white hover:bg-white/[0.06]'
+      active ? 'text-[#262626] bg-[#FFF0E8]' : 'text-[#737373]/80 hover:text-[#262626] hover:bg-black/[0.04]'
     )}
   >
     {active && (

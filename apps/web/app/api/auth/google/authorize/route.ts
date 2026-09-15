@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const clientId = process.env.LEARNHOUSE_GOOGLE_CLIENT_ID
+    const clientId = process.env.VALIDBRIDGE_GOOGLE_CLIENT_ID
     if (!clientId) {
       return NextResponse.json(
         { error: 'Google OAuth not configured' },

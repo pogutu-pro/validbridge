@@ -164,7 +164,7 @@ class TestInternalKeysNotLeaked:
         await rt.commit_scorm_data(None, act.activity_uuid,
                                    {"cmi.core.session_time": "00:00:30"}, admin_user, db)
         again = await rt.initialize_scorm_session(None, act.activity_uuid, admin_user, db)
-        leaked = [k for k in again["cmi_data"] if k.startswith("_lh_")]
+        leaked = [k for k in again["cmi_data"] if k.startswith("_vb_")]
         assert leaked == [], f"internal keys leaked to content: {leaked}"
 
 
@@ -229,7 +229,7 @@ class TestRuntimeAuthorization:
 
 
 class TestCompletionSyncsToTrail:
-    """P1: finishing a SCORM activity must credit LearnHouse course progress."""
+    """P1: finishing a SCORM activity must credit ValidBridge course progress."""
 
     def _patch_trail_side_effects(self):
         return (

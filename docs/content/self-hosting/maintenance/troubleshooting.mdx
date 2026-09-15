@@ -2,28 +2,28 @@ import { Callout } from 'nextra/components'
 
 # Troubleshooting
 
-This guide covers common issues with self-hosted LearnHouse instances and how to resolve them.
+This guide covers common issues with self-hosted ValidBridge instances and how to resolve them.
 
 ## First Step: Run Diagnostics
 
 Before diving into specific issues, run the built-in diagnostics:
 
 ```bash
-learnhouse doctor
+validbridge doctor
 ```
 
 This checks Docker availability, container health, port conflicts, DNS resolution, and disk space. It will often identify the root cause of problems automatically.
 
 ## Services Not Starting
 
-**Symptoms:** `learnhouse start` fails, or containers are stopped or restarting.
+**Symptoms:** `validbridge start` fails, or containers are stopped or restarting.
 
 **Common causes:**
 
 - **Docker is not running.** Verify Docker is running with `docker info`. Start the Docker daemon if needed.
-- **Insufficient memory.** LearnHouse requires at least 2 GB of RAM. Check available memory with `free -m` (Linux) or Activity Monitor (macOS).
-- **Port conflicts.** Another service may be using port 80 or 443. Check with `lsof -i :80` and stop the conflicting service. `learnhouse doctor` will also detect port conflicts.
-- **Corrupted configuration.** Re-run `learnhouse setup` to regenerate configuration files.
+- **Insufficient memory.** ValidBridge requires at least 2 GB of RAM. Check available memory with `free -m` (Linux) or Activity Monitor (macOS).
+- **Port conflicts.** Another service may be using port 80 or 443. Check with `lsof -i :80` and stop the conflicting service. `validbridge doctor` will also detect port conflicts.
+- **Corrupted configuration.** Re-run `validbridge setup` to regenerate configuration files.
 
 ## Database Connection Errors
 
@@ -33,12 +33,12 @@ This checks Docker availability, container health, port conflicts, DNS resolutio
 
 1. Run diagnostics to check container health:
    ```bash
-   learnhouse doctor
+   validbridge doctor
    ```
 
 2. Check database logs:
    ```bash
-   learnhouse logs
+   validbridge logs
    ```
    Look for log lines from the `db` container.
 
@@ -60,7 +60,7 @@ lsof -i :80
 lsof -i :443
 ```
 
-Stop the conflicting service, or reconfigure LearnHouse to use a different port by re-running `learnhouse setup`.
+Stop the conflicting service, or reconfigure ValidBridge to use a different port by re-running `validbridge setup`.
 
 ## Storage Permission Errors
 
@@ -73,7 +73,7 @@ Stop the conflicting service, or reconfigure LearnHouse to use a different port 
 **For S3 storage:**
 
 - Verify your S3 credentials have read and write permissions on the configured bucket.
-- Check that the bucket name (`LEARNHOUSE_S3_API_BUCKET_NAME`) and endpoint URL (`LEARNHOUSE_S3_API_ENDPOINT_URL`) are correct in your `.env` file.
+- Check that the bucket name (`VALIDBRIDGE_S3_API_BUCKET_NAME`) and endpoint URL (`VALIDBRIDGE_S3_API_ENDPOINT_URL`) are correct in your `.env` file.
 - Test connectivity to the S3 endpoint from the server.
 
 ## Authentication Issues
@@ -81,7 +81,7 @@ Stop the conflicting service, or reconfigure LearnHouse to use a different port 
 **Symptoms:** Users cannot log in, or sessions expire immediately.
 
 - Verify `NEXTAUTH_SECRET` is set and has not changed since the last restart. Changing the secret invalidates all existing sessions.
-- Verify `LEARNHOUSE_COOKIE_DOMAIN` matches your actual domain. Incorrect cookie domain prevents authentication from working.
+- Verify `VALIDBRIDGE_COOKIE_DOMAIN` matches your actual domain. Incorrect cookie domain prevents authentication from working.
 - If using SSL, ensure `NEXTAUTH_URL` uses `https://`.
 
 ## Performance Issues
@@ -90,17 +90,17 @@ Stop the conflicting service, or reconfigure LearnHouse to use a different port 
 
 1. Run diagnostics:
    ```bash
-   learnhouse doctor
+   validbridge doctor
    ```
 
 2. Review application logs for errors or slow operations:
    ```bash
-   learnhouse logs
+   validbridge logs
    ```
 
 3. Check resource limits on your containers:
    ```bash
-   learnhouse deployments
+   validbridge deployments
    ```
 
 4. Consider increasing server resources (RAM, CPU) if usage is consistently high.
@@ -117,22 +117,22 @@ If you need to start fresh:
 
 ```bash
 # Back up current data (optional)
-learnhouse backup
+validbridge backup
 
 # Stop all services
-learnhouse stop
+validbridge stop
 
 # Re-run setup
-learnhouse setup
+validbridge setup
 
 # Start fresh
-learnhouse start
+validbridge start
 ```
 
 ## Getting Help
 
 If you cannot resolve an issue using this guide:
 
-1. Run `learnhouse doctor` and include the output in your report.
-2. Check the [LearnHouse GitHub issues](https://github.com/learnhouse/learnhouse/issues) for known problems and solutions.
+1. Run `validbridge doctor` and include the output in your report.
+2. Check the [ValidBridge GitHub issues](https://github.com/pogutu-pro/validbridge/issues) for known problems and solutions.
 3. Open a new issue with details about your problem, including relevant log output and your environment (OS, Docker version, RAM).

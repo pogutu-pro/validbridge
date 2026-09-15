@@ -270,20 +270,20 @@
      proportions mid-sentence.
 
      `!important` is required, not defensive: the org's custom font is applied
-     as an inline style on .lh-org-font-root, and an inline declaration beats
+     as an inline style on .vb-org-font-root, and an inline declaration beats
      any normal rule regardless of specificity. Monospace is unaffected —
      code, pre and the editors set font-family on their own elements, and
      cascade contests only happen element by element. */
   [dir='rtl'],
   [dir='rtl'] body,
-  [dir='rtl'] .lh-org-font-root,
+  [dir='rtl'] .vb-org-font-root,
   [dir='rtl'] input,
   [dir='rtl'] textarea,
   [dir='rtl'] select,
   [dir='rtl'] button,
   :lang(ar),
   :lang(ar) body,
-  :lang(ar) .lh-org-font-root {
+  :lang(ar) .vb-org-font-root {
     font-family: var(--font-arabic), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   }
 
@@ -379,26 +379,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --background: 50 30% 96.1%;
+    --foreground: 0 0% 14.9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 0 0% 14.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
+    --popover-foreground: 0 0% 14.9%;
+    --primary: 16 100% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 50 20% 94%;
+    --secondary-foreground: 0 0% 14.9%;
+    --muted: 50 20% 94%;
     --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --accent: 21 100% 95%;
+    --accent-foreground: 16 100% 45%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
+    --border: 20 6% 90%;
+    --input: 20 6% 90%;
+    --ring: 16 100% 56%;
+    --chart-1: 16 100% 56%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
@@ -432,30 +432,30 @@
     --z-max: 9999;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 50 30% 96.1%;
+    --foreground: 0 0% 14.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 14.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 14.9%;
+    --primary: 16 100% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 50 20% 94%;
+    --secondary-foreground: 0 0% 14.9%;
+    --muted: 50 20% 94%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 21 100% 95%;
+    --accent-foreground: 16 100% 45%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
+    --border: 20 6% 90%;
+    --input: 20 6% 90%;
+    --ring: 16 100% 56%;
+    --chart-1: 16 100% 56%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;}}
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;}}
 
 @layer base {
   * {
@@ -489,20 +489,20 @@
      proportions mid-sentence.
 
      `!important` is required, not defensive: the org's custom font is applied
-     as an inline style on .lh-org-font-root, and an inline declaration beats
+     as an inline style on .vb-org-font-root, and an inline declaration beats
      any normal rule regardless of specificity. Monospace is unaffected —
      code, pre and the editors set font-family on their own elements, and
      cascade contests only happen element by element. */
   [dir='rtl'],
   [dir='rtl'] body,
-  [dir='rtl'] .lh-org-font-root,
+  [dir='rtl'] .vb-org-font-root,
   [dir='rtl'] input,
   [dir='rtl'] textarea,
   [dir='rtl'] select,
   [dir='rtl'] button,
   :lang(ar),
   :lang(ar) body,
-  :lang(ar) .lh-org-font-root {
+  :lang(ar) .vb-org-font-root {
     font-family: var(--font-arabic), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   }
 
@@ -637,7 +637,7 @@
 
   /* Toasts carry a mix of translated copy and raw English API errors — see
      components/Objects/StyledElements/Toast/Toast.tsx. */
-  .lh-toast {
+  .vb-toast {
     unicode-bidi: plaintext;
     text-align: start;
   }
@@ -701,11 +701,11 @@
   landing) — feels modern without the cartoonish overshoot of a back-out.
   Exit uses a sharp ease-in so the close feels instant, not draggy.
 */
-.lh-modal-content[data-state="open"] {
+.vb-modal-content[data-state="open"] {
   animation: modalEnter 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.lh-modal-content[data-state="closed"] {
+.vb-modal-content[data-state="closed"] {
   animation: modalExit 120ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
@@ -719,11 +719,11 @@
   to   { opacity: 0; }
 }
 
-.lh-modal-overlay[data-state="open"] {
+.vb-modal-overlay[data-state="open"] {
   animation: modalOverlayEnter 160ms ease-out forwards;
 }
 
-.lh-modal-overlay[data-state="closed"] {
+.vb-modal-overlay[data-state="closed"] {
   animation: modalOverlayExit 130ms ease-in forwards;
 }
 

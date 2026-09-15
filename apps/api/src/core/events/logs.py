@@ -9,7 +9,7 @@ async def create_logs_dir():
 
 
 def _log_level() -> int:
-    raw = (os.environ.get("LEARNHOUSE_LOG_LEVEL") or "INFO").strip().upper()
+    raw = (os.environ.get("VALIDBRIDGE_LOG_LEVEL") or "INFO").strip().upper()
     return getattr(logging, raw, logging.INFO)
 
 
@@ -26,14 +26,14 @@ def init_logging() -> None:
     stream handler to the root leaves uvicorn alone and lets everything that
     propagates through.
 
-    No file handler. In a container nothing reads ``logs/learnhouse.log`` and
+    No file handler. In a container nothing reads ``logs/validbridge.log`` and
     it grows until the disk complains; stdout is what the platform collects.
     """
     root = logging.getLogger()
     root.setLevel(_log_level())
 
     already = any(
-        isinstance(h, logging.StreamHandler) and getattr(h, "_learnhouse", False)
+        isinstance(h, logging.StreamHandler) and getattr(h, "_validbridge", False)
         for h in root.handlers
     )
     if already:
@@ -46,7 +46,7 @@ def init_logging() -> None:
             datefmt="%Y-%m-%dT%H:%M:%S",
         )
     )
-    handler._learnhouse = True  # type: ignore[attr-defined]
+    handler._validbridge = True  # type: ignore[attr-defined]
     root.addHandler(handler)
 
     logging.getLogger(__name__).info("Application logging initialised at %s", logging.getLevelName(root.level))

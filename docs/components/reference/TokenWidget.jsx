@@ -23,8 +23,8 @@ export default function TokenWidget({ compact = false }) {
   const apply = () => {
     const value = draft.trim()
     if (!value) return
-    if (!/^lh_[A-Za-z0-9_-]+$/.test(value)) {
-      setWarning('That does not look like an lh_ API token — using it anyway.')
+    if (!/^vb_[A-Za-z0-9_-]+$/.test(value)) {
+      setWarning('That does not look like an vb_ API token — using it anyway.')
     } else {
       setWarning('')
     }
@@ -68,7 +68,7 @@ export default function TokenWidget({ compact = false }) {
         <input
           type={visible ? 'text' : 'password'}
           className="lh-ref-token-input"
-          placeholder="Paste your lh_ API token…"
+          placeholder="Paste your vb_ API token…"
           value={draft}
           autoComplete="off"
           spellCheck={false}

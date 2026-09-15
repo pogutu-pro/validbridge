@@ -24,7 +24,7 @@ import React, { useEffect } from 'react'
 import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { updateAssignment } from '@services/courses/assignments';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import toast from 'react-hot-toast';
@@ -37,7 +37,7 @@ import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';
 import { useMediaQuery } from 'usehooks-ts';
 import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal';
 import { useTranslation } from 'react-i18next';
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics';
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics';
 const AssignmentSubmissionsSubPage = dynamic(() => import('./subpages/AssignmentSubmissionsSubPage'))
 const AssignmentAnalyticsSubPage = dynamic(() => import('./subpages/AssignmentAnalyticsSubPage'))
 
@@ -47,7 +47,7 @@ function AssignmentEdit() {
     const searchParams = useSearchParams()
     const [selectedSubPage, setSelectedSubPage] = React.useState(searchParams.get('subpage') || 'editor')
     const isMobile = useMediaQuery('(max-width: 767px)')
-    const { track } = useLHAnalytics('dashboard')
+    const { track } = useVBAnalytics('dashboard')
 
     useEffect(() => {
         if (selectedSubPage === 'submissions') {
@@ -160,10 +160,10 @@ function BrdCmpx() {
 function PublishingState() {
     const { t } = useTranslation()
     const assignment = useAssignments() as any;
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const queryClient = useQueryClient();
-    const { track } = useLHAnalytics('dashboard');
+    const { track } = useVBAnalytics('dashboard');
     const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
 
     async function updateAssignmentPublishState(assignmentUUID: string) {
@@ -295,7 +295,7 @@ const BADGE_BASE =
     'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ring-1 ring-inset whitespace-nowrap';
 
 const BADGE_VIOLET =
-    'bg-gradient-to-b from-violet-50 to-violet-100 text-violet-700 ring-violet-300/40 shadow-[0_1px_2px_rgba(139,92,246,0.18),inset_0_1px_0_rgba(255,255,255,0.85)]';
+    'bg-gradient-to-b from-orange-50 to-orange-100 text-orange-700 ring-orange-300/40 shadow-[0_1px_2px_rgba(249,115,22,0.18),inset_0_1px_0_rgba(255,255,255,0.85)]';
 const BADGE_BLUE =
     'bg-gradient-to-b from-blue-50 to-blue-100 text-blue-700 ring-blue-300/40 shadow-[0_1px_2px_rgba(59,130,246,0.18),inset_0_1px_0_rgba(255,255,255,0.85)]';
 const BADGE_EMERALD =

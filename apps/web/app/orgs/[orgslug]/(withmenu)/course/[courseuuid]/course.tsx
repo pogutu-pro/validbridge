@@ -19,7 +19,7 @@ import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesAct
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getActivityWithAuthHeader } from '@services/courses/activities'
@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next'
 import CourseCommunitySection from '@components/Objects/Communities/CourseCommunitySection'
 import CourseShare from '@components/Objects/Courses/CourseShare/CourseShare'
 import { JsonLd } from '@components/SEO/JsonLd'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const CourseClient = (props: any) => {
   const { t } = useTranslation()
@@ -41,7 +41,7 @@ const CourseClient = (props: any) => {
   const org = useOrg() as any
   const _router = useRouter()
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const queryClient = useQueryClient()
 
@@ -55,7 +55,7 @@ const CourseClient = (props: any) => {
 
   const course = initialCourse || clientCourseData;
 
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   // Track course view
   const courseId = course?.id

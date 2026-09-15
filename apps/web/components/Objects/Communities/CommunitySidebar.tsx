@@ -18,7 +18,7 @@ import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { getCourseById } from '@services/courses/courses'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import dayjs from 'dayjs'
@@ -40,7 +40,7 @@ export function CommunitySidebar({
   const { t } = useTranslation()
   const { canManageCommunity, canCreateDiscussion } = useCommunityRights(community.community_uuid)
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
   // Fetch linked course if community has a course_id
@@ -150,7 +150,7 @@ export function CommunitySidebar({
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors truncate">
+                  <h4 className="text-sm font-medium text-gray-900 group-hover:text-orange-600 transition-colors truncate">
                     {linkedCourse.name}
                   </h4>
                   {linkedCourse.description && (
@@ -159,7 +159,7 @@ export function CommunitySidebar({
                     </p>
                   )}
                 </div>
-                <ChevronRight size={16} className="text-gray-400 group-hover:text-indigo-600 transition-colors flex-shrink-0" />
+                <ChevronRight size={16} className="text-gray-400 group-hover:text-orange-600 transition-colors flex-shrink-0" />
               </div>
             </Link>
           </div>

@@ -5,7 +5,7 @@ Tests cover:
 - Origin header validation
 - Referer fallback when Origin is missing
 - Rejection when both Origin and Referer are missing
-- API token (lh_*) exemption
+- API token (vb_*) exemption
 - Regular Bearer JWT NOT exempt (cookie fallback vulnerability)
 - Stripe webhook exemption
 - Safe methods (GET, HEAD, OPTIONS) bypass
@@ -44,7 +44,7 @@ class TestCSRFOriginValidation:
     """Test origin checking logic."""
 
     def test_allowed_origin_exact_match(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com", "https://app.example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware
@@ -53,7 +53,7 @@ class TestCSRFOriginValidation:
             assert mw.is_allowed_origin("https://app.example.com") is True
 
     def test_disallowed_origin(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware
@@ -61,7 +61,7 @@ class TestCSRFOriginValidation:
             assert mw.is_allowed_origin("https://evil.com") is False
 
     def test_no_origin_no_referer_rejected(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware
@@ -69,7 +69,7 @@ class TestCSRFOriginValidation:
             assert mw.is_allowed_origin(None, None) is False
 
     def test_referer_fallback(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware
@@ -78,7 +78,7 @@ class TestCSRFOriginValidation:
             assert mw.is_allowed_origin(None, "https://example.com/some/page") is True
 
     def test_referer_fallback_disallowed(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware
@@ -86,7 +86,7 @@ class TestCSRFOriginValidation:
             assert mw.is_allowed_origin(None, "https://evil.com/page") is False
 
     def test_regex_origin_match(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=[],
             allowed_regexp=r"https://.*\.example\.com"
         )):
@@ -96,7 +96,7 @@ class TestCSRFOriginValidation:
             assert mw.is_allowed_origin("https://evil.com") is False
 
     def test_development_mode_localhost(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=[],
             development_mode=True
         )):
@@ -106,7 +106,7 @@ class TestCSRFOriginValidation:
             assert mw.is_allowed_origin("http://127.0.0.1:8000") is True
 
     def test_production_mode_no_localhost(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=[],
             development_mode=False
         )):
@@ -117,7 +117,7 @@ class TestCSRFOriginValidation:
     def test_invalid_regex_is_logged_and_disabled(self):
         with patch("src.security.csrf.re.compile", side_effect=re.error("bad regex")), patch(
             "src.security.csrf.logger.error"
-        ) as mock_error, patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        ) as mock_error, patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=[],
             allowed_regexp=r"[",
         )):
@@ -129,7 +129,7 @@ class TestCSRFOriginValidation:
         mock_error.assert_called_once()
 
     def test_extract_origin_invalid_url_returns_none(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware
@@ -140,7 +140,7 @@ class TestCSRFOriginValidation:
             assert mw._extract_origin_from_url("not-a-url") is None
 
     def test_development_mode_rejects_missing_headers(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=[],
             development_mode=True
         )):
@@ -154,21 +154,21 @@ class TestCSRFExemptions:
     """Test CSRF exemption logic."""
 
     def _make_middleware(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware
             return CSRFProtectionMiddleware(MagicMock())
 
     def test_api_token_exempt(self):
-        """Bearer lh_* API tokens should bypass CSRF (never fall back to cookies)."""
+        """Bearer vb_* API tokens should bypass CSRF (never fall back to cookies)."""
         mw = self._make_middleware()
-        req = _make_request(headers={"authorization": "Bearer lh_abc123_secret"})
+        req = _make_request(headers={"authorization": "Bearer vb_abc123_secret"})
         assert mw._is_csrf_exempt(req) is True
 
     def test_api_token_case_insensitive(self):
         mw = self._make_middleware()
-        req = _make_request(headers={"authorization": "BEARER LH_abc123"})
+        req = _make_request(headers={"authorization": "BEARER VB_abc123"})
         assert mw._is_csrf_exempt(req) is True
 
     def test_regular_bearer_jwt_not_exempt(self):
@@ -231,7 +231,7 @@ class TestCSRFExemptions:
 
 class TestCSRFMiddlewareDispatch:
     def _make_middleware(self, *, allowed_origins=None, allowed_regexp="", development_mode=False):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=allowed_origins or ["https://example.com"],
             allowed_regexp=allowed_regexp,
             development_mode=development_mode,
@@ -252,7 +252,7 @@ class TestCSRFMiddlewareDispatch:
 
     def test_csrf_exempt_request_bypasses(self):
         mw = self._make_middleware()
-        req = _make_request(method="POST", headers={"authorization": "Bearer lh_abc"})
+        req = _make_request(method="POST", headers={"authorization": "Bearer vb_abc"})
         call_next = AsyncMock(return_value="ok")
 
         result = asyncio.run(mw.dispatch(req, call_next))
@@ -300,7 +300,7 @@ class TestCSRFCustomDomain:
     are allowed via a cached DB lookup on the slow path."""
 
     def test_verified_custom_domain_origin_allowed(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware, _CUSTOM_DOMAIN_CACHE
@@ -312,7 +312,7 @@ class TestCSRFCustomDomain:
             assert asyncio.run(mw._is_verified_custom_domain_origin("https://learn.acme.org")) is True
 
     def test_unverified_custom_domain_origin_denied(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware, _CUSTOM_DOMAIN_CACHE
@@ -322,14 +322,14 @@ class TestCSRFCustomDomain:
                 assert asyncio.run(mw._is_verified_custom_domain_origin("https://attacker.com")) is False
 
     def test_invalid_origin_has_no_host(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config()):
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config()):
             from src.security.csrf import CSRFProtectionMiddleware
             mw = CSRFProtectionMiddleware(MagicMock())
             assert asyncio.run(mw._is_verified_custom_domain_origin("not-a-url")) is False
 
     def test_urlparse_raises_is_denied(self):
         # If URL parsing itself blows up, the origin is denied (fail-closed).
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config()):
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config()):
             from src.security.csrf import CSRFProtectionMiddleware
             mw = CSRFProtectionMiddleware(MagicMock())
             with patch("src.security.csrf.urlparse", side_effect=ValueError("boom")):
@@ -338,7 +338,7 @@ class TestCSRFCustomDomain:
     def test_cache_evicts_when_full(self):
         # When the cache hits its cap it is cleared before inserting, so it never
         # grows unbounded. Cap patched low to exercise the eviction branch.
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config()):
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config()):
             from src.security.csrf import CSRFProtectionMiddleware, _CUSTOM_DOMAIN_CACHE
             _CUSTOM_DOMAIN_CACHE.clear()
             _CUSTOM_DOMAIN_CACHE["stale.example"] = (True, 9999999999.0)
@@ -351,7 +351,7 @@ class TestCSRFCustomDomain:
             assert "fresh.example" in _CUSTOM_DOMAIN_CACHE
 
     def test_dispatch_allows_verified_custom_domain(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware, _CUSTOM_DOMAIN_CACHE
@@ -369,7 +369,7 @@ class TestCSRFCustomDomain:
             assert called["v"] is True
 
     def test_dispatch_rejects_unverified_origin(self):
-        with patch("src.security.csrf.get_learnhouse_config", return_value=_make_mock_config(
+        with patch("src.security.csrf.get_validbridge_config", return_value=_make_mock_config(
             allowed_origins=["https://example.com"]
         )):
             from src.security.csrf import CSRFProtectionMiddleware, _CUSTOM_DOMAIN_CACHE

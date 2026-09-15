@@ -2,19 +2,19 @@
 Single source of truth for deployment mode detection.
 
 Three modes:
-- 'saas': LEARNHOUSE_SAAS=true — plan-based gating, usage limits apply
+- 'saas': VALIDBRIDGE_SAAS=true — plan-based gating, usage limits apply
 - 'ee':   EE folder present (and not SaaS) — all features enabled, unlimited
 - 'oss':  EE folder absent (and not SaaS) — EE features blocked, unlimited otherwise
 
 Development override:
-- LEARNHOUSE_FORCE_EE=1 skips the license check when the EE folder is present.
+- VALIDBRIDGE_FORCE_EE=1 skips the license check when the EE folder is present.
   Only effective when development_mode=true in config. Never set this in production.
 """
 
 import logging
 import os
 from typing import Literal
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.core.ee_hooks import is_ee_available, get_ee_hooks
 
 logger = logging.getLogger(__name__)
@@ -37,17 +37,17 @@ def get_deployment_mode() -> DeploymentMode:
     is_ee_available() returns True in SaaS mode. The saas_mode flag MUST be
     checked first — never reorder these checks.
     """
-    if get_learnhouse_config().general_config.saas_mode:
+    if get_validbridge_config().general_config.saas_mode:
         return 'saas'
     # Only reaches here for self-hosted deployments.
     # EE folder present = self-hosted enterprise; absent = OSS.
     if is_ee_available():
         # Dev override: bypass license check when explicitly requested.
-        # LEARNHOUSE_FORCE_EE=1 is only honoured in development_mode to
+        # VALIDBRIDGE_FORCE_EE=1 is only honoured in development_mode to
         # prevent accidental use in production deployments.
         if (
-            os.environ.get('LEARNHOUSE_FORCE_EE') == '1'
-            and get_learnhouse_config().general_config.development_mode
+            os.environ.get('VALIDBRIDGE_FORCE_EE') == '1'
+            and get_validbridge_config().general_config.development_mode
         ):
             return 'ee'
         # When EE is present, license + integrity verification gate the mode:

@@ -3,7 +3,7 @@
 import React from 'react'
 import { ArrowSquareOut, DownloadSimple, LinkSimple } from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import MediaViewer from '@components/Objects/Media/MediaViewer'
 import { shareMediaLink } from '@components/Dashboard/Library/shareFolder'
@@ -27,7 +27,7 @@ type Props = {
 
 export default function MediaLightbox({ resource, mediaUuid, isOpen, onOpenChange }: Props) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const uuid = resource?.media_uuid || mediaUuid

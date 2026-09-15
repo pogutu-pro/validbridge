@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Languages, ChevronDown, Check } from 'lucide-react'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { changeLanguage } from '@/lib/i18n'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
 const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
   const { i18n } = useTranslation()
-  const { track } = useLHAnalytics()
+  const { track } = useVBAnalytics()
   const colors = getMenuColorClasses(primaryColor)
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])

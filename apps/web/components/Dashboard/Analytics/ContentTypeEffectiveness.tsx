@@ -28,7 +28,7 @@ export default function ContentTypeEffectiveness({ days = '30' }: { days?: strin
             <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
             <Bar dataKey="view_count" name="Views" fill="#93c5fd" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="completion_count" name="Completions" fill="#6366f1" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="completion_count" name="Completions" fill="#f97316" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

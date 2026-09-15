@@ -3,14 +3,14 @@ import { getUriWithOrg } from '@services/config/config'
 import { createInviteCode } from '@services/organizations/invites'
 import { getUserGroups } from '@services/usergroups/usergroups'
 import { Ticket, UserSquare, Users } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 type OrgInviteCodeGenerateProps = {
     setInvitesModal: any
@@ -19,12 +19,12 @@ type OrgInviteCodeGenerateProps = {
 function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
   const { t } = useTranslation()
     const org = useOrg() as any
-    const session = useLHSession() as any
+    const session = useVBSession() as any
     const access_token = session?.data?.tokens?.access_token;
     const queryClient = useQueryClient()
     const [mode, setMode] = React.useState<'normal' | 'usergroup'>('normal');
     const [usergroup_id, setUsergroup_id] = React.useState(0);
-    const { track } = useLHAnalytics('dashboard')
+    const { track } = useVBAnalytics('dashboard')
 
     const { data: usergroups } = useQuery({
         queryKey: queryKeys.usergroups.list(org?.id),

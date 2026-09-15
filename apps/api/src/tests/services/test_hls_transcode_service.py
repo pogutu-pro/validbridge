@@ -91,18 +91,18 @@ def test_build_ffmpeg_args_without_audio_omits_audio_maps():
 
 
 def test_build_ffmpeg_args_caps_threads(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_HLS_FFMPEG_THREADS", "2")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_FFMPEG_THREADS", "2")
     args = ht.build_ffmpeg_args("in.mp4", "/out", ht.select_ladder(360), has_audio=True)
     assert "-threads" in args
     assert args[args.index("-threads") + 1] == "2"
 
 
 def test_ffmpeg_threads_parsing(monkeypatch):
-    monkeypatch.delenv("LEARNHOUSE_HLS_FFMPEG_THREADS", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_HLS_FFMPEG_THREADS", raising=False)
     assert ht.ffmpeg_threads() == "1"  # default
-    monkeypatch.setenv("LEARNHOUSE_HLS_FFMPEG_THREADS", "3")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_FFMPEG_THREADS", "3")
     assert ht.ffmpeg_threads() == "3"
-    monkeypatch.setenv("LEARNHOUSE_HLS_FFMPEG_THREADS", "bad")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_FFMPEG_THREADS", "bad")
     assert ht.ffmpeg_threads() == "1"  # invalid -> default
 
 
@@ -172,7 +172,7 @@ def test_transcode_source_to_hls_end_to_end(tmp_path):
 
 @pytest.mark.skipif(not _HAS_FFMPEG, reason="ffmpeg/ffprobe not installed")
 def test_transcode_without_encryption(tmp_path, monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_HLS_ENCRYPT", "false")
+    monkeypatch.setenv("VALIDBRIDGE_HLS_ENCRYPT", "false")
     src = str(tmp_path / "src.mp4")
     out = str(tmp_path / "hls")
     _make_clip(src)

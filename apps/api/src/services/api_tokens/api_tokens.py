@@ -31,7 +31,7 @@ from src.security.security import (
 
 
 # Token generation constants
-TOKEN_PREFIX = "lh_"
+TOKEN_PREFIX = "vb_"
 TOKEN_BYTES = 32  # 256 bits of entropy
 
 
@@ -434,7 +434,7 @@ async def validate_api_token_for_auth(
     Updates last_used_at on successful validation.
 
     Args:
-        token: The full token string (lh_...)
+        token: The full token string (vb_...)
         db_session: Database session
 
     Returns:

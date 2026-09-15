@@ -35,8 +35,8 @@ export function stripPort(host: string | null | undefined): string {
 /**
  * Is `host` a subdomain of `domain`?
  * Both may include ports — ports are stripped before comparison.
- * isSubdomainOf("acme.learnhouse.io:3000", "learnhouse.io") -> true
- * isSubdomainOf("learnhouse.io", "learnhouse.io") -> false (same host, not a subdomain)
+ * isSubdomainOf("acme.validbridge.co.ke:3000", "validbridge.co.ke") -> true
+ * isSubdomainOf("validbridge.co.ke", "validbridge.co.ke") -> false (same host, not a subdomain)
  */
 export function isSubdomainOf(host: string | null | undefined, domain: string): boolean {
   const h = stripPort(host).toLowerCase()
@@ -60,9 +60,9 @@ export function isSameHost(a: string | null | undefined, b: string | null | unde
 /**
  * Extract subdomain from host given a parent domain.
  * Both may include ports — ports are stripped before comparison.
- * extractSubdomain("acme.learnhouse.io:3000", "learnhouse.io") -> "acme"
- * extractSubdomain("learnhouse.io", "learnhouse.io") -> null
- * extractSubdomain("localhost", "learnhouse.io") -> null
+ * extractSubdomain("acme.validbridge.co.ke:3000", "validbridge.co.ke") -> "acme"
+ * extractSubdomain("validbridge.co.ke", "validbridge.co.ke") -> null
+ * extractSubdomain("localhost", "validbridge.co.ke") -> null
  */
 export function extractSubdomain(host: string | null | undefined, domain: string): string | null {
   const h = stripPort(host).toLowerCase()

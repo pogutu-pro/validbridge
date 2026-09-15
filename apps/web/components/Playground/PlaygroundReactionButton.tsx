@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { SmilePlus } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import {
   getPlaygroundReactions,
   togglePlaygroundReaction,
@@ -33,7 +33,7 @@ interface PlaygroundReactionButtonProps {
 }
 
 export function PlaygroundReactionButton({ playgroundUuid }: PlaygroundReactionButtonProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const isAuthenticated = session?.status === 'authenticated'
 
@@ -97,7 +97,7 @@ export function PlaygroundReactionButton({ playgroundUuid }: PlaygroundReactionB
                     disabled={isLoading || !isAuthenticated}
                     className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all border ${
                       existing?.has_reacted
-                        ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                        ? 'bg-orange-100 border-orange-300 text-orange-700'
                         : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
                     } ${!isAuthenticated ? 'cursor-default' : 'cursor-pointer'}`}
                   >
@@ -142,7 +142,7 @@ export function PlaygroundReactionButton({ playgroundUuid }: PlaygroundReactionB
                         onClick={() => handleToggle(emoji)}
                         disabled={isLoading}
                         className={`w-9 h-9 flex items-center justify-center text-xl rounded-lg transition-colors ${
-                          existing?.has_reacted ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                          existing?.has_reacted ? 'bg-orange-100' : 'hover:bg-gray-100'
                         }`}
                       >
                         {emoji}
@@ -166,7 +166,7 @@ export function PlaygroundReactionButton({ playgroundUuid }: PlaygroundReactionB
                     disabled={isLoading || !isAuthenticated}
                     className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all border ${
                       reaction.has_reacted
-                        ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                        ? 'bg-orange-100 border-orange-300 text-orange-700'
                         : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
                     } ${!isAuthenticated ? 'cursor-default' : 'cursor-pointer'}`}
                   >

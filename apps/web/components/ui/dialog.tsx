@@ -20,7 +20,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={cn("lh-modal-overlay fixed inset-0 bg-black/40", className)}
+    className={cn("vb-modal-overlay fixed inset-0 bg-black/40", className)}
     style={{ zIndex: 'var(--z-modal-backdrop)', willChange: 'opacity' }}
     {...props}
   />
@@ -60,7 +60,7 @@ const DialogContent = React.forwardRef<
         }
       }}
       className={cn(
-        "lh-modal-content fixed left-[50%] top-[50%] grid w-full max-w-lg gap-0 border border-gray-200/80 bg-white shadow-2xl shadow-black/10 rounded-2xl",
+        "vb-modal-content fixed left-[50%] top-[50%] grid w-full max-w-lg gap-0 border border-gray-200/80 bg-white shadow-2xl shadow-black/10 rounded-2xl",
         className
       )}
       {...props}

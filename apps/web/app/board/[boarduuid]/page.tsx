@@ -26,7 +26,7 @@ async function BoardEditorPage(props: any) {
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
   const cookieStore = await cookies()
-  const orgslug = cookieStore.get('LH_org')?.value || ''
+  const orgslug = cookieStore.get('VB_org')?.value || ''
 
   // Require authentication to access board canvas. Bare /login only — the proxy
   // rewrites it to /auth/login with tenant context; an /orgs/{slug}/login path

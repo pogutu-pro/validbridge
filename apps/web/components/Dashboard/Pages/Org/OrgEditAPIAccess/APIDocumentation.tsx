@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
@@ -118,7 +118,7 @@ const ALLOWED_API_TAGS = [
 ]
 
 const APIDocumentation: React.FC = () => {
-  const _session = useLHSession() as any
+  const _session = useVBSession() as any
   const org = useOrg() as any
   const [spec, setSpec] = useState<OpenAPISpec | null>(null)
   const [loading, setLoading] = useState(true)
@@ -546,7 +546,7 @@ const APIDocumentation: React.FC = () => {
             type="password"
             value={apiToken}
             onChange={(e) => setApiToken(e.target.value)}
-            placeholder="Enter your API token (lh_...)"
+            placeholder="Enter your API token (vb_...)"
             className="font-mono"
           />
           <p className="text-xs text-gray-500 mt-1">
@@ -579,7 +579,7 @@ const APIDocumentation: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <span className="font-medium capitalize">{group.tag}</span>
                       {TAG_LABELS[group.tag.toLowerCase()] && (
-                        <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                        <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
                           <Monitor size={10} className="me-1" />
                           {TAG_LABELS[group.tag.toLowerCase()]}
                         </Badge>

@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { queryKeys } from '@/lib/query/keys'
 import { getAPIUrl, getDeploymentMode } from '@services/config/config'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { X, Buildings } from '@phosphor-icons/react'
 
 function slugify(s: string): string {
@@ -23,7 +23,7 @@ export default function CreateOrganizationModal({
   open: boolean
   onClose: () => void
 }) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
   const router = useRouter()

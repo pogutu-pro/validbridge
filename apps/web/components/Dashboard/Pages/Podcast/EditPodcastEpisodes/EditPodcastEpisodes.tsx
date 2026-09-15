@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { usePodcast } from '@components/Contexts/PodcastContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import {
   createEpisode,
@@ -14,7 +14,7 @@ import {
   formatDuration,
 } from '@services/podcasts/episodes'
 import { getEpisodeAudioMediaDirectory, getEpisodeThumbnailMediaDirectory } from '@services/media/media'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useTranslation } from 'react-i18next'
 import {
@@ -48,11 +48,11 @@ interface EditPodcastEpisodesProps {
 function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps) {
   const { t } = useTranslation()
   const { podcast, episodes, refreshPodcast, isLoading } = usePodcast()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const accessToken = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingEpisode, setEditingEpisode] = useState<PodcastEpisode | null>(null)
@@ -374,7 +374,7 @@ function CreateEpisodeModal({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')

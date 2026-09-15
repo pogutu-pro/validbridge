@@ -7,7 +7,7 @@ import "server-only";
 // caller (see app/api/billing/_lib.ts). The `server-only` import hard-fails the
 // build if any client bundle imports this module. Pure decision logic lives in
 // ./subscriptionUtils; static price/type config in ./plans.
-import { getServerAPIUrl, getLEARNHOUSE_HTTP_PROTOCOL_VAL, getLEARNHOUSE_DOMAIN_VAL } from "@services/config/config";
+import { getServerAPIUrl, getVALIDBRIDGE_HTTP_PROTOCOL_VAL, getVALIDBRIDGE_DOMAIN_VAL } from "@services/config/config";
 import {
   PRICE_IDS,
   PACK_PRICE_IDS,
@@ -28,12 +28,12 @@ import { sendPlanSwitchMail, sendSubscriptionCanceledMail } from "./emails";
 import { invoiceSubscriptionId } from "./activeUserBillingUtils";
 
 // Resolve the Stripe secret key. Prefer the billing-specific STRIPE_SECRET_KEY,
-// but fall back to LEARNHOUSE_STRIPE_SECRET_KEY (the platform Stripe account's
+// but fall back to VALIDBRIDGE_STRIPE_SECRET_KEY (the platform Stripe account's
 // secret key — the same account the SaaS subscription prices live in) so
-// deployments that only set the LEARNHOUSE_-prefixed var still work. Shared by
+// deployments that only set the VALIDBRIDGE_-prefixed var still work. Shared by
 // the lazy Stripe client here, the webhook route, and the billing guard.
 export function getStripeSecretKey(): string | undefined {
-  return process.env.STRIPE_SECRET_KEY || process.env.LEARNHOUSE_STRIPE_SECRET_KEY;
+  return process.env.STRIPE_SECRET_KEY || process.env.VALIDBRIDGE_STRIPE_SECRET_KEY;
 }
 
 // Lazy Stripe client. The SDK throws if instantiated without a key, so we must
@@ -64,7 +64,7 @@ const stripe: any = stripeClient;
 // APP_URL is computed per-call: apps/web reads runtime config lazily, so a
 // module-load constant could capture an empty domain before config is hydrated.
 function appUrl(): string {
-  return `${getLEARNHOUSE_HTTP_PROTOCOL_VAL()}${getLEARNHOUSE_DOMAIN_VAL()}`;
+  return `${getVALIDBRIDGE_HTTP_PROTOCOL_VAL()}${getVALIDBRIDGE_DOMAIN_VAL()}`;
 }
 
 /** Resolve a Stripe price id to its plan/billing (or pack). */
@@ -86,7 +86,7 @@ function getPeriodStart(subscription: any): number | undefined {
 
 // ── Customer resolution ──────────────────────────────────────────────────────
 // A single email can map to MULTIPLE Stripe customers. Duplicates arise because
-// other LearnHouse products share this Stripe account and create their own
+// other ValidBridge products share this Stripe account and create their own
 // customer per email. `customers.list({ email, limit: 1 })` returns an arbitrary
 // (most-recently created) customer, which may not be the one holding this org's
 // subscription — that made getActiveSubscription return null and wrongly route
@@ -556,7 +556,7 @@ export async function getUpcomingInvoice(
  *
  * Invoices carry no org metadata, so they are matched by the subscriptions they
  * belong to — the org's plan subscription plus its packs. Invoices belonging to
- * another org (or another LearnHouse product) on the same shared customer are
+ * another org (or another ValidBridge product) on the same shared customer are
  * therefore excluded.
  */
 export async function listInvoices(

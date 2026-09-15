@@ -425,7 +425,7 @@ class TestImportTempIdTraversal:
         (extracted / "manifest.json").write_text(
             json.dumps(
                 {
-                    "format": "learnhouse-course-export",
+                    "format": "validbridge-course-export",
                     "courses": [{"course_uuid": "course-1", "path": "course-1"}],
                 }
             )

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { getUriWithOrg } from '@services/config/config'
 import { useParams } from 'next/navigation'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import UserProfilePopup from './UserProfilePopup'
 import { getUserByUsername, getUser } from '@services/users/users'
 
@@ -22,7 +22,7 @@ type UserAvatarProps = {
 }
 
 function UserAvatar(props: UserAvatarProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const params = useParams() as any
   const [userData, setUserData] = useState<any>(null)

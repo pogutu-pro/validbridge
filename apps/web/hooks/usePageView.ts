@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { useLHAnalytics } from '@services/analytics'
+import { useVBAnalytics } from '@services/analytics'
 
 function getDeviceType(): string {
   if (typeof window === 'undefined') return 'unknown'
@@ -24,7 +24,7 @@ export function usePageView() {
   const pathname = usePathname()
   // trackPageView emits the backend page_view only; PostHog's native $pageview
   // is fired by PostHogPageView, so this never double-counts in PostHog.
-  const { trackPageView } = useLHAnalytics()
+  const { trackPageView } = useVBAnalytics()
 
   useEffect(() => {
     if (!pathname) return

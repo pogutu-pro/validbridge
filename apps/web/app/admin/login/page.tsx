@@ -37,12 +37,12 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#0f0f10]">
+    <div className="flex items-center justify-center min-h-screen bg-[#F8F7F2]">
       <div className="w-full max-w-sm px-6">
         <div className="flex flex-col items-center mb-8">
-          <Shield className="w-10 h-10 text-white/70 mb-3" />
-          <h1 className="text-2xl font-bold text-white">LearnHouse Admin</h1>
-          <p className="text-white/40 text-sm mt-1">Sign in to continue</p>
+          <Shield className="w-10 h-10 text-[#737373] mb-3" />
+          <h1 className="text-2xl font-bold text-[#262626]">ValidBridge Admin</h1>
+          <p className="text-[#737373]/70 text-sm mt-1">Sign in to continue</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-white/60 mb-1.5">
+            <label htmlFor="email" className="block text-sm font-medium text-[#737373]/80 mb-1.5">
               Email
             </label>
             <input
@@ -63,13 +63,13 @@ export default function AdminLoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
-              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+              className="w-full px-3 py-2.5 bg-white border border-[#E7E5E4] rounded-lg text-[#262626] placeholder-[#737373]/60 focus:outline-none focus:border-[#FF5A1F] transition-colors"
               placeholder="admin@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-white/60 mb-1.5">
+            <label htmlFor="password" className="block text-sm font-medium text-[#737373]/80 mb-1.5">
               Password
             </label>
             <input
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+              className="w-full px-3 py-2.5 bg-white border border-[#E7E5E4] rounded-lg text-[#262626] placeholder-[#737373]/60 focus:outline-none focus:border-[#FF5A1F] transition-colors"
               placeholder="Enter your password"
             />
           </div>

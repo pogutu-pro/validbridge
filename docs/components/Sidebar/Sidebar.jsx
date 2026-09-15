@@ -168,7 +168,6 @@ const iconMap = {
   // Self Hosting > Installation
   '/self-hosting/installation/requirements': ListChecks,
   '/self-hosting/installation/quick-install': Lightning,
-  '/self-hosting/installation/cli-reference': Terminal,
 
   // Self Hosting > Configuration
   '/self-hosting/configuration/environment-variables': Code,
@@ -182,13 +181,6 @@ const iconMap = {
   '/self-hosting/maintenance/backups': ClockCountdown,
   '/self-hosting/maintenance/monitoring': ChartBar,
   '/self-hosting/maintenance/troubleshooting': Lifebuoy,
-
-  // CLI
-  '/cli': Terminal,
-  '/cli/commands': ListChecks,
-  '/cli/setup-wizard': Lightning,
-  '/cli/dev-mode': Code,
-  '/cli/environment-variables': Gear,
 
   // Developers
   '/developers/architecture': TreeStructure,
@@ -347,16 +339,16 @@ function SidebarContent({ onNavigate }) {
   const pathname = usePathname()
   const { docsDirectories } = config.normalizePagesResult
 
-  const isDevSection = pathname?.startsWith('/developers') || pathname?.startsWith('/self-hosting') || pathname?.startsWith('/cli') || pathname?.startsWith('/enterprise')
+  const isDevSection = pathname?.startsWith('/developers') || pathname?.startsWith('/self-hosting') || pathname?.startsWith('/enterprise')
 
-  const devRoutes = ['/developers', '/self-hosting', '/cli', '/enterprise']
+  const devRoutes = ['/developers', '/self-hosting', '/enterprise']
   const items = docsDirectories.filter((item) => {
     const isDev = devRoutes.some(r => item.route?.startsWith(r))
     return isDevSection ? isDev : !isDev
   })
 
   // Enforce sidebar order for dev section
-  const devOrder = ['/developers', '/cli', '/self-hosting', '/enterprise']
+  const devOrder = ['/developers', '/self-hosting', '/enterprise']
   items.sort((a, b) => {
     const aIdx = devOrder.indexOf(a.route)
     const bIdx = devOrder.indexOf(b.route)

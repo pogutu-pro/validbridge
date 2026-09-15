@@ -2,7 +2,7 @@
 import { use, useEffect, type ReactNode } from "react";
 import '@styles/globals.css'
 import Watermark from '@components/Objects/Watermark'
-import { SessionGate } from '@components/Contexts/LHSessionContext'
+import { SessionGate } from '@components/Contexts/VBSessionContext'
 import { OrgMenu } from '@components/Objects/Menus/OrgMenu'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { OrgJoinBanner, OrgJoinBannerProvider } from '@components/Objects/Banners/OrgJoinBanner'
@@ -39,10 +39,10 @@ function OrgFooter() {
       <div className="flex flex-col items-center justify-center space-y-4">
         {footerText && <p className="text-sm text-gray-500">{footerText}</p>}
         {showWatermark && (
-          <Link href="https://learnhouse.app" target="_blank" rel="noopener noreferrer">
+          <Link href="https://validbridge.co.ke" target="_blank" rel="noopener noreferrer">
             <Image
-              src="/lrn.svg"
-              alt="LearnHouse"
+              src="/validbridge.svg"
+              alt="ValidBridge"
               width={24}
               height={24}
               style={{ height: 'auto' }}
@@ -107,11 +107,11 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
 
   return (
     <div
-      // lh-org-font-root gives globals.css a hook to override this inline
+      // vb-org-font-root gives globals.css a hook to override this inline
       // font-family in Arabic, where Tajawal replaces the org's custom face
       // outright. An inline style beats any normal rule, so the override has to
       // target this element specifically.
-      className="lh-org-font-root flex flex-col min-h-screen"
+      className="vb-org-font-root flex flex-col min-h-screen"
       style={{
         backgroundColor: primaryColor ? hexToRgba(primaryColor, 0.05) : 'transparent',
         ...(customFont ? { fontFamily: `'${customFont}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif` } : {}),

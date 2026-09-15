@@ -1,17 +1,17 @@
 import * as Sentry from "@sentry/nextjs";
 
 const rc = typeof window !== 'undefined' ? (window as any).__RUNTIME_CONFIG__ || {} : {};
-const SENTRY_DSN = rc.NEXT_PUBLIC_LEARNHOUSE_SENTRY_DSN || process.env.NEXT_PUBLIC_LEARNHOUSE_SENTRY_DSN;
-const LEARNHOUSE_ENV = rc.NEXT_PUBLIC_LEARNHOUSE_ENV || process.env.NEXT_PUBLIC_LEARNHOUSE_ENV || "dev";
+const SENTRY_DSN = rc.NEXT_PUBLIC_VALIDBRIDGE_SENTRY_DSN || process.env.NEXT_PUBLIC_VALIDBRIDGE_SENTRY_DSN;
+const VALIDBRIDGE_ENV = rc.NEXT_PUBLIC_VALIDBRIDGE_ENV || process.env.NEXT_PUBLIC_VALIDBRIDGE_ENV || "dev";
 
 if (SENTRY_DSN) {
   Sentry.init({
     dsn: SENTRY_DSN,
     tunnel: '/monitoring',
-    environment: LEARNHOUSE_ENV,
+    environment: VALIDBRIDGE_ENV,
     sendDefaultPii: true,
     enableLogs: true,
-    tracesSampleRate: LEARNHOUSE_ENV === "dev" ? 1.0 : 0.1,
+    tracesSampleRate: VALIDBRIDGE_ENV === "dev" ? 1.0 : 0.1,
     replaysSessionSampleRate: 0.0,
     replaysOnErrorSampleRate: 0.1,
     integrations: [

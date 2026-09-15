@@ -2,13 +2,13 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useOrg, useOrgMembership } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { usePlan } from '@components/Hooks/usePlan'
 import { getDeploymentMode } from '@services/config/config'
 
 /**
  * Standard properties auto-attached to EVERY analytics event. Call-sites must
- * never pass these — they're injected by useLHAnalytics from app context.
+ * never pass these — they're injected by useVBAnalytics from app context.
  *
  * All hooks used here are provider-safe (useOrg/useOrgMembership/usePlan return
  * defaults when their provider is absent), so this works on any surface,
@@ -52,7 +52,7 @@ function highestRole(session: any, orgId?: number): string {
 export function useStandardProps(surface?: string): StandardProps {
   const org = useOrg() as any
   const { isUserPartOfTheOrg } = useOrgMembership()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const plan = usePlan()
   const { i18n } = useTranslation()
 

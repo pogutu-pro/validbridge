@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useTranslation } from 'react-i18next'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCommunity, useCommunityDispatch } from '@components/Contexts/CommunityContext'
 import { updateCommunity } from '@services/communities/communities'
@@ -22,7 +22,7 @@ import { Button } from '@components/ui/button'
 const CommunityEditGeneral: React.FC = () => {
   const { t } = useTranslation()
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const communityState = useCommunity()
   const dispatch = useCommunityDispatch()

@@ -1,11 +1,11 @@
 'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { canManageOrgFromSession } from '@components/Hooks/useAdminStatus'
-import { useLHAnalytics } from '@services/analytics/useLHAnalytics'
+import { useVBAnalytics } from '@services/analytics/useVBAnalytics'
 import { AnalyticsEvent } from '@services/analytics/events'
 import DemoEntryCard from '@components/Objects/Demo/DemoEntryCard'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { getAPIUrl, getUriWithOrg, getLEARNHOUSE_PLATFORM_URL_VAL } from '@services/config/config'
+import { getAPIUrl, getUriWithOrg, getVALIDBRIDGE_PLATFORM_URL_VAL } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { signOut } from '@components/Contexts/AuthContext'
 import OrgSquareLogo from '@components/Objects/Org/OrgSquareLogo'
@@ -42,12 +42,12 @@ import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 
 function HomeClient() {
   const { t, i18n } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const router = useRouter()
   const access_token = session?.data?.tokens?.access_token
   const isAuthenticated = session?.status === 'authenticated'
   const isLoading = session?.status === 'loading'
-  const platformUrl = getLEARNHOUSE_PLATFORM_URL_VAL()
+  const platformUrl = getVALIDBRIDGE_PLATFORM_URL_VAL()
 
   const { data: orgs, isLoading: orgsLoading } = useQuery({
     queryKey: ['orgs', 'user'],
@@ -96,8 +96,8 @@ function HomeClient() {
             <div className="flex flex-col items-center mb-10">
               { }
               <img
-                src="/lrn.svg"
-                alt="LearnHouse"
+                src="/validbridge.svg"
+                alt="ValidBridge"
                 width={44}
                 height={44}
                 className="opacity-90"
@@ -242,12 +242,12 @@ function HomeClient() {
                 className="mt-10 flex items-center gap-1.5 text-[11px] text-black/30 hover:text-black/60 transition-colors"
               >
                 <span>{t('common.powered_by', { defaultValue: 'Powered by' })}</span>
-                <span className="font-semibold tracking-tight text-black/50 group-hover:text-black/70">LearnHouse</span>
+                <span className="font-semibold tracking-tight text-black/50 group-hover:text-black/70">ValidBridge</span>
               </a>
             ) : (
               <div className="mt-10 flex items-center gap-1.5 text-[11px] text-black/30">
                 <span>{t('common.powered_by', { defaultValue: 'Powered by' })}</span>
-                <span className="font-semibold tracking-tight text-black/50">LearnHouse</span>
+                <span className="font-semibold tracking-tight text-black/50">ValidBridge</span>
               </div>
             )}
             <CopyrightFooter year={new Date().getFullYear()} className="mt-4 pt-0" />
@@ -261,8 +261,8 @@ function HomeClient() {
 function OrgRow({ org, access_token }: { org: any; access_token: string }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const orgSession = useLHSession() as any
-  const { track } = useLHAnalytics('hub')
+  const orgSession = useVBSession() as any
+  const { track } = useVBAnalytics('hub')
   // Only org managers (admins/superadmins) see the billing / Manage-Upgrade entry.
   const canManageOrg = canManageOrgFromSession(orgSession, org?.id)
   const [confirmOpen, setConfirmOpen] = useState(false)

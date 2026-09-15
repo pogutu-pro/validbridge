@@ -8,7 +8,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { LinkSimple, Plus, ShareNetwork, X } from '@phosphor-icons/react'
 import { SiFacebook, SiInstagram, SiX, SiYoutube } from '@icons-pack/react-simple-icons'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { updateOrganization } from '@services/settings/org'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { queryKeys } from '@/lib/query/keys'
@@ -41,7 +41,7 @@ export default function SocialTab() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
   const initialValues: SocialValues = {

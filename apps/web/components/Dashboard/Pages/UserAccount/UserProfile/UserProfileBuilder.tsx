@@ -6,7 +6,7 @@ import { Textarea } from "@components/ui/textarea"
 import { Label } from "@components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
 import { Button } from "@components/ui/button"
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { updateProfile } from '@services/settings/profile'
 import { getUser } from '@services/users/users'
 import { toast } from 'react-hot-toast'
@@ -169,7 +169,7 @@ interface ProfileData {
 }
 
 const UserProfileBuilder = () => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [profileData, setProfileData] = React.useState<ProfileData>({
     sections: []

@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 # Single Sign-On (SSO)
 
-LearnHouse supports enterprise Single Sign-On, allowing organizations to authenticate users through their existing identity provider. This means users can log in with their company credentials without creating a separate LearnHouse account.
+ValidBridge supports enterprise Single Sign-On, allowing organizations to authenticate users through their existing identity provider. This means users can log in with their company credentials without creating a separate ValidBridge account.
 
 <Callout>
 SSO requires an Enterprise plan.
@@ -24,11 +24,11 @@ The Custom OIDC provider lets you connect to virtually any modern identity provi
 1. An admin configures SSO in the organization settings, selecting a provider and entering the required credentials.
 2. When a user visits the login page, they see an SSO login option if SSO is enabled for that organization.
 3. Clicking the SSO button redirects the user to the identity provider's login page.
-4. After authenticating with the IdP, the user is redirected back to LearnHouse with an active session.
+4. After authenticating with the IdP, the user is redirected back to ValidBridge with an active session.
 
 ## User Provisioning
 
-When a user logs in via SSO for the first time, LearnHouse automatically creates their account using profile data from the identity provider:
+When a user logs in via SSO for the first time, ValidBridge automatically creates their account using profile data from the identity provider:
 
 - **First name, last name, and email** are mapped from the IdP.
 - **Avatar** is imported if available.

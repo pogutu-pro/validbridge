@@ -4,7 +4,7 @@ import { getCanonicalUrl } from './utils'
 /**
  * Async canonical URL for Server Components / `generateMetadata`.
  *
- * Reads the `x-lh-tenancy`, `x-lh-top-domain`, `x-lh-custom-domain` request
+ * Reads the `x-vb-tenancy`, `x-vb-top-domain`, `x-vb-custom-domain` request
  * headers set by the middleware on every tenant-scoped request, and builds a
  * fully qualified absolute URL appropriate for the current tenancy mode and
  * host. Falls back to the request `host` header when tenancy headers aren't
@@ -17,9 +17,9 @@ import { getCanonicalUrl } from './utils'
 export async function getServerCanonicalUrl(orgslug: string, path: string): Promise<string> {
   try {
     const h = await headers()
-    const tenancy = h.get('x-lh-tenancy')
-    const customDomain = h.get('x-lh-custom-domain')
-    const topDomain = h.get('x-lh-top-domain')
+    const tenancy = h.get('x-vb-tenancy')
+    const customDomain = h.get('x-vb-custom-domain')
+    const topDomain = h.get('x-vb-top-domain')
     const proto = h.get('x-forwarded-proto') ?? 'https'
 
     if (customDomain) {

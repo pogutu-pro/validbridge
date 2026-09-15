@@ -4,10 +4,10 @@ import { Database } from '@hocuspocus/extension-database';
 import jwt from 'jsonwebtoken';
 import Redis from 'ioredis';
 const PORT = parseInt(process.env.COLLAB_PORT || '4000', 10);
-const API_URL = process.env.LEARNHOUSE_API_URL || 'http://localhost:8000';
-const SECRET_KEY = process.env.LEARNHOUSE_AUTH_JWT_SECRET_KEY || '';
+const API_URL = process.env.VALIDBRIDGE_API_URL || 'http://localhost:8000';
+const SECRET_KEY = process.env.VALIDBRIDGE_AUTH_JWT_SECRET_KEY || '';
 const INTERNAL_KEY = process.env.COLLAB_INTERNAL_KEY || '';
-const REDIS_URL = process.env.LEARNHOUSE_REDIS_URL || 'redis://localhost:6379';
+const REDIS_URL = process.env.VALIDBRIDGE_REDIS_URL || 'redis://localhost:6379';
 // Timeout for all outbound HTTP requests (ms)
 const FETCH_TIMEOUT_MS = 10_000;
 // Debounce interval before flushing ydoc state to the database (ms)
@@ -16,7 +16,7 @@ const DB_FLUSH_DELAY = 5000;
 const REDIS_YDOC_TTL = 3600;
 // ── Startup validation ──────────────────────────────────────────────────────
 if (!SECRET_KEY) {
-    console.error('[collab] FATAL: LEARNHOUSE_AUTH_JWT_SECRET_KEY is not set');
+    console.error('[collab] FATAL: VALIDBRIDGE_AUTH_JWT_SECRET_KEY is not set');
     process.exit(1);
 }
 if (!INTERNAL_KEY) {

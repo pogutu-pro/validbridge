@@ -5,7 +5,7 @@ import { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/l
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getOrgCourses } from '@services/courses/courses'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { useTranslation } from 'react-i18next'
@@ -20,7 +20,7 @@ interface LandingCustomProps {
 
 function LandingCustom({ landing, orgslug }: LandingCustomProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   // Fetch all courses for the organization

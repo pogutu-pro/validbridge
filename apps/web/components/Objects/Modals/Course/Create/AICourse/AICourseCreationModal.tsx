@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
-import lrnaiIcon from 'public/lrnai_icon.png'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
+import lrnaiIcon from 'public/validbridge_ai_icon.png'
 import AICoursePreview from './AICoursePreview'
 import AICourseChat from './AICourseChat'
 import type { CoursePlan, CoursePlanningMessage, CreatedChapter, Attachment } from '@services/ai/courseplanning'
@@ -39,7 +39,7 @@ function AICourseCreationModal({
   accessToken,
 }: AICourseCreationModalProps) {
   const { t, i18n } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const router = useRouter()
 
   const [sessionUuid, setSessionUuid] = React.useState<string | null>(null)
@@ -248,7 +248,7 @@ function AICourseCreationModal({
                     className={cn(
                       "flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all",
                       ENABLE_ACTIVITY_CONTENT_GENERATION
-                        ? "bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 outline outline-1 outline-purple-500/30"
+                        ? "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 outline outline-1 outline-orange-500/30"
                         : "bg-green-500/20 text-green-300 hover:bg-green-500/30 outline outline-1 outline-green-500/30",
                       (isFinalizingPlan || isLoading) && "opacity-50 cursor-not-allowed"
                     )}

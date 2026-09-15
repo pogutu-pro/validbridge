@@ -21,10 +21,10 @@ set -a
 set +a
 
 export COLLAB_PORT=4000
-export LEARNHOUSE_API_URL="http://lvh.me:1348"
-# LEARNHOUSE_REDIS_URL, not the API's LEARNHOUSE_REDIS_CONNECTION_STRING —
+export VALIDBRIDGE_API_URL="http://lvh.me:1348"
+# VALIDBRIDGE_REDIS_URL, not the API's VALIDBRIDGE_REDIS_CONNECTION_STRING —
 # src/index.ts reads a different name, so the wrong one silently falls back to
 # the default and would point at the wrong Redis anywhere but here.
-export LEARNHOUSE_REDIS_URL="redis://localhost:6379/0"
+export VALIDBRIDGE_REDIS_URL="redis://localhost:6379/0"
 
 exec bun run start

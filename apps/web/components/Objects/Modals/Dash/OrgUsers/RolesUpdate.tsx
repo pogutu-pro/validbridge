@@ -1,5 +1,5 @@
 'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import FormLayout, {
   ButtonBlack,
@@ -27,7 +27,7 @@ interface Props {
 
 function RolesUpdate(props: Props) {
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token;
   const queryClient = useQueryClient()
   const { handlePlanLimit } = useUpgradeModal()

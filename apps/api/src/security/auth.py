@@ -6,7 +6,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, APITokenUser, PublicUser, SuperadminAPITokenUser, User, UserRead
 from src.services.users.users import security_get_user
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from pydantic import BaseModel
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -79,8 +79,8 @@ JWT_SECRET_KEY = SECRET_KEY
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
 JWT_COOKIE_SAMESITE = "lax"
 JWT_COOKIE_SECURE = True
-JWT_COOKIE_DOMAIN = get_learnhouse_config().hosting_config.cookie_config.domain
-JWT_COOKIE_NAME = "LH_access"
+JWT_COOKIE_DOMAIN = get_validbridge_config().hosting_config.cookie_config.domain
+JWT_COOKIE_NAME = "VB_access"
 
 
 def extract_jwt_from_request(request: Request) -> Optional[str]:
@@ -91,7 +91,7 @@ def extract_jwt_from_request(request: Request) -> Optional[str]:
     """
     # Try Authorization header first (standard API behavior)
     auth_header = request.headers.get("Authorization", "")
-    if auth_header.lower().startswith("bearer ") and not auth_header.lower().startswith("bearer lh_"):
+    if auth_header.lower().startswith("bearer ") and not auth_header.lower().startswith("bearer vb_"):
         return auth_header[7:].strip()
 
     # Fall back to cookies (for browser-based requests without explicit token)
@@ -215,13 +215,13 @@ def _refresh_token_lifetime() -> timedelta:
     Only a user who does not open the app at all for this long loses their
     session.
 
-    Overridable with ``LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS`` for operators who
+    Overridable with ``VALIDBRIDGE_AUTH_REFRESH_TOKEN_DAYS`` for operators who
     want a longer or shorter window, but never below
     ``MIN_REFRESH_TOKEN_DAYS`` — a shorter window is nearly always a
     misconfiguration that shows up as users complaining they get logged out.
     """
     import os
-    raw = os.environ.get("LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS")
+    raw = os.environ.get("VALIDBRIDGE_AUTH_REFRESH_TOKEN_DAYS")
     if raw:
         try:
             days = int(raw)
@@ -232,7 +232,7 @@ def _refresh_token_lifetime() -> timedelta:
 
 
 JWT_REFRESH_TOKEN_EXPIRES = _refresh_token_lifetime()
-JWT_REFRESH_COOKIE_NAME = "LH_refresh"
+JWT_REFRESH_COOKIE_NAME = "VB_refresh"
 
 
 def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
@@ -550,16 +550,16 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    # Step 1: Check for API token (Bearer lh_... or Bearer lh_sa_...)
+    # Step 1: Check for API token (Bearer vb_... or Bearer vb_sa_...)
     auth_header = request.headers.get("Authorization", "").strip()
     auth_lower = auth_header.lower()
 
-    # ORDER MATTERS: the superadmin prefix "lh_sa_" also starts with "lh_",
+    # ORDER MATTERS: the superadmin prefix "vb_sa_" also starts with "vb_",
     # so the broader org-token branch below would shadow it. Keep this
     # branch above the org-token branch — do not reorder for "alphabetical
     # cleanliness" — or every superadmin token will silently fall through
     # to org-token validation and fail.
-    if auth_lower.startswith("bearer lh_sa_"):
+    if auth_lower.startswith("bearer vb_sa_"):
         # Superadmin tokens are an Enterprise Edition credential. On an OSS
         # deployment they can only exist through a lapsed license or a direct
         # DB insert, so refuse before touching the database. This matters
@@ -580,8 +580,8 @@ async def get_current_user(
             return sa_user
         raise credentials_exception
 
-    # Case-insensitive check for "Bearer " prefix with lh_ token (org-scoped)
-    if auth_lower.startswith("bearer lh_"):
+    # Case-insensitive check for "Bearer " prefix with vb_ token (org-scoped)
+    if auth_lower.startswith("bearer vb_"):
         token = auth_header[7:].strip()  # Remove "Bearer " prefix and trim
         api_token_user = await validate_api_token(token, db_session)
         if api_token_user:
@@ -728,7 +728,7 @@ async def validate_api_token(
     Validate an API token and return an APITokenUser if valid.
 
     Args:
-        token: The full token string (lh_...)
+        token: The full token string (vb_...)
         db_session: Database session
 
     Returns:
@@ -778,7 +778,7 @@ async def validate_superadmin_api_token(
     token: str,
     db_session: AsyncSession,
 ) -> Optional[SuperadminAPITokenUser]:
-    """Validate a cross-org superadmin API token (lh_sa_...).
+    """Validate a cross-org superadmin API token (vb_sa_...).
 
     Returns a SuperadminAPITokenUser principal on success, None otherwise.
     The principal's `id` is the token id (not a user id) — code that needs

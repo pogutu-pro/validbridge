@@ -6,7 +6,7 @@ import { getAPIUrl } from '@services/config/config'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { safeImageSrc } from '@services/security/url'
 import { apiFetch } from '@services/utils/ts/requests'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import {
   User,
@@ -71,7 +71,7 @@ function OrgListTooltip({ orgs }: { orgs: OrgMembership[] }) {
   }, [open])
 
   if (orgs.length === 0) {
-    return <span className="text-white/25 text-xs">None</span>
+    return <span className="text-[#262626]/25 text-xs">None</span>
   }
 
   return (
@@ -80,13 +80,13 @@ function OrgListTooltip({ orgs }: { orgs: OrgMembership[] }) {
         ref={btnRef}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
-        className="text-sm text-white/60 hover:text-white/80 transition-colors underline decoration-dotted underline-offset-2"
+        className="text-sm text-[#737373]/80 hover:text-[#262626]/80 transition-colors underline decoration-dotted underline-offset-2"
       >
         {orgs.length} org{orgs.length !== 1 ? 's' : ''}
       </button>
       {open && pos && (
         <div
-          className="fixed z-[9999] w-64 bg-[#1a1a1b] border border-white/[0.12] rounded-lg shadow-xl p-2 space-y-1 max-h-64 overflow-y-auto"
+          className="fixed z-[9999] w-64 bg-[#262626] border border-white/[0.12] rounded-lg shadow-xl p-2 space-y-1 max-h-64 overflow-y-auto"
           style={{ top: pos.top, ...(pos.rtl ? { right: pos.left } : { left: pos.left }), transform: 'translateY(-100%)' }}
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
@@ -100,13 +100,13 @@ function OrgListTooltip({ orgs }: { orgs: OrgMembership[] }) {
                 <Buildings
                   size={12}
                   weight="fill"
-                  className="text-white/30 shrink-0"
+                  className="text-[#737373]/60 shrink-0"
                 />
-                <span className="text-xs font-medium text-white/90 truncate">
+                <span className="text-xs font-medium text-[#262626]/90 truncate">
                   {o.name}
                 </span>
               </div>
-              <span className="text-[10px] text-white/40 shrink-0 ms-2">
+              <span className="text-[10px] text-[#737373]/70 shrink-0 ms-2">
                 {o.role_name}
               </span>
             </div>
@@ -118,7 +118,7 @@ function OrgListTooltip({ orgs }: { orgs: OrgMembership[] }) {
 }
 
 export default function UserList() {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -227,8 +227,8 @@ export default function UserList() {
   }
 
   const avatarFallback = (
-    <div className="h-8 w-8 rounded-full bg-white/[0.08] flex items-center justify-center shrink-0">
-      <User size={14} weight="fill" className="text-white/30" />
+    <div className="h-8 w-8 rounded-full bg-[#FFF0E8] flex items-center justify-center shrink-0">
+      <User size={14} weight="fill" className="text-[#737373]/60" />
     </div>
   )
 
@@ -240,32 +240,32 @@ export default function UserList() {
           <div className="relative">
             <MagnifyingGlass
               size={14}
-              className="absolute start-2.5 top-1/2 -translate-y-1/2 text-white/30"
+              className="absolute start-2.5 top-1/2 -translate-y-1/2 text-[#737373]/60"
             />
             <input
               type="text"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search users..."
-              className="bg-white/[0.05] border border-white/[0.08] rounded-lg ps-8 pe-3 py-1.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-white/20 w-64"
+              className="bg-white/[0.05] border border-[#E7E5E4] rounded-lg ps-8 pe-3 py-1.5 text-sm text-[#262626] placeholder:text-[#262626]/25 focus:outline-none focus:border-white/20 w-64"
             />
           </div>
-          <span className="text-xs text-white/30">
+          <span className="text-xs text-[#737373]/60">
             {totalCount} user{totalCount !== 1 ? 's' : ''}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-white/40 me-1">Role:</span>
+              <span className="text-xs text-[#737373]/70 me-1">Role:</span>
               {SUPERADMIN_FILTERS.map((f) => (
                 <button
                   key={f}
                   onClick={() => handleSuperadminFilter(f)}
                   className={`text-xs px-2.5 py-1 rounded-md transition-colors capitalize ${
                     superadminFilter === f
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
+                      ? 'bg-white/10 text-[#262626]'
+                      : 'text-[#737373]/70 hover:text-[#737373]/80 hover:bg-white/[0.05]'
                   }`}
                 >
                   {f === 'all'
@@ -277,15 +277,15 @@ export default function UserList() {
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-white/40">Min orgs:</span>
+              <span className="text-xs text-[#737373]/70">Min orgs:</span>
               {[0, 1, 2, 3, 5].map((n) => (
                 <button
                   key={n}
                   onClick={() => handleMinOrgsChange(n)}
                   className={`text-xs px-2 py-1 rounded-md transition-colors ${
                     minOrgs === n
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
+                      ? 'bg-white/10 text-[#262626]'
+                      : 'text-[#737373]/70 hover:text-[#737373]/80 hover:bg-white/[0.05]'
                   }`}
                 >
                   {n === 0 ? 'Any' : `${n}+`}
@@ -294,7 +294,7 @@ export default function UserList() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-white/40 me-1">Sort:</span>
+            <span className="text-xs text-[#737373]/70 me-1">Sort:</span>
             {(
               [
                 ['id', 'Default'],
@@ -311,8 +311,8 @@ export default function UserList() {
                 onClick={() => handleSortChange(key)}
                 className={`text-xs px-2.5 py-1 rounded-md transition-colors ${
                   sortBy === key
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
+                    ? 'bg-white/10 text-[#262626]'
+                    : 'text-[#737373]/70 hover:text-[#737373]/80 hover:bg-white/[0.05]'
                 }`}
               >
                 {label}
@@ -325,7 +325,7 @@ export default function UserList() {
       {/* Table */}
       <div className="relative">
         {isValidating && !isLoading && (
-          <div className="absolute inset-0 bg-[#0f0f10]/50 z-10 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-[#F8F7F2]/50 z-10 flex items-center justify-center pointer-events-none">
             <div className="h-5 w-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
           </div>
         )}
@@ -334,7 +334,7 @@ export default function UserList() {
             <div className="h-6 w-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
           </div>
         ) : !users || users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-white/40">
+          <div className="flex flex-col items-center justify-center py-20 text-[#737373]/70">
             <User size={48} weight="fill" />
             <p className="mt-4 text-lg">No users found</p>
           </div>
@@ -342,23 +342,23 @@ export default function UserList() {
           <>
             <table className="w-full text-start">
               <thead>
-                <tr className="border-b border-white/[0.08]">
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                <tr className="border-b border-[#E7E5E4]">
+                  <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">
                     User
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">
                     Organizations
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">
                     Role
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">
                     Created
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-medium text-[#737373]/70 uppercase tracking-wider">
                     Updated
                   </th>
                 </tr>
@@ -372,7 +372,7 @@ export default function UserList() {
                   return (
                     <tr
                       key={u.id}
-                      className="border-b border-white/[0.05] hover:bg-white/[0.03] transition-colors"
+                      className="border-b border-[#E7E5E4] hover:bg-white/[0.03] transition-colors"
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -390,11 +390,11 @@ export default function UserList() {
                             avatarFallback
                           )}
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-white">
+                            <p className="text-sm font-medium text-[#262626]">
                               {u.username}
                             </p>
                             {fullName && (
-                              <p className="text-xs text-white/30 truncate max-w-[200px]">
+                              <p className="text-xs text-[#737373]/60 truncate max-w-[200px]">
                                 {fullName}
                               </p>
                             )}
@@ -406,9 +406,9 @@ export default function UserList() {
                           <EnvelopeSimple
                             size={12}
                             weight="bold"
-                            className="text-white/20 shrink-0"
+                            className="text-[#262626]/20 shrink-0"
                           />
-                          <span className="text-sm text-white/60 truncate max-w-[220px]">
+                          <span className="text-sm text-[#737373]/80 truncate max-w-[220px]">
                             {u.email}
                           </span>
                         </div>
@@ -423,20 +423,20 @@ export default function UserList() {
                             Superadmin
                           </span>
                         ) : (
-                          <span className="text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-white/[0.06] text-white/40">
+                          <span className="text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-white/[0.06] text-[#737373]/70">
                             User
                           </span>
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-white/40">
+                        <span className="text-sm text-[#737373]/70">
                           {u.creation_date
                             ? new Date(u.creation_date).toLocaleDateString()
                             : '—'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-white/40">
+                        <span className="text-sm text-[#737373]/70">
                           {u.update_date
                             ? new Date(u.update_date).toLocaleDateString()
                             : '—'}
@@ -451,14 +451,14 @@ export default function UserList() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-4 px-4">
-                <span className="text-xs text-white/30">
+                <span className="text-xs text-[#737373]/60">
                   Page {page} of {totalPages}
                 </span>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handlePageChange(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded text-[#737373]/70 hover:text-[#262626] hover:bg-black/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
                   >
                     <CaretLeft size={14} weight="bold" data-dir-flip />
                   </button>
@@ -472,7 +472,7 @@ export default function UserList() {
                     .map((p, idx, arr) => (
                       <React.Fragment key={p}>
                         {idx > 0 && arr[idx - 1] !== p - 1 && (
-                          <span className="text-white/20 text-xs px-1">
+                          <span className="text-[#262626]/20 text-xs px-1">
                             ...
                           </span>
                         )}
@@ -480,8 +480,8 @@ export default function UserList() {
                           onClick={() => handlePageChange(p)}
                           className={`text-xs min-w-[28px] h-7 rounded transition-colors ${
                             p === page
-                              ? 'bg-white/10 text-white'
-                              : 'text-white/40 hover:text-white hover:bg-white/[0.05]'
+                              ? 'bg-white/10 text-[#262626]'
+                              : 'text-[#737373]/70 hover:text-[#262626] hover:bg-white/[0.05]'
                           }`}
                         >
                           {p}
@@ -493,7 +493,7 @@ export default function UserList() {
                       handlePageChange(Math.min(totalPages, page + 1))
                     }
                     disabled={page === totalPages}
-                    className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded text-[#737373]/70 hover:text-[#262626] hover:bg-black/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
                   >
                     <CaretRight size={14} weight="bold" data-dir-flip />
                   </button>

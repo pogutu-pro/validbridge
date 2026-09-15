@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { BookCopy, LogIn } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 
 interface LandingClassicProps {
   courses: any[]
@@ -21,7 +21,7 @@ interface LandingClassicProps {
 
 function LandingClassic({ courses, orgslug, org_id }: LandingClassicProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const isAuthenticated = session?.status === 'authenticated'
 
   // Limit to 12 courses (4x3 grid) for the home page

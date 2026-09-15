@@ -16,7 +16,7 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
@@ -24,7 +24,7 @@ import {  UploadCloud, Clipboard } from 'lucide-react'
 import AIImageButton from '@components/Objects/AI/AIImageButton'
 import FormTagInput from "@components/Objects/StyledElements/Form/TagInput"
 import { useTranslation } from "react-i18next"
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useUpgradeModal } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'
 
 const _validationSchema = Yup.object().shape({
@@ -41,9 +41,9 @@ const _validationSchema = Yup.object().shape({
 
 function CreateCourseModal({ closeModal, orgslug }: any) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const queryClient = useQueryClient()
   const [orgId, setOrgId] = React.useState(null) as any
   const [isUploading, setIsUploading] = React.useState(false)

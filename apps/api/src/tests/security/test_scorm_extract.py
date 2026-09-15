@@ -29,7 +29,7 @@ class TestPathTraversal:
         zip_path, extract_dir = _write(tmp_path, pkg.adv_path_traversal())
         scorm._safe_extract_zip(zip_path, extract_dir)
         # The malicious ../../../../tmp file must NOT escape the extract dir.
-        assert not os.path.exists("/tmp/lh_scorm_pwned.txt")
+        assert not os.path.exists("/tmp/vb_scorm_pwned.txt")
         # Legit content is still present.
         assert os.path.exists(os.path.join(extract_dir, "index.html"))
         assert os.path.exists(os.path.join(extract_dir, "imsmanifest.xml"))

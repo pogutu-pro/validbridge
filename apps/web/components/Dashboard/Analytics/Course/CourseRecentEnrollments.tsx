@@ -86,7 +86,7 @@ export default function CourseRecentEnrollments({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={UserList} bg="bg-indigo-50" color="text-indigo-500" />}
+      icon={<WidgetIcon icon={UserList} bg="bg-orange-50" color="text-orange-500" />}
       title={t('analytics.course_analytics.recent_enrollments.title')}
       subtitle={t('analytics.course_analytics.recent_enrollments.subtitle')}
       modalContent={

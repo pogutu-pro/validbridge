@@ -129,7 +129,7 @@ class TestCustomDomainHelpers:
         assert token == "token123"
         assert is_valid_domain("docs.example.com") is True
         assert is_valid_domain("bad-domain") is False
-        assert is_reserved_domain("learnhouse.io") is True
+        assert is_reserved_domain("validbridge.co.ke") is True
         assert is_reserved_domain("docs.example.com") is False
         assert _get_subdomain_prefix("contribhub.com") == ""
         assert _get_subdomain_prefix("docs.learn.contribhub.com") == "docs.learn"
@@ -142,18 +142,18 @@ class TestCustomDomainHelpers:
 
         assert info.domain == "docs.example.com"
         assert info.status == "pending"
-        assert info.txt_record_host == "_learnhouse-verification.docs"
-        assert info.txt_record_value == "learnhouse-verify=token123"
+        assert info.txt_record_host == "_validbridge-verification.docs"
+        assert info.txt_record_value == "validbridge-verify=token123"
         assert info.cname_record_host == "docs"
-        assert info.cname_record_value == f"test-org.{custom_domains_service.LEARNHOUSE_DOMAIN}"
+        assert info.cname_record_value == f"test-org.{custom_domains_service.VALIDBRIDGE_DOMAIN}"
         assert "DNS records" in info.instructions
 
     def test_helper_functions_cover_apex_domain_instructions(self):
         info = get_verification_instructions("example.com", "token456", "org-slug")
 
-        assert info.txt_record_host == "_learnhouse-verification"
+        assert info.txt_record_host == "_validbridge-verification"
         assert info.cname_record_host == "@"
-        assert info.cname_record_value == f"org-slug.{custom_domains_service.LEARNHOUSE_DOMAIN}"
+        assert info.cname_record_value == f"org-slug.{custom_domains_service.VALIDBRIDGE_DOMAIN}"
 
 
 class TestAddCustomDomain:
@@ -235,7 +235,7 @@ class TestAddCustomDomain:
             await add_custom_domain(
                 mock_request,
                 db,
-                custom_domains_service.CustomDomainCreate(domain="https://learnhouse.io/app"),
+                custom_domains_service.CustomDomainCreate(domain="https://validbridge.co.ke/app"),
                 org.id,
                 admin_user,
             )
@@ -372,7 +372,7 @@ class TestVerificationInfoAndVerifyCustomDomain:
 
         assert info.domain == domain.domain
         assert info.status == "pending"
-        assert info.txt_record_host == "_learnhouse-verification.docs"
+        assert info.txt_record_host == "_validbridge-verification.docs"
         assert info.cname_record_host == "docs"
         assert result["success"] is True
         assert result["status"] == "pending"
@@ -452,7 +452,7 @@ class TestVerifyDomainDns:
         )
 
         dns_module, resolver_module = _install_fake_dns_module(
-            resolve_return_value=["learnhouse-verify=token-123"],
+            resolve_return_value=["validbridge-verify=token-123"],
         )
         with patch.dict(sys.modules, {"dns": dns_module, "dns.resolver": resolver_module}):
             success, message = await verify_domain_dns(domain, db, org.slug)
@@ -463,7 +463,7 @@ class TestVerifyDomainDns:
         assert domain.verified_at is not None
         assert domain.last_check_at is not None
         resolver_module.resolve.assert_called_once_with(
-            "_learnhouse-verification.docs.example.com",
+            "_validbridge-verification.docs.example.com",
             "TXT",
         )
 
@@ -476,7 +476,7 @@ class TestVerifyDomainDns:
             verification_token="token-abc",
         )
         dns_module, resolver_module = _install_fake_dns_module(
-            resolve_return_value=["learnhouse-verify=wrong"],
+            resolve_return_value=["validbridge-verify=wrong"],
         )
         with patch.dict(sys.modules, {"dns": dns_module, "dns.resolver": resolver_module}):
             success, message = await verify_domain_dns(mismatch, db, org.slug)
@@ -535,7 +535,7 @@ class TestVerifyDomainDns:
 
         with patch.dict(
             os.environ,
-            {"LEARNHOUSE_CUSTOM_DOMAIN_DEV_MODE": "true"},
+            {"VALIDBRIDGE_CUSTOM_DOMAIN_DEV_MODE": "true"},
             clear=False,
         ):
             success, message = await verify_domain_dns(dev_domain, db, org.slug)
@@ -973,7 +973,7 @@ class TestAgencySubdomainAutoVerify:
     must still go through the DNS TXT flow."""
 
     def test_is_own_agency_subdomain_matches_only_the_orgs_own_slug_host(self):
-        with patch.object(custom_domains_service, "LEARNHOUSE_DOMAIN", "acme.com"):
+        with patch.object(custom_domains_service, "VALIDBRIDGE_DOMAIN", "acme.com"):
             # The org's own slug host -> auto-verifiable.
             assert is_own_agency_subdomain("test-org.acme.com", "test-org") is True
             assert is_own_agency_subdomain("TEST-ORG.ACME.COM", "test-org") is True
@@ -988,8 +988,8 @@ class TestAgencySubdomainAutoVerify:
 
     def test_is_own_agency_subdomain_disabled_for_default_or_dev_apex(self):
         # No real agency domain configured -> never auto-verify (unsafe otherwise).
-        for base in ("learnhouse.io", "localhost", ""):
-            with patch.object(custom_domains_service, "LEARNHOUSE_DOMAIN", base):
+        for base in ("validbridge.co.ke", "localhost", ""):
+            with patch.object(custom_domains_service, "VALIDBRIDGE_DOMAIN", base):
                 assert is_own_agency_subdomain(f"test-org.{base}", "test-org") is False
 
     @pytest.mark.asyncio
@@ -1003,7 +1003,7 @@ class TestAgencySubdomainAutoVerify:
             verification_token="token-agency",
         )
 
-        with patch.object(custom_domains_service, "LEARNHOUSE_DOMAIN", "acme.com"):
+        with patch.object(custom_domains_service, "VALIDBRIDGE_DOMAIN", "acme.com"):
             success, message = await verify_domain_dns(domain, db, org.slug)
 
         assert success is True
@@ -1016,7 +1016,7 @@ class TestAgencySubdomainAutoVerify:
     async def test_add_custom_domain_auto_verifies_own_agency_subdomain(
         self, mock_request, db, org, admin_user
     ):
-        with patch.object(custom_domains_service, "LEARNHOUSE_DOMAIN", "acme.com"):
+        with patch.object(custom_domains_service, "VALIDBRIDGE_DOMAIN", "acme.com"):
             result = await add_custom_domain(
                 mock_request,
                 db,

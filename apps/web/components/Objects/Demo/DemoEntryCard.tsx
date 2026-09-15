@@ -5,7 +5,7 @@ import { Sparkle, CircleNotch } from '@phosphor-icons/react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import { DemoStatus, enterDemo, getDemoStatus } from '@services/demo/demo'
 
@@ -33,7 +33,7 @@ function formatInterval(minutes: number): string {
  */
 export default function DemoEntryCard({ className = '' }: { className?: string }) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const [status, setStatus] = useState<DemoStatus | null>(null)
   const [entering, setEntering] = useState(false)
 

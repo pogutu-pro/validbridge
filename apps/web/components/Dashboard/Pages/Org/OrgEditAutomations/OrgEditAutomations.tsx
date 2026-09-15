@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Image from 'next/image'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { Button } from '@components/ui/button'
 import { getAPIUrl } from '@services/config/config'
@@ -76,7 +76,7 @@ import {
   getWebhookDeliveryLogs,
 } from '@services/webhooks/webhooks'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 // Types for API-driven event registry
 interface EventInfo {
@@ -108,12 +108,12 @@ function buildCategories(events: Record<string, EventInfo>): EventCategory[] {
 }
 
 const OrgEditAutomations: React.FC = () => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   // Fetch event registry from API
   const { data: eventsData } = useQuery<{ events: Record<string, EventInfo> }>({
@@ -342,13 +342,13 @@ const OrgEditAutomations: React.FC = () => {
     }
   }
 
-  // Zapier hero card stays hidden until the LearnHouse Zapier app is live
+  // Zapier hero card stays hidden until the ValidBridge Zapier app is live
   const showZapierHeroCard = false
 
   return (
     <FeatureGate feature="webhooks">
       <>
-        {/* ── Zapier hero card (hidden until the LearnHouse Zapier app is live) ────────────────────── */}
+        {/* ── Zapier hero card (hidden until the ValidBridge Zapier app is live) ────────────────────── */}
         {showZapierHeroCard && (
         <div className="sm:mx-10 mx-0 mb-6 bg-white rounded-xl nice-shadow overflow-hidden">
           <div className="px-5 py-4 flex items-center gap-4">
@@ -358,7 +358,7 @@ const OrgEditAutomations: React.FC = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="font-semibold text-gray-800 text-[15px]">Zapier</h2>
-                <Badge className="bg-violet-50 text-violet-700 border border-violet-200 text-[10px] font-semibold uppercase tracking-wider hover:bg-violet-50">
+                <Badge className="bg-orange-50 text-orange-700 border border-orange-200 text-[10px] font-semibold uppercase tracking-wider hover:bg-orange-50">
                   Beta
                 </Badge>
                 {zapierWebhooks.length > 0 && (
@@ -368,7 +368,7 @@ const OrgEditAutomations: React.FC = () => {
                 )}
               </div>
               <p className="text-gray-500 text-xs mt-0.5">
-                Connect LearnHouse to thousands of apps without writing code.
+                Connect ValidBridge to thousands of apps without writing code.
               </p>
             </div>
             <div className="flex items-center gap-3 flex-shrink-0">
@@ -381,7 +381,7 @@ const OrgEditAutomations: React.FC = () => {
                 Manage Zaps
               </a>
               <a
-                href="https://zapier.com/apps/learnhouse/integrations"
+                href="https://zapier.com/app/zaps"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -1031,7 +1031,7 @@ const EventSelector: React.FC<{
 }
 
 // Compact row used inside the Zapier hero card.
-// Zapier-managed webhooks are read-only from LearnHouse's side — the Zap itself
+// Zapier-managed webhooks are read-only from ValidBridge's side — the Zap itself
 // must be edited inside Zapier. We only expose enable/disable, view logs, and
 // a delete escape hatch for admins who want to force-disconnect a Zap.
 const ZapierRow: React.FC<{

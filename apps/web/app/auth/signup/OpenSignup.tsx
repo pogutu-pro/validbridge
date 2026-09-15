@@ -11,12 +11,12 @@ import Link from 'next/link'
 import { signup, resendVerificationEmail } from '@services/auth/auth'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { signIn } from '@components/Contexts/AuthContext'
-import { getLEARNHOUSE_TOP_DOMAIN_VAL, isOnCustomDomain } from '@services/config/config'
+import { getVALIDBRIDGE_TOP_DOMAIN_VAL, isOnCustomDomain } from '@services/config/config'
 import { getErrorMessage } from '@services/utils/ts/errorMessage'
 import { useTranslation } from 'react-i18next'
 import { PasswordStrengthIndicator, validatePasswordStrength } from '@components/Auth/PasswordStrengthIndicator'
 import TurnstileWidget, { useTurnstileRequired, type TurnstileWidgetHandle } from '@components/Auth/TurnstileWidget'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { getAllowedAuthMethods } from '@services/auth/authMethods'
 import CustomSignupFields, {
   initialCustomFieldValues,
@@ -68,7 +68,7 @@ interface OpenSignUpComponentProps {
 
 function OpenSignUpComponent({ org: propOrg }: OpenSignUpComponentProps = {}) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('public')
+  const { track } = useVBAnalytics('public')
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const contextOrg = useOrg() as any
   const org = (contextOrg && (contextOrg.id || contextOrg.slug)) ? contextOrg : propOrg
@@ -156,15 +156,15 @@ function OpenSignUpComponent({ org: propOrg }: OpenSignUpComponentProps = {}) {
     track(AnalyticsEvent.SignupGoogleClicked)
     // Store org context in cookies before OAuth redirect
     if (org?.slug) {
-      const topDomain = getLEARNHOUSE_TOP_DOMAIN_VAL();
+      const topDomain = getVALIDBRIDGE_TOP_DOMAIN_VAL();
       const isSecure = window.location.protocol === 'https:';
       const secureAttr = isSecure ? '; secure' : '';
       const baseAttributes = `; path=/; SameSite=Lax${secureAttr}`;
       // Host-only on custom domains (a .{platformTopDomain} cookie can't be set
       // from learn.acme.org → browser drops it → callback loses org context).
       const domainAttr = (topDomain === 'localhost' || isOnCustomDomain()) ? '' : `; domain=.${topDomain}`;
-      document.cookie = `LH_oauth_orgslug=${org.slug}${baseAttributes}${domainAttr}`;
-      document.cookie = `LH_oauth_org_id=${org.id}${baseAttributes}${domainAttr}`;
+      document.cookie = `VB_oauth_orgslug=${org.slug}${baseAttributes}${domainAttr}`;
+      document.cookie = `VB_oauth_org_id=${org.id}${baseAttributes}${domainAttr}`;
     }
     // Use absolute URL with current origin for custom domain support
     signIn('google', { callbackUrl: buildCallbackUrl() });

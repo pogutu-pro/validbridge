@@ -43,11 +43,11 @@ import { PlanLevel, planMeetsRequirement } from '@services/plans/plans'
 import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import WelcomeGlobe from './WelcomeGlobe'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const ACTIVITY_TYPES = [
   { icon: Browsers, color: 'text-blue-400', label: 'Page' },
-  { icon: PlayCircle, color: 'text-violet-400', label: 'Video' },
+  { icon: PlayCircle, color: 'text-orange-400', label: 'Video' },
   { icon: FileText, color: 'text-emerald-400', label: 'Document' },
   { icon: Backpack, color: 'text-amber-400', label: 'Assignment' },
   { icon: MarkdownLogo, color: 'text-rose-400', label: 'Markdown' },
@@ -78,7 +78,7 @@ const STEP_CONFIG: Record<
     actionLabel: 'Go to Content',
     actionHref: '',
     pattern: `repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(196,181,253,0.1) 8px, rgba(196,181,253,0.1) 9px)`,
-    iconColor: 'text-violet-400',
+    iconColor: 'text-orange-400',
   },
   experience_editor: {
     icon: PencilSimple,
@@ -115,7 +115,7 @@ const STEP_CONFIG: Record<
     actionLabel: '',
     actionHref: '',
     pattern: '',
-    iconColor: 'text-indigo-400',
+    iconColor: 'text-orange-400',
   },
 }
 
@@ -143,7 +143,7 @@ export default function OnboardingBar() {
   } = useOnboarding()
 
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const [showFarewell, setShowFarewell] = useState(false)
   const isDev = process.env.NODE_ENV === 'development'
   const currentPlan = usePlan()
@@ -625,7 +625,7 @@ export default function OnboardingBar() {
                                             </span>
                                           </div>
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
-                                            <ImageIcon size={16} weight="duotone" className="text-violet-400 shrink-0" />
+                                            <ImageIcon size={16} weight="duotone" className="text-orange-400 shrink-0" />
                                             <span className="text-[11px] font-medium text-gray-600">
                                               {t('onboarding.steps.experience_editor.images_media')}
                                             </span>
@@ -662,19 +662,19 @@ export default function OnboardingBar() {
                                       </div>
                                     )}
 
-                                  {/* Teach the world — LearnHouse University link */}
+                                  {/* Teach the world — ValidBridge University link */}
                                   {step.id === 'teach_the_world' &&
                                     !step.completed && (
                                       <div className="relative px-3 pb-3 space-y-2">
                                         <a
-                                          href="https://university.learnhouse.io"
+                                          href="https://university.validbridge.co.ke"
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white nice-shadow hover:bg-gray-50 transition-colors"
                                         >
                                           <img
                                             src="/UNI_LOGO.png"
-                                            alt="LearnHouse University"
+                                            alt="ValidBridge University"
                                             className="h-9 w-auto shrink-0 rounded"
                                           />
                                           <div className="min-w-0">
@@ -688,7 +688,7 @@ export default function OnboardingBar() {
                                           <span className="text-gray-300 shrink-0 ms-auto">→</span>
                                         </a>
                                         <a
-                                          href="https://classroom.learnhouse.io"
+                                          href="https://classroom.validbridge.co.ke"
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white nice-shadow hover:bg-gray-50 transition-colors"

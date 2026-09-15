@@ -1,4 +1,4 @@
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import Toast from '@components/Objects/StyledElements/Toast/Toast'
@@ -28,7 +28,7 @@ import toast from 'react-hot-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useUpgradeModal } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'
 
 const ITEMS_PER_PAGE = 10
@@ -51,7 +51,7 @@ const invitedUsersKey = (orgId: number) => ['org', orgId, 'invitedUsers'] as con
 function OrgUsersAdd() {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
@@ -63,7 +63,7 @@ function OrgUsersAdd() {
   const [page, setPage] = useState(1)
   // A free org that hits its member limit gets the shared upgrade paywall.
   const { handlePlanLimit } = useUpgradeModal()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
 
   const { data: invites } = useQuery({
     queryKey: queryKeys.org.inviteCodes(org?.id),
@@ -213,7 +213,7 @@ function OrgUsersAdd() {
             value={invitedUsers}
             onChange={(e) => setInvitedUsers(e.target.value)}
             aria-label={t('dashboard.users.invite_members.email_placeholder')}
-            className="w-full h-[140px] rounded-lg border border-gray-200 px-4 py-3 bg-gray-50/50 placeholder:italic placeholder:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all resize-none"
+            className="w-full h-[140px] rounded-lg border border-gray-200 px-4 py-3 bg-gray-50/50 placeholder:italic placeholder:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all resize-none"
             placeholder={t('dashboard.users.invite_members.email_placeholder')}
           />
           <div className="flex flex-wrap gap-3 items-center justify-between mt-4">
@@ -225,7 +225,7 @@ function OrgUsersAdd() {
                 onChange={(e) => setSelectedInviteCode(e.target.value || undefined)}
                 value={selectedInviteCode || ''}
                 aria-label={t('dashboard.users.invite_members.invite_code_label')}
-                className="text-sm text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                className="text-sm text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
               >
                 <option value="">{t('dashboard.users.invite_members.no_invite_code') || 'None'}</option>
                 {invites?.map((invite: any) => (
@@ -342,7 +342,7 @@ function OrgUsersAdd() {
                   t('dashboard.users.invite_members.invited_users.search_placeholder') ||
                   'Search by email...'
                 }
-                className="ps-10 pe-4 py-2 w-full sm:w-[200px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                className="ps-10 pe-4 py-2 w-full sm:w-[200px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
                 value={searchValue}
                 onChange={(e) => handleSearchChange(e.target.value)}
               />

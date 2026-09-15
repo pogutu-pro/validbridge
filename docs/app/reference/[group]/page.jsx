@@ -31,15 +31,15 @@ export default async function GroupPage({ params }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'APIReference',
-    name: `LearnHouse API — ${model.title}`,
+    name: `ValidBridge API — ${model.title}`,
     description: model.description,
-    url: `https://docs.learnhouse.app/reference/${model.slug}`,
+    url: `https://docs.validbridge.co.ke/reference/${model.slug}`,
     programmingModel: 'REST',
-    targetPlatform: 'LearnHouse',
+    targetPlatform: 'ValidBridge',
     isPartOf: {
       '@type': 'WebSite',
-      name: 'LearnHouse Docs',
-      url: 'https://docs.learnhouse.app',
+      name: 'ValidBridge Docs',
+      url: 'https://docs.validbridge.co.ke',
     },
   }
 

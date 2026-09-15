@@ -7,7 +7,7 @@ import { getActivityBlockMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { constructAcceptValue } from '@/lib/constants';
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,7 @@ function PDFBlockComponent(props: any) {
   const { t } = useTranslation()
   const org = useOrg() as any
   const course = useCourse() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token;
   const [pdf, setPDF] = React.useState<File | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)

@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import {
@@ -76,7 +76,7 @@ const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   failed:    { label: 'Failed',    cls: 'bg-red-100 text-red-600' },
   cancelled: { label: 'Cancelled', cls: 'bg-gray-100 text-gray-500' },
   canceled:  { label: 'Cancelled', cls: 'bg-gray-100 text-gray-500' },
-  refunded:  { label: 'Refunded',  cls: 'bg-purple-100 text-purple-700' },
+  refunded:  { label: 'Refunded',  cls: 'bg-orange-100 text-orange-700' },
   trialing:  { label: 'Trialing',  cls: 'bg-sky-100 text-sky-700' },
   past_due:  { label: 'Past due',  cls: 'bg-red-100 text-red-600' },
 }
@@ -143,10 +143,10 @@ function OverviewTab({ orgId, accessToken }: { orgId: number; accessToken: strin
       {/* Metric cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         <MetricCard label="MRR"               value={fmt(d.mrr)}            icon={TrendingUp}  color="bg-blue-100 text-blue-600" />
-        <MetricCard label="ARR"               value={fmt(d.arr)}            icon={TrendingUp}  color="bg-indigo-100 text-indigo-600" />
+        <MetricCard label="ARR"               value={fmt(d.arr)}            icon={TrendingUp}  color="bg-orange-100 text-orange-600" />
         <MetricCard label="Total revenue"     value={fmt(d.total_revenue)}  icon={DollarSign}  color="bg-green-100 text-green-600" />
-        <MetricCard label="Active subscribers" value={String(d.active_subscribers)} icon={RefreshCcw} color="bg-violet-100 text-violet-600" />
-        <MetricCard label="Total customers"   value={String(d.total_customers)} icon={Users}   color="bg-purple-100 text-purple-600" />
+        <MetricCard label="Active subscribers" value={String(d.active_subscribers)} icon={RefreshCcw} color="bg-orange-100 text-orange-600" />
+        <MetricCard label="Total customers"   value={String(d.total_customers)} icon={Users}   color="bg-orange-100 text-orange-600" />
         <MetricCard label="Churned (30d)"     value={String(d.churn_30d)}   icon={Activity}    color="bg-red-100 text-red-500" />
       </div>
 
@@ -351,7 +351,7 @@ function TransactionsTab({ orgId, accessToken }: { orgId: number; accessToken: s
                 <TableCell className="font-semibold">{fmt(ch.amount, ch.currency)}</TableCell>
                 <TableCell className="text-sm">
                   {ch.amount_refunded > 0 ? (
-                    <span className="text-purple-600">{fmt(ch.amount_refunded, ch.currency)}</span>
+                    <span className="text-orange-600">{fmt(ch.amount_refunded, ch.currency)}</span>
                   ) : '—'}
                 </TableCell>
                 <TableCell><StatusPill status={ch.paid ? 'succeeded' : ch.status} /></TableCell>
@@ -497,7 +497,7 @@ function StripeUnavailable() {
 // ---------------------------------------------------------------------------
 function PaymentsCustomersPage() {
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const { isEnabled, isLoading } = usePaymentsEnabled()
   const [activeTab, setActiveTab] = useState<Tab>('overview')

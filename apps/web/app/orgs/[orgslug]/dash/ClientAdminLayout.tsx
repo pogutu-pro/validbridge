@@ -5,7 +5,7 @@ import OnboardingTracker from '@components/Dashboard/Onboarding/OnboardingTracke
 import WelcomeModal from '@components/Dashboard/Onboarding/WelcomeModal';
 import DemoBanner from '@components/Objects/Demo/DemoBanner';
 import AdminAuthorization from '@components/Security/AdminAuthorization'
-import { SessionGate } from '@components/Contexts/LHSessionContext'
+import { SessionGate } from '@components/Contexts/VBSessionContext'
 import { CommandPaletteProvider } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
 import CommandPalette from '@components/Dashboard/CommandPalette/CommandPalette'
 import { UpgradeModalProvider } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'

@@ -33,8 +33,8 @@ export default function CourseLearnerRetention({
       <AreaChart data={chartRows}>
         <defs>
           <linearGradient id="retentionGradientMini" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.2} />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+            <stop offset="0%" stopColor="#f97316" stopOpacity={0.2} />
+            <stop offset="100%" stopColor="#f97316" stopOpacity={0.02} />
           </linearGradient>
         </defs>
         <XAxis dataKey="day" tick={{ fontSize: 9 }} axisLine={false} tickLine={false} />
@@ -43,7 +43,7 @@ export default function CourseLearnerRetention({
           labelFormatter={(label) => t('analytics.course_analytics.learner_retention.day_label', { day: label })}
           contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 13 }}
         />
-        <Area type="monotone" dataKey="retention" stroke="#6366f1" strokeWidth={2} fill="url(#retentionGradientMini)" dot={false} />
+        <Area type="monotone" dataKey="retention" stroke="#f97316" strokeWidth={2} fill="url(#retentionGradientMini)" dot={false} />
       </AreaChart>
     </ResponsiveContainer>
   )
@@ -53,8 +53,8 @@ export default function CourseLearnerRetention({
       <AreaChart data={chartRows}>
         <defs>
           <linearGradient id="retentionGradientModal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+            <stop offset="0%" stopColor="#f97316" stopOpacity={0.3} />
+            <stop offset="100%" stopColor="#f97316" stopOpacity={0.02} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -77,14 +77,14 @@ export default function CourseLearnerRetention({
           labelFormatter={(label) => t('analytics.course_analytics.learner_retention.day_label', { day: label })}
           contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 13 }}
         />
-        <Area type="monotone" dataKey="retention" stroke="#6366f1" strokeWidth={2.5} fill="url(#retentionGradientModal)" dot={{ r: 3, fill: '#6366f1', strokeWidth: 0 }} />
+        <Area type="monotone" dataKey="retention" stroke="#f97316" strokeWidth={2.5} fill="url(#retentionGradientModal)" dot={{ r: 3, fill: '#f97316', strokeWidth: 0 }} />
       </AreaChart>
     </ResponsiveContainer>
   )
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={UsersFour} bg="bg-indigo-50" color="text-indigo-500" />}
+      icon={<WidgetIcon icon={UsersFour} bg="bg-orange-50" color="text-orange-500" />}
       title={t('analytics.course_analytics.learner_retention.title')}
       subtitle={t('analytics.course_analytics.learner_retention.subtitle')}
       modalContent={
@@ -95,9 +95,9 @@ export default function CourseLearnerRetention({
         ) : (
           <div className="space-y-5">
             <div className="flex gap-8">
-              <div className="bg-indigo-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.learner_retention.cohort_size')}</p>
-                <p className="text-2xl font-bold text-indigo-600">{cohortSize}</p>
+              <div className="bg-orange-50 rounded-xl px-5 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-orange-400 font-semibold">{t('analytics.course_analytics.learner_retention.cohort_size')}</p>
+                <p className="text-2xl font-bold text-orange-600">{cohortSize}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.learner_retention.current_retention')}</p>
@@ -120,7 +120,7 @@ export default function CourseLearnerRetention({
               <span className="text-2xl font-bold text-gray-900"><AnimatedNumber value={latestRetention} suffix="%" /></span>
               <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.retention')}</span>
             </div>
-            <span className="text-xs text-indigo-400">{cohortSize} {t('analytics.course_analytics.units.in_cohort')}</span>
+            <span className="text-xs text-orange-400">{cohortSize} {t('analytics.course_analytics.units.in_cohort')}</span>
           </div>
           <MiniChart />
         </div>

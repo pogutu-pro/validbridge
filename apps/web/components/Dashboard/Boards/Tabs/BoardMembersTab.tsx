@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { UserPlus, Trash2, Search, Check, User, Users } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
@@ -16,7 +16,7 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import UserAvatar from '@components/Objects/UserAvatar'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface BoardMembersTabProps {
   boardUuid: string
@@ -25,7 +25,7 @@ interface BoardMembersTabProps {
 
 function BoardMembersTab({ boardUuid, orgId }: BoardMembersTabProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
 
@@ -128,7 +128,7 @@ function BoardMembersTab({ boardUuid, orgId }: BoardMembersTabProps) {
                   <td className="py-3 px-4">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${
                       member.role === 'owner'
-                        ? 'bg-purple-100 text-purple-700'
+                        ? 'bg-orange-100 text-orange-700'
                         : member.role === 'editor'
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-gray-100 text-gray-700'
@@ -205,7 +205,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen }: {
   setModalOpen: (_open: boolean) => void
 }) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set())

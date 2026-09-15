@@ -1,6 +1,6 @@
 'use client'
 import React, { createContext, useContext, useEffect, useReducer } from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAssignmentTask } from '@services/courses/assignments'
 import { useAssignments } from './AssignmentContext';
 import { useQueryClient } from '@tanstack/react-query';
@@ -27,7 +27,7 @@ export const AssignmentsTaskContext = createContext<State | undefined>(undefined
 export const AssignmentsTaskDispatchContext = createContext<React.Dispatch<Action> | undefined>(undefined);
 
 export function AssignmentsTaskProvider({ children }: { children: React.ReactNode }) {
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const assignment = useAssignments() as any
     const queryClient = useQueryClient();

@@ -1,6 +1,6 @@
-# Tinybird Analytics for LearnHouse
+# Tinybird Analytics for ValidBridge
 
-LearnHouse uses [Tinybird](https://www.tinybird.co/) (managed ClickHouse) for analytics event ingestion and querying. This directory contains the datasource schema and reference pipe definitions.
+ValidBridge uses [Tinybird](https://www.tinybird.co/) (managed ClickHouse) for analytics event ingestion and querying. This directory contains the datasource schema and reference pipe definitions.
 
 ## Architecture
 
@@ -19,14 +19,14 @@ LearnHouse uses [Tinybird](https://www.tinybird.co/) (managed ClickHouse) for an
 Set these in your `.env` or deployment secrets:
 
 ```
-LEARNHOUSE_TINYBIRD_API_URL=https://api.europe-west2.gcp.tinybird.co
-LEARNHOUSE_TINYBIRD_INGEST_TOKEN=p.eyJ...
-LEARNHOUSE_TINYBIRD_READ_TOKEN=p.eyJ...
+VALIDBRIDGE_TINYBIRD_API_URL=https://api.europe-west2.gcp.tinybird.co
+VALIDBRIDGE_TINYBIRD_INGEST_TOKEN=p.eyJ...
+VALIDBRIDGE_TINYBIRD_READ_TOKEN=p.eyJ...
 ```
 
-- `LEARNHOUSE_TINYBIRD_API_URL` — Your workspace's regional API URL
-- `LEARNHOUSE_TINYBIRD_INGEST_TOKEN` — Token with write permissions (Events API)
-- `LEARNHOUSE_TINYBIRD_READ_TOKEN` — Token with read permissions (Query API / SQL)
+- `VALIDBRIDGE_TINYBIRD_API_URL` — Your workspace's regional API URL
+- `VALIDBRIDGE_TINYBIRD_INGEST_TOKEN` — Token with write permissions (Events API)
+- `VALIDBRIDGE_TINYBIRD_READ_TOKEN` — Token with read permissions (Query API / SQL)
 
 When both tokens are set, analytics is enabled automatically. When they are missing, the API skips tracking and the frontend shows a "not configured" message.
 
@@ -88,7 +88,7 @@ tb datasource ls
 ```bash
 curl -X POST \
   'https://api.europe-west2.gcp.tinybird.co/v0/events?name=events' \
-  -H "Authorization: Bearer $LEARNHOUSE_TINYBIRD_INGEST_TOKEN" \
+  -H "Authorization: Bearer $VALIDBRIDGE_TINYBIRD_INGEST_TOKEN" \
   -d '{"event_name":"test","timestamp":"2025-01-01 00:00:00","org_id":1,"user_id":1,"session_id":"test","properties":"{}","source":"test","ip":"127.0.0.1"}'
 ```
 
@@ -97,7 +97,7 @@ curl -X POST \
 ```bash
 curl -X POST \
   'https://api.europe-west2.gcp.tinybird.co/v0/sql' \
-  -H "Authorization: Bearer $LEARNHOUSE_TINYBIRD_READ_TOKEN" \
+  -H "Authorization: Bearer $VALIDBRIDGE_TINYBIRD_READ_TOKEN" \
   -d "SELECT count() FROM events FORMAT JSON"
 ```
 
@@ -114,7 +114,7 @@ tinybird/
 
 ### Why Pipes Are Not Deployed
 
-LearnHouse uses the Tinybird **Query API** (`POST /v0/sql`) to run ClickHouse SQL directly, rather than deploying pipe endpoints. This approach:
+ValidBridge uses the Tinybird **Query API** (`POST /v0/sql`) to run ClickHouse SQL directly, rather than deploying pipe endpoints. This approach:
 
 - Avoids Forward mode deployment complexity for pipes
 - Keeps all query logic in the Python codebase (`src/services/analytics/queries.py`)
@@ -165,7 +165,7 @@ rm -rf /tmp/tb-empty
 # Option 2: Delete via API (only works in Classic mode, NOT Forward mode)
 curl -X DELETE \
   'https://api.europe-west2.gcp.tinybird.co/v0/datasources/events' \
-  -H "Authorization: Bearer $LEARNHOUSE_TINYBIRD_INGEST_TOKEN"
+  -H "Authorization: Bearer $VALIDBRIDGE_TINYBIRD_INGEST_TOKEN"
 ```
 
 ### Delete Deployment History
@@ -194,7 +194,7 @@ The datasource hasn't been deployed yet. Follow the [Initial Setup](#initial-set
 Same as above — the Events API cannot auto-create datasources in Forward mode.
 
 ### Dashboard shows "Analytics not configured"
-The `LEARNHOUSE_TINYBIRD_INGEST_TOKEN` and/or `LEARNHOUSE_TINYBIRD_READ_TOKEN` env vars are not set. Set both to enable analytics.
+The `VALIDBRIDGE_TINYBIRD_INGEST_TOKEN` and/or `VALIDBRIDGE_TINYBIRD_READ_TOKEN` env vars are not set. Set both to enable analytics.
 
 ### Dashboard queries return empty data
 If the `events` table exists but has no data, queries will return empty results. Send some test events or use the app to generate real events.

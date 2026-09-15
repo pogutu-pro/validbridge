@@ -12,7 +12,7 @@ from typing import Literal
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.security.features_utils.plan_check import get_org_plan
 from src.security.features_utils.plans import plan_meets_requirement
 
@@ -50,7 +50,7 @@ _PURPOSE_TIERS: dict[str, tuple[Tier, Tier]] = {
 
 def model_for_tier(tier: Tier) -> str:
     """Return the configured model name for a tier, falling back to the Gemini default."""
-    cfg = get_learnhouse_config().ai_config
+    cfg = get_validbridge_config().ai_config
     return getattr(cfg, _TIER_CONFIG_ATTR[tier], None) or _TIER_DEFAULTS[tier]
 
 

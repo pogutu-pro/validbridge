@@ -1,8 +1,8 @@
 """
 Zapier integration router.
 
-These endpoints are called by the Zapier Platform (not the LearnHouse dashboard)
-and MUST be authenticated via an API token (``Authorization: Bearer lh_...``).
+These endpoints are called by the Zapier Platform (not the ValidBridge dashboard)
+and MUST be authenticated via an API token (``Authorization: Bearer vb_...``).
 The token carries the organization scope — no ``org_id`` appears in the URL.
 
 Pattern: REST Hooks. When a Zap is enabled, Zapier calls ``POST /subscriptions``
@@ -52,7 +52,7 @@ def _require_api_token(current_user) -> APITokenUser:
     if not isinstance(current_user, APITokenUser):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Zapier endpoints require an API token (Authorization: Bearer lh_...)",
+            detail="Zapier endpoints require an API token (Authorization: Bearer vb_...)",
         )
     return current_user
 

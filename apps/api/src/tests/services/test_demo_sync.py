@@ -322,7 +322,7 @@ async def test_payments_is_only_unlocked_where_the_storefront_can_be_swept(db, s
 async def test_enterprise_only_features_follow_the_deployment_not_the_config(db, synced):
     """Deployment mode has the last word, whatever the config asks for.
 
-    The suite pins OSS (conftest sets LEARNHOUSE_DISABLE_EE), so this documents
+    The suite pins OSS (conftest sets VALIDBRIDGE_DISABLE_EE), so this documents
     where the ceiling actually is: an Enterprise-only feature stays unavailable
     on a self-hosted OSS install however the demo is configured.
     """

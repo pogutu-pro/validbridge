@@ -6,7 +6,7 @@ import { queryKeys } from '@/lib/query/keys'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/lib/format'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { Users, ShieldCheck, Clock, EnvelopeSimple } from '@phosphor-icons/react'
@@ -14,7 +14,7 @@ import { Users, ShieldCheck, Clock, EnvelopeSimple } from '@phosphor-icons/react
 export default function RecentMembers() {
   const { t, i18n } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const token = session?.data?.tokens?.access_token
   const orgId = org?.id
 
@@ -36,7 +36,7 @@ export default function RecentMembers() {
             {t('dashboard.home.recent_members')}
           </h3>
           {totalMembers > 0 && (
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
               {totalMembers} {t('dashboard.home.total')}
             </span>
           )}
@@ -95,8 +95,8 @@ export default function RecentMembers() {
                 className="flex items-center gap-3 px-5 py-3"
               >
                 {/* Avatar */}
-                <div className="w-8 h-8 rounded-full bg-indigo-100 shrink-0 flex items-center justify-center">
-                  <span className="text-[11px] font-semibold text-indigo-600">
+                <div className="w-8 h-8 rounded-full bg-orange-100 shrink-0 flex items-center justify-center">
+                  <span className="text-[11px] font-semibold text-orange-600">
                     {initials}
                   </span>
                 </div>

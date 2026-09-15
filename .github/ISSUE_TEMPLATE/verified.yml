@@ -4,9 +4,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for your interest in LearnHouse 💖
+        Thanks for your interest in ValidBridge 💖
 
-        If you are not someone from the team or the team didn't ask you directly to create an issue here, please start the conversation in a [Question in GitHub Discussions](https://github.com/learnhouse/learnhouse/discussions/categories/questions) instead.
+        If you are not someone from the team or the team didn't ask you directly to create an issue here, please start the conversation in a [Question in GitHub Discussions](https://github.com/pogutu-pro/validbridge/discussions/categories/questions) instead.
   - type: checkboxes
     id: verified
     attributes:

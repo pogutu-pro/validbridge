@@ -48,11 +48,11 @@
     "help": "Help",
     "help_menu": {
       "documentation": "Documentation",
-      "website": "LearnHouse Website",
+      "website": "ValidBridge Website",
       "discord": "Discord",
       "report_feedback": "Report Issue or Feedback",
       "feedback_title": "Send Feedback",
-      "feedback_description": "Help us improve LearnHouse by sharing your thoughts, reporting bugs, or suggesting new features.",
+      "feedback_description": "Help us improve ValidBridge by sharing your thoughts, reporting bugs, or suggesting new features.",
       "feedback_placeholder": "Tell us what's on your mind...",
       "feedback_success": "Thank you for your feedback!",
       "send_feedback": "Send Feedback",
@@ -215,7 +215,7 @@
     "organizations": "Organizations",
     "billing": "Billing",
     "create_organization": "Create organization",
-    "copyright": "© {{year}} LearnHouse, Inc.",
+    "copyright": "© {{year}} ValidBridge, Inc.",
     "delete_organization_error": "Could not delete this organization. Please try again.",
     "org_actions": "Organization actions",
     "manage_upgrade": "Manage / Upgrade",
@@ -361,17 +361,17 @@
     "invite_required_desc": "An invite code is required to join {{org}}",
     "invite_code": "Invite Code",
     "validate_invite": "Validate Invite",
-    "terms_text": "By continuing, you agree to LearnHouse's",
+    "terms_text": "By continuing, you agree to ValidBridge's",
     "terms_of_service": "Terms of Service",
     "and": "and",
     "privacy_policy": "Privacy Policy",
     "image_title_forgot": "Reset your password.",
     "image_subtitle_forgot": "We'll help you get back into your account in no time.",
-    "image_title_login": "Welcome back to LearnHouse.",
+    "image_title_login": "Welcome back to ValidBridge.",
     "image_subtitle_login": "Pick up where you left off — your courses, students, and tools are waiting.",
     "image_title_reset": "Almost there.",
     "image_subtitle_reset": "Create a strong password to keep your account secure.",
-    "image_title_signup": "Start teaching with LearnHouse.",
+    "image_title_signup": "Start teaching with ValidBridge.",
     "image_subtitle_signup": "Create your account and launch your first course in minutes.",
     "image_title_verify": "Verify your email.",
     "image_subtitle_verify": "One quick step to secure your account and get started.",
@@ -580,14 +580,14 @@
     "import": {
       "scorm_package": "SCORM Package",
       "scorm_description": "Import SCORM 1.2 or SCORM 2004 packages",
-      "learnhouse_courses": "LearnHouse Courses",
-      "learnhouse_description": "Import courses exported from LearnHouse",
+      "validbridge_courses": "ValidBridge Courses",
+      "validbridge_description": "Import courses exported from ValidBridge",
       "upload_package": "Upload Package",
       "configure": "Configure",
       "complete": "Complete",
       "click_to_upload": "Click to upload or drag and drop",
-      "learnhouse_format": "LearnHouse course export (.zip)",
-      "learnhouse_info": "Upload a LearnHouse course export package (.zip). You'll be able to select which courses to import and configure import options.",
+      "validbridge_format": "ValidBridge course export (.zip)",
+      "validbridge_info": "Upload a ValidBridge course export package (.zip). You'll be able to select which courses to import and configure import options.",
       "analyze_package": "Analyze Package",
       "ready_to_analyze": "Ready to analyze",
       "invalid_file_format": "Please upload a .zip file",
@@ -1475,7 +1475,7 @@
     "not_supported_title": "This activity is not supported",
     "not_supported_description": "This type of activity requires authentication and cannot be embedded.",
     "visit_activity": "Visit Activity Page",
-    "powered_by": "Powered by LearnHouse"
+    "powered_by": "Powered by ValidBridge"
   },
   "assignments": {
     "submit_assignment": "Submit Assignment",
@@ -1899,7 +1899,7 @@
           "rate_limited": "Too many attempts. Please wait a moment and try again.",
           "status_error": "Could not load your two-factor settings.",
           "copy_failed": "Could not copy. Please select the text and copy it manually.",
-          "codes_file_header": "LearnHouse two-factor backup codes. Each code can be used once.",
+          "codes_file_header": "ValidBridge two-factor backup codes. Each code can be used once.",
           "already_enabled": "Two-factor authentication is already enabled on this account.",
           "setup_failed": "Could not start two-factor setup. Please try again.",
           "enabled_toast": "Two-factor authentication is now enabled.",
@@ -2018,7 +2018,7 @@
           "description": "Configure your personal settings, passwords, email"
         }
       },
-      "learnhouse_university": "LearnHouse University",
+      "validbridge_university": "ValidBridge University",
       "welcome_back": "Welcome back",
       "plan": "plan",
       "create_course": "Create Course",
@@ -2075,8 +2075,8 @@
       "import_course": "Import Course",
       "import_scorm": "Import SCORM",
       "import_scorm_description": "Import a SCORM package to create a new course",
-      "import_learnhouse": "Import LearnHouse Course",
-      "import_learnhouse_description": "Import a course exported from LearnHouse",
+      "import_validbridge": "Import ValidBridge Course",
+      "import_validbridge_description": "Import a course exported from ValidBridge",
       "import_select_type": "Select the type of course to import",
       "no_courses": "No courses yet",
       "create_course_placeholder": "Create a course to add content",
@@ -2937,8 +2937,8 @@
         "email_sender_name_desc": "The name recipients see on emails sent for this organization — login links, password resets, invitations, verification and welcome emails. Those emails also carry your logo, your brand color on buttons and your watermark setting. Only the name changes here — the sending address stays the platform's, which is what keeps these emails passing SPF and DKIM checks. Leave empty to use the platform default.",
         "default_language": "Default Language",
         "default_language_desc": "The language new visitors see by default and the language used for emails sent on behalf of this organization. Members can still switch their own UI language.",
-        "watermark_label": "\"Made with LearnHouse\" watermark",
-        "watermark_desc": "Show the LearnHouse branding watermark on your organization pages",
+        "watermark_label": "\"Made with ValidBridge\" watermark",
+        "watermark_desc": "Show the ValidBridge branding watermark on your organization pages",
         "watermark_free_plan": "Watermark is always shown on the free plan",
         "watermark_ee": "Hidden by your Enterprise Edition license"
       },
@@ -3088,7 +3088,7 @@
         },
         "previews": {
           "thumbnail_title": "Thumbnail",
-          "thumbnail_desc": "The cover image for your organization when it is listed or shared: on the LearnHouse explore page and in link previews.",
+          "thumbnail_desc": "The cover image for your organization when it is listed or shared: on the ValidBridge explore page and in link previews.",
           "thumbnail_add": "Add thumbnail",
           "thumbnail_replace": "Replace thumbnail",
           "gallery_title": "Preview gallery",
@@ -3659,8 +3659,8 @@
         "methods_description": "Choose how members are allowed to sign in to this organization. Leave every method checked to keep sign-in unrestricted.",
         "methods_empty_warning": "With no method selected, no one could sign in to this organization. Pick at least one.",
         "methods_effect": "Unchecked methods disappear from this organization’s login page, and members already signed in with one are asked to sign in again with an allowed method.",
-        "session_sharing_label": "Allow sharing sessions with learnhouse.io",
-        "session_sharing_hint": "When off, signing in at learnhouse.io won’t let members into this org — they must sign in again from this org’s login page using an allowed method.",
+        "session_sharing_label": "Allow sharing sessions with validbridge.co.ke",
+        "session_sharing_hint": "When off, signing in at validbridge.co.ke won’t let members into this org — they must sign in again from this org’s login page using an allowed method.",
         "saving_short": "Saving…",
         "save": "Save changes",
         "cancel": "Cancel",
@@ -5385,7 +5385,7 @@
     },
     "not_configured": {
       "title": "Analytics not configured",
-      "description": "Analytics requires a Tinybird connection. Set the <code>LEARNHOUSE_TINYBIRD_INGEST_TOKEN</code> and <code>LEARNHOUSE_TINYBIRD_READ_TOKEN</code> environment variables to enable it."
+      "description": "Analytics requires a Tinybird connection. Set the <code>VALIDBRIDGE_TINYBIRD_INGEST_TOKEN</code> and <code>VALIDBRIDGE_TINYBIRD_READ_TOKEN</code> environment variables to enable it."
     },
     "advanced_gate": {
       "requires": "Requires",
@@ -5857,10 +5857,10 @@
       },
       "teach_the_world": {
         "title": "Learn & grow",
-        "description": "Resources to help you get the most out of LearnHouse.",
+        "description": "Resources to help you get the most out of ValidBridge.",
         "classroom": "The Classroom",
         "classroom_desc": "Learn how to grow and manage your courses",
-        "university": "LearnHouse University",
+        "university": "ValidBridge University",
         "university_desc": "Guides, tips and best practices"
       },
       "add_content": {
@@ -5890,7 +5890,7 @@
       }
     },
     "welcome": {
-      "title": "Welcome to LearnHouse",
+      "title": "Welcome to ValidBridge",
       "subtitle": "Create courses, invite learners and share knowledge with the world.",
       "get_started": "Get Started",
       "features_title": "Everything you need",
@@ -6259,7 +6259,7 @@
         "title": "Looking to test?",
         "body": "Head to the",
         "link": "Developers page",
-        "suffix": "to try LearnHouse instead."
+        "suffix": "to try ValidBridge instead."
       },
       "validation": {
         "required": "Required",

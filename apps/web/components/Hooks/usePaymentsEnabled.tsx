@@ -1,13 +1,13 @@
 // hooks/usePaymentsEnabled.ts
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import { getPaymentConfigs } from '@services/payments/payments';
 
 export function usePaymentsEnabled() {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
   const { data: paymentConfigs, error, isLoading } = useQuery({

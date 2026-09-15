@@ -19,7 +19,7 @@ import asyncio
 import logging
 from typing import Optional
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.ai.llm import AINotConfiguredError
 from src.services.ai.llm.provider import _GOOGLE_ALIASES
 
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 # Google "nano banana" image model. Defaults to the generally-available Gemini 2.5
 # Flash Image model so generation works out of the box on any Gemini API key.
 # Newer/preview models (e.g. Nano Banana 2 / "gemini-3-pro-image-preview") require
-# allowlist access and can 429/500 under capacity — set LEARNHOUSE_AI_IMAGE_MODEL
+# allowlist access and can 429/500 under capacity — set VALIDBRIDGE_AI_IMAGE_MODEL
 # to opt into one once it is enabled for your key.
 DEFAULT_IMAGE_MODEL = "gemini-2.5-flash-image"
 
@@ -70,7 +70,7 @@ def _is_retryable(exc: Exception) -> bool:
 
 def _resolve_image_config() -> tuple[str, str]:
     """Return ``(api_key, model)`` for image generation or raise if unconfigured."""
-    cfg = get_learnhouse_config().ai_config
+    cfg = get_validbridge_config().ai_config
     provider_id = (getattr(cfg, "provider", None) or "").strip().lower()
 
     # Prefer the unified key when the deployment is already on Google; otherwise
@@ -84,8 +84,8 @@ def _resolve_image_config() -> tuple[str, str]:
     if not api_key:
         raise AINotConfiguredError(
             "AI image generation requires a Google/Gemini API key "
-            "(set LEARNHOUSE_GEMINI_API_KEY, or LEARNHOUSE_AI_API_KEY when "
-            "LEARNHOUSE_AI_PROVIDER=google)."
+            "(set VALIDBRIDGE_GEMINI_API_KEY, or VALIDBRIDGE_AI_API_KEY when "
+            "VALIDBRIDGE_AI_PROVIDER=google)."
         )
 
     model = (getattr(cfg, "image_model", None) or "").strip() or DEFAULT_IMAGE_MODEL

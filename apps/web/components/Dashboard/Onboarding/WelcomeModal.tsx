@@ -16,7 +16,7 @@ import {
 } from '@phosphor-icons/react'
 import WelcomeGlobe from './WelcomeGlobe'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -51,9 +51,9 @@ const FEATURES = [
     icon: Files,
     labelKey: 'onboarding.welcome.features.assess',
     descKey: 'onboarding.welcome.features.assess_desc',
-    gradient: 'from-violet-50/40 to-violet-50/10',
-    iconColor: 'text-violet-500',
-    pattern: `repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(139,92,246,0.06) 6px, rgba(139,92,246,0.06) 7px)`,
+    gradient: 'from-orange-50/40 to-orange-50/10',
+    iconColor: 'text-orange-500',
+    pattern: `repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(249,115,22,0.06) 6px, rgba(249,115,22,0.06) 7px)`,
   },
   {
     icon: ChalkboardSimple,
@@ -67,9 +67,9 @@ const FEATURES = [
     icon: Microphone,
     labelKey: 'onboarding.welcome.features.voice',
     descKey: 'onboarding.welcome.features.voice_desc',
-    gradient: 'from-purple-50/40 to-purple-50/10',
-    iconColor: 'text-purple-500',
-    pattern: `radial-gradient(circle, rgba(168,85,247,0.06) 1.5px, transparent 1.5px)`,
+    gradient: 'from-orange-50/40 to-orange-50/10',
+    iconColor: 'text-orange-500',
+    pattern: `radial-gradient(circle, rgba(249,115,22,0.06) 1.5px, transparent 1.5px)`,
     patternSize: '12px 12px',
   },
   {
@@ -84,9 +84,9 @@ const FEATURES = [
     icon: ChartBar,
     labelKey: 'onboarding.welcome.features.impact',
     descKey: 'onboarding.welcome.features.impact_desc',
-    gradient: 'from-indigo-50/40 to-indigo-50/10',
-    iconColor: 'text-indigo-500',
-    pattern: `radial-gradient(circle, rgba(99,102,241,0.06) 1px, transparent 1px), radial-gradient(circle, rgba(99,102,241,0.04) 1.5px, transparent 1.5px)`,
+    gradient: 'from-orange-50/40 to-orange-50/10',
+    iconColor: 'text-orange-500',
+    pattern: `radial-gradient(circle, rgba(249,115,22,0.06) 1px, transparent 1px), radial-gradient(circle, rgba(249,115,22,0.04) 1.5px, transparent 1.5px)`,
     patternSize: '10px 10px',
   },
   {
@@ -102,7 +102,7 @@ const FEATURES = [
 export default function WelcomeModal() {
   const { welcomeSeen, markWelcomeSeen, dismissed } = useOnboarding()
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const [step, setStep] = useState<'welcome' | 'features'>('welcome')
   const [isMobile, setIsMobile] = useState(false)
 
@@ -147,8 +147,8 @@ export default function WelcomeModal() {
                 >
                   <div className="px-10 pt-10 pb-2 text-center">
                     <motion.img
-                      src="/lrn-dash.svg"
-                      alt="LearnHouse"
+                      src="/validbridge-dash.svg"
+                      alt="ValidBridge"
                       className="h-12 w-12 mx-auto mb-5"
                       style={{ filter: 'brightness(0)' }}
                       initial={{ opacity: 0, y: 10 }}

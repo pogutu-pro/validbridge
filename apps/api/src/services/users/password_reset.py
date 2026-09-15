@@ -11,7 +11,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization, OrganizationRead
 from src.security.security import security_hash_password
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.users.emails import (
     send_password_reset_email,
     send_password_reset_email_platform,
@@ -28,8 +28,8 @@ from src.services.security.password_validation import validate_password_complexi
 
 def _get_redis_connection():
     """Get Redis connection from config."""
-    LH_CONFIG = get_learnhouse_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    VB_CONFIG = get_validbridge_config()
+    redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -115,8 +115,8 @@ async def send_reset_password_code(
         return "If an account with that email exists, a reset code has been sent"
 
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    VB_CONFIG = get_validbridge_config()
+    redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -244,8 +244,8 @@ async def change_password_with_reset_code(
         )
 
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
-    redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
+    VB_CONFIG = get_validbridge_config()
+    redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(

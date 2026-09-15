@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import MediaViewer from '@components/Objects/Media/MediaViewer'
 import MediaLightbox from '@components/Objects/Media/MediaLightbox'
@@ -57,7 +57,7 @@ function snapshotOf(resource: any) {
 function LibraryBlockComponent(props: NodeViewProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const editorState = useEditorProvider() as any
   const isEditable = editorState.isEditable

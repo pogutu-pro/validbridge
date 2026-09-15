@@ -10,21 +10,21 @@ import PostHogProvider from '../components/Analytics/PostHogProvider'
 
 export const metadata = {
   title: {
-    default: 'LearnHouse Docs',
-    template: '%s – LearnHouse Docs',
+    default: 'ValidBridge Docs',
+    template: '%s – ValidBridge Docs',
   },
   description:
-    'Official documentation for LearnHouse, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',
+    'Official documentation for ValidBridge, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',
   keywords: [
-    'LearnHouse',
+    'ValidBridge',
     'open source LMS',
     'learning management system',
     'self-hosted LMS',
     'course creation',
-    'LearnHouse documentation',
-    'LearnHouse docs',
+    'ValidBridge documentation',
+    'ValidBridge docs',
   ],
-  metadataBase: new URL('https://docs.learnhouse.app'),
+  metadataBase: new URL('https://docs.validbridge.co.ke'),
   robots: {
     index: true,
     follow: true,
@@ -39,22 +39,22 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://docs.learnhouse.app',
-    siteName: 'LearnHouse Docs',
+    url: 'https://docs.validbridge.co.ke',
+    siteName: 'ValidBridge Docs',
     description:
-      'Official documentation for LearnHouse, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',
+      'Official documentation for ValidBridge, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',
     images: [
       {
-        url: 'https://docs.learnhouse.app/img/pages/learnhouse-github.png',
-        alt: 'LearnHouse Docs',
+        url: 'https://docs.validbridge.co.ke/img/pages/validbridge-github.png',
+        alt: 'ValidBridge Docs',
         width: 2051,
         height: 1016,
       },
     ],
   },
   twitter: {
-    creator: '@getlearnhouse',
-    site: '@getlearnhouse',
+    creator: '@getvalidbridge',
+    site: '@getvalidbridge',
     card: 'summary_large_image',
   },
   icons: {
@@ -83,7 +83,7 @@ export default async function RootLayout({ children }) {
           <CustomNavbar />
           <Layout
             pageMap={await getPageMap()}
-            docsRepositoryBase="https://github.com/learnhouse/learnhouse/tree/dev/docs"
+            docsRepositoryBase="https://github.com/pogutu-pro/validbridge/tree/dev/docs"
             sidebar={{ defaultMenuCollapseLevel: 2 }}
             editLink="Edit this page on GitHub"
             footer={<></>}

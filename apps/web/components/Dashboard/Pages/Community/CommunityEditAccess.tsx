@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCommunity, useCommunityDispatch } from '@components/Contexts/CommunityContext'
 import { updateCommunity } from '@services/communities/communities'
@@ -18,7 +18,7 @@ import LinkCommunityToUserGroup from '@components/Objects/Modals/Dash/EditCommun
 
 const CommunityEditAccess: React.FC = () => {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
   const communityState = useCommunity()
   const dispatch = useCommunityDispatch()
@@ -167,7 +167,7 @@ function UserGroupsSection({ usergroups, isLoading }: { usergroups: any[]; isLoa
   const communityState = useCommunity()
   const community = communityState?.community
   const [userGroupModal, setUserGroupModal] = useState(false)
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const queryClient = useQueryClient()

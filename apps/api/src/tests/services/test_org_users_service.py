@@ -550,7 +550,7 @@ class TestOrgUsersService:
             redis_config=SimpleNamespace(redis_connection_string="")
         )
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=empty_config,
         ):
             with pytest.raises(Exception) as redis_missing_exc:
@@ -563,7 +563,7 @@ class TestOrgUsersService:
             redis_config=SimpleNamespace(redis_connection_string="redis://test")
         )
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=fake_config,
         ), patch(
             "src.services.orgs.users.rbac_check",
@@ -576,7 +576,7 @@ class TestOrgUsersService:
         assert org_missing_exc.value.status_code == 404
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=fake_config,
         ), patch(
             "src.services.orgs.users.rbac_check",
@@ -601,7 +601,7 @@ class TestOrgUsersService:
         fake_redis.__bool__ = Mock(return_value=True)
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=fake_config,
         ), patch(
             "src.services.orgs.users.redis.Redis.from_url",
@@ -656,7 +656,7 @@ class TestOrgUsersService:
             redis_config=SimpleNamespace(redis_connection_string="")
         )
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=empty_config,
         ):
             with pytest.raises(Exception) as list_missing_exc:
@@ -664,7 +664,7 @@ class TestOrgUsersService:
         assert list_missing_exc.value.status_code == 500
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -688,7 +688,7 @@ class TestOrgUsersService:
         fake_redis.__bool__ = Mock(return_value=True)
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -704,7 +704,7 @@ class TestOrgUsersService:
         assert [item["email"] for item in invited] == ["a@test.com", "b@test.com"]
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -720,7 +720,7 @@ class TestOrgUsersService:
         assert list_redis_exc.value.status_code == 500
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=empty_config,
         ), patch(
             "src.services.orgs.users.rbac_check",
@@ -736,7 +736,7 @@ class TestOrgUsersService:
         assert remove_redis_exc.value.status_code == 500
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=empty_config,
         ):
             with pytest.raises(Exception) as remove_missing_conn_exc:
@@ -746,7 +746,7 @@ class TestOrgUsersService:
         assert remove_missing_conn_exc.value.status_code == 500
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -761,7 +761,7 @@ class TestOrgUsersService:
         assert remove_org_missing_exc.value.status_code == 404
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -782,7 +782,7 @@ class TestOrgUsersService:
         missing_redis.get.return_value = None
         missing_redis.__bool__ = Mock(return_value=True)
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -804,7 +804,7 @@ class TestOrgUsersService:
         fake_redis.delete = Mock()
         fake_redis.__bool__ = Mock(return_value=True)
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),
@@ -1266,7 +1266,7 @@ class TestOrgUsersService:
         )
 
         with patch(
-            "src.services.orgs.users.get_learnhouse_config",
+            "src.services.orgs.users.get_validbridge_config",
             return_value=fake_config,
         ), patch(
             "src.services.orgs.users.redis.Redis.from_url",
@@ -1317,7 +1317,7 @@ class TestOrgUsersService:
         )
 
         patches = [
-            patch("src.services.orgs.users.get_learnhouse_config", return_value=fake_config),
+            patch("src.services.orgs.users.get_validbridge_config", return_value=fake_config),
             patch("src.services.orgs.users.redis.Redis.from_url", return_value=fake_redis),
             patch("src.services.orgs.users.rbac_check", new_callable=AsyncMock),
             patch("src.services.orgs.users.check_members_limit_with_pending", new_callable=AsyncMock),

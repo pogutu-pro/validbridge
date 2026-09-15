@@ -3,7 +3,7 @@ import React, { createContext, useContext, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import ErrorUI from '@components/Objects/StyledElements/Error/Error'
 
 interface OrgContextValue {
@@ -29,7 +29,7 @@ export function OrgProvider({
   errorSubmessage?: string
   inactiveMessage?: string
 }) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
   const { data: org, error: orgError, isLoading } = useQuery({

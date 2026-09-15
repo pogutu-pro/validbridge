@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { createOffer } from '@services/payments/offers';
 import { getPaymentsGroups } from '@services/payments/groups';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics';
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics';
 import { meaningfulMessage } from '@lib/errors/classify';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -44,10 +44,10 @@ interface OfferFormValues {
 
 const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const token = session?.data?.tokens?.access_token;
   const queryClient = useQueryClient();
-  const { track } = useLHAnalytics('dashboard');
+  const { track } = useVBAnalytics('dashboard');
   const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
 
   useEffect(() => {
@@ -230,7 +230,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                       return (
                         <li key={uuid} className="flex items-center justify-between bg-white rounded px-2 py-1 text-xs border">
                           <div className="flex items-center gap-1.5">
-                            <BookOpen size={11} className="text-indigo-500" />
+                            <BookOpen size={11} className="text-orange-500" />
                             <span>{course?.name ?? uuid}</span>
                           </div>
                           <button
@@ -301,7 +301,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                     {groups.map((g: any) => (
                       <SelectItem key={g.id} value={String(g.id)}>
                         <div className="flex items-center gap-1.5">
-                          <Layers size={11} className="text-indigo-500" />
+                          <Layers size={11} className="text-orange-500" />
                           {g.name}
                         </div>
                       </SelectItem>

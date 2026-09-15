@@ -59,17 +59,17 @@ class TestTokenHelpers:
         assert len(seen) == 200
 
     def test_hash_is_salted_and_verifies(self):
-        h1 = hash_token("lh_sa_x")
-        h2 = hash_token("lh_sa_x")
+        h1 = hash_token("vb_sa_x")
+        h2 = hash_token("vb_sa_x")
         assert h1 != h2
-        assert verify_token("lh_sa_x", h1) is True
-        assert verify_token("lh_sa_x", h2) is True
-        assert verify_token("lh_sa_y", h1) is False
+        assert verify_token("vb_sa_x", h1) is True
+        assert verify_token("vb_sa_x", h2) is True
+        assert verify_token("vb_sa_y", h1) is False
 
     def test_verify_token_happy_and_wrong(self):
         full, _prefix, h = generate_token()
         assert verify_token(full, h) is True
-        assert verify_token("lh_sa_wrong", h) is False
+        assert verify_token("vb_sa_wrong", h) is False
 
 
 class TestCreateSuperadminToken:
@@ -179,11 +179,11 @@ class TestValidateForAuth:
         assert result.last_used_at is not None
 
     async def test_wrong_prefix_returns_none(self, db):
-        result = await validate_superadmin_token_for_auth("lh_not_an_sa_token", db)
+        result = await validate_superadmin_token_for_auth("vb_not_an_sa_token", db)
         assert result is None
 
     async def test_unknown_token_returns_none(self, db):
-        result = await validate_superadmin_token_for_auth("lh_sa_bogus_value_here", db)
+        result = await validate_superadmin_token_for_auth("vb_sa_bogus_value_here", db)
         assert result is None
 
     async def test_revoked_token_returns_none(self, db):

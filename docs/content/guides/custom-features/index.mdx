@@ -1,6 +1,6 @@
 ---
 title: Custom Features & Webhooks
-description: Extend LearnHouse beyond the official frontend — authenticate with API tokens, create and query content programmatically, and react to events with webhooks.
+description: Extend ValidBridge beyond the official frontend — authenticate with API tokens, create and query content programmatically, and react to events with webhooks.
 ---
 
 import { Callout } from 'nextra/components'
@@ -8,7 +8,7 @@ import GuideCards from '../../../components/GuideCards/GuideCards'
 
 # Custom Features & Webhooks
 
-The [build guide](/guides/build-learning-platform) showed how to *read* the API as a frontend. This guide is about going further: driving LearnHouse **programmatically** — creating and managing content from your own scripts and services, and reacting to what happens inside LearnHouse with **webhooks**.
+The [build guide](/guides/build-learning-platform) showed how to *read* the API as a frontend. This guide is about going further: driving ValidBridge **programmatically** — creating and managing content from your own scripts and services, and reacting to what happens inside ValidBridge with **webhooks**.
 
 <GuideCards set="custom" />
 
@@ -18,18 +18,18 @@ The [build guide](/guides/build-learning-platform) showed how to *read* the API 
 | --- | --- | --- |
 | **For** | Acting *as a logged-in user* (a frontend) | Server-to-server automation, scripts, integrations |
 | **How** | `POST /api/v1/auth/login` → bearer token | A long-lived token created in org settings |
-| **Prefix** | a JWT | `lh_…` |
+| **Prefix** | a JWT | `vb_…` |
 | **Plan** | any | **Pro** |
 
 For everything in this guide, use an **API token**. It's a single bearer credential you attach to every request:
 
 ```bash
 curl "http://localhost:1338/api/v1/courses/org_slug/{org_slug}/page/1/limit/10" \
-  -H "Authorization: Bearer lh_your_api_token_here"
+  -H "Authorization: Bearer vb_your_api_token_here"
 ```
 
 <Callout type="warning">
-API tokens work on resource routes (courses, chapters, activities, collections…) but **not** on routes that require a real user session — `/users/*`, `/orgs/*`, `/roles/*`, and **webhook management** all reject `lh_` tokens with `403`. Use a courses read to smoke-test a token.
+API tokens work on resource routes (courses, chapters, activities, collections…) but **not** on routes that require a real user session — `/users/*`, `/orgs/*`, `/roles/*`, and **webhook management** all reject `vb_` tokens with `403`. Use a courses read to smoke-test a token.
 </Callout>
 
 ### Creating an API token
@@ -51,10 +51,10 @@ The response includes the **full token exactly once** — store it securely, it 
 
 ```json
 {
-  "token": "lh_8f3c…the only time you'll see this…",
+  "token": "vb_8f3c…the only time you'll see this…",
   "token_uuid": "apitoken_…",
   "name": "My integration",
-  "token_prefix": "lh_8f3c4d2a",
+  "token_prefix": "vb_8f3c4d2a",
   "org_id": 1
 }
 ```
@@ -68,7 +68,7 @@ Tokens support fine-grained permissions via a `rights` object (per-resource read
 A few things that are true across the whole API:
 
 - **Base path** — every endpoint is under `/api/v1/`.
-- **Auth** — `Authorization: Bearer <token>` (JWT or `lh_` token).
+- **Auth** — `Authorization: Bearer <token>` (JWT or `vb_` token).
 - **Reads are JSON** — `GET` returns JSON; lists are plain arrays unless documented otherwise.
 - **Writes are often multipart** — create/update endpoints that can take a file (courses, activities, avatars) accept `multipart/form-data`, not JSON. Endpoints without files (collections, trails, users) take JSON.
 - **Errors** — non-2xx responses are `{ "detail": "..." }`. Always read `detail`.
@@ -80,7 +80,7 @@ Courses are created with multipart form data (so a thumbnail can ride along). `o
 
 ```bash
 curl -X POST "http://localhost:1338/api/v1/courses/?org_id=1" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -F 'name=Introduction to Python' \
   -F 'description=A beginner-friendly Python course' \
   -F 'about=Learn Python from scratch.' \
@@ -96,7 +96,7 @@ Then add structure — a chapter (JSON), then activities inside it:
 ```bash
 # Create a chapter
 curl -X POST "http://localhost:1338/api/v1/chapters/" \
-  -H "Authorization: Bearer lh_your_api_token" \
+  -H "Authorization: Bearer vb_your_api_token" \
   -H "Content-Type: application/json" \
   -d '{ "name": "Getting started", "org_id": 1, "course_id": 42 }'
 ```
@@ -110,11 +110,11 @@ For bulk or AI-assisted course creation from existing media, see the [Migration]
 ```bash
 # Paginated list of courses
 curl "http://localhost:1338/api/v1/courses/org_slug/{org_slug}/page/1/limit/20" \
-  -H "Authorization: Bearer lh_your_api_token"
+  -H "Authorization: Bearer vb_your_api_token"
 
 # Full-text search (max 50 per page)
 curl "http://localhost:1338/api/v1/courses/org_slug/{org_slug}/search?query=python&page=1&limit=10" \
-  -H "Authorization: Bearer lh_your_api_token"
+  -H "Authorization: Bearer vb_your_api_token"
 ```
 
 ## Discoverability: the OpenAPI spec

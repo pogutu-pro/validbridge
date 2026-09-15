@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 # Webhooks
 
-Webhooks deliver real-time event notifications to any HTTPS endpoint you control. When something happens in LearnHouse — a learner completes a course, a user signs up, an assignment is graded — LearnHouse sends a signed `POST` request with a JSON payload to every matching endpoint.
+Webhooks deliver real-time event notifications to any HTTPS endpoint you control. When something happens in ValidBridge — a learner completes a course, a user signs up, an assignment is graded — ValidBridge sends a signed `POST` request with a JSON payload to every matching endpoint.
 
 <Callout type="info">
 Webhooks are available on the **Pro plan** or higher. Manage endpoints under **Settings → Automations** in the organization dashboard, or via the [REST API](#api-reference) with an API token.
@@ -47,17 +47,17 @@ The shape of `data` varies per event. See the [Event Catalogue](/platform/automa
 | Header | Value |
 | --- | --- |
 | `Content-Type` | `application/json` |
-| `User-Agent` | `LearnHouse-Webhooks/1.0` |
+| `User-Agent` | `ValidBridge-Webhooks/1.0` |
 | `X-Webhook-Event` | Event name (e.g. `course_completed`) |
 | `X-Webhook-Delivery` | Unique delivery ID (matches `delivery_id` in the body) |
 | `X-Webhook-Signature` | `sha256=<hex_digest>` — HMAC-SHA256 of the raw body |
 
 ## Verifying the signature
 
-LearnHouse signs every payload with HMAC-SHA256, using the endpoint's signing secret. The signature covers the **raw request body** (exactly the bytes sent over the wire, before any JSON parsing) and is delivered in the `X-Webhook-Signature` header as `sha256=<hex_digest>` — the same convention used by GitHub and Stripe.
+ValidBridge signs every payload with HMAC-SHA256, using the endpoint's signing secret. The signature covers the **raw request body** (exactly the bytes sent over the wire, before any JSON parsing) and is delivered in the `X-Webhook-Signature` header as `sha256=<hex_digest>` — the same convention used by GitHub and Stripe.
 
 <Callout type="warning">
-Always verify the signature before trusting a payload. Anyone who discovers your endpoint URL can send unsigned requests; the signature is the only thing that proves the request came from LearnHouse.
+Always verify the signature before trusting a payload. Anyone who discovers your endpoint URL can send unsigned requests; the signature is the only thing that proves the request came from ValidBridge.
 </Callout>
 
 ### Node.js
@@ -107,7 +107,7 @@ Logs are visible from the endpoint detail page in the dashboard and via `GET /{o
 
 ## Your endpoint: what to return
 
-- **Respond quickly.** LearnHouse uses a 10 s per-attempt timeout; if your handler does heavy work, enqueue a job and return `200` immediately.
+- **Respond quickly.** ValidBridge uses a 10 s per-attempt timeout; if your handler does heavy work, enqueue a job and return `200` immediately.
 - **Respond with any 2xx status.** Body content is ignored (but captured in the delivery log for debugging).
 - **Be idempotent.** Because of retries and rare duplicate deliveries, handle the same `delivery_id` arriving twice as a no-op.
 - **Verify the signature.** Do this before any database write.
@@ -115,8 +115,8 @@ Logs are visible from the endpoint detail page in the dashboard and via `GET /{o
 ## Security
 
 - **HTTPS only.** `http://` URLs are rejected at create time.
-- **Private address protection (SSRF guard).** LearnHouse resolves every webhook URL to an IP before calling it and refuses to deliver to private ranges (`10.0.0.0/8`, `127.0.0.0/8`, `169.254.0.0/16`, `172.16.0.0/12`, `192.168.0.0/16`, `::1`, link-local, etc.). The same check is repeated **after** the connection is established to defeat DNS rebinding.
-- **Signing secret at rest.** Secrets are stored encrypted (Fernet, key derived from the application's JWT secret) and are returned in plaintext **only** at creation and when you click **Regenerate**. LearnHouse cannot recover a lost secret — you can only rotate it.
+- **Private address protection (SSRF guard).** ValidBridge resolves every webhook URL to an IP before calling it and refuses to deliver to private ranges (`10.0.0.0/8`, `127.0.0.0/8`, `169.254.0.0/16`, `172.16.0.0/12`, `192.168.0.0/16`, `::1`, link-local, etc.). The same check is repeated **after** the connection is established to defeat DNS rebinding.
+- **Signing secret at rest.** Secrets are stored encrypted (Fernet, key derived from the application's JWT secret) and are returned in plaintext **only** at creation and when you click **Regenerate**. ValidBridge cannot recover a lost secret — you can only rotate it.
 - **Scope.** A webhook endpoint is scoped to a single organization. It can only subscribe to events fired for that org.
 
 ## Regenerating a secret
@@ -142,7 +142,7 @@ POST /api/v1/{org_id}/webhooks
 Content-Type: application/json
 
 {
-  "url": "https://example.com/hooks/learnhouse",
+  "url": "https://example.com/hooks/validbridge",
   "description": "Main backend",
   "events": ["course_completed", "user_signed_up"]
 }
@@ -153,7 +153,7 @@ Response (200):
 ```json
 {
   "webhook_uuid": "webhook_b5f2…",
-  "url": "https://example.com/hooks/learnhouse",
+  "url": "https://example.com/hooks/validbridge",
   "description": "Main backend",
   "events": ["course_completed", "user_signed_up"],
   "is_active": true,
@@ -224,7 +224,7 @@ Delivers a synthetic `ping` event:
   "delivery_id": "dlv_…",
   "timestamp": "2026-04-19T14:31:02Z",
   "org_id": 1,
-  "data": { "message": "This is a test webhook event from LearnHouse." }
+  "data": { "message": "This is a test webhook event from ValidBridge." }
 }
 ```
 

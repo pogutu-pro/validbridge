@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { AlertTriangle, Trash2 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { signOut } from '@components/Contexts/AuthContext'
 import { getUriWithoutOrg } from '@services/config/config'
 import { getErrorMessage } from '@services/utils/ts/errorMessage'
@@ -23,7 +23,7 @@ import {
 // that consequence prominently and require typing the username to confirm.
 export default function AccountDangerZone() {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const user = session?.data?.user
   const access_token = session?.data?.tokens?.access_token
 

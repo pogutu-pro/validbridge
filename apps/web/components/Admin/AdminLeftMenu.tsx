@@ -8,13 +8,13 @@ import {
   Users,
 } from '@phosphor-icons/react'
 import { signOut } from '@components/Contexts/AuthContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import Link from 'next/link'
 import React from 'react'
 
 function AdminTopMenu() {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
 
   async function logOutUI() {
     await signOut({ redirect: true, callbackUrl: '/admin/login' })
@@ -35,13 +35,13 @@ function AdminTopMenu() {
       <div className="h-14" />
       {/* Fixed menu bar */}
       <div
-        className="fixed top-0 start-0 end-0 h-14 bg-black border-b border-white/[0.08] flex items-center text-white px-4 gap-6"
+        className="fixed top-0 start-0 end-0 h-14 bg-[#F8F7F2] border-b border-[#E7E5E4] flex items-center text-[#262626] px-4 gap-6"
         style={{ zIndex: 'var(--z-overlay)' }}
       >
         {/* Logo */}
         <Link className="flex items-center gap-2 transition-opacity hover:opacity-70 shrink-0" href="/admin">
-          <img src="/lrn-dash.svg" alt="Learnhouse logo" className="h-7 w-7" />
-          <span className="font-semibold text-sm text-white">Admin</span>
+          <img src="/validbridge-dash.svg" alt="ValidBridge logo" className="h-7 w-7" />
+          <span className="font-semibold text-sm text-[#262626]">Admin</span>
           <span className="text-[9px] font-medium uppercase tracking-wider text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">
             Superadmin
           </span>
@@ -85,16 +85,16 @@ function AdminTopMenu() {
               />
             ) : (
               <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
-                <User size={14} weight="fill" className="text-white/50" />
+                <User size={14} weight="fill" className="text-[#737373]/80" />
               </div>
             )}
-            <span className="text-sm text-white/60 hidden sm:inline">
+            <span className="text-sm text-[#737373]/80 hidden sm:inline">
               {user?.username}
             </span>
           </div>
           <button
             onClick={logOutUI}
-            className="flex items-center gap-1.5 rounded-lg text-red-500 hover:text-red-400 hover:bg-white/[0.08] transition-all px-2 py-1.5"
+            className="flex items-center gap-1.5 rounded-lg text-red-500 hover:text-red-400 hover:bg-black/[0.04] transition-all px-2 py-1.5"
             title="Sign Out"
           >
             <SignOut size={16} weight="fill" data-dir-flip />
@@ -117,7 +117,7 @@ const NavLink = ({
 }) => {
   return (
     <Link aria-label={label} href={href}>
-      <div className="flex items-center rounded-lg text-white/50 hover:text-white hover:bg-white/[0.08] transition-all px-3 py-1.5 gap-2">
+      <div className="flex items-center rounded-lg text-[#737373]/80 hover:text-[#262626] hover:bg-black/[0.04] transition-all px-3 py-1.5 gap-2">
         {icon}
         <span className="text-sm font-medium">{label}</span>
       </div>

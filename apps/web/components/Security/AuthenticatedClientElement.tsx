@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 
 interface AuthenticatedClientElementProps {
@@ -26,7 +26,7 @@ export const AuthenticatedClientElement = (
   props: AuthenticatedClientElementProps
 ) => {
   const [isAllowed, setIsAllowed] = React.useState(false)
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const org = useOrg() as any
 
   function isUserAllowed(

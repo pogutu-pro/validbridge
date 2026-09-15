@@ -5,7 +5,7 @@ import * as Form from '@radix-ui/react-form'
 import BarLoader from 'react-spinners/BarLoader'
 import { Upload, Package, CheckCircle2, ChevronRight, AlertCircle } from 'lucide-react'
 import { getAPIUrl } from '@services/config/config'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import {
   uploadScormPackage,
   formatMB,
@@ -67,7 +67,7 @@ interface ScormActivityModalProps {
 
 function ScormActivityModal({ course, closeModal, onImportComplete, chapterId }: ScormActivityModalProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
   const cleanCourseUuid = (id: string) => id?.replace(/^course_/, '') ?? id

@@ -6,14 +6,14 @@ import { getAPIUrl } from '@services/config/config'
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups'
 import { apiFetch } from '@services/utils/ts/requests'
 import { Check, Globe, SquareUserRound, Users, X } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 type EditCourseAccessProps = {
     orgslug: string
@@ -39,7 +39,7 @@ const AccessCard = React.forwardRef<HTMLDivElement, AccessCardProps>(
                     flex flex-col items-center justify-center text-center
                     transition-all duration-150
                     ${selected
-                        ? 'bg-white border border-indigo-200 ring-1 ring-indigo-100 shadow-xs'
+                        ? 'bg-white border border-orange-200 ring-1 ring-orange-100 shadow-xs'
                         : 'bg-gray-50/80 border border-gray-100 hover:bg-gray-50 hover:border-gray-200'
                     }
                     ${className || ''}
@@ -47,8 +47,8 @@ const AccessCard = React.forwardRef<HTMLDivElement, AccessCardProps>(
                 style={{ minHeight: 180 }}
             >
                 {selected && (
-                    <div className="absolute top-3 end-3 flex items-center gap-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-full ps-1 pe-2 py-0.5">
-                        <span className="w-4 h-4 rounded-full bg-indigo-600 flex items-center justify-center">
+                    <div className="absolute top-3 end-3 flex items-center gap-1 text-[11px] font-semibold text-orange-700 bg-orange-50 border border-orange-100 rounded-full ps-1 pe-2 py-0.5">
+                        <span className="w-4 h-4 rounded-full bg-orange-600 flex items-center justify-center">
                             <Check size={10} strokeWidth={3.5} className="text-white" />
                         </span>
                         <span>Active</span>
@@ -58,7 +58,7 @@ const AccessCard = React.forwardRef<HTMLDivElement, AccessCardProps>(
                 <div
                     className={`
                         w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-150
-                        ${selected ? 'bg-indigo-50 text-indigo-600' : 'bg-white border border-gray-100 text-gray-400'}
+                        ${selected ? 'bg-orange-50 text-orange-600' : 'bg-white border border-gray-100 text-gray-400'}
                     `}
                 >
                     <Icon size={24} strokeWidth={1.75} />
@@ -89,8 +89,8 @@ function SkeletonCard() {
 
 function EditCourseAccess(_props: EditCourseAccessProps) {
     const { t } = useTranslation()
-    const { track } = useLHAnalytics('dashboard')
-    const session = useLHSession() as any;
+    const { track } = useVBAnalytics('dashboard')
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const org = useOrg() as any;
 
@@ -237,7 +237,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
     const { t } = useTranslation()
     const course = useCourse() as any;
     const [userGroupModal, setUserGroupModal] = useState(false);
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const org = useOrg() as any;
     const queryClient = useQueryClient();
@@ -323,7 +323,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
                                 >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center flex-shrink-0">
+                                            <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
                                                 <Users className="w-4 h-4" />
                                             </div>
                                             <div className="flex flex-col min-w-0">

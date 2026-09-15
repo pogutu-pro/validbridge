@@ -11,7 +11,7 @@ import { updateFolder, updateFolderThumbnail } from '@services/folders/folders'
 import FolderAppearance from '@components/Dashboard/Library/FolderAppearance'
 import { getFolderThumbnailMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { Globe, Lock } from 'lucide-react'
 import React from 'react'
 import { BarLoader } from 'react-spinners'
@@ -30,7 +30,7 @@ type Props = {
 function EditFolderModal({ folder, closeModal, onChanged }: Props) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const [color, setColor] = React.useState(folder?.color || 'violet')
@@ -109,7 +109,7 @@ function EditFolderModal({ folder, closeModal, onChanged }: Props) {
             onClick={() => formik.setFieldValue('public', true)}
             className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${
               formik.values.public
-                ? 'bg-white border-indigo-200 ring-1 ring-indigo-100 text-gray-900'
+                ? 'bg-white border-orange-200 ring-1 ring-orange-100 text-gray-900'
                 : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
             }`}
           >
@@ -120,7 +120,7 @@ function EditFolderModal({ folder, closeModal, onChanged }: Props) {
             onClick={() => formik.setFieldValue('public', false)}
             className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${
               !formik.values.public
-                ? 'bg-white border-indigo-200 ring-1 ring-indigo-100 text-gray-900'
+                ? 'bg-white border-orange-200 ring-1 ring-orange-100 text-gray-900'
                 : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
             }`}
           >

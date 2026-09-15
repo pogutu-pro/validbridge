@@ -70,14 +70,14 @@ class TestIdleLogging:
     run must say so."""
 
     def test_says_so_when_the_flag_is_unset(self, monkeypatch, caplog):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "false")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "false")
         scheduler._task = None
         with caplog.at_level("INFO"):
             scheduler.start_scheduler()
-        assert "LEARNHOUSE_NUDGES_ENABLED" in caplog.text
+        assert "VALIDBRIDGE_NUDGES_ENABLED" in caplog.text
 
     def test_says_so_when_the_deployment_is_not_saas(self, monkeypatch, caplog):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(
             "src.core.deployment_mode.get_deployment_mode", lambda: "oss"
         )
@@ -90,18 +90,18 @@ class TestIdleLogging:
 class TestStartGating:
     @pytest.fixture(autouse=True)
     def _clean(self, monkeypatch):
-        monkeypatch.delenv("LEARNHOUSE_NUDGES_NO_SCHEDULER", raising=False)
+        monkeypatch.delenv("VALIDBRIDGE_NUDGES_NO_SCHEDULER", raising=False)
         scheduler._task = None
         yield
         scheduler._task = None
 
     def test_does_not_start_when_the_feature_is_off(self, monkeypatch):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "false")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "false")
         scheduler.start_scheduler()
         assert scheduler._task is None
 
     def test_does_not_start_outside_saas(self, monkeypatch):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(
             "src.core.deployment_mode.get_deployment_mode", lambda: "oss"
         )
@@ -110,16 +110,16 @@ class TestStartGating:
 
     def test_can_be_opted_out_of(self, monkeypatch):
         """For deployments that would rather drive the CLI from their own cron."""
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(
             "src.core.deployment_mode.get_deployment_mode", lambda: "saas"
         )
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_NO_SCHEDULER", "1")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_NO_SCHEDULER", "1")
         scheduler.start_scheduler()
         assert scheduler._task is None
 
     async def test_starts_when_enabled_on_saas(self, monkeypatch):
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(
             "src.core.deployment_mode.get_deployment_mode", lambda: "saas"
         )
@@ -170,7 +170,7 @@ class TestAutoSeed:
         db.add(row)
         await db.commit()
 
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(runner_module, "get_deployment_mode", lambda: "saas")
 
         with patch("src.services.nudges.runner.send_nudge_email") as sender:
@@ -200,7 +200,7 @@ class TestAutoSeed:
         db.add(row)
         await db.commit()
 
-        monkeypatch.setenv("LEARNHOUSE_NUDGES_ENABLED", "true")
+        monkeypatch.setenv("VALIDBRIDGE_NUDGES_ENABLED", "true")
         monkeypatch.setattr(runner_module, "get_deployment_mode", lambda: "saas")
         monkeypatch.setattr(
             runner_module.links, "org_base_url", AsyncMock(return_value="https://a.test")

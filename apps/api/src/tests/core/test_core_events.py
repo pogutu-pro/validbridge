@@ -143,7 +143,7 @@ def test_init_logging_attaches_a_stdout_handler():
         root.handlers = []
         logs.init_logging()
 
-        ours = [h for h in root.handlers if getattr(h, "_learnhouse", False)]
+        ours = [h for h in root.handlers if getattr(h, "_validbridge", False)]
         assert len(ours) == 1
         assert isinstance(ours[0], logging.StreamHandler)
         assert root.level == logging.INFO
@@ -160,13 +160,13 @@ def test_init_logging_is_idempotent():
         root.handlers = []
         logs.init_logging()
         logs.init_logging()
-        assert len([h for h in root.handlers if getattr(h, "_learnhouse", False)]) == 1
+        assert len([h for h in root.handlers if getattr(h, "_validbridge", False)]) == 1
     finally:
         root.handlers = before
 
 
 def test_init_logging_honours_an_explicit_level(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_LOG_LEVEL", "WARNING")
+    monkeypatch.setenv("VALIDBRIDGE_LOG_LEVEL", "WARNING")
     root = logging.getLogger()
     before, before_level = list(root.handlers), root.level
     try:
@@ -192,10 +192,10 @@ def test_init_logging_leaves_uvicorn_handlers_alone():
 
 
 def test_is_ee_available(monkeypatch):
-    monkeypatch.setenv("LEARNHOUSE_DISABLE_EE", "1")
+    monkeypatch.setenv("VALIDBRIDGE_DISABLE_EE", "1")
     assert ee_hooks.is_ee_available() is False
 
-    monkeypatch.delenv("LEARNHOUSE_DISABLE_EE", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_DISABLE_EE", raising=False)
     monkeypatch.setattr(ee_hooks.os.path, "isdir", lambda path: True)
     monkeypatch.setattr(ee_hooks.os.path, "isfile", lambda path: True)
     assert ee_hooks.is_ee_available() is True
@@ -312,7 +312,7 @@ async def test_startup_and_shutdown_app(monkeypatch):
     app = SimpleNamespace()
     calls = []
 
-    monkeypatch.setattr(events, "get_learnhouse_config", lambda: SimpleNamespace(name="cfg"))
+    monkeypatch.setattr(events, "get_validbridge_config", lambda: SimpleNamespace(name="cfg"))
 
     async def connect_to_db(app_):
         calls.append(("connect", app_))
@@ -363,7 +363,7 @@ async def test_startup_and_shutdown_app(monkeypatch):
     start_app = events.startup_app(app)
     await start_app()
 
-    assert app.learnhouse_config.name == "cfg"
+    assert app.validbridge_config.name == "cfg"
     assert calls[:5] == [("connect", app), "logs", "content", "install", "reconcile"]
     assert "cleanup" in calls
     assert calls[-1] == ("ee", app)

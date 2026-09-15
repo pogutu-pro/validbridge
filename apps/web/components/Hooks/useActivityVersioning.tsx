@@ -3,7 +3,7 @@ import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useCallback, useRef, useState } from 'react'
 
 export interface ActivityVersion {
@@ -37,7 +37,7 @@ export function useActivityVersions(
   limit: number = 20,
   enabled: boolean = true
 ) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const queryClient = useQueryClient()
@@ -65,7 +65,7 @@ export function useActivityVersions(
  * Hook to fetch remote activity state for conflict detection
  */
 export function useActivityState(activityUuid: string, enabled: boolean = true) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const queryClient = useQueryClient()
@@ -107,7 +107,7 @@ export function useActivityConflictDetection(
   localVersion: number,
   localUpdateDate: string
 ) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [isChecking, setIsChecking] = useState(false)
   const [conflictInfo, setConflictInfo] = useState<ConflictInfo | null>(null)

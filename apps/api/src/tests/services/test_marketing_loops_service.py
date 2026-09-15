@@ -74,7 +74,7 @@ async def test_upserts_contact_and_sends_event(monkeypatch):
     assert put_body["email"] == "admin@test.com"
     assert put_body["is_org_admin"] is True
     assert put_body["userGroup"] == "signed-users"
-    assert put_body["source"] == "learnhouse.io"
+    assert put_body["source"] == "validbridge.co.ke"
     assert put_body["org_slug"] == "acme"
     assert put_body["firstName"] == "Ada"
     assert put_body["lastName"] == "Lovelace"

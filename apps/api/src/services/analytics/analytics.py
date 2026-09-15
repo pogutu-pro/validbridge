@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 import httpx
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def _get_ingest_client() -> httpx.AsyncClient | None:
     if _ingest_client is not None:
         return _ingest_client
 
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     tb = config.tinybird_config
     if tb is None:
         return None
@@ -47,7 +47,7 @@ async def track(
     Fire-and-forget analytics event to Tinybird.
     All errors are swallowed and logged — analytics never breaks the app.
     """
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     if config.tinybird_config is None:
         return
 

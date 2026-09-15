@@ -802,7 +802,7 @@ class TestUserPasswordAvatarSession:
             "src.services.users.users.add_users_to_usergroup",
             new_callable=AsyncMock,
         ) as mock_add_users_to_usergroup, patch(
-            "src.services.users.users.get_learnhouse_config",
+            "src.services.users.users.get_validbridge_config",
             return_value=Mock(redis_config=Mock(redis_connection_string="redis://test")),
         ), patch(
             "src.services.users.users.redis.Redis.from_url",
@@ -861,7 +861,7 @@ class TestUserPasswordAvatarSession:
         ), patch(
             "src.services.users.users.increase_feature_usage"
         ), patch(
-            "src.services.users.users.get_learnhouse_config",
+            "src.services.users.users.get_validbridge_config",
             return_value=Mock(redis_config=Mock(redis_connection_string="redis://test")),
         ), patch(
             "src.services.users.users.redis.Redis.from_url",
@@ -1146,7 +1146,7 @@ class TestWelcomeCtaUrl:
             "src.services.email.utils.get_trusted_base_url_from_request",
             return_value=None,
         ), patch.dict(
-            "os.environ", {"LEARNHOUSE_PLATFORM_URL": "https://platform.test/"}
+            "os.environ", {"VALIDBRIDGE_PLATFORM_URL": "https://platform.test/"}
         ):
             url = await _get_welcome_cta_url(mock_request, db, org_id=None)
         assert url == "https://platform.test/organizations"

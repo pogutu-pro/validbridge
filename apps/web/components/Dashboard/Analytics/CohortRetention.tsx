@@ -12,8 +12,8 @@ export default function CohortRetention({ days = '90' }: { days?: string }) {
   const cellColor = (val: number, total: number) => {
     if (total === 0) return ''
     const p = val / total
-    if (p >= 0.5) return 'bg-indigo-100 text-indigo-800'
-    if (p >= 0.25) return 'bg-indigo-50 text-indigo-600'
+    if (p >= 0.5) return 'bg-orange-100 text-orange-800'
+    if (p >= 0.25) return 'bg-orange-50 text-orange-600'
     return 'text-gray-500'
   }
 

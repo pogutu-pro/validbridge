@@ -108,7 +108,7 @@ export default function LibraryHeader({
         </div>
         <div className="flex gap-1.5 flex-wrap">
           <FilterPill label={t('library.filters.all')} active={filter === 'all'} activeClass="bg-neutral-700 text-white" onClick={() => setFilter('all')} />
-          <FilterPill label={t('library.folders')} active={filter === 'folders'} activeClass="bg-violet-600 text-white" onClick={() => setFilter('folders')} />
+          <FilterPill label={t('library.folders')} active={filter === 'folders'} activeClass="bg-orange-600 text-white" onClick={() => setFilter('folders')} />
           <FilterPill label={t('library.tabs.courses')} active={filter === 'courses'} activeClass="bg-blue-600 text-white" onClick={() => setFilter('courses')} />
           <FilterPill label={t('media.media')} active={filter === 'media'} activeClass="bg-amber-500 text-white" onClick={() => setFilter('media')} />
         </div>

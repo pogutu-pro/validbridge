@@ -24,7 +24,7 @@ import {
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { isFeatureAvailable } from '@services/plans/plans'
 import { normalizeForSearch } from '@/lib/search/normalize'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 const CONTENT_TYPE_ICON: Record<ContentResultType, SearchMeta['icon']> = {
   course: BookOpen,
@@ -85,7 +85,7 @@ export default function CommandPalette() {
   const { t } = useTranslation()
   const { open, setOpen } = useCommandPalette()
   const router = useRouter()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const [query, setQuery] = useState('')
 
   const pages = usePagesFiltered()
@@ -251,7 +251,7 @@ export default function CommandPalette() {
                 />
               </div>
               <img
-                src="/lrn-dash.svg"
+                src="/validbridge-dash.svg"
                 alt=""
                 aria-hidden="true"
                 draggable={false}

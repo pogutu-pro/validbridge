@@ -92,18 +92,18 @@ def test_is_retryable():
 
 
 def test_resolve_tts_config_no_key_raises():
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg(api_key=None, gemini_api_key=None)):
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg(api_key=None, gemini_api_key=None)):
         with pytest.raises(AINotConfiguredError):
             gen._resolve_tts_config()
 
 
 def test_resolve_tts_config_default_and_override():
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg(provider="google", api_key="k")):
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg(provider="google", api_key="k")):
         key, model = gen._resolve_tts_config()
         assert key == "k"
         assert model == gen.DEFAULT_TTS_MODEL
     with patch.object(
-        gen, "get_learnhouse_config",
+        gen, "get_validbridge_config",
         return_value=_cfg(provider="openai", api_key=None, gemini_api_key="gk", tts_model="custom-tts"),
     ):
         key, model = gen._resolve_tts_config()
@@ -115,7 +115,7 @@ def test_resolve_tts_config_default_and_override():
 
 async def test_generate_speech_single_voice():
     client = _fake_client(_fake_response())
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), \
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), \
          patch("google.genai.Client", return_value=client):
         out = await gen.generate_speech("Hello world", voice="Puck")
     assert out[:4] == b"RIFF" and out[8:12] == b"WAVE"
@@ -125,7 +125,7 @@ async def test_generate_speech_single_voice():
 async def test_generate_speech_multi_speaker():
     client = _fake_client(_fake_response())
     speakers = [gen.Speaker(name="Host", voice="Kore"), gen.Speaker(name="Guest", voice="Puck")]
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), \
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), \
          patch("google.genai.Client", return_value=client):
         out = await gen.generate_speech("Host: hi\nGuest: hey", speakers=speakers, style="upbeat", language="English")
     assert out[8:12] == b"WAVE"
@@ -143,7 +143,7 @@ async def test_generate_speech_too_long_raises():
 
 async def test_generate_speech_no_audio_raises_runtime():
     client = _fake_client(SimpleNamespace(candidates=[]))
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), \
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), \
          patch("google.genai.Client", return_value=client):
         with pytest.raises(RuntimeError):
             await gen.generate_speech("Hello")
@@ -154,7 +154,7 @@ async def test_generate_speech_retries_then_succeeds():
     retryable.code = 503
     client = MagicMock()
     client.aio.models.generate_content = AsyncMock(side_effect=[retryable, _fake_response()])
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), \
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), \
          patch("google.genai.Client", return_value=client), \
          patch.object(gen.asyncio, "sleep", new=AsyncMock()):
         out = await gen.generate_speech("Hello")
@@ -164,7 +164,7 @@ async def test_generate_speech_retries_then_succeeds():
 
 async def test_generate_speech_nonretryable_raises_runtime():
     client = _fake_client(side_effect=ValueError("bad request"))
-    with patch.object(gen, "get_learnhouse_config", return_value=_cfg()), \
+    with patch.object(gen, "get_validbridge_config", return_value=_cfg()), \
          patch("google.genai.Client", return_value=client):
         with pytest.raises(RuntimeError):
             await gen.generate_speech("Hello")

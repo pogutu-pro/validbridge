@@ -51,8 +51,8 @@ const EVENT_META: Record<
   },
   course_enrolled: {
     labelKey: 'analytics.overview.enrollments',
-    icon: <GraduationCap size={16} weight="duotone" className="text-indigo-400" />,
-    dotColor: 'bg-indigo-400',
+    icon: <GraduationCap size={16} weight="duotone" className="text-orange-400" />,
+    dotColor: 'bg-orange-400',
     modalKey: 'enrollments',
   },
   course_completed: {
@@ -71,14 +71,14 @@ const EVENT_META: Record<
 const DEVICE_COLORS: Record<string, string> = {
   desktop: '#6b8de3',
   mobile: '#818cf8',
-  tablet: '#a78bfa',
+  tablet: '#fb923c',
   unknown: '#d1d5db',
 }
 
 const DEVICE_ICONS: Record<string, React.ReactNode> = {
   desktop: <Desktop size={13} weight="duotone" className="text-blue-400" />,
-  mobile: <DeviceMobile size={13} weight="duotone" className="text-indigo-400" />,
-  tablet: <Devices size={13} weight="duotone" className="text-purple-400" />,
+  mobile: <DeviceMobile size={13} weight="duotone" className="text-orange-400" />,
+  tablet: <Devices size={13} weight="duotone" className="text-orange-400" />,
   unknown: <Devices size={13} weight="duotone" className="text-gray-400" />,
 }
 
@@ -328,7 +328,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
 
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Devices size={15} weight="duotone" className="text-indigo-400" />
+            <Devices size={15} weight="duotone" className="text-orange-400" />
             <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.devices')}</h3>
           </div>
           {deviceLoading ? (
@@ -452,7 +452,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         onOpenChange={(open) => !open && setActiveModal(null)}
         title={t('analytics.modals.enrollments.title')}
         description={t('analytics.modals.enrollments.description', { days })}
-        icon={<GraduationCap size={18} weight="duotone" className="text-indigo-400" />}
+        icon={<GraduationCap size={18} weight="duotone" className="text-orange-400" />}
       >
         <EnrollmentsDetail days={days} />
       </AnalyticsDetailModal>

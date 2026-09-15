@@ -1,5 +1,5 @@
 import { useOrgMembership } from '@components/Contexts/OrgContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useMemo } from 'react';
 
 interface Role {
@@ -204,7 +204,7 @@ const SUPERADMIN_RIGHTS: Rights = {
 };
 
 function useAdminStatus(): UseAdminStatusReturn {
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const { org, orgslug } = useOrgMembership() as any;
 
     const roles = session.data?.roles;

@@ -1,6 +1,6 @@
 'use client'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { getUriWithOrg } from '@services/config/config'
@@ -125,7 +125,7 @@ function CommunityCard(props: PropsType) {
 const CommunityAdminEditsArea = (props: any) => {
   const { t } = useTranslation()
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const queryClient = useQueryClient()
 
   const deleteCommunityUI = async () => {

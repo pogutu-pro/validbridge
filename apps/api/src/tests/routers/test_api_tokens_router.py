@@ -36,7 +36,7 @@ def _mock_token_read(**overrides) -> APITokenRead:
         token_uuid="apitoken_test",
         name="Test Token",
         description="desc",
-        token_prefix="lh_test",
+        token_prefix="vb_test",
         org_id=1,
         rights=None,
         created_by_user_id=1,
@@ -52,11 +52,11 @@ def _mock_token_read(**overrides) -> APITokenRead:
 
 def _mock_token_created(**overrides) -> APITokenCreatedResponse:
     data = dict(
-        token="lh_secret_token",
+        token="vb_secret_token",
         token_uuid="apitoken_test",
         name="Test Token",
         description="desc",
-        token_prefix="lh_test",
+        token_prefix="vb_test",
         org_id=1,
         rights=None,
         created_by_user_id=1,
@@ -152,14 +152,14 @@ class TestApiTokensRouter:
         ), patch(
             "src.routers.api_tokens.regenerate_api_token",
             new_callable=AsyncMock,
-            return_value=_mock_token_created(token="lh_new_token"),
+            return_value=_mock_token_created(token="vb_new_token"),
         ):
             response = await client.post(
                 "/api/v1/orgs/1/api-tokens/apitoken_test/regenerate"
             )
 
         assert response.status_code == 200
-        assert response.json()["token"] == "lh_new_token"
+        assert response.json()["token"] == "vb_new_token"
 
     async def test_regenerate_api_token_rate_limited(self, client):
         with patch(

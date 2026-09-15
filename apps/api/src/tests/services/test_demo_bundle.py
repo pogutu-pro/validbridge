@@ -117,7 +117,7 @@ def test_no_placeholder_text_anywhere():
 # relying on review: the bundle is public-facing, and a real customer's name in
 # a demo organisation is a conversation nobody wants to have.
 DENYLIST = [
-    "learnhouse",
+    "validbridge",
     "acme",
     "contoso",
     "northwind",

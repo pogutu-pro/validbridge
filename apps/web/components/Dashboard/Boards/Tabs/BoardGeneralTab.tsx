@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Save } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { updateBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
@@ -19,7 +19,7 @@ interface BoardGeneralTabProps {
 function BoardGeneralTab({ board, boardUuid, boardKey }: BoardGeneralTabProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
 

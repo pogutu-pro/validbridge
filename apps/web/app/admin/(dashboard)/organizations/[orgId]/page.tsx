@@ -9,7 +9,7 @@ import {
   getCourseThumbnailMediaDirectory,
 } from '@services/media/media'
 import { apiFetch } from '@services/utils/ts/requests'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import Link from 'next/link'
 import { useParams, useSearchParams, useRouter, usePathname } from 'next/navigation'
@@ -106,7 +106,7 @@ function getFrontendDomain(): string {
   return (
     document.cookie
       .split('; ')
-      .find((c) => c.startsWith('LH_frontend_domain='))
+      .find((c) => c.startsWith('VB_frontend_domain='))
       ?.split('=')[1] || 'localhost:3000'
   )
 }
@@ -114,7 +114,7 @@ function getFrontendDomain(): string {
 export default function OrgDetailPage() {
   const params = useParams()
   const orgId = params.orgId as string
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const { searchParams, updateParams } = useUrlParams()
 
@@ -181,7 +181,7 @@ export default function OrgDetailPage() {
                     org.plan === 'enterprise'
                       ? 'bg-amber-400/10 text-amber-400'
                       : org.plan === 'pro'
-                        ? 'bg-purple-400/10 text-purple-400'
+                        ? 'bg-orange-400/10 text-orange-400'
                         : org.plan === 'standard'
                           ? 'bg-blue-400/10 text-blue-400'
                           : 'bg-white/[0.06] text-white/40'
@@ -910,7 +910,7 @@ function PlanTab({
       id: 'pro',
       name: 'Pro',
       description: 'Advanced analytics, API access',
-      color: 'text-purple-400 bg-purple-400/10',
+      color: 'text-orange-400 bg-orange-400/10',
     },
     {
       id: 'enterprise',
@@ -1126,7 +1126,7 @@ function AICreditsSection({ orgId, accessToken }: { orgId: string; accessToken: 
   return (
     <div>
       <h3 className="text-sm font-medium text-white/60 mb-4 flex items-center gap-2">
-        <Robot size={14} weight="fill" className="text-violet-400" />
+        <Robot size={14} weight="fill" className="text-orange-400" />
         AI Credits
       </h3>
       <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-5 space-y-5">
@@ -1390,7 +1390,7 @@ function FeaturesTab({
                       {/* "Available in the org's plan" — separate from the on/off
                           toggle. On a paid plan these stay enabled regardless. */}
                       {mode === 'saas' && resolvedFeatures[key]?.available && (
-                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-violet-400/10 text-violet-300 border border-violet-400/20">
+                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-orange-400/10 text-orange-300 border border-orange-400/20">
                           In plan
                         </span>
                       )}

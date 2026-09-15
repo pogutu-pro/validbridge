@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveCo
 import { ChartBar } from '@phosphor-icons/react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
-const BAR_COLORS = ['#c4b5fd', '#a78bfa', '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6']
+const BAR_COLORS = ['#fdba74', '#fb923c', '#f97316', '#ea580c', '#c2410c', '#5b21b6']
 
 function kFormatter(v: number) {
   return v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
@@ -65,7 +65,7 @@ export default function CourseLearnerProgress({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={ChartBar} bg="bg-purple-50" color="text-purple-500" />}
+      icon={<WidgetIcon icon={ChartBar} bg="bg-orange-50" color="text-orange-500" />}
       title={t('analytics.course_analytics.learner_progress.title')}
       subtitle={t('analytics.course_analytics.learner_progress.subtitle')}
       modalContent={

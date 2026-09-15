@@ -83,7 +83,7 @@ export default function CourseOverviewStats({
         value={row?.enrollments ?? 0}
         numericValue={row?.enrollments ?? 0}
         icon={UserPlus}
-        bgColor="bg-indigo-500"
+        bgColor="bg-orange-500"
       />
       <StatCard
         label={t('analytics.course_analytics.overview_stats.completions')}

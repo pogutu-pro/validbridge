@@ -26,7 +26,7 @@ def _patch_ai_config(monkeypatch, **overrides):
     fields.update(overrides)
     cfg = SimpleNamespace(**fields)
     monkeypatch.setattr(
-        provider_mod, "get_learnhouse_config", lambda: SimpleNamespace(ai_config=cfg)
+        provider_mod, "get_validbridge_config", lambda: SimpleNamespace(ai_config=cfg)
     )
 
 
@@ -69,7 +69,7 @@ def test_build_model_ollama_needs_no_key(monkeypatch):
 
 
 def test_build_model_bedrock_needs_no_api_key(monkeypatch):
-    # Bedrock uses the standard AWS credential chain + region (not LEARNHOUSE_AI_API_KEY).
+    # Bedrock uses the standard AWS credential chain + region (not VALIDBRIDGE_AI_API_KEY).
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
     _patch_ai_config(monkeypatch, provider="bedrock", api_key=None)
     model = build_model("anthropic.claude-sonnet-4-5-20250929-v1:0")
@@ -162,7 +162,7 @@ def _patch_embed_config(monkeypatch, **overrides):
     fields.update(overrides)
     cfg = SimpleNamespace(**fields)
     monkeypatch.setattr(
-        embeddings_mod, "get_learnhouse_config", lambda: SimpleNamespace(ai_config=cfg)
+        embeddings_mod, "get_validbridge_config", lambda: SimpleNamespace(ai_config=cfg)
     )
 
 

@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react'
 import { UploadCloud, Image as ImageIcon, ArrowBigUpDash } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { Community, updateCommunityThumbnail } from '@services/communities/communities'
 import { getCommunityThumbnailMediaDirectory } from '@services/media/media'
@@ -36,7 +36,7 @@ export function CommunityThumbnailModal({
   community,
   orgSlug,
 }: CommunityThumbnailModalProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const router = useRouter()
   const org = useOrg() as any
   const queryClient = useQueryClient()

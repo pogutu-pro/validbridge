@@ -16,7 +16,7 @@ import logging
 
 from pydantic_ai.embeddings import Embedder, EmbeddingModel, EmbeddingSettings
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.services.ai.llm.provider import (
     DEFAULT_OLLAMA_BASE_URL,
     DEFAULT_PROVIDER,
@@ -40,7 +40,7 @@ _DEFAULT_EMBEDDING_MODEL = {
 
 
 def embedding_dimensions() -> int:
-    cfg = get_learnhouse_config().ai_config
+    cfg = get_validbridge_config().ai_config
     return getattr(cfg, "embedding_dimensions", None) or DEFAULT_EMBEDDING_DIMENSIONS
 
 
@@ -54,7 +54,7 @@ def _resolve_embedding_provider(cfg) -> str:
 
 def build_embedding_model() -> EmbeddingModel:
     """Build a Pydantic AI ``EmbeddingModel`` for the configured (embedding) provider."""
-    cfg = get_learnhouse_config().ai_config
+    cfg = get_validbridge_config().ai_config
     prov = _resolve_embedding_provider(cfg)
     main_provider = (getattr(cfg, "provider", None) or "").strip().lower() or DEFAULT_PROVIDER
     api_key = getattr(cfg, "api_key", None)
@@ -71,7 +71,7 @@ def build_embedding_model() -> EmbeddingModel:
         key = getattr(cfg, "gemini_api_key", None) or (api_key if main_provider in _GOOGLE_ALIASES else None)
         if not key:
             raise AINotConfiguredError(
-                "Google embeddings require an API key (set LEARNHOUSE_GEMINI_API_KEY)."
+                "Google embeddings require an API key (set VALIDBRIDGE_GEMINI_API_KEY)."
             )
         return GoogleEmbeddingModel(
             model_name or _DEFAULT_EMBEDDING_MODEL["google"],
@@ -95,7 +95,7 @@ def build_embedding_model() -> EmbeddingModel:
 
         if not api_key:
             raise AINotConfiguredError(
-                "OpenAI embeddings require an API key (set LEARNHOUSE_AI_API_KEY)."
+                "OpenAI embeddings require an API key (set VALIDBRIDGE_AI_API_KEY)."
             )
         return OpenAIEmbeddingModel(
             model_name or _DEFAULT_EMBEDDING_MODEL["openai"],
@@ -120,8 +120,8 @@ def build_embedding_model() -> EmbeddingModel:
         )
 
     raise AINotConfiguredError(
-        f"Provider '{prov}' has no embeddings API. Set LEARNHOUSE_AI_EMBEDDING_PROVIDER to "
-        "'google', 'openai', or 'ollama' (with its credentials), or set LEARNHOUSE_GEMINI_API_KEY "
+        f"Provider '{prov}' has no embeddings API. Set VALIDBRIDGE_AI_EMBEDDING_PROVIDER to "
+        "'google', 'openai', or 'ollama' (with its credentials), or set VALIDBRIDGE_GEMINI_API_KEY "
         "to use Google embeddings for RAG."
     )
 

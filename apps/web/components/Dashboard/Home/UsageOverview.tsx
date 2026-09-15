@@ -15,7 +15,7 @@ import {
 } from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { OrgUsageResponse, getOrgUsage } from '@services/orgs/usage'
 import { apiFetch } from '@services/utils/ts/requests'
@@ -35,7 +35,7 @@ const PLAN_COLORS: Record<string, { bg: string; text: string }> = {
   free: { bg: 'bg-gray-100', text: 'text-gray-600' },
   oss: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
   standard: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  pro: { bg: 'bg-purple-100', text: 'text-purple-700' },
+  pro: { bg: 'bg-orange-100', text: 'text-orange-700' },
   enterprise: { bg: 'bg-amber-100', text: 'text-amber-700' },
 }
 
@@ -61,7 +61,7 @@ const METER_ICONS: Record<string, React.ComponentType<any>> = {
 export default function UsageOverview() {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const token = session?.data?.tokens?.access_token
   const orgId = org?.id
 
@@ -290,18 +290,18 @@ function AICreditsSection({ credits }: { credits: AICreditsSummary }) {
       : 0
 
   const barColor = isUnlimited
-    ? 'bg-violet-500'
+    ? 'bg-orange-500'
     : percent > 90
       ? 'bg-red-500'
       : percent > 70
         ? 'bg-amber-500'
-        : 'bg-violet-500'
+        : 'bg-orange-500'
 
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2">
-          <Lightning size={13} weight="duotone" className="text-violet-400" />
+          <Lightning size={13} weight="duotone" className="text-orange-400" />
           <span className="text-xs font-medium text-gray-600">{t('dashboard.home.ai_credits')}</span>
         </div>
         <span className="text-[11px] text-gray-400 tabular-nums">

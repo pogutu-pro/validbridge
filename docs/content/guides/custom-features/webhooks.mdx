@@ -1,6 +1,6 @@
 ---
 title: Webhooks
-description: Subscribe to LearnHouse events, verify HMAC-SHA256 signatures, and react to learning activity in real time with a Next.js webhook receiver.
+description: Subscribe to ValidBridge events, verify HMAC-SHA256 signatures, and react to learning activity in real time with a Next.js webhook receiver.
 ---
 
 import { Callout } from 'nextra/components'
@@ -8,7 +8,7 @@ import WebhookFlowDiagram from '../../../components/diagrams/WebhookFlowDiagram'
 
 # Webhooks
 
-Webhooks let LearnHouse **push events to your application** the moment they happen — a learner enrolls, completes a course, submits an assignment, signs up — so you can react without polling. Use them to sync a CRM, send custom emails, update a dashboard, or kick off any workflow.
+Webhooks let ValidBridge **push events to your application** the moment they happen — a learner enrolls, completes a course, submits an assignment, signs up — so you can react without polling. Use them to sync a CRM, send custom emails, update a dashboard, or kick off any workflow.
 
 <WebhookFlowDiagram />
 
@@ -19,9 +19,9 @@ Webhooks are a **Pro** feature. They're managed by an authenticated user under o
 ## How it works
 
 1. You register an **endpoint** (a public HTTPS URL) and choose which events to subscribe to.
-2. When a subscribed event fires, LearnHouse sends a `POST` to your URL with a JSON body, **signed** with a per-endpoint secret.
+2. When a subscribed event fires, ValidBridge sends a `POST` to your URL with a JSON body, **signed** with a per-endpoint secret.
 3. Your receiver **verifies the signature**, then handles the event.
-4. If your endpoint doesn't return a `2xx`, LearnHouse **retries** — up to 3 attempts, waiting 1s then 4s between them — and logs every delivery.
+4. If your endpoint doesn't return a `2xx`, ValidBridge **retries** — up to 3 attempts, waiting 1s then 4s between them — and logs every delivery.
 
 ## Managing endpoints
 
@@ -46,7 +46,7 @@ curl -X POST "http://localhost:1338/api/v1/orgs/1/webhooks" \
   -H "Authorization: Bearer <user_jwt>" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://your-app.com/api/webhooks/learnhouse",
+    "url": "https://your-app.com/api/webhooks/validbridge",
     "events": ["course_completed", "course_enrolled", "user_signed_up"]
   }'
 ```
@@ -56,7 +56,7 @@ The response contains the **signing secret exactly once** (prefixed `whsec_`). S
 ```json
 {
   "webhook_uuid": "webhook_…",
-  "url": "https://your-app.com/api/webhooks/learnhouse",
+  "url": "https://your-app.com/api/webhooks/validbridge",
   "events": ["course_completed", "course_enrolled", "user_signed_up"],
   "secret": "whsec_…store me…",
   "is_active": true
@@ -91,7 +91,7 @@ Each request also carries these headers:
 | `X-Webhook-Event` | The event name, e.g. `course_completed` |
 | `X-Webhook-Delivery` | Unique delivery id, e.g. `dlv_…` (use it for idempotency) |
 | `X-Webhook-Signature` | `sha256=<hmac-hex>` — HMAC-SHA256 of the **raw request body** |
-| `User-Agent` | `LearnHouse-Webhooks/1.0` |
+| `User-Agent` | `ValidBridge-Webhooks/1.0` |
 
 ## Verifying the signature
 
@@ -99,11 +99,11 @@ The signature is `sha256=` followed by the hex HMAC-SHA256 of the **exact raw bo
 
 Here's a complete receiver as a Next.js Route Handler:
 
-```ts filename="src/app/api/webhooks/learnhouse/route.ts"
+```ts filename="src/app/api/webhooks/validbridge/route.ts"
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 
-const SECRET = process.env.LEARNHOUSE_WEBHOOK_SECRET! // the whsec_… value
+const SECRET = process.env.VALIDBRIDGE_WEBHOOK_SECRET! // the whsec_… value
 
 export async function POST(req: NextRequest) {
   // 1. Read the RAW body — do not use req.json() first.
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
       break
   }
 
-  // 4. Return 2xx quickly so LearnHouse marks the delivery successful.
+  // 4. Return 2xx quickly so ValidBridge marks the delivery successful.
   return NextResponse.json({ received: true })
 }
 ```
@@ -178,7 +178,7 @@ A webhook can subscribe to any of these events. The shape of each event's `data`
 
 - **Secrets** are stored encrypted at rest and are shown to you only at creation and on rotation.
 - **Signatures** use HMAC-SHA256 over the raw body — the same convention as GitHub and Stripe.
-- **Outbound requests are SSRF-protected**: LearnHouse validates the target URL and the resolved IP before every delivery, so endpoints must be publicly reachable — `localhost` and private/reserved IP ranges are always rejected (in every environment).
+- **Outbound requests are SSRF-protected**: ValidBridge validates the target URL and the resolved IP before every delivery, so endpoints must be publicly reachable — `localhost` and private/reserved IP ranges are always rejected (in every environment).
 
 ## See also
 

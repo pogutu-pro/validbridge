@@ -53,8 +53,8 @@ def _mock_pack(**overrides) -> OrgPackRead:
 
 class TestInternalPacksRouter:
     async def test_verify_platform_key_errors(self, client):
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
         try:
             response = await client.post(
                 "/api/v1/internal/packs/1/activate",
@@ -63,14 +63,14 @@ class TestInternalPacksRouter:
             )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 403
 
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = "platform-secret"
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = "platform-secret"
         try:
             response = await client.post(
                 "/api/v1/internal/packs/1/activate",
@@ -79,9 +79,9 @@ class TestInternalPacksRouter:
             )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 403
 
@@ -92,8 +92,8 @@ class TestInternalPacksRouter:
         verify_platform_key this exact combination would return 200 and let any
         caller activate packs on any organization.
         """
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
         try:
             with patch(
                 "src.routers.orgs.packs.activate_pack",
@@ -106,9 +106,9 @@ class TestInternalPacksRouter:
                 )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 403
 
@@ -118,8 +118,8 @@ class TestInternalPacksRouter:
         Header values arrive decoded as latin-1 and hmac.compare_digest raises
         TypeError on non-ASCII str, so the comparison runs on bytes.
         """
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = "platform-secret"
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = "platform-secret"
         try:
             response = await client.post(
                 "/api/v1/internal/packs/1/activate",
@@ -128,15 +128,15 @@ class TestInternalPacksRouter:
             )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 403
 
     async def test_activate_pack(self, client):
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = "platform-secret"
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = "platform-secret"
         try:
             with patch(
                 "src.routers.orgs.packs.activate_pack",
@@ -149,16 +149,16 @@ class TestInternalPacksRouter:
                 )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 200
         assert response.json()["pack_id"] == "ai_500"
 
     async def test_mark_pack_canceling(self, client):
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = "platform-secret"
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = "platform-secret"
         try:
             with patch(
                 "src.routers.orgs.packs.mark_pack_canceling",
@@ -171,16 +171,16 @@ class TestInternalPacksRouter:
                 )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 200
         assert response.json()["cancel_at_period_end"] is True
 
     async def test_deactivate_pack(self, client):
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = "platform-secret"
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = "platform-secret"
         try:
             with patch(
                 "src.routers.orgs.packs.deactivate_pack",
@@ -194,16 +194,16 @@ class TestInternalPacksRouter:
                 )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 200
         assert response.json()["status"] == "cancelled"
 
     async def test_deactivate_all_packs(self, client):
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = "platform-secret"
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = "platform-secret"
         try:
             with patch(
                 "src.routers.orgs.packs.deactivate_all_packs_for_org",
@@ -215,16 +215,16 @@ class TestInternalPacksRouter:
                 )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 200
         assert response.json()["deactivated"] == 2
 
     async def test_get_active_user_overage(self, client):
-        old = os.environ.get("LEARNHOUSE_PLATFORM_API_KEY")
-        os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = "platform-secret"
+        old = os.environ.get("VALIDBRIDGE_PLATFORM_API_KEY")
+        os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = "platform-secret"
         summary = {
             "org_id": 1, "plan": "pro", "year": 2026, "month": 7,
             "active_users": 214, "plan_limit": 200,
@@ -242,9 +242,9 @@ class TestInternalPacksRouter:
                 )
         finally:
             if old is None:
-                os.environ.pop("LEARNHOUSE_PLATFORM_API_KEY", None)
+                os.environ.pop("VALIDBRIDGE_PLATFORM_API_KEY", None)
             else:
-                os.environ["LEARNHOUSE_PLATFORM_API_KEY"] = old
+                os.environ["VALIDBRIDGE_PLATFORM_API_KEY"] = old
 
         assert response.status_code == 200
         assert response.json()["overage_units"] == 14

@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "@learnhouse/collab",
+      "name": "@validbridge/collab",
       "dependencies": {
         "@hocuspocus/extension-database": "^4.0.0",
         "@hocuspocus/server": "^4.0.0",

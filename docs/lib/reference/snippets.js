@@ -25,7 +25,7 @@ function pyString(value) {
  * @param {string} input.method    - 'GET' | 'POST' | ...
  * @param {string} input.url       - full URL with {placeholders} and example query string
  * @param {boolean} input.auth     - include the Authorization header
- * @param {string} input.authValue - bearer value shown in examples (defaults to the lh_ token
+ * @param {string} input.authValue - bearer value shown in examples (defaults to the vb_ token
  *                                   placeholder; session-only endpoints pass a JWT placeholder)
  * @param {string|null} input.contentType
  * @param {object|null} input.bodyExample   - example body (JSON object; for form types a flat object)

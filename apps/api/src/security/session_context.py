@@ -37,7 +37,7 @@ def _legacy_session_grace() -> timedelta:
     re-authenticating — so everyone gets a full cycle to sign in again before the
     policy applies to them.
     """
-    raw = os.environ.get("LEARNHOUSE_AUTH_LEGACY_SESSION_GRACE_DAYS")
+    raw = os.environ.get("VALIDBRIDGE_AUTH_LEGACY_SESSION_GRACE_DAYS")
     if raw:
         try:
             return timedelta(days=max(int(raw), 0))

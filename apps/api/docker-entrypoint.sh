@@ -29,10 +29,10 @@ wait_for_service() {
 }
 
 # Extract host and port from connection strings if provided
-if [ -n "$LEARNHOUSE_SQL_CONNECTION_STRING" ]; then
+if [ -n "$VALIDBRIDGE_SQL_CONNECTION_STRING" ]; then
     # Extract host and port from postgresql://user:pass@host:port/db
-    DB_HOST=$(echo "$LEARNHOUSE_SQL_CONNECTION_STRING" | sed -n 's/.*@\([^:]*\):\([0-9]*\)\/.*/\1/p')
-    DB_PORT=$(echo "$LEARNHOUSE_SQL_CONNECTION_STRING" | sed -n 's/.*@\([^:]*\):\([0-9]*\)\/.*/\2/p')
+    DB_HOST=$(echo "$VALIDBRIDGE_SQL_CONNECTION_STRING" | sed -n 's/.*@\([^:]*\):\([0-9]*\)\/.*/\1/p')
+    DB_PORT=$(echo "$VALIDBRIDGE_SQL_CONNECTION_STRING" | sed -n 's/.*@\([^:]*\):\([0-9]*\)\/.*/\2/p')
     
     if [ -z "$DB_PORT" ]; then
         DB_PORT=5432
@@ -43,10 +43,10 @@ if [ -n "$LEARNHOUSE_SQL_CONNECTION_STRING" ]; then
     fi
 fi
 
-if [ -n "$LEARNHOUSE_REDIS_CONNECTION_STRING" ]; then
+if [ -n "$VALIDBRIDGE_REDIS_CONNECTION_STRING" ]; then
     # Extract host and port from redis://host:port/db or redis://host:port
-    REDIS_HOST=$(echo "$LEARNHOUSE_REDIS_CONNECTION_STRING" | sed -n 's|redis://\([^:/]*\):\([0-9]*\).*|\1|p')
-    REDIS_PORT=$(echo "$LEARNHOUSE_REDIS_CONNECTION_STRING" | sed -n 's|redis://\([^:/]*\):\([0-9]*\).*|\2|p')
+    REDIS_HOST=$(echo "$VALIDBRIDGE_REDIS_CONNECTION_STRING" | sed -n 's|redis://\([^:/]*\):\([0-9]*\).*|\1|p')
+    REDIS_PORT=$(echo "$VALIDBRIDGE_REDIS_CONNECTION_STRING" | sed -n 's|redis://\([^:/]*\):\([0-9]*\).*|\2|p')
     
     if [ -z "$REDIS_PORT" ]; then
         REDIS_PORT=6379
@@ -54,7 +54,7 @@ if [ -n "$LEARNHOUSE_REDIS_CONNECTION_STRING" ]; then
     
     if [ -z "$REDIS_HOST" ]; then
         # Try default format redis://host:port
-        REDIS_HOST=$(echo "$LEARNHOUSE_REDIS_CONNECTION_STRING" | sed -n 's|redis://\([^:/]*\).*|\1|p')
+        REDIS_HOST=$(echo "$VALIDBRIDGE_REDIS_CONNECTION_STRING" | sed -n 's|redis://\([^:/]*\).*|\1|p')
     fi
     
     if [ -n "$REDIS_HOST" ]; then
@@ -67,10 +67,10 @@ export PYTHONUNBUFFERED=1
 export PYTHONIOENCODING=utf-8
 
 # Get port from config or use default
-PORT=${LEARNHOUSE_PORT:-9000}
+PORT=${VALIDBRIDGE_PORT:-9000}
 HOST=${HOSTNAME:-0.0.0.0}
 
-echo "Starting LearnHouse backend on ${HOST}:${PORT}..."
+echo "Starting ValidBridge backend on ${HOST}:${PORT}..."
 
 # Start the FastAPI application.
 # Calling the venv's uvicorn directly rather than `uv run` keeps a lockfile

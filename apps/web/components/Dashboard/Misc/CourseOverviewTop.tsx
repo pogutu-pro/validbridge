@@ -14,13 +14,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@compo
 import { useTranslation } from 'react-i18next'
 import { updateCourse } from '@services/courses/courses'
 import { getAPIUrl } from '@services/config/config'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import toast from 'react-hot-toast'
 import { useState, useCallback } from 'react'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 export function CourseOverviewTop({
   params,
@@ -28,11 +28,11 @@ export function CourseOverviewTop({
   params: CourseOverviewParams
 }) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const course = useCourse() as any
   const dispatchCourse = useCourseDispatch() as any
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const queryClient = useQueryClient()
   const [isPublishing, setIsPublishing] = useState(false)
   const [isIndexing, setIsIndexing] = useState(false)
@@ -237,7 +237,7 @@ export function CourseOverviewTop({
                       className={`group px-2.5 sm:px-3.5 py-2 text-sm font-semibold flex items-center space-x-1.5 transition-colors ${
                         isIndexed
                           ? 'bg-blue-50/70 text-blue-700'
-                          : 'bg-purple-50/70 text-purple-700 hover:bg-purple-100/70'
+                          : 'bg-orange-50/70 text-orange-700 hover:bg-orange-100/70'
                       } ${isIndexing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
                       {isIndexing ? (

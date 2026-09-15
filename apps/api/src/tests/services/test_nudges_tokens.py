@@ -71,7 +71,7 @@ class TestRejection:
         token = make_unsubscribe_token("user_abc123")
         tokens_module._unsub_secret.cache_clear()
 
-        real_config = tokens_module.get_learnhouse_config()
+        real_config = tokens_module.get_validbridge_config()
 
         class _Rotated:
             security_config = type(
@@ -81,5 +81,5 @@ class TestRejection:
             def __getattr__(self, name):
                 return getattr(real_config, name)
 
-        monkeypatch.setattr(tokens_module, "get_learnhouse_config", lambda: _Rotated())
+        monkeypatch.setattr(tokens_module, "get_validbridge_config", lambda: _Rotated())
         assert verify_unsubscribe_token(token) is None

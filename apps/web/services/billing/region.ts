@@ -36,9 +36,9 @@ export function currencyForRegion(region: Region): string | undefined {
   return region === 'eur' ? 'eur' : undefined
 }
 
-/** Client-side: read a previously-set `LH_region` cookie (default usd). */
+/** Client-side: read a previously-set `VB_region` cookie (default usd). */
 export function getRegionFromCookie(): Region {
   if (typeof document === 'undefined') return 'usd'
-  const match = document.cookie.match(/(?:^|;\s*)LH_region=([^;]*)/)
+  const match = document.cookie.match(/(?:^|;\s*)VB_region=([^;]*)/)
   return match?.[1] === 'eur' ? 'eur' : 'usd'
 }

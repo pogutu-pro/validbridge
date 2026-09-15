@@ -11,12 +11,12 @@ import Link from 'next/link'
 import { signUpWithInviteCode } from '@services/auth/auth'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { signIn } from '@components/Contexts/AuthContext'
-import { getLEARNHOUSE_TOP_DOMAIN_VAL, isOnCustomDomain } from '@services/config/config'
+import { getVALIDBRIDGE_TOP_DOMAIN_VAL, isOnCustomDomain } from '@services/config/config'
 import { getErrorMessage } from '@services/utils/ts/errorMessage'
 import { useTranslation } from 'react-i18next'
 import { PasswordStrengthIndicator, validatePasswordStrength } from '@components/Auth/PasswordStrengthIndicator'
 import TurnstileWidget, { useTurnstileRequired, type TurnstileWidgetHandle } from '@components/Auth/TurnstileWidget'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import CustomSignupFields, {
   initialCustomFieldValues,
   validateCustomFields,
@@ -65,7 +65,7 @@ interface InviteOnlySignUpProps {
 
 function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('public')
+  const { track } = useVBAnalytics('public')
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   // Prefer the client OrgContext, but fall back to the server-provided org so the
   // OAuth org cookies get written even during the react-query load window (an
@@ -142,21 +142,21 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
   const handleGoogleSignIn = () => {
     // Store org context in cookies before OAuth redirect
     if (org?.slug) {
-      const topDomain = getLEARNHOUSE_TOP_DOMAIN_VAL();
+      const topDomain = getVALIDBRIDGE_TOP_DOMAIN_VAL();
       const isSecure = window.location.protocol === 'https:';
       const secureAttr = isSecure ? '; secure' : '';
       const baseAttributes = `; path=/; SameSite=Lax${secureAttr}`;
       // Host-only on custom domains (a .{platformTopDomain} cookie can't be set
       // from learn.acme.org → browser drops it → callback loses org context).
       const domainAttr = (topDomain === 'localhost' || isOnCustomDomain()) ? '' : `; domain=.${topDomain}`;
-      document.cookie = `LH_oauth_orgslug=${org.slug}${baseAttributes}${domainAttr}`;
-      document.cookie = `LH_oauth_org_id=${org.id}${baseAttributes}${domainAttr}`;
+      document.cookie = `VB_oauth_orgslug=${org.slug}${baseAttributes}${domainAttr}`;
+      document.cookie = `VB_oauth_org_id=${org.id}${baseAttributes}${domainAttr}`;
       // Invite-only orgs need the invite code itself, not just the org: the
       // backend requires the same proof the form signup posts to
       // /users/{org_id}/invite/{code}. Without it a Google sign-up through an
       // invite link is refused instead of joining the org.
       if (props.inviteCode) {
-        document.cookie = `LH_oauth_invite_code=${encodeURIComponent(props.inviteCode)}${baseAttributes}${domainAttr}`;
+        document.cookie = `VB_oauth_invite_code=${encodeURIComponent(props.inviteCode)}${baseAttributes}${domainAttr}`;
       }
     }
     // Use absolute URL with current origin for custom domain support

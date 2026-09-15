@@ -1,6 +1,6 @@
 import { NodeViewWrapper } from '@tiptap/react'
 import React, { useEffect, useState } from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUserByUsername, getUser } from '@services/users/users'
 import { Input } from "@components/ui/input"
 import { Button } from "@components/ui/button"
@@ -69,7 +69,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 
 function UserBlockComponent(props: any) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const editorState = useEditorProvider() as any
   const isEditable = editorState.isEditable

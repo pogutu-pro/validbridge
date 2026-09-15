@@ -10,7 +10,7 @@ import { MessageCircle, ArrowRight, ChevronUp } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { Community, getCommunityByCourse } from '@services/communities/communities'
 import { DiscussionWithAuthor, getDiscussions } from '@services/communities/discussions'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 
@@ -21,7 +21,7 @@ interface CourseCommunitySectionProps {
 
 export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunitySectionProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
   // TanStack Query for community data — cached across navigations within the same course

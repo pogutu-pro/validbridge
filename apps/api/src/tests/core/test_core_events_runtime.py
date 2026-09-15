@@ -198,7 +198,7 @@ async def test_events_startup_shutdown_and_reconcile(monkeypatch):
         coro.close()
         return fake_task
 
-    monkeypatch.setattr(core_events, "get_learnhouse_config", lambda: fake_config)
+    monkeypatch.setattr(core_events, "get_validbridge_config", lambda: fake_config)
     monkeypatch.setattr(core_events, "connect_to_db", connect_to_db)
     monkeypatch.setattr(core_events, "create_logs_dir", create_logs_dir)
     monkeypatch.setattr(core_events, "check_content_directory", check_content_directory)
@@ -220,7 +220,7 @@ async def test_events_startup_shutdown_and_reconcile(monkeypatch):
     start_app = core_events.startup_app(app)
     await start_app()
 
-    assert app.learnhouse_config is fake_config
+    assert app.validbridge_config is fake_config
     connect_to_db.assert_awaited_once_with(app)
     create_logs_dir.assert_awaited_once()
     check_content_directory.assert_awaited_once()
@@ -316,16 +316,16 @@ async def test_periodic_migration_cleanup(monkeypatch, caplog):
 
 
 def test_ee_hooks_availability_and_loading(monkeypatch, caplog):
-    monkeypatch.delenv("LEARNHOUSE_DISABLE_EE", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_DISABLE_EE", raising=False)
     monkeypatch.setattr(ee_hooks.os.path, "isdir", lambda path: path == "ee")
     monkeypatch.setattr(ee_hooks.os.path, "isfile", lambda path: True)
     assert ee_hooks.is_ee_available() is True
 
-    monkeypatch.setenv("LEARNHOUSE_DISABLE_EE", "1")
+    monkeypatch.setenv("VALIDBRIDGE_DISABLE_EE", "1")
     assert ee_hooks.is_ee_available() is False
     assert ee_hooks.get_ee_hooks() is None
 
-    monkeypatch.delenv("LEARNHOUSE_DISABLE_EE", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_DISABLE_EE", raising=False)
     monkeypatch.setattr(ee_hooks.os.path, "isdir", lambda path: True)
     monkeypatch.setattr(ee_hooks.importlib.util, "find_spec", lambda name: None)
     assert ee_hooks.get_ee_hooks() is None

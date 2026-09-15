@@ -12,7 +12,7 @@ import src.services.courses.transfer.storage_utils as storage_utils
 def _make_config(
     *,
     content_delivery: str = "filesystem",
-    bucket_name: str | None = "learnhouse-media",
+    bucket_name: str | None = "validbridge-media",
     endpoint_url: str = "https://s3.test",
 ):
     return SimpleNamespace(
@@ -99,7 +99,7 @@ class TestStorageClientHelpers:
     def test_cached_config_helpers_cover_delivery_bucket_and_s3_flag(self):
         with patch.object(
             storage_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             return_value=_make_config(content_delivery="filesystem"),
         ):
             assert storage_utils.get_content_delivery_type() == "filesystem"
@@ -108,7 +108,7 @@ class TestStorageClientHelpers:
 
         with patch.object(
             storage_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             return_value=_make_config(content_delivery="s3api"),
         ):
             assert storage_utils.get_content_delivery_type() == "s3api"
@@ -116,15 +116,15 @@ class TestStorageClientHelpers:
         storage_utils.get_s3_bucket_name.cache_clear()
         with patch.object(
             storage_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             return_value=_make_config(bucket_name=None, content_delivery="s3api"),
         ):
-            assert storage_utils.get_s3_bucket_name() == "learnhouse-media"
+            assert storage_utils.get_s3_bucket_name() == "validbridge-media"
 
         storage_utils.get_s3_bucket_name.cache_clear()
         with patch.object(
             storage_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             return_value=_make_config(bucket_name="custom-bucket", content_delivery="s3api"),
         ):
             assert storage_utils.get_s3_bucket_name() == "custom-bucket"
@@ -163,7 +163,7 @@ class TestStorageClientHelpers:
             return_value="s3api",
         ), patch.object(
             storage_utils,
-            "get_learnhouse_config",
+            "get_validbridge_config",
             return_value=fake_config,
         ), patch.object(
             storage_utils.boto3,

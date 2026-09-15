@@ -113,8 +113,8 @@ function QuickStatsContent() {
       value: enrollments,
       loading: eventsLoading,
       icon: GraduationCap,
-      color: 'text-indigo-500',
-      bg: 'bg-indigo-50',
+      color: 'text-orange-500',
+      bg: 'bg-orange-50',
     },
     {
       label: t('dashboard.home.completions_30d'),

@@ -53,7 +53,7 @@ def get_client_ip(request: Request) -> str:
     # from untrusted clients. If the proxy passes through client-supplied headers,
     # IP spoofing can bypass rate limits.
     # For self-hosted deployments without a reverse proxy, set
-    # LEARNHOUSE_SECURITY__TRUST_PROXY_HEADERS=false in config to disable this.
+    # VALIDBRIDGE_SECURITY__TRUST_PROXY_HEADERS=false in config to disable this.
     direct_ip = request.client.host if request.client else None
 
     # Only trust proxy headers if request comes from a local reverse proxy
@@ -200,7 +200,7 @@ def check_refresh_rate_limit(request: Request) -> Tuple[bool, int]:
     /auth/refresh requires an already-valid, server-signed refresh JWT, so
     there is nothing here an attacker can brute-force.
 
-    The limit is keyed per IP, and schools/companies — LearnHouse's core
+    The limit is keyed per IP, and schools/companies — ValidBridge's core
     audience — put hundreds of users behind a single NAT address. The previous
     60/minute ceiling was reached by a few dozen people signing in at the same
     time (start of a class, Monday morning), and every request over the line

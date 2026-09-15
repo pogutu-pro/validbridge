@@ -169,7 +169,7 @@ def _verified_event(request: Request, raw_body: bytes) -> dict:
     """
     from fastapi import HTTPException
 
-    secret = (os.environ.get("LEARNHOUSE_RESEND_WEBHOOK_SECRET") or "").strip()
+    secret = (os.environ.get("VALIDBRIDGE_RESEND_WEBHOOK_SECRET") or "").strip()
     if not secret:
         logger.error("Delivery webhook received but no signing secret is configured")
         raise HTTPException(status_code=403, detail="Webhook verification unavailable")

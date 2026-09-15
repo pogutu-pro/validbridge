@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { removeCourse, startCourse } from '@services/courses/activity'
 import { revalidateTags, asArray } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import { getOffersByResource } from '@services/payments/offers'
 import { UserPen, ClockIcon, ArrowRight, BookOpen, UserPlus } from 'lucide-react'
@@ -16,7 +16,7 @@ import { useOrg, useOrgMembership } from '@components/Contexts/OrgContext'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CourseRun {
   status: string
@@ -56,7 +56,7 @@ interface CourseActionsProps {
 function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseActionsProps) {
   const { t } = useTranslation()
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isContributeLoading, setIsContributeLoading] = useState(false)
   const { contributorStatus, refetch } = useContributorStatus(courseuuid)
@@ -64,7 +64,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
   const org = useOrg() as any
   const { isUserPartOfTheOrg } = useOrgMembership()
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   // Clean up course UUID by removing 'course_' prefix if it exists
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');

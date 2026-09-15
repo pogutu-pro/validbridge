@@ -1,5 +1,5 @@
 DESCRIPTION >
-    Unified analytics events table for LearnHouse
+    Unified analytics events table for ValidBridge
 
 SCHEMA >
     `event_name` String `json:$.event_name`,

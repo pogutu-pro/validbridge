@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Globe, Users, X, SquareUserRound } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
@@ -30,7 +30,7 @@ const boardResourceUserGroupsKey = (boardUuid: string, orgId: number) =>
 function BoardAccessTab({ board, boardUuid, orgId, boardKey }: BoardAccessTabProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const queryClient = useQueryClient()
 

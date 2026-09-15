@@ -15,9 +15,9 @@ import {
 import { Hexagon } from 'lucide-react'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useTranslation } from 'react-i18next'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 type EditCourseStructureProps = {
   orgslug: string
@@ -41,9 +41,9 @@ export type OrderPayload =
 
 const EditCourseStructure = (props: EditCourseStructureProps) => {
   const { t } = useTranslation()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const router = useRouter()
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const queryClient = useQueryClient()
   const cleanCourseUuid = (id: string) => id?.replace(/^course_/, '') ?? id

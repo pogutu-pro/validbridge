@@ -13,36 +13,36 @@ from src.services.demo import flags
 
 def test_boolean_flags_accept_the_usual_spellings(monkeypatch):
     for raw in ("1", "true", "TRUE", " yes ", "on"):
-        monkeypatch.setenv("LEARNHOUSE_DEMO_ENABLED", raw)
+        monkeypatch.setenv("VALIDBRIDGE_DEMO_ENABLED", raw)
         assert flags.demo_enabled() is True
 
     for raw in ("0", "false", "no", "off", ""):
-        monkeypatch.setenv("LEARNHOUSE_DEMO_ENABLED", raw)
+        monkeypatch.setenv("VALIDBRIDGE_DEMO_ENABLED", raw)
         assert flags.demo_enabled() is False
 
 
 def test_an_unset_interval_uses_the_declared_default(monkeypatch):
-    monkeypatch.delenv("LEARNHOUSE_DEMO_REFRESH_MINUTES", raising=False)
+    monkeypatch.delenv("VALIDBRIDGE_DEMO_REFRESH_MINUTES", raising=False)
     assert flags.refresh_minutes() == flags.DEFAULT_REFRESH_MINUTES
 
 
 def test_a_nonsense_interval_falls_back_rather_than_crashing(monkeypatch):
     """This is read at startup; a typo must not stop the API booting."""
     for raw in ("ten", "", "10 minutes", "1e3"):
-        monkeypatch.setenv("LEARNHOUSE_DEMO_REFRESH_MINUTES", raw)
+        monkeypatch.setenv("VALIDBRIDGE_DEMO_REFRESH_MINUTES", raw)
         assert flags.refresh_minutes() == flags.DEFAULT_REFRESH_MINUTES
 
 
 def test_a_zero_or_negative_interval_falls_back(monkeypatch):
     """Otherwise the scheduler becomes a busy loop rebuilding the demo."""
     for raw in ("0", "-5"):
-        monkeypatch.setenv("LEARNHOUSE_DEMO_REFRESH_MINUTES", raw)
+        monkeypatch.setenv("VALIDBRIDGE_DEMO_REFRESH_MINUTES", raw)
         assert flags.refresh_minutes() == flags.DEFAULT_REFRESH_MINUTES
 
 
 def test_a_valid_interval_is_honoured(monkeypatch):
     """The fallbacks above would be indistinguishable from ignoring the flag."""
-    monkeypatch.setenv("LEARNHOUSE_DEMO_REFRESH_MINUTES", " 45 ")
+    monkeypatch.setenv("VALIDBRIDGE_DEMO_REFRESH_MINUTES", " 45 ")
     assert flags.refresh_minutes() == 45
 
 

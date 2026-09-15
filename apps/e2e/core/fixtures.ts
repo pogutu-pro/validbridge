@@ -1,16 +1,16 @@
 /**
  * Shared Playwright fixtures.
  *
- * The big one: we suppress LearnHouse's first-run onboarding (the "Welcome"
+ * The big one: we suppress ValidBridge's first-run onboarding (the "Welcome"
  * splash + the "Getting Started" checklist) by pre-seeding its localStorage
  * state via an init script that runs before any page script on every
  * navigation. Without this, the onboarding's full-screen overlay intercepts
  * pointer events and makes the dashboard untestable. The key + shape mirror
- * apps/web/components/Hooks/useOnboarding.ts (STORAGE_KEY = 'lh_onboarding').
+ * apps/web/components/Hooks/useOnboarding.ts (STORAGE_KEY = 'vb_onboarding').
  */
 import { test as base, expect } from '@playwright/test'
 
-const ONBOARDING_KEY = 'lh_onboarding'
+const ONBOARDING_KEY = 'vb_onboarding'
 
 /** Fully-completed, dismissed onboarding state — nothing pops up. */
 const ONBOARDING_DISMISSED = JSON.stringify({

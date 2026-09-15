@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useCallback, useRef, useEffect, useMemo } from 'react'
 import { Podcast, PodcastEpisode } from '@services/podcasts/podcasts'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { safePlay } from '@/lib/media/safePlay'
 
 interface PodcastPlayerState {
@@ -112,7 +112,7 @@ const PodcastPlayerContext = createContext<PodcastPlayerContextValue | null>(nul
 export function PodcastPlayerProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(podcastPlayerReducer, initialState)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
   const trackRef = useRef(track)
   useEffect(() => {
     trackRef.current = track

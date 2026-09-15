@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useLHSession } from '../LHSessionContext'
+import { useVBSession } from '../VBSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { useQuery } from '@tanstack/react-query'
@@ -10,7 +10,7 @@ export const AssignmentSubmissionContext = React.createContext({})
 export const AssignmentTaskSubmissionsContext = React.createContext<Record<string, any> | null>(null)
 
 function AssignmentSubmissionProvider({ children, assignment_uuid }: { children: React.ReactNode, assignment_uuid: string }) {
-    const session = useLHSession() as any
+    const session = useVBSession() as any
     const accessToken = session?.data?.tokens?.access_token
 
     const { data: assignmentSubmission } = useQuery({

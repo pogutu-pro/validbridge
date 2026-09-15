@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 import type { CoursePlanningMessage, Attachment } from '@services/ai/courseplanning'
-import lrnaiIcon from 'public/lrnai_icon.png'
+import lrnaiIcon from 'public/validbridge_ai_icon.png'
 import { safeImageSrc } from '@services/security/url'
 
 interface AICourseChatProps {
@@ -202,7 +202,7 @@ function AICourseChat({
               className={cn(
                 "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm",
                 message.role === 'user'
-                  ? "bg-purple-600/80 text-white rounded-ee-md"
+                  ? "bg-orange-600/80 text-white rounded-ee-md"
                   : "bg-white/5 text-white/80 rounded-es-md ring-1 ring-inset ring-white/10"
               )}
             >
@@ -227,7 +227,7 @@ function AICourseChat({
           <div className="flex justify-start">
             <div className="bg-white/5 rounded-2xl rounded-es-md px-4 py-3 ring-1 ring-inset ring-white/10 max-w-[85%]">
               <div className="flex items-center gap-3">
-                <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
+                <Loader2 className="w-5 h-5 animate-spin text-orange-400" />
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-white/70 font-medium">
                     {currentHasVideo && loadingDuration < 10
@@ -252,7 +252,7 @@ function AICourseChat({
                 <div className="mt-2 flex items-center gap-2">
                   <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-purple-500/50 rounded-full animate-pulse"
+                      className="h-full bg-orange-500/50 rounded-full animate-pulse"
                       style={{ width: `${Math.min(loadingDuration * 2, 95)}%`, transition: 'width 1s ease-out' }}
                     />
                   </div>
@@ -318,7 +318,7 @@ function AICourseChat({
             )}
 
             {/* Input container */}
-            <div className="relative bg-white/[0.03] rounded-2xl ring-1 ring-inset ring-white/10 focus-within:ring-purple-500/30 transition-all">
+            <div className="relative bg-white/[0.03] rounded-2xl ring-1 ring-inset ring-white/10 focus-within:ring-orange-500/30 transition-all">
               <textarea
                 ref={inputRef}
                 value={inputValue}
@@ -374,7 +374,7 @@ function AICourseChat({
                             value={youtubeUrl}
                             onChange={(e) => setYoutubeUrl(e.target.value)}
                             placeholder="Paste YouTube URL..."
-                            className="w-full px-3 py-2.5 text-sm bg-white/5 rounded-lg text-white placeholder:text-white/30 ring-1 ring-inset ring-white/10 focus:outline-none focus:ring-purple-500/30"
+                            className="w-full px-3 py-2.5 text-sm bg-white/5 rounded-lg text-white placeholder:text-white/30 ring-1 ring-inset ring-white/10 focus:outline-none focus:ring-orange-500/30"
                             autoFocus
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') { e.preventDefault(); handleYoutubeAdd() }
@@ -391,7 +391,7 @@ function AICourseChat({
                             <button
                               type="button"
                               onClick={handleYoutubeAdd}
-                              className="flex-1 px-3 py-2 text-xs font-medium text-white bg-purple-500/50 hover:bg-purple-500/70 rounded-lg transition-colors"
+                              className="flex-1 px-3 py-2 text-xs font-medium text-white bg-orange-500/50 hover:bg-orange-500/70 rounded-lg transition-colors"
                             >
                               {t('common.add') || 'Add'}
                             </button>
@@ -462,7 +462,7 @@ function AICourseChat({
                   className={cn(
                     "flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all text-xs font-medium",
                     canSendMessage
-                      ? "bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 ring-1 ring-inset ring-purple-500/30"
+                      ? "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 ring-1 ring-inset ring-orange-500/30"
                       : "bg-white/5 text-white/30 cursor-not-allowed ring-1 ring-inset ring-white/10"
                   )}
                 >

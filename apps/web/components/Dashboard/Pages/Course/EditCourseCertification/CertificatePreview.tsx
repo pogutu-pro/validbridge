@@ -81,10 +81,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         };
       case 'geometric':
         return {
-          primary: 'text-purple-700',
-          secondary: 'text-purple-600',
-          icon: 'text-purple-600',
-          badge: 'bg-purple-50 text-purple-700 border-purple-200'
+          primary: 'text-orange-700',
+          secondary: 'text-orange-600',
+          icon: 'text-orange-600',
+          badge: 'bg-orange-50 text-orange-700 border-orange-200'
         };
       case 'vintage':
         return {
@@ -116,10 +116,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         };
       case 'academic':
         return {
-          primary: 'text-indigo-700',
-          secondary: 'text-indigo-600',
-          icon: 'text-indigo-600',
-          badge: 'bg-indigo-50 text-indigo-700 border-indigo-200'
+          primary: 'text-orange-700',
+          secondary: 'text-orange-600',
+          icon: 'text-orange-600',
+          badge: 'bg-orange-50 text-orange-700 border-orange-200'
         };
       case 'modern':
         return {
@@ -236,26 +236,26 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         return (
           <>
             {/* Geometric angular borders */}
-            <div className="absolute inset-2 border-2 border-purple-200 opacity-50" style={{
+            <div className="absolute inset-2 border-2 border-orange-200 opacity-50" style={{
               clipPath: 'polygon(0 10px, 10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px))'
             }}></div>
             
             {/* Geometric corner elements */}
-            <div className="absolute top-1 left-1 w-6 h-6 border-2 border-purple-300 opacity-60 transform rotate-45"></div>
-            <div className="absolute top-1 right-1 w-6 h-6 border-2 border-purple-300 opacity-60 transform rotate-45"></div>
-            <div className="absolute bottom-1 left-1 w-6 h-6 border-2 border-purple-300 opacity-60 transform rotate-45"></div>
-            <div className="absolute bottom-1 right-1 w-6 h-6 border-2 border-purple-300 opacity-60 transform rotate-45"></div>
+            <div className="absolute top-1 left-1 w-6 h-6 border-2 border-orange-300 opacity-60 transform rotate-45"></div>
+            <div className="absolute top-1 right-1 w-6 h-6 border-2 border-orange-300 opacity-60 transform rotate-45"></div>
+            <div className="absolute bottom-1 left-1 w-6 h-6 border-2 border-orange-300 opacity-60 transform rotate-45"></div>
+            <div className="absolute bottom-1 right-1 w-6 h-6 border-2 border-orange-300 opacity-60 transform rotate-45"></div>
             
             {/* Abstract geometric shapes */}
-            <div className="absolute top-1/4 left-1 w-2 h-8 bg-purple-200 opacity-30 transform rotate-12"></div>
-            <div className="absolute top-1/4 right-1 w-2 h-8 bg-purple-200 opacity-30 transform -rotate-12"></div>
-            <div className="absolute bottom-1/4 left-1 w-2 h-8 bg-purple-200 opacity-30 transform -rotate-12"></div>
-            <div className="absolute bottom-1/4 right-1 w-2 h-8 bg-purple-200 opacity-30 transform rotate-12"></div>
+            <div className="absolute top-1/4 left-1 w-2 h-8 bg-orange-200 opacity-30 transform rotate-12"></div>
+            <div className="absolute top-1/4 right-1 w-2 h-8 bg-orange-200 opacity-30 transform -rotate-12"></div>
+            <div className="absolute bottom-1/4 left-1 w-2 h-8 bg-orange-200 opacity-30 transform -rotate-12"></div>
+            <div className="absolute bottom-1/4 right-1 w-2 h-8 bg-orange-200 opacity-30 transform rotate-12"></div>
             
             {/* Geometric background */}
             <div className="absolute inset-0 opacity-4">
               <div className="w-full h-full" style={{
-                backgroundImage: `linear-gradient(45deg, #8b5cf6 25%, transparent 25%), linear-gradient(-45deg, #8b5cf6 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #8b5cf6 75%), linear-gradient(-45deg, transparent 75%, #8b5cf6 75%)`,
+                backgroundImage: `linear-gradient(45deg, #f97316 25%, transparent 25%), linear-gradient(-45deg, #f97316 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f97316 75%), linear-gradient(-45deg, transparent 75%, #f97316 75%)`,
                 backgroundSize: '6px 6px'
               }}></div>
             </div>
@@ -370,27 +370,27 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         return (
           <>
             {/* Academic traditional border */}
-            <div className="absolute inset-2 border-3 border-indigo-300 opacity-50"></div>
-            <div className="absolute inset-3 border border-indigo-400 opacity-40"></div>
+            <div className="absolute inset-2 border-3 border-orange-300 opacity-50"></div>
+            <div className="absolute inset-3 border border-orange-400 opacity-40"></div>
             
             {/* Academic shield-like corners */}
-            <div className="absolute top-2 left-2 w-8 h-8 border-2 border-indigo-400 opacity-50 rounded-tl-lg"></div>
-            <div className="absolute top-2 right-2 w-8 h-8 border-2 border-indigo-400 opacity-50 rounded-tr-lg"></div>
-            <div className="absolute bottom-2 left-2 w-8 h-8 border-2 border-indigo-400 opacity-50 rounded-bl-lg"></div>
-            <div className="absolute bottom-2 right-2 w-8 h-8 border-2 border-indigo-400 opacity-50 rounded-br-lg"></div>
+            <div className="absolute top-2 left-2 w-8 h-8 border-2 border-orange-400 opacity-50 rounded-tl-lg"></div>
+            <div className="absolute top-2 right-2 w-8 h-8 border-2 border-orange-400 opacity-50 rounded-tr-lg"></div>
+            <div className="absolute bottom-2 left-2 w-8 h-8 border-2 border-orange-400 opacity-50 rounded-bl-lg"></div>
+            <div className="absolute bottom-2 right-2 w-8 h-8 border-2 border-orange-400 opacity-50 rounded-br-lg"></div>
             
             {/* Academic laurel-like decorations */}
             <div className="absolute top-1/2 left-1 transform -translate-y-1/2">
-              <div className="w-1 h-6 bg-indigo-300 opacity-40 rounded-full"></div>
+              <div className="w-1 h-6 bg-orange-300 opacity-40 rounded-full"></div>
             </div>
             <div className="absolute top-1/2 right-1 transform -translate-y-1/2">
-              <div className="w-1 h-6 bg-indigo-300 opacity-40 rounded-full"></div>
+              <div className="w-1 h-6 bg-orange-300 opacity-40 rounded-full"></div>
             </div>
             
             {/* Academic background pattern */}
             <div className="absolute inset-0 opacity-3">
               <div className="w-full h-full" style={{
-                backgroundImage: `radial-gradient(circle at 50% 50%, #6366f1 1px, transparent 1px)`,
+                backgroundImage: `radial-gradient(circle at 50% 50%, #f97316 1px, transparent 1px)`,
                 backgroundSize: '15px 15px'
               }}></div>
             </div>
@@ -447,7 +447,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   // the text nodes below use dir="auto". A properly RTL certificate belongs in
   // a separate template variant, not a flip of this one.
   return (
-    <div dir="ltr" className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 w-full h-full">
+    <div dir="ltr" className="bg-gradient-to-br from-blue-50 to-orange-50 border border-blue-200 rounded-xl p-4 w-full h-full">
       <div className="bg-white rounded-lg shadow-sm p-6 relative overflow-hidden w-full h-full flex flex-col">
         {/* Dynamic Certificate Pattern */}
         {renderCertificatePattern(certificatePattern)}
@@ -569,7 +569,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 )}
               </div>
               <div className={`text-xs ${theme.secondary} font-medium`} dir="auto">
-                {org?.name || 'LearnHouse'}
+                {org?.name || 'ValidBridge'}
               </div>
             </div>
 

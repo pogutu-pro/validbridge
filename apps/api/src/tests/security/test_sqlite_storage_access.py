@@ -18,7 +18,7 @@ def filesystem_storage(tmp_path, monkeypatch):
             content_delivery=SimpleNamespace(type="filesystem")
         )
     )
-    monkeypatch.setattr(code_execution, "get_learnhouse_config", lambda: config)
+    monkeypatch.setattr(code_execution, "get_validbridge_config", lambda: config)
     return tmp_path / "content"
 
 
@@ -92,6 +92,6 @@ def test_sqlite_s3_key_keeps_storage_identity(monkeypatch):
     config = SimpleNamespace(
         hosting_config=SimpleNamespace(content_delivery=SimpleNamespace(type="s3api"))
     )
-    monkeypatch.setattr(code_execution, "get_learnhouse_config", lambda: config)
+    monkeypatch.setattr(code_execution, "get_validbridge_config", lambda: config)
     relative = "orgs/org_own/courses/course_owned/activities/activity_1/db.sqlite3"
     assert code_execution._canonical_sqlite_path(relative) == relative

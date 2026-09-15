@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import {
@@ -92,9 +92,9 @@ function GroupResourcePanel({ group, orgId, token }: { group: any; orgId: number
       ) : (
         <ul className="space-y-1">
           {rawList.map((uuid: string) => (
-            <li key={uuid} className="flex items-center justify-between bg-indigo-50 rounded-lg px-3 py-2">
+            <li key={uuid} className="flex items-center justify-between bg-orange-50 rounded-lg px-3 py-2">
               <div className="flex items-center gap-2">
-                <BookOpen size={13} className="text-indigo-500 shrink-0" />
+                <BookOpen size={13} className="text-orange-500 shrink-0" />
                 <span className="text-sm font-medium text-gray-800 truncate max-w-[200px]">
                   {nameMap[uuid] ?? uuid}
                 </span>
@@ -115,7 +115,7 @@ function GroupResourcePanel({ group, orgId, token }: { group: any; orgId: number
       {!pickerOpen ? (
         <button
           onClick={() => setPickerOpen(true)}
-          className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors py-1"
+          className="flex items-center gap-1.5 text-xs font-medium text-orange-600 hover:text-orange-800 transition-colors py-1"
         >
           <Plus size={12} /> Add course
         </button>
@@ -139,9 +139,9 @@ function GroupResourcePanel({ group, orgId, token }: { group: any; orgId: number
                   <li key={uuid}>
                     <button
                       onClick={() => handleAdd(uuid)}
-                      className="w-full text-start px-3 py-2 text-sm text-gray-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors"
+                      className="w-full text-start px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 flex items-center gap-2 transition-colors"
                     >
-                      <BookOpen size={13} className="text-indigo-400 shrink-0" />
+                      <BookOpen size={13} className="text-orange-400 shrink-0" />
                       <span className="truncate">{c.name}</span>
                     </button>
                   </li>
@@ -259,8 +259,8 @@ function GroupCard({ group, orgId, token, onEdit, onDelete }: {
       {/* Card header */}
       <div className="flex items-start justify-between px-4 pt-4 pb-3 border-b border-gray-50">
         <div className="flex items-start gap-2.5 min-w-0">
-          <div className="mt-0.5 w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-            <Layers size={14} className="text-indigo-500" />
+          <div className="mt-0.5 w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+            <Layers size={14} className="text-orange-500" />
           </div>
           <div className="min-w-0">
             <h3 className="font-bold text-sm text-gray-900 leading-snug">{group.name}</h3>
@@ -296,7 +296,7 @@ function GroupCard({ group, orgId, token, onEdit, onDelete }: {
         {/* Courses section */}
         <div className="px-4 py-3">
           <div className="flex items-center gap-1.5 mb-2.5">
-            <BookOpen size={12} className="text-indigo-400" />
+            <BookOpen size={12} className="text-orange-400" />
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Courses</span>
           </div>
           <GroupResourcePanel group={group} orgId={orgId} token={token} />
@@ -376,7 +376,7 @@ function GroupForm({ initial, onSubmit, onCancel }: {
 
 export default function PaymentsGroupsPage() {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useVBSession() as any;
   const token = session?.data?.tokens?.access_token;
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const queryClient = useQueryClient();
@@ -489,8 +489,8 @@ export default function PaymentsGroupsPage() {
 
       {list.length === 0 ? (
         <div className="border border-dashed border-gray-200 rounded-xl p-12 text-center">
-          <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-            <Layers size={22} className="text-indigo-300" />
+          <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <Layers size={22} className="text-orange-300" />
           </div>
           <p className="font-semibold text-gray-600 mb-1">No groups yet</p>
           <p className="text-sm text-gray-400 mb-4 max-w-xs mx-auto">

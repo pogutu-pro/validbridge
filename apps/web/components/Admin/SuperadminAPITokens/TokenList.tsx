@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { Key, Plus, Trash, CircleNotch } from '@phosphor-icons/react'
 import CreateTokenModal from '@components/Admin/SuperadminAPITokens/CreateTokenModal'
 import TokenCreatedDialog, { CreatedToken } from '@components/Admin/SuperadminAPITokens/TokenCreatedDialog'
@@ -41,7 +41,7 @@ function fmtDate(s: string | null | undefined): string {
 }
 
 export default function TokenList() {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
   const [createOpen, setCreateOpen] = useState(false)

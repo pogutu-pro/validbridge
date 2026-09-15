@@ -13,7 +13,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getCourseMetadata } from '@services/courses/courses'
 import { BookMinus, FilePenLine, Settings2, MoreVertical, Copy, Download, CheckSquare, Square, Lock } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import Link from 'next/link'
 import React from 'react'
 import toast from 'react-hot-toast'
@@ -26,7 +26,7 @@ import {
 } from "@components/ui/dropdown-menu"
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/lib/format'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 type Course = {
   course_uuid: string
@@ -66,9 +66,9 @@ export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('
 function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isSelected = false, onToggleSelect, isPriority = false }: PropsType) {
   const { t, i18n } = useTranslation()
   const org = useOrg() as any
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('learner')
+  const { track } = useVBAnalytics('learner')
 
   const cleanUuid = removeCoursePrefix(course.course_uuid)
 

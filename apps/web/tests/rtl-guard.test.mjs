@@ -120,8 +120,8 @@ describe('globals.css', () => {
       'recharts-wrapper', // charts locked to LTR
       'unicode-bidi', // per-block direction for authored content
       '--leading-tight', // Arabic line-height
-      'lh-toast', // toast direction
-      'lh-org-font-root', // Tajawal overriding the inline org font
+      'vb-toast', // toast direction
+      'vb-org-font-root', // Tajawal overriding the inline org font
     ]) {
       expect(result.css).toContain(needle)
     }

@@ -1,6 +1,6 @@
 ---
 title: Build a Learning Platform
-description: Build your own headless learning platform on the web with Next.js and the LearnHouse API. Start with an anonymous public catalogue, then add authentication, enrollment, and progress tracking.
+description: Build your own headless learning platform on the web with Next.js and the ValidBridge API. Start with an anonymous public catalogue, then add authentication, enrollment, and progress tracking.
 ---
 
 import { Callout, Tabs } from 'nextra/components'
@@ -10,9 +10,9 @@ import ResourceModelDiagram from '../../../components/diagrams/ResourceModelDiag
 
 # Build a Learning Platform
 
-LearnHouse is **API-first**. The official web app is just one client of a public REST API — which means you can build your *own* learning platform on top of the same API, with your own design, your own routing, and your own brand.
+ValidBridge is **API-first**. The official web app is just one client of a public REST API — which means you can build your *own* learning platform on top of the same API, with your own design, your own routing, and your own brand.
 
-This guide takes you from an empty folder to a working **headless learning platform**: a Next.js app that lists your courses, plays your content, signs users in, enrolls them, and tracks their progress — all powered by the LearnHouse API. It's the kind of result you'll find in the [`learnhouse/headless-examples`](https://github.com/learnhouse/headless-examples) repository.
+This guide takes you from an empty folder to a working **headless learning platform**: a Next.js app that lists your courses, plays your content, signs users in, enrolls them, and tracks their progress — all powered by the ValidBridge API. It's the kind of result you'll find in the [`validbridge/headless-examples`](https://github.com/validbridge/headless-examples) repository.
 
 ## Pick your path
 
@@ -34,7 +34,7 @@ A learning platform you reach in two stages — **anonymous first, authenticated
   </Tabs.Tab>
   <Tabs.Tab>
     Layered on top of stage 1, without rewriting it:
-    - **Signup & login** with the LearnHouse auth endpoints.
+    - **Signup & login** with the ValidBridge auth endpoints.
     - **Enrollment** — learners join a course.
     - **Progress tracking** — mark activities complete and show how far a learner has come.
   </Tabs.Tab>
@@ -42,17 +42,17 @@ A learning platform you reach in two stages — **anonymous first, authenticated
 
 ## Architecture
 
-Your Next.js app is a thin, fast client in front of the LearnHouse API. Reads happen in **Server Components**; anything involving a token goes through a **Route Handler acting as a Backend-for-Frontend (BFF)**, so LearnHouse tokens never reach the browser. Media is streamed straight from the API's content-delivery endpoint.
+Your Next.js app is a thin, fast client in front of the ValidBridge API. Reads happen in **Server Components**; anything involving a token goes through a **Route Handler acting as a Backend-for-Frontend (BFF)**, so ValidBridge tokens never reach the browser. Media is streamed straight from the API's content-delivery endpoint.
 
 <HeadlessArchitecture />
 
 <Callout type="info">
-Using a server-side BFF isn't just for security — it also sidesteps CORS entirely. Your browser only ever talks to your own Next.js origin, and your server talks to LearnHouse.
+Using a server-side BFF isn't just for security — it also sidesteps CORS entirely. Your browser only ever talks to your own Next.js origin, and your server talks to ValidBridge.
 </Callout>
 
 ## The resources you'll touch
 
-Everything in LearnHouse hangs off an **Organization**. Content is a tree of **Course → Chapter → Activity**. A learner's progress is a separate tree: each **User** has a **Trail**, which holds a **Run** per enrolled course, which holds a **Step** per completed activity.
+Everything in ValidBridge hangs off an **Organization**. Content is a tree of **Course → Chapter → Activity**. A learner's progress is a separate tree: each **User** has a **Trail**, which holds a **Run** per enrolled course, which holds a **Step** per completed activity.
 
 <ResourceModelDiagram />
 
@@ -66,7 +66,7 @@ Everything in LearnHouse hangs off an **Organization**. Content is a tree of **C
 ## Prerequisites
 
 - **Node.js 18+** and a package manager (`npm`, `pnpm`, or `bun`).
-- **A running LearnHouse instance.** Spin one up locally with the [Quickstart](/getting-started/quickstart) or [self-hosting guide](/self-hosting), or use [LearnHouse Cloud](https://learnhouse.app). The examples assume the API is at `http://localhost:1338`.
+- **A running ValidBridge instance.** Spin one up locally with the [Quickstart](/getting-started/quickstart) or [self-hosting guide](/self-hosting), or use [ValidBridge Cloud](https://validbridge.co.ke). The examples assume the API is at `http://localhost:1338`.
 - **Your organization slug** and **at least one public, published course** with some content. Create one in the dashboard if you don't have it yet.
 - Basic familiarity with the [API Reference](/developers/api).
 

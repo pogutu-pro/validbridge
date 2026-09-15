@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/black_logo.png'
+import validbridgeIcon from 'public/validbridge_logo.png'
 
 export default function NotFound() {
   return (
@@ -14,7 +14,7 @@ export default function NotFound() {
         <Image quality={100}
           width={270}
           height={100}
-          src={learnhouseIcon}
+          src={validbridgeIcon}
           alt="logo"
         />
         </div>

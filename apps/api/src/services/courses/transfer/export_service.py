@@ -241,7 +241,7 @@ def _build_export_zip(
     """
     content_base = "content/orgs"
 
-    tmp_fd, tmp_path = tempfile.mkstemp(suffix=".zip", prefix="learnhouse-export-")
+    tmp_fd, tmp_path = tempfile.mkstemp(suffix=".zip", prefix="validbridge-export-")
     os.close(tmp_fd)
 
     try:
@@ -316,7 +316,7 @@ def _build_export_zip(
 
             manifest = ExportManifest(
                 version="1.0.0",
-                format="learnhouse-course-export",
+                format="validbridge-course-export",
                 created_at=datetime.now().isoformat(),
                 courses=manifest_courses,
             )

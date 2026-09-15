@@ -12,13 +12,13 @@ import hmac
 
 from cryptography.fernet import Fernet
 
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 
 
 @functools.lru_cache(maxsize=1)
 def _fernet_key() -> bytes:
     """Derive a 32-byte Fernet key from the application's JWT secret."""
-    secret = get_learnhouse_config().security_config.auth_jwt_secret_key
+    secret = get_validbridge_config().security_config.auth_jwt_secret_key
     digest = hashlib.sha256(secret.encode()).digest()
     return base64.urlsafe_b64encode(digest)
 

@@ -38,7 +38,7 @@ export default function CourseEnrollmentTrend({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={TrendUp} bg="bg-indigo-50" color="text-indigo-500" />}
+      icon={<WidgetIcon icon={TrendUp} bg="bg-orange-50" color="text-orange-500" />}
       title={t('analytics.course_analytics.enrollment_trend.title')}
       subtitle={t('analytics.course_analytics.enrollment_trend.subtitle')}
       modalContent={
@@ -49,9 +49,9 @@ export default function CourseEnrollmentTrend({
         ) : (
           <div className="space-y-5">
             <div className="flex gap-8">
-              <div className="bg-indigo-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.common.total')}</p>
-                <p className="text-2xl font-bold text-indigo-600">{totalEnrollments}</p>
+              <div className="bg-orange-50 rounded-xl px-5 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-orange-400 font-semibold">{t('analytics.course_analytics.common.total')}</p>
+                <p className="text-2xl font-bold text-orange-600">{totalEnrollments}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.daily_avg')}</p>
@@ -67,15 +67,15 @@ export default function CourseEnrollmentTrend({
                 <AreaChart data={rows}>
                   <defs>
                     <linearGradient id="enrollModalGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.25} />
-                      <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+                      <stop offset="0%" stopColor="#f97316" stopOpacity={0.25} />
+                      <stop offset="100%" stopColor="#f97316" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9ca3af" tickFormatter={shortDate} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" tickFormatter={kFormatter} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Area type="monotone" dataKey="enrollments" stroke="#6366f1" strokeWidth={2.5} fill="url(#enrollModalGrad)" dot={false} />
+                  <Area type="monotone" dataKey="enrollments" stroke="#f97316" strokeWidth={2.5} fill="url(#enrollModalGrad)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -98,13 +98,13 @@ export default function CourseEnrollmentTrend({
               <AreaChart data={rows}>
                 <defs>
                   <linearGradient id="enrollMiniGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#f97316" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="#f97316" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="#9ca3af" tickFormatter={shortDate} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="enrollments" stroke="#6366f1" strokeWidth={2} fill="url(#enrollMiniGrad)" dot={false} />
+                <Area type="monotone" dataKey="enrollments" stroke="#f97316" strokeWidth={2} fill="url(#enrollMiniGrad)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

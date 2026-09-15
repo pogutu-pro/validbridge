@@ -3,7 +3,7 @@ import React from 'react'
 import { X, Clock, User, RotateCcw, Eye, Loader2 } from 'lucide-react'
 import { useActivityVersions, ActivityVersion } from '@components/Hooks/useActivityVersioning'
 import { restoreActivityVersion } from '@services/courses/activities'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { motion, AnimatePresence } from 'motion/react'
 import EditorPreview from '../EditorPreview'
@@ -31,7 +31,7 @@ function VersionHistoryPanel({
   const { t } = useTranslation()
   // Drawer enters from the inline end — '100%' is a physical offset.
   const { x: dx } = useDirection()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const { versions, isLoading, error } = useActivityVersions(activityUuid, 20, isOpen)
   const [restoringVersion, setRestoringVersion] = React.useState<number | null>(null)
@@ -249,7 +249,7 @@ function VersionPreviewModal({ version, onClose, onRestore, activity, courseUuid
         animate={{ scale: 1, opacity: 1 }}
         className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden"
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-sky-50 to-indigo-50">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-sky-50 to-orange-50">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-sky-100 rounded-lg">
               <Clock size={20} className="text-sky-600" />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { queryKeys } from '@lib/query/keys'
 import {
   getCommunities,
@@ -10,7 +10,7 @@ import {
 } from '@services/communities/communities'
 
 export function useCommunities(orgId: number | undefined, page = 1) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({
@@ -22,7 +22,7 @@ export function useCommunities(orgId: number | undefined, page = 1) {
 }
 
 export function useCommunity(communityUuid: string) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({
@@ -34,7 +34,7 @@ export function useCommunity(communityUuid: string) {
 }
 
 export function useCommunityRights(communityUuid: string) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const accessToken = session?.data?.tokens?.access_token as string | undefined
 
   return useQuery({

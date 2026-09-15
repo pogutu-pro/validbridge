@@ -7,7 +7,7 @@ import { getBoard } from '@services/boards/boards'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import BoardCanvas from '@components/Dashboard/Boards/BoardCanvas'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 
 interface BoardCanvasClientProps {
   boardUuid: string
@@ -24,7 +24,7 @@ interface BoardCanvasClientProps {
 }
 
 export default function BoardCanvasClient({ boardUuid, accessToken, orgslug, username }: BoardCanvasClientProps) {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const token: string | undefined = accessToken || session?.data?.tokens?.access_token
   const displayName =
     username || session?.data?.user?.username || session?.data?.user?.email || 'Anonymous'

@@ -87,7 +87,7 @@ async def create_video_block(
     await db_session.refresh(block)
 
     # Kick off HLS transcoding (adaptive streaming), reusing the same pipeline as
-    # video activities. No-op unless LEARNHOUSE_HLS_ENABLED; until ready the
+    # video activities. No-op unless VALIDBRIDGE_HLS_ENABLED; until ready the
     # player uses the faststart MP4 fallback.
     try:
         from src.services.utils.hls_jobs import enqueue_block

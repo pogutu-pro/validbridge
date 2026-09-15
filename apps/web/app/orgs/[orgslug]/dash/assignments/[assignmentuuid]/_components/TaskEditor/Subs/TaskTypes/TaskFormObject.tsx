@@ -1,7 +1,7 @@
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { useAssignmentSubmission, useAssignmentTaskSubmissions } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { useAssignmentsTask, useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { getAssignmentTask, getAssignmentTaskSubmissionsUser, handleAssignmentTaskSubmission, updateAssignmentTask } from '@services/courses/assignments';
 import { Check, Info, Minus, Plus, PlusCircle, X, Type } from 'lucide-react';
@@ -44,7 +44,7 @@ type TaskFormObjectProps = {
 
 function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFormObjectProps) {
     const { t } = useTranslation()
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const assignmentTaskState = useAssignmentsTask() as any;
     const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
@@ -501,7 +501,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                 autoGradable={true}
             >
                 {view === 'grading' && (
-                    <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                    <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg border border-blue-200">
                         <h3 className="text-sm font-semibold text-gray-800 mb-2">Submission Summary</h3>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                             <div className="text-center">

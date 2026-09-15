@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { Button } from '@components/ui/button'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -54,17 +54,17 @@ import {
   CustomDomainSSLStatus,
 } from '@services/custom_domains/custom_domains'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useUpgradeModal } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'
 import { getErrorMessage } from '@services/utils/ts/errorMessage'
 
 const OrgEditDomains: React.FC = () => {
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const { track } = useLHAnalytics('dashboard')
+  const { track } = useVBAnalytics('dashboard')
   const { handlePlanLimit } = useUpgradeModal()
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isVerifyDialogOpen, setIsVerifyDialogOpen] = useState(false)

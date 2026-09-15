@@ -1,4 +1,4 @@
-import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useVBSession } from '@components/Contexts/VBSessionContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getAPIUrl } from '@services/config/config';
@@ -29,7 +29,7 @@ import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/Assign
 import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '@/lib/format';
-import { useLHAnalytics, AnalyticsEvent } from '@services/analytics';
+import { useVBAnalytics, AnalyticsEvent } from '@services/analytics';
 
 type SortField =
     | 'date'             // when the student submitted
@@ -81,7 +81,7 @@ function displayNameOf(user: any): string {
 
 function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: string }) {
     const { t } = useTranslation();
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -319,7 +319,7 @@ function SubmissionsList({
     sortDirection: SortDirection;
 }) {
     const { t } = useTranslation();
-    const session = useLHSession() as any;
+    const session = useVBSession() as any;
     const access_token = session?.data?.tokens?.access_token;
 
     // Prefetch every submitter at list level. These use the exact same query
@@ -482,7 +482,7 @@ function SubmissionRow({
     isLast: boolean;
 }) {
     const { t, i18n } = useTranslation();
-    const { track } = useLHAnalytics('dashboard');
+    const { track } = useVBAnalytics('dashboard');
     const [gradeModalOpen, setGradeModalOpen] = useState(false);
 
     // Every status the API can return is listed explicitly. The old fallback

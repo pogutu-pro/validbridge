@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import NewAssignment from '@components/Objects/Modals/Activities/Create/NewActivityModal/AssignmentActivityModal'
 import { getCourse } from '@services/courses/courses'
@@ -29,7 +29,7 @@ export default function NewAssignmentModal({
   onCreated?: () => void
 }) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
 
   const [step, setStep] = useState<'course' | 'chapter' | 'form'>('course')

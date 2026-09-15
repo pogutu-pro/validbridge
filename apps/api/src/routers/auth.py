@@ -8,7 +8,7 @@ from sqlmodel import select
 from src.db.users import AnonymousUser, User, UserRead
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
-from config.config import get_learnhouse_config
+from config.config import get_validbridge_config
 from src.core.deployment_mode import get_deployment_mode
 from src.security.auth import (
     authenticate_user,
@@ -89,12 +89,12 @@ def get_cookie_domain_for_request(request: Request) -> str | None:
       whatever Host the request arrived with — same code path serves
       localhost dev and self-hosted VPS deployments on any domain.
     - tenancy == "multi":
-        - request from a subdomain of LEARNHOUSE_DOMAIN → configured cookie
-          domain (e.g. ".learnhouse.io") so subdomains share the session.
+        - request from a subdomain of VALIDBRIDGE_DOMAIN → configured cookie
+          domain (e.g. ".validbridge.co.ke") so subdomains share the session.
         - request from a custom (per-org) domain or unknown host → None
           (host-only cookie).
     """
-    config = get_learnhouse_config()
+    config = get_validbridge_config()
     tenancy = config.hosting_config.tenancy
 
     if tenancy == "single":
@@ -214,7 +214,7 @@ def unset_auth_cookies(response: Response, request: Request = None):
     response.delete_cookie(key=JWT_REFRESH_COOKIE_NAME, domain=cookie_domain)
 
 
-_refresh_logger = logging.getLogger("learnhouse.auth.refresh")
+_refresh_logger = logging.getLogger("validbridge.auth.refresh")
 
 
 def _token_age_seconds(payload: dict | None) -> int | None:
@@ -757,8 +757,8 @@ async def third_party_login(
             if not _authorized:
                 _r = None
                 try:
-                    _lh_config = get_learnhouse_config()
-                    _redis_url = _lh_config.redis_config.redis_connection_string
+                    _vb_config = get_validbridge_config()
+                    _redis_url = _vb_config.redis_config.redis_connection_string
                     if _redis_url:
                         _r = _redis.Redis.from_url(_redis_url)
                         _invite_key = f"invited_user:{_invite_email}:org:{org_record.org_uuid}"
@@ -840,7 +840,7 @@ async def third_party_login(
     if _consume_invite_key:
         _r = None
         try:
-            _redis_url = get_learnhouse_config().redis_config.redis_connection_string
+            _redis_url = get_validbridge_config().redis_config.redis_connection_string
             if _redis_url:
                 _r = _redis.Redis.from_url(_redis_url)
                 _invited_data = _r.get(_consume_invite_key)

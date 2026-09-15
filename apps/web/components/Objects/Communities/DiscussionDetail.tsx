@@ -14,7 +14,7 @@ import { DiscussionWithAuthor, DiscussionAuthor, deleteDiscussion, getLabelInfo 
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { CommentSection } from './CommentSection'
 import { DiscussionContent } from './DiscussionContent'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import {
   DropdownMenu,
@@ -75,7 +75,7 @@ export function DiscussionDetail({
   allowRichContent = false,
 }: DiscussionDetailProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const router = useRouter()
   const communityId = communityUuid.replace('community_', '')
   const accessToken = session?.data?.tokens?.access_token

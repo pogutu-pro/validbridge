@@ -6,7 +6,7 @@ import { updateOrganization } from '@services/settings/org'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { toast } from 'react-hot-toast'
 import { Button } from "@components/ui/button"
 import { Label } from "@components/ui/label"
@@ -42,7 +42,7 @@ const getValidationSchema = (t: any) => Yup.object().shape({
 const OrgEditOther: React.FC = () => {
   const { t } = useTranslation()
   const router = useRouter()
-  const session = useLHSession() as any
+  const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const queryClient = useQueryClient()

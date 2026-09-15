@@ -197,7 +197,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
     return (
       <div className="flex flex-col h-[calc(75vh-220px)] p-2">
         {/* Preview Header */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-4 -mx-2 -mt-2 mb-4 flex-shrink-0">
+        <div className="bg-gradient-to-r from-blue-50 to-orange-50 border border-blue-200 p-4 -mx-2 -mt-2 mb-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">

@@ -29,7 +29,7 @@ const getPlanStyles = (plan: PlanLevel): string => {
     case 'standard':
       return 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-800 border-blue-200 shadow-sm shadow-blue-200/50'
     case 'pro':
-      return 'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-800 border-purple-200 shadow-sm shadow-purple-200/50'
+      return 'bg-gradient-to-br from-orange-100 to-orange-200 text-orange-800 border-orange-200 shadow-sm shadow-orange-200/50'
     case 'enterprise':
       return 'bg-gradient-to-br from-amber-100 to-amber-200 text-amber-800 border-amber-200 shadow-sm shadow-amber-200/50'
     default:
@@ -45,7 +45,7 @@ const getDarkPlanStyles = (plan: PlanLevel): string => {
     case 'standard':
       return 'bg-gradient-to-br from-blue-900/40 to-blue-800/30 text-blue-300 border-blue-700/30 shadow-sm shadow-blue-900/30'
     case 'pro':
-      return 'bg-gradient-to-br from-purple-900/40 to-purple-800/30 text-purple-300 border-purple-700/30 shadow-sm shadow-purple-900/30'
+      return 'bg-gradient-to-br from-orange-900/40 to-orange-800/30 text-orange-300 border-orange-700/30 shadow-sm shadow-orange-900/30'
     case 'enterprise':
       return 'bg-gradient-to-br from-amber-900/40 to-amber-800/30 text-amber-300 border-amber-700/30 shadow-sm shadow-amber-900/30'
     default:

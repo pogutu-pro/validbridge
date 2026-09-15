@@ -11,7 +11,7 @@ import {
 } from '@services/auth/cookies'
 import { isLocalhost } from '@services/utils/ts/hostUtils'
 
-const BACKEND_URL = (getConfig('NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL') || 'http://localhost:1338').replace(/\/+$/, '')
+const BACKEND_URL = (getConfig('NEXT_PUBLIC_VALIDBRIDGE_BACKEND_URL') || 'http://localhost:1338').replace(/\/+$/, '')
 
 // Paths that return tokens in response body (relative to /api/v1/auth/)
 // `verify-email` auto-signs-in the user on successful email verification, so
@@ -55,20 +55,20 @@ const REFRESH_FAST_PATH_HEADROOM_MS = 2 * 60 * 1000
 // staling").
 //
 // Crucially, the domain-scoped attribute is derived from env/host (via
-// getDomainFromRequest), NOT from the LH_tenancy cookie: on a browser-restart-
-// then-logout, LH_tenancy can be absent, and gating the domain clear on it
+// getDomainFromRequest), NOT from the VB_tenancy cookie: on a browser-restart-
+// then-logout, VB_tenancy can be absent, and gating the domain clear on it
 // (the old getCookieDomain path) left a multi-tenant session's .{top}-scoped
 // 30-day refresh cookie alive forever. We always attempt both variants.
 //
 // We clear exactly the SESSION-sensitive cookies: the httpOnly auth tokens, the
-// "session exists" marker (LH_session), the current-org marker (LH_org), and the
+// "session exists" marker (VB_session), the current-org marker (VB_org), and the
 // per-session custom-domain marker. We deliberately do NOT clear the instance
-// metadata cookies (LH_tenancy/LH_mode/LH_top_domain/LH_frontend_domain/
-// LH_default_org) — those describe the deployment, are non-sensitive, are needed
+// metadata cookies (VB_tenancy/VB_mode/VB_top_domain/VB_frontend_domain/
+// VB_default_org) — those describe the deployment, are non-sensitive, are needed
 // by anonymous visitors, and the proxy re-sets them on the very next request, so
 // clearing them is both pointless and would briefly break tenancy resolution.
-const CLEAR_HTTPONLY = [ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, 'LH_custom_domain']
-const CLEAR_MARKERS = ['LH_session', 'LH_org']
+const CLEAR_HTTPONLY = [ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, 'VB_custom_domain']
+const CLEAR_MARKERS = ['VB_session', 'VB_org']
 
 // A refresh failure only justifies destroying the session when the backend
 // rejected the CREDENTIAL itself. 401/403 are terminal — the refresh cookie is
@@ -178,7 +178,7 @@ async function proxyRequest(
   const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE)
 
   // Short-circuit: no refresh token cookie means nothing to refresh. Clear the
-  // stale LH_session marker (and any orphaned cookies) too — otherwise the
+  // stale VB_session marker (and any orphaned cookies) too — otherwise the
   // client keeps seeing "a session exists" and loops on failed refreshes.
   if (pathSegments === 'refresh' && !refreshToken?.value) {
     const response = NextResponse.json({ error: 'No refresh token' }, { status: 401 })
@@ -210,8 +210,8 @@ async function proxyRequest(
     try {
       const logoutHeaders: HeadersInit = {}
       // Both cookies must go: the backend identifies the session to revoke from
-      // LH_access (Authorization header or the LH_access cookie — never
-      // LH_refresh), so sending only the refresh cookie made every logout 401
+      // VB_access (Authorization header or the VB_access cookie — never
+      // VB_refresh), so sending only the refresh cookie made every logout 401
       // and skipped server-side revocation entirely.
       const logoutCookieParts: string[] = []
       if (accessToken?.value) {
@@ -331,7 +331,7 @@ async function proxyRequest(
     // Set a non-httpOnly marker so the client knows a session exists
     // without making a network request (the actual tokens stay httpOnly)
     if (tokens.access_token || tokens.refresh_token) {
-      response.cookies.set('LH_session', '1', {
+      response.cookies.set('VB_session', '1', {
         ...cookieOptions,
         httpOnly: false,
         maxAge: REFRESH_TOKEN_MAX_AGE,

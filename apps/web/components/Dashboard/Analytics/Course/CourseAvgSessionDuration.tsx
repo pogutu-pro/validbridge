@@ -50,7 +50,7 @@ export default function CourseAvgSessionDuration({
           formatter={(value = 0) => [`${value} min ${t('analytics.course_analytics.units.avg_per_learner')}`, '']}
           contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 13 }}
         />
-        <Bar dataKey="minutes" name={t('analytics.course_analytics.avg_session_duration.minutes_label')} fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="minutes" name={t('analytics.course_analytics.avg_session_duration.minutes_label')} fill="#f97316" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -70,14 +70,14 @@ export default function CourseAvgSessionDuration({
           formatter={(value = 0) => [`${value} min ${t('analytics.course_analytics.units.avg_per_learner')}`, '']}
           contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 13 }}
         />
-        <Bar dataKey="minutes" name={t('analytics.course_analytics.avg_session_duration.minutes_label')} fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+        <Bar dataKey="minutes" name={t('analytics.course_analytics.avg_session_duration.minutes_label')} fill="#f97316" radius={[6, 6, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={ClockCountdown} bg="bg-purple-50" color="text-purple-500" />}
+      icon={<WidgetIcon icon={ClockCountdown} bg="bg-orange-50" color="text-orange-500" />}
       title={t('analytics.course_analytics.avg_session_duration.title')}
       subtitle={t('analytics.course_analytics.avg_session_duration.subtitle')}
       modalContent={
@@ -88,9 +88,9 @@ export default function CourseAvgSessionDuration({
         ) : (
           <div className="space-y-5">
             <div className="flex gap-8">
-              <div className="bg-purple-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-purple-400 font-semibold">{t('analytics.course_analytics.avg_session_duration.total_time')}</p>
-                <p className="text-2xl font-bold text-purple-600">{formatSeconds(totalSeconds)}</p>
+              <div className="bg-orange-50 rounded-xl px-5 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-orange-400 font-semibold">{t('analytics.course_analytics.avg_session_duration.total_time')}</p>
+                <p className="text-2xl font-bold text-orange-600">{formatSeconds(totalSeconds)}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.avg_session_duration.avg_per_day')}</p>
@@ -113,7 +113,7 @@ export default function CourseAvgSessionDuration({
               <span className="text-2xl font-bold text-gray-900">{avgMinutes}m</span>
               <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.avg_per_day')}</span>
             </div>
-            <span className="text-xs text-purple-400">{formatSeconds(totalSeconds)} {t('analytics.course_analytics.units.total')}</span>
+            <span className="text-xs text-orange-400">{formatSeconds(totalSeconds)} {t('analytics.course_analytics.units.total')}</span>
           </div>
           <MiniChart />
         </div>

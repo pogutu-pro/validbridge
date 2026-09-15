@@ -1,7 +1,7 @@
 import { getBackendUrl, getConfig } from '@services/config/config'
 
 function getMediaUrl() {
-  const raw = getConfig('NEXT_PUBLIC_LEARNHOUSE_MEDIA_URL') || getBackendUrl();
+  const raw = getConfig('NEXT_PUBLIC_VALIDBRIDGE_MEDIA_URL') || getBackendUrl();
   // Guarantee a trailing slash so callers can concatenate "content/..." without
   // producing "https://api.example.iocontent/..." when the base lacks a slash.
   return raw.endsWith('/') ? raw : `${raw}/`;

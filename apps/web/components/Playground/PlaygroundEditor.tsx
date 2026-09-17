@@ -292,11 +292,11 @@ export default function PlaygroundEditor({
 
         {/* Back */}
         <Link
-          href="/playgrounds"
+          href="/labs"
           className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-700 transition-colors flex-shrink-0 font-medium"
         >
           <ArrowLeft size={14} weight="bold" data-dir-flip />
-          <span>Playgrounds</span>
+          <span>Labs</span>
         </Link>
 
         <SlashIcon style={{ color: '#d1d5db', flexShrink: 0 }} />
@@ -393,7 +393,7 @@ export default function PlaygroundEditor({
 
           {/* Preview */}
           <Link
-            href={`/playground/${playground.playground_uuid}`}
+            href={`/labs/${playground.playground_uuid}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 h-9 px-3 py-2 font-black text-sm nice-shadow rounded-lg transition-all ease-linear bg-neutral-100 hover:bg-neutral-200 text-neutral-600"

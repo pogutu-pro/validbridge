@@ -40,6 +40,10 @@ class AccessDecision(BaseModel):
     user_id: Optional[int] = None
     action: Optional[str] = None
     context: Optional[str] = None
+    # HTTP status to raise on denial (defaults to 403). The paywall uses 402.
+    status_code: int = 403
+    # Structured error payload (e.g. paywall offer metadata) surfaced as `detail`.
+    detail: Optional[dict] = None
 
 
 class ResourceConfig(BaseModel):

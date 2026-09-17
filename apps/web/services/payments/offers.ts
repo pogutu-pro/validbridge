@@ -34,14 +34,6 @@ export async function archiveOffer(orgId: number, offerId: string, access_token:
   return getResponseMetadata(result);
 }
 
-export async function getOfferDetails(orgId: number, offerId: string, access_token: string) {
-  const result = await secureFetch(
-    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/offers/${encodeURIComponent(offerId)}`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token)
-  );
-  return getResponseMetadata(result);
-}
-
 export async function getPublicOffer(orgId: number, offerId: string) {
   const result = await secureFetch(
     `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/offers/${encodeURIComponent(offerId)}/public`,
@@ -72,18 +64,13 @@ export async function getOfferCheckoutSession(
   orgId: number,
   offerUuid: string,
   redirect_uri: string,
-  access_token: string
+  access_token: string,
+  amount?: number
 ) {
+  const params = new URLSearchParams({ redirect_uri })
+  if (amount != null) params.set('amount', String(amount))
   const result = await secureFetch(
-    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/offers/${encodeURIComponent(offerUuid)}/checkout?redirect_uri=${encodeURIComponent(redirect_uri)}`,
-    RequestBodyWithAuthHeader('POST', null, null, access_token)
-  );
-  return getResponseMetadata(result);
-}
-
-export async function getBillingPortalSession(orgId: number, return_url: string, access_token: string) {
-  const result = await secureFetch(
-    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/billing/portal?return_url=${encodeURIComponent(return_url)}`,
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/offers/${encodeURIComponent(offerUuid)}/checkout?${params.toString()}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token)
   );
   return getResponseMetadata(result);
@@ -97,4 +84,12 @@ export async function getUserEnrollments(orgId: number, access_token: string) {
   const metadata = await getResponseMetadata(result);
   if (!metadata.success) throw new Error(metadata.HTTPmessage || 'Failed to fetch enrollments')
   return metadata;
+}
+
+export async function cancelSubscription(orgId: number, offerId: number, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/enrollments/${encodeURIComponent(offerId)}`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  );
+  return getResponseMetadata(result);
 }

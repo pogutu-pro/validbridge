@@ -152,6 +152,11 @@ configure_cors(app)
 # compresslevel 9 costs several times the CPU of 6 for a couple of percent on
 # JSON; 6 is gzip's own default.
 app.add_middleware(SelectiveGZipMiddleware, minimum_size=1000, compresslevel=6)
+# Registered last → outermost: the request audit middleware observes every
+# request (and the response status) before any other middleware, and must never
+# interfere with the request path. No-op for GET/denylisted paths.
+from src.core.middleware.audit_log import AuditLogMiddleware
+app.add_middleware(AuditLogMiddleware)
 register_ee_middlewares(app)
 
 # Content delivery — S3-aware router when S3 is enabled, local otherwise.

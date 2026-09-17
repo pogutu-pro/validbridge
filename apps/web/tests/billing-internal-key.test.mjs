@@ -6,11 +6,12 @@
 // then 403'd, and nothing in CI noticed. If a future change narrows the env
 // names or restores the silent "" fallback, these fail.
 
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 
 // `server-only` is a Next build-time alias rather than an installed package, so
 // it has to be stubbed before importing any module that declares it.
 mock.module("server-only", () => ({}));
+afterAll(() => { mock.restore(); });
 
 const { updateOrganizationConfigInternally } = await import("../services/billing/orgPlan.ts");
 

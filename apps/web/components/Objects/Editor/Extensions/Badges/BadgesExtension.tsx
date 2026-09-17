@@ -68,7 +68,7 @@ const BadgesExtension: React.FC = (props: any) => {
     setShowPredefinedCallouts(false)
   }
 
-  const colors = ['sky', 'green', 'yellow', 'red', 'purple', 'teal', 'amber', 'indigo', 'neutral']
+  const colors = ['sky', 'green', 'yellow', 'red', 'teal', 'amber', 'indigo', 'neutral']
   const predefinedBadges = [
     {
       emoji: '📝',
@@ -92,7 +92,7 @@ const BadgesExtension: React.FC = (props: any) => {
     },
     {
       emoji: '🧠',
-      color: 'purple',
+      color: 'amber',
       content: 'Remember This'
     },
     {

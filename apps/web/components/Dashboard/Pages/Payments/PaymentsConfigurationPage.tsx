@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useVBSession } from '@components/Contexts/VBSessionContext';
 import {
@@ -7,7 +7,6 @@ import {
   initializePaymentConfig,
   deletePaymentConfig,
 } from '@services/payments/payments';
-import { getStripeOnboardingLink } from '@services/payments/providers/stripe';
 import {
   CheckCircle2,
   ExternalLink,
@@ -16,48 +15,30 @@ import {
   Trash2,
   UnplugIcon,
   XCircle,
-  AlertTriangle,
+  Wallet,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/keys';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Button } from '@components/ui/button';
-import { getMainDomainUri } from '@services/config/config';
-import { useVBAnalytics, AnalyticsEvent } from '@services/analytics';
-import { SiStripe } from '@icons-pack/react-simple-icons';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
 
 // ---------------------------------------------------------------------------
-// Provider registry
+// Page — Paystack (bring-your-own-keys) configuration.
+//
+// Each organization connects its OWN Paystack merchant account. There is no
+// OAuth/Connect flow: the org admin pastes their secret key here, it is stored
+// on the org's PaymentsConfig row, and funds settle directly to the org.
 // ---------------------------------------------------------------------------
-interface PaymentProviderDef {
-  id: string;
-  name: string;
-  Icon: React.ComponentType<{ size?: number; className?: string }>;
-  tagline: string;
-  docsUrl: string;
-  callbackPath: string;
-  getConnectUrl: (_orgId: number, _accessToken: string, _redirectUri: string) => Promise<string>;
-}
+const PROVIDER = {
+  id: 'paystack',
+  name: 'Paystack',
+  tagline: 'Accept one-time payments (cards, bank, M-Pesa) via your own Paystack account.',
+  docsUrl: 'https://paystack.com/docs',
+};
 
-const PAYMENT_PROVIDERS: PaymentProviderDef[] = [
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    Icon: SiStripe,
-    tagline: 'Accept one-time payments and subscriptions via Stripe Connect.',
-    docsUrl: 'https://stripe.com/docs',
-    callbackPath: '/payments/stripe/connect/oauth',
-    async getConnectUrl(orgId, accessToken, redirectUri) {
-      const { connect_url } = await getStripeOnboardingLink(orgId, accessToken, redirectUri);
-      return connect_url;
-    },
-  },
-];
-
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
 const PaymentsConfigurationPage: React.FC = () => {
   const org = useOrg() as any;
   const session = useVBSession() as any;
@@ -70,16 +51,6 @@ const PaymentsConfigurationPage: React.FC = () => {
     enabled: !!(org?.id && access_token),
     staleTime: 60_000,
   });
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'payment_provider_connected') {
-        queryClient.invalidateQueries({ queryKey: queryKeys.payments.configs(org?.id) });
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [org?.id, queryClient]);
 
   if (isLoading) return (
     <div className="ms-10 me-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4 animate-pulse">
@@ -103,161 +74,131 @@ const PaymentsConfigurationPage: React.FC = () => {
   if (error) return <div className="p-6 text-sm text-red-500">Error loading payment configuration</div>;
 
   const configs: any[] = Array.isArray(paymentConfigs) ? paymentConfigs : [];
+  const config = configs.find((c: any) => c.provider === PROVIDER.id);
+  const isConnected = !!(config && config.active);
 
   return (
     <div className="ms-10 me-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-4">
         <h1 className="font-bold text-xl text-gray-800">Payments Configuration</h1>
         <h2 className="text-gray-500 text-sm">
-          Connect a payment provider to accept payments from your learners.
+          Connect your Paystack account to accept payments from your learners.
         </h2>
       </div>
 
       <div className="space-y-3">
-        {PAYMENT_PROVIDERS.map((provider) => {
-          const config = configs.find((c: any) => c.provider === provider.id);
-          return (
-            <ProviderCard
-              key={provider.id}
-              provider={provider}
-              config={config}
-              orgId={org.id}
-              accessToken={access_token}
-            />
-          );
-        })}
+        <ProviderCard
+          config={config}
+          isConnected={isConnected}
+          orgId={org.id}
+          accessToken={access_token}
+          onChanged={() => queryClient.invalidateQueries({ queryKey: queryKeys.payments.configs(org.id) })}
+        />
       </div>
     </div>
   );
 };
 
 // ---------------------------------------------------------------------------
-// ProviderCard
+// Provider card + key form
 // ---------------------------------------------------------------------------
-interface ProviderCardProps {
-  provider: PaymentProviderDef;
+const ProviderCard: React.FC<{
   config: any | undefined;
+  isConnected: boolean;
   orgId: number;
   accessToken: string;
-}
+  onChanged: () => void;
+}> = ({ config, isConnected, orgId, accessToken, onChanged }) => {
+  const [editing, setEditing] = useState(false);
+  const [secretKey, setSecretKey] = useState('');
+  const [publicKey, setPublicKey] = useState('');
+  const [saving, setSaving] = useState(false);
 
-const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, accessToken }) => {
-  const queryClient = useQueryClient();
-  const { track } = useVBAnalytics('dashboard');
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [disconnectError, setDisconnectError] = useState<{ count: number } | null>(null);
-  const isConnected = !!(config?.provider_specific_id && config?.active);
-
-  const handleConnect = async () => {
+  const handleSave = async () => {
+    if (!secretKey.trim()) {
+      toast.error('Secret key is required');
+      return;
+    }
+    setSaving(true);
     try {
-      track(AnalyticsEvent.PaymentProviderConnectClicked, {
-        is_reconnect: isConnected,
-        had_existing_config: !!config,
-      });
-      setIsConnecting(true);
-      if (!config) {
-        await initializePaymentConfig(orgId, { provider: provider.id, enabled: true }, provider.id, accessToken);
-        queryClient.invalidateQueries({ queryKey: queryKeys.payments.configs(orgId) });
-      }
-      const redirectUri = getMainDomainUri(provider.callbackPath);
-      const url = await provider.getConnectUrl(orgId, accessToken, redirectUri);
-      window.open(url, '_blank');
+      await initializePaymentConfig(
+        orgId,
+        { secret_key: secretKey.trim(), public_key: publicKey.trim(), active: true },
+        PROVIDER.id,
+        accessToken,
+      );
+      toast.success('Paystack connected');
+      setEditing(false);
+      onChanged();
     } catch {
-      toast.error(`Failed to connect ${provider.name}`);
+      toast.error('Failed to save Paystack keys');
     } finally {
-      setIsConnecting(false);
+      setSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    setDisconnectError(null);
     try {
       await deletePaymentConfig(orgId, config.id, accessToken);
-      toast.success(`${provider.name} connection removed`);
-      queryClient.invalidateQueries({ queryKey: queryKeys.payments.configs(orgId) });
-    } catch (err: any) {
-      if (err?.status === 409 || err?.response?.status === 409) {
-        let detail: any = err?.detail ?? err?.response?.data?.detail;
-        try { detail = JSON.parse(detail); } catch { /* ignore */ }
-        if (detail?.code === 'ACTIVE_SUBSCRIPTIONS_EXIST') {
-          setDisconnectError({ count: detail.count });
-          return;
-        }
-      }
-      toast.error(`Failed to remove ${provider.name} connection`);
+      toast.success('Paystack connection removed');
+      setSecretKey('');
+      setPublicKey('');
+      onChanged();
+    } catch {
+      toast.error('Failed to remove Paystack connection');
     }
   };
 
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden">
-      {/* Main row */}
       <div className="flex items-center justify-between px-5 py-4 bg-white">
         <div className="flex items-center space-x-4">
           <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg shrink-0">
-            <provider.Icon size={22} className="text-gray-700" />
+            <Wallet size={22} className="text-gray-700" />
           </div>
           <div>
             <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-              <span className="font-semibold text-gray-900">{provider.name}</span>
-              {config ? (
-                isConnected ? (
-                  <span className="inline-flex items-center space-x-1 text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                    <CheckCircle2 size={10} />
-                    <span>Connected</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center space-x-1 text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-                    <XCircle size={10} />
-                    <span>Authorization required</span>
-                  </span>
-                )
+              <span className="font-semibold text-gray-900">{PROVIDER.name}</span>
+              {isConnected ? (
+                <span className="inline-flex items-center space-x-1 text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                  <CheckCircle2 size={10} />
+                  <span>Connected</span>
+                </span>
+              ) : config ? (
+                <span className="inline-flex items-center space-x-1 text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                  <XCircle size={10} />
+                  <span>Not active</span>
+                </span>
               ) : (
                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
                   Not configured
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-500 mt-0.5">{provider.tagline}</p>
-            {isConnected && (
-              <p className="text-xs text-gray-400 mt-0.5 font-mono truncate max-w-xs">
-                {config.provider_specific_id}
-              </p>
-            )}
+            <p className="text-sm text-gray-500 mt-0.5">{PROVIDER.tagline}</p>
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center space-x-2 shrink-0">
           <a
-            href={provider.docsUrl}
+            href={PROVIDER.docsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-gray-600 transition p-1"
-            title={`${provider.name} docs`}
+            title={`${PROVIDER.name} docs`}
           >
             <ExternalLink size={15} />
           </a>
 
           {isConnected ? (
             <>
-              <Button
-                onClick={handleConnect}
-                disabled={isConnecting}
-                variant="outline"
-                size="sm"
-                className="text-xs"
-              >
-                {isConnecting ? (
-                  <Loader2 size={12} className="animate-spin me-1" />
-                ) : (
-                  <UnplugIcon size={12} className="me-1" />
-                )}
-                Reconnect
+              <Button onClick={() => setEditing((v) => !v)} variant="outline" size="sm" className="text-xs">
+                {editing ? 'Cancel' : 'Update keys'}
               </Button>
               <ConfirmationModal
                 confirmationButtonText="Remove"
-                confirmationMessage={`Remove the ${provider.name} connection? This will disable payments for this organization.`}
-                dialogTitle={`Remove ${provider.name} Connection`}
+                confirmationMessage="Remove the Paystack connection? This will disable payments for this organization."
+                dialogTitle="Remove Paystack Connection"
                 dialogTrigger={
                   <Button variant="destructive" size="sm" className="text-xs">
                     <Trash2 size={12} className="me-1" />
@@ -269,58 +210,51 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
               />
             </>
           ) : (
-            <Button
-              onClick={handleConnect}
-              disabled={isConnecting}
-              size="sm"
-              className="text-xs bg-gray-900 text-white hover:bg-gray-800"
-            >
-              {isConnecting ? (
-                <Loader2 size={12} className="animate-spin me-1" />
-              ) : (
-                <UnplugIcon size={12} className="me-1" />
-              )}
-              {config ? 'Complete Setup' : 'Connect'}
+            <Button onClick={() => setEditing(true)} size="sm" className="text-xs bg-gray-900 text-white hover:bg-gray-800">
+              <UnplugIcon size={12} className="me-1" />
+              Connect
             </Button>
           )}
         </div>
       </div>
 
-      {/* Active subscription disconnect error */}
-      {disconnectError && (
-        <div className="bg-red-50 border-t border-red-100 px-5 py-3 text-sm text-red-700">
-          <div className="flex items-start space-x-2">
-            <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-            <p>
-              You have <strong>{disconnectError.count} active subscriber{disconnectError.count !== 1 ? 's' : ''}</strong>.
-              Cancel all subscriptions first via your Stripe dashboard before removing.
-            </p>
+      {editing && (
+        <div className="bg-gray-50 border-t border-gray-100 px-5 py-4 space-y-3">
+          <p className="text-xs text-gray-500">
+            Paste your Paystack keys from the Paystack Dashboard (Settings → API Keys &amp; Webhooks).
+            Your secret key is stored on your organization&apos;s configuration.
+          </p>
+          <div className="space-y-2">
+            <Label htmlFor="paystack-secret" className="text-xs">Secret key</Label>
+            <Input
+              id="paystack-secret"
+              type="password"
+              value={secretKey}
+              onChange={(e) => setSecretKey(e.target.value)}
+              placeholder="sk_live_… / sk_test_…"
+              autoComplete="off"
+            />
           </div>
-        </div>
-      )}
-
-      {/* Warning strip when config exists but OAuth not completed */}
-      {config && !isConnected && !disconnectError && (
-        <div className="bg-amber-50 border-t border-amber-100 px-5 py-2 text-xs text-amber-700 flex items-center justify-between">
-          <div className="flex items-center space-x-1.5">
-            <Info size={12} className="shrink-0" />
-            <span>
-              Configuration started but OAuth authorization is not complete. Click{' '}
-              <strong>Complete Setup</strong> to finish connecting.
-            </span>
+          <div className="space-y-2">
+            <Label htmlFor="paystack-public" className="text-xs">Public key (optional)</Label>
+            <Input
+              id="paystack-public"
+              type="text"
+              value={publicKey}
+              onChange={(e) => setPublicKey(e.target.value)}
+              placeholder="pk_live_… / pk_test_…"
+              autoComplete="off"
+            />
           </div>
-          <ConfirmationModal
-            confirmationButtonText="Start Over"
-            confirmationMessage={`This will delete the current ${provider.name} configuration so you can start fresh.`}
-            dialogTitle="Start Over?"
-            dialogTrigger={
-              <button className="ms-4 shrink-0 underline hover:text-amber-900 transition-colors cursor-pointer">
-                Start over
-              </button>
-            }
-            functionToExecute={handleDelete}
-            status="warning"
-          />
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <Info size={12} />
+            <span>Set your webhook URL in Paystack to: <code className="font-mono">/api/v1/payments/paystack/webhook</code></span>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={saving} size="sm">
+              {saving ? <><Loader2 size={12} className="animate-spin me-1" /> Saving…</> : 'Save & Activate'}
+            </Button>
+          </div>
         </div>
       )}
     </div>

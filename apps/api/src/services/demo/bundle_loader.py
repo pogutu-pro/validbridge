@@ -279,8 +279,9 @@ class StoreOfferSpec(BaseModel):
     description: str = ""
     offer_type: str = "one_time"  # one_time | subscription
     price_type: str = "fixed_price"  # fixed_price | customer_choice
+    interval: str = "monthly"  # monthly | yearly (subscription offers only)
     amount: float = 0.0
-    currency: str = "USD"
+    currency: str = "KES"
     benefits: str = ""
     # Exactly one of these: an offer sells a single course or a group of them.
     course: Optional[str] = None

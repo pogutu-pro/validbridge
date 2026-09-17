@@ -362,13 +362,11 @@ def test_ee_hook_registration_and_paid_access(monkeypatch):
     middleware_calls = []
     router_calls = []
     startup_calls = []
-    paid_calls = []
 
     fake_hooks = SimpleNamespace(
         register_middlewares=lambda app: middleware_calls.append(app),
         register_routers=lambda router: router_calls.append(router),
         on_startup=lambda app: startup_calls.append(app),
-        check_activity_paid_access=AsyncMock(side_effect=lambda request, activity_id, user, db_session: paid_calls.append((activity_id, user))),
     )
 
     monkeypatch.setattr(ee_hooks, "get_ee_hooks", lambda: fake_hooks)
@@ -390,6 +388,7 @@ def test_ee_hook_registration_and_paid_access(monkeypatch):
     monkeypatch.setattr("src.core.deployment_mode.get_deployment_mode", lambda: "free")
     assert ee_hooks.is_multi_org_allowed() is False
 
+    # Paid-access check is fail-closed: a caller with no user id is denied.
     result = asyncio.run(
         ee_hooks.check_ee_activity_paid_access(
             object(),
@@ -398,8 +397,7 @@ def test_ee_hook_registration_and_paid_access(monkeypatch):
             object(),
         )
     )
-    assert result is None
-    assert paid_calls
+    assert result is False
 
     monkeypatch.setattr(ee_hooks, "get_ee_hooks", lambda: None)
     assert asyncio.run(
@@ -409,7 +407,7 @@ def test_ee_hook_registration_and_paid_access(monkeypatch):
             object(),
             object(),
         )
-    ) is True
+    ) is False
 
 
 # --------------------------------------------------------------------------

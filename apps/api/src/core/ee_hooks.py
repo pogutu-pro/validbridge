@@ -69,12 +69,45 @@ def is_multi_org_allowed() -> bool:
 
 async def check_ee_activity_paid_access(request, activity_id, user, db_session) -> bool:
     """
-    Check if a user has paid access to an activity via EE.
-    Returns True if EE is not available (free access fallback).
+    Whether the user may see the full content of this activity.
+
+    Fail-closed: any error (missing row, DB failure, unexpected exception)
+    returns False, gating the content instead of leaking it. Superadmins and the
+    activity's course authors/maintainers always see their own content. A course
+    that is not behind a paid offer is treated as free.
     """
-    hooks = get_ee_hooks()
-    if hooks and hasattr(hooks, "check_activity_paid_access"):
-        return await hooks.check_activity_paid_access(request, activity_id, user, db_session)
-    # If EE is not available, grant access (free tier behavior)
-    return True
+    from sqlmodel import select
+
+    from src.db.courses.activities import Activity
+    from src.db.courses.courses import Course
+    from src.security.superadmin import is_user_superadmin
+    from src.services.payments.payments_access import check_enrollment_access, get_paywall_offer
+
+    user_id = getattr(user, "id", None)
+    if not user_id:
+        return False
+
+    try:
+        if await is_user_superadmin(user_id, db_session):
+            return True
+        course_uuid = (
+            await db_session.execute(
+                select(Course.course_uuid)
+                .join(Activity, Activity.course_id == Course.id)
+                .where(Activity.id == activity_id)
+            )
+        ).scalars().first()
+    except Exception:
+        return False
+
+    if not course_uuid:
+        return True
+
+    try:
+        paywall_offer = await get_paywall_offer(course_uuid, db_session)
+        if paywall_offer is None:
+            return True
+        return await check_enrollment_access(course_uuid, user_id, db_session)
+    except Exception:
+        return False
 

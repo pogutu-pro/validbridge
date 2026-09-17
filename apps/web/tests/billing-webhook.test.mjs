@@ -8,9 +8,11 @@
 //
 // All fixtures are synthetic.
 
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 
+// mocks in this file must not leak into sibling test files run in the same process
 mock.module("server-only", () => ({}));
+afterAll(() => { mock.restore(); });
 
 // --- test doubles -----------------------------------------------------------
 

@@ -413,7 +413,8 @@ export type DeploymentMode = 'saas' | 'oss' | 'ee'
  * Defaults to 'oss' when cookie is absent (safe fallback — blocks EE features).
  */
 export const getDeploymentMode = (): DeploymentMode => {
-  return (getCookieValue('VB_mode') as DeploymentMode) || 'oss'
+  // Gating is disabled in this build: always report a fully enabled instance.
+  return 'ee'
 }
 
 /**

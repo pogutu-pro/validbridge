@@ -22,7 +22,7 @@ export default function QuickStats() {
 
   if (statusLoading) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-5 animate-pulse">
+      <div className="rounded-xl border border-border bg-card p-5 animate-pulse">
         <div className="flex items-center justify-between mb-4">
           <div className="h-3.5 bg-gray-100 rounded w-24" />
           <div className="h-3 bg-gray-100 rounded w-20" />
@@ -44,7 +44,7 @@ export default function QuickStats() {
 
   if (!isConfigured) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-5">
+      <div className="rounded-xl border border-border bg-card p-5">
         <div className="flex flex-col items-center justify-center py-6 text-center">
           <div className="p-2.5 rounded-full bg-gray-100 mb-2.5">
             <ChartBar size={18} weight="duotone" className="text-gray-400" />
@@ -127,7 +127,7 @@ function QuickStatsContent() {
   ]
 
   return (
-    <div className="bg-white rounded-xl nice-shadow p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-gray-700">{t('dashboard.home.quick_stats')}</h3>
         <Link

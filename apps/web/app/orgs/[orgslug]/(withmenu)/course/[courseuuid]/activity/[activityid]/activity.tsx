@@ -26,6 +26,7 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useMediaQuery, useWindowSize } from 'usehooks-ts'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
+import PaymentWall from '@components/Payments/PaymentWall'
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown'
@@ -56,10 +57,7 @@ const AssignmentStudentActivity = lazy(() => import('@components/Objects/Activit
 // what the API will actually accept. Static import: it's a pure function, and
 // gating render on the lazy chunk would flash the wrong control.
 import { isAssignmentPastDue } from '@components/Objects/Activities/Assignment/AssignmentStudentActivity'
-const AIActivityAsk = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk'))
-const AISidePanelContentWrapper = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk').then(mod => ({ default: mod.AISidePanelContentWrapper })))
-const AISidePanelInline = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk').then(mod => ({ default: mod.AISidePanelInline })))
-const AIChatBotProvider = lazy(() => import('@components/Contexts/AI/AIChatBotContext'))
+import { useAICopilot } from '@components/Contexts/AI/AICopilotContext'
 const ScormActivity = lazy(() => import('../../../../../../../../ee/components/Activities/ScormActivity'))
 const MarkdownActivity = lazy(() => import('@components/Objects/Activities/Markdown/MarkdownActivity'))
 const EmbedActivity = lazy(() => import('@components/Objects/Activities/Embed/EmbedActivity'))
@@ -245,10 +243,11 @@ function ActivityClient(props: ActivityClientProps) {
   const org = useOrg() as any
 
   const { data: course, isLoading: courseLoading } = useCourseMeta(courseuuid)
-  const { data: activity, isLoading: activityLoading } = useActivity(activityid)
+  const { data: activity, isLoading: activityLoading, error: activityError } = useActivity(activityid)
   const session = useVBSession() as any;
   const pathname = usePathname()
   const access_token = session?.data?.tokens?.access_token;
+  const { setActivityContext, openCopilot } = useAICopilot()
   const [bgColor, setBgColor] = React.useState('bg-white nice-shadow')
   const [assignment, setAssignment] = React.useState(null) as any;
   const [_markStatusButtonActive, setMarkStatusButtonActive] = React.useState(false);
@@ -259,6 +258,21 @@ function ActivityClient(props: ActivityClientProps) {
 
   const { track } = useVBAnalytics('learner')
   const activityStartTime = useRef(Date.now())
+
+  // Keep the AI Copilot drawer aware of the current activity so "Ask AI"
+  // resolves against this activity rather than requiring manual selection.
+  useEffect(() => {
+    if (activity?.activity_uuid && activity?.published) {
+      setActivityContext({
+        activity_uuid: activity.activity_uuid,
+        name: activity.name,
+        activity_type: activity.activity_type,
+      })
+    } else {
+      setActivityContext(null)
+    }
+    return () => setActivityContext(null)
+  }, [activity?.activity_uuid, activity?.published, activity?.activity_type, activity?.name, setActivityContext])
 
   // Track activity view on mount, time_on_activity on unmount
   const activityUuidForTracking = activity?.activity_uuid
@@ -446,6 +460,20 @@ function ActivityClient(props: ActivityClientProps) {
   }
     , [activity, pathname, isFocusMode])
 
+  // A 402 means this activity belongs to a paid offer the user hasn't bought —
+  // render the paywall with the offer metadata the API returns.
+  if (activityError && (activityError as any)?.status === 402 && (activityError as any)?.detail) {
+    return (
+      <GeneralWrapperStyled>
+        <PaymentWall
+          offer={(activityError as any).detail}
+          resourceName={(activityError as any).detail?.offer_name}
+          orgslug={orgslug}
+        />
+      </GeneralWrapperStyled>
+    )
+  }
+
   if (courseLoading || !course) {
     return (
       <GeneralWrapperStyled>
@@ -543,9 +571,7 @@ function ActivityClient(props: ActivityClientProps) {
             flush unsaved task answers before grading (avoids silent 0%). */}
         <AssignmentDirtyTasksProvider>
         <Suspense fallback={<LoadingFallback />}>
-          <AIChatBotProvider>
             <Suspense fallback={null}>
-              <AISidePanelContentWrapper>
             {isFocusMode ? (
               <AnimatePresence>
                 <motion.div
@@ -943,7 +969,13 @@ function ActivityClient(props: ActivityClientProps) {
                               <AuthenticatedClientElement checkMethod="authentication">
                                 {activity.activity_type != 'TYPE_ASSIGNMENT' && (
                                   <>
-                                    <AIActivityAsk activity={activity} />
+                                    <button
+                                      onClick={() => openCopilot()}
+                                      className="flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition delay-150 duration-300 ease-in-out hover:scale-105 hover:bg-primary/90"
+                                    >
+                                      <Sparkles size={16} />
+                                      <span>{t('ai.ask_ai')}</span>
+                                    </button>
                                     <ActivityChapterDropdown
                                       course={course}
                                       currentActivityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
@@ -999,9 +1031,6 @@ function ActivityClient(props: ActivityClientProps) {
                                 </button>
                                 {activityContent}
                               </div>
-                              <Suspense fallback={null}>
-                                <AISidePanelInline activity={activity} />
-                              </Suspense>
                             </div>
                           )}
                         </>
@@ -1051,9 +1080,7 @@ function ActivityClient(props: ActivityClientProps) {
                 )}
               </GeneralWrapperStyled>
             )}
-              </AISidePanelContentWrapper>
             </Suspense>
-          </AIChatBotProvider>
         </Suspense>
         </AssignmentDirtyTasksProvider>
       </CourseProvider>
@@ -1984,9 +2011,9 @@ function AssignmentTools(props: {
                 {allowRetries && (
                   <div className="pt-2">
                     {canRetry ? (
-                      <div className="rounded-xl border border-fuchsia-100 bg-gradient-to-br from-fuchsia-50 via-pink-50 to-rose-50 p-4">
+                      <div className="rounded-xl border border-orange-100 bg-gradient-to-br from-orange-50 via-amber-50 to-rose-50 p-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 rounded-full bg-white nice-shadow flex items-center justify-center text-fuchsia-600 shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-white nice-shadow flex items-center justify-center text-orange-600 shrink-0">
                             <RotateCcw size={16} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -1996,7 +2023,7 @@ function AssignmentTools(props: {
                             <p className="text-xs text-gray-600 mt-1 leading-snug">
                               {t('assignments.retry_assignment_confirm')}
                             </p>
-                            <p className="text-[11px] text-fuchsia-700 mt-2 font-semibold flex items-center gap-1.5">
+                            <p className="text-[11px] text-orange-700 mt-2 font-semibold flex items-center gap-1.5">
                               {maxRetries === 0 ? (
                                 <>
                                   <InfinityIcon size={11} />

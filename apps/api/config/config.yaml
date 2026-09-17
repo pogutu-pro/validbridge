@@ -63,20 +63,13 @@ redis_config:
   redis_connection_string: redis://localhost:6379/validbridge
 
 payments_config:
-  # See ee/services/payments/README.md for full setup instructions.
-  # To add a new payment provider, add its credentials block here and register
-  # it in ee/db/payments/payments.py (PaymentProviderEnum) and config/config.py.
-  stripe:
-    # Platform API keys — Stripe Dashboard → Developers → API keys
-    stripe_secret_key: ""        # sk_live_... (or sk_test_... for development)
-    stripe_publishable_key: ""   # pk_live_... (or pk_test_... for development)
-    # Stripe Connect OAuth client ID — Stripe Dashboard → Settings → Connect → OAuth
-    stripe_client_id: ""         # ca_...
-    # Webhook signing secrets — Stripe Dashboard → Developers → Webhooks
-    # Standard endpoint:  POST /payments/stripe/webhook/standard
-    stripe_webhook_standard_secret: ""   # whsec_...
-    # Connect endpoint:   POST /payments/stripe/webhook/connect
-    stripe_webhook_connect_secret: ""    # whsec_...
+  # Payment provider configuration. Organizations bring their own Paystack
+  # merchant account (per-org credentials are stored on the org's
+  # PaymentsConfig row, not here). These are the PLATFORM-LEVEL fallbacks used
+  # only when an org's own config has no credentials configured.
+  paystack:
+    secret_key: ""       # sk_live_... / sk_test_...  (VALIDBRIDGE_PAYSTACK_SECRET_KEY)
+    public_key: ""       # pk_live_... / pk_test_...  (VALIDBRIDGE_PAYSTACK_PUBLIC_KEY)
 
 ai_config:
   is_ai_enabled: false

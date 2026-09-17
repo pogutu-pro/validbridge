@@ -37,6 +37,24 @@ DEMO_EMAIL_DOMAIN = "demo.example.com"
 # the registry is ever inconsistent.
 DEMO_SIGNUP_METHOD = "demo"
 
+# The four well-known role test users created by `cli.py demo-roles`. These are
+# demo-owned accounts (signup_method="demo"), not visitors, so the sync's
+# resource-author reconciliation must not treat their authorship as drift.
+DEMO_ROLE_EMAILS = (
+    "role-admin@demo.example.com",
+    "role-maintainer@demo.example.com",
+    "role-instructor@demo.example.com",
+    "role-learner@demo.example.com",
+)
+
+# The staff roles that are allowed to author/edit demo content. The learner is
+# deliberately excluded — it exists to demonstrate the read-only experience.
+DEMO_STAFF_ROLE_EMAILS = (
+    "role-admin@demo.example.com",
+    "role-maintainer@demo.example.com",
+    "role-instructor@demo.example.com",
+)
+
 
 def _flag(name: str, default: bool = False) -> bool:
     raw = os.environ.get(name)

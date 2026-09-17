@@ -90,7 +90,7 @@ const STEP_CONFIG: Record<
   try_playgrounds: {
     icon: Lightning,
     actionLabel: 'Try Playgrounds',
-    actionHref: '/dash/playgrounds',
+    actionHref: '/dash/labs',
     pattern: `radial-gradient(circle, rgba(253,230,138,0.12) 1px, transparent 1px), radial-gradient(circle, rgba(253,186,116,0.08) 1px, transparent 1px)`,
     patternSize: '14px 14px',
     iconColor: 'text-amber-400',
@@ -162,7 +162,7 @@ export default function OnboardingBar() {
     }
     // experience_editor is completed manually via the acknowledge tick
 
-    if (/\/editor\/playground\/[^/]+\/edit/.test(pathname)) {
+    if (/\/editor\/labs\/[^/]+\/edit/.test(pathname)) {
       completeStep('try_playgrounds')
     }
     if (/\/dash\/users\/settings\/add/.test(pathname)) {
@@ -185,7 +185,7 @@ export default function OnboardingBar() {
     : false
 
   const isInEditor = pathname
-    ? /\/course\/[^/]+\/activity\/[^/]+\/edit/.test(pathname) || /\/editor\/playground\/[^/]+\/edit/.test(pathname)
+    ? /\/course\/[^/]+\/activity\/[^/]+\/edit/.test(pathname) || /\/editor\/labs\/[^/]+\/edit/.test(pathname)
     : false
 
   const orgSlug = org?.slug || ''
@@ -673,7 +673,7 @@ export default function OnboardingBar() {
                                           className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white nice-shadow hover:bg-gray-50 transition-colors"
                                         >
                                           <img
-                                            src="/UNI_LOGO.png"
+                                            src="/validbridge-university.svg"
                                             alt="ValidBridge University"
                                             className="h-9 w-auto shrink-0 rounded"
                                           />
@@ -694,7 +694,7 @@ export default function OnboardingBar() {
                                           className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white nice-shadow hover:bg-gray-50 transition-colors"
                                         >
                                           <img
-                                            src="/theclassroom.png"
+                                            src="/validbridge-classroom.svg"
                                             alt="The Classroom"
                                             className="h-9 w-auto shrink-0 rounded"
                                           />

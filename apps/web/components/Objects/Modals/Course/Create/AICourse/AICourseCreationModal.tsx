@@ -212,22 +212,19 @@ function AICourseCreationModal({
               mass: 0.2,
               velocity: 2,
             }}
-            style={{
-              pointerEvents: 'auto',
-              background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
-            }}
-            className="relative w-[95vw] max-w-[1400px] h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-inset ring-white/10 backdrop-blur-md min-h-0"
+            style={{ pointerEvents: 'auto' }}
+            className="relative w-[95vw] max-w-[1400px] h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border bg-white backdrop-blur-md min-h-0"
           >
             {/* Header - clean, minimal */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 flex-shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-3">
                 <Image
-                  className="outline outline-1 outline-neutral-200/20 rounded-lg"
+                  className="border border-border rounded-lg"
                   width={24}
                   src={lrnaiIcon}
                   alt="AI Course"
                 />
-                <span className="text-sm font-semibold text-white/70">
+                <span className="text-sm font-semibold text-foreground">
                   {t('courses.create.ai.title')}
                 </span>
               </div>
@@ -265,7 +262,7 @@ function AICourseCreationModal({
                 )}
                 <X
                   size={20}
-                  className="text-white/50 hover:cursor-pointer bg-white/10 p-1 rounded-full items-center hover:bg-white/20 transition-colors"
+                  className="text-muted-foreground hover:cursor-pointer bg-secondary p-1 rounded-full items-center hover:bg-accent transition-colors"
                   onClick={onClose}
                 />
               </div>
@@ -273,9 +270,9 @@ function AICourseCreationModal({
 
             {/* Error banner */}
             {error && (
-              <div className="px-6 py-3 bg-red-500/20 outline outline-1 outline-red-500 text-red-200 text-sm flex-shrink-0 flex items-center justify-between">
+              <div className="px-6 py-3 bg-red-50 border border-red-200 text-red-600 text-sm flex-shrink-0 flex items-center justify-between">
                 <span>{error}</span>
-                <button onClick={() => setError(null)} className="p-1 hover:bg-white/10 rounded">
+                <button onClick={() => setError(null)} className="p-1 hover:bg-secondary rounded">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -284,7 +281,7 @@ function AICourseCreationModal({
             {/* Content - Two panel layout */}
             <div className="flex-1 flex min-h-0">
               {/* Left panel - Unified plan & content */}
-              <div className="flex-1 border-e border-white/5 relative overflow-hidden">
+              <div className="flex-1 border-e border-border relative overflow-hidden">
                 <AICoursePreview
                   plan={currentPlan}
                   createdChapters={createdChapters}

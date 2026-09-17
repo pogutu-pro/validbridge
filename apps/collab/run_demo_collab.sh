@@ -27,4 +27,6 @@ export VALIDBRIDGE_API_URL="http://lvh.me:1348"
 # the default and would point at the wrong Redis anywhere but here.
 export VALIDBRIDGE_REDIS_URL="redis://localhost:6379/0"
 
-exec bun run start
+# node + tsx, NOT Bun: Bun's tsx loader fails with
+# "Cannot find module './cjs/index.cjs'" on this dependency graph.
+exec node --import tsx src/index.ts

@@ -812,7 +812,7 @@ async def get_user_session(
     current_user: PublicUser | AnonymousUser,
 ) -> UserSession:
     # Get user
-    statement = select(User).where(User.user_uuid == current_user.user_uuid)
+    statement = select(User).where(User.id == current_user.id)
     user = (await db_session.execute(statement)).scalars().first()
 
     if not user:
@@ -863,7 +863,7 @@ async def authorize_user_action(
     action: Literal["create", "read", "update", "delete"],
 ):
     # Get user
-    statement = select(User).where(User.user_uuid == current_user.user_uuid)
+    statement = select(User).where(User.id == current_user.id)
     user = (await db_session.execute(statement)).scalars().first()
 
     if not user:

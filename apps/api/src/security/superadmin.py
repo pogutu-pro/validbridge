@@ -25,13 +25,7 @@ def ensure_ee_superadmin_surface() -> None:
     """Block the superadmin surface on OSS deployments.
 
     Denies only when the mode is definitively 'oss'. Both 'saas' and 'ee' pass
-    through untouched — never invert this to ``!= 'ee'``, which would 403 the
-    live SaaS deployment.
-
-    The import is lazy so the mode is resolved per request rather than frozen
-    when the dependency is constructed, and to stay clear of the
-    rbac -> superadmin -> auth -> users -> rbac import cycle this module
-    already works around.
+    through untouched.
     """
     from src.core.deployment_mode import get_deployment_mode
 
@@ -90,8 +84,6 @@ async def require_superadmin(
     # their own OSS check, so on those routes this never fires — it is here so
     # that any core route which adopts require_superadmin later inherits the
     # gate instead of quietly shipping a superadmin surface to OSS.
-    # Ordered after the 401 so anonymous callers still get 401, and before the
-    # principal-type branches so OSS never reveals which principals would pass.
     ensure_ee_superadmin_surface()
 
     # Org-scoped API tokens are never superadmins, regardless of who minted them.

@@ -16,7 +16,7 @@ export const FrameBoxExtension = Node.create({
       height: { default: 300 },
       title: { default: 'Frame' },
       locked: { default: false },
-      color: { default: 'purple' },
+      color: { default: 'teal' },
     }
   },
 

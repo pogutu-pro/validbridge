@@ -18,31 +18,9 @@ from src.security.rbac.utils import (
 )
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
+from src.services.payments.payments_access import check_enrollment_access, get_paywall_offer
 
 logger = logging.getLogger(__name__)
-
-
-async def _get_offer_for_usergroup(usergroup_id: int, db_session: AsyncSession) -> dict | None:
-    """
-    Return offer metadata if a usergroup is the access-control group for a PaymentsOffer.
-    Returns None if the usergroup is not tied to any offer.
-    """
-    try:
-        from ee.db.payments.payments_offers import PaymentsOffer
-        stmt = select(PaymentsOffer).where(
-            PaymentsOffer.usergroup_id == usergroup_id,
-        )
-        offer = (await db_session.execute(stmt)).scalars().first()
-        if offer:
-            return {
-                "offer_id": offer.id,
-                "offer_name": offer.name,
-                "amount": offer.amount,
-                "currency": offer.currency,
-            }
-    except Exception:
-        pass
-    return None
 
 
 async def check_usergroup_access(
@@ -98,22 +76,23 @@ async def check_usergroup_access(
     else:
         logger.info("[USERGROUP_ACCESS] User %s is NOT a member of any linked UserGroups %s, denying access", user_id, usergroup_ids)
 
-        # Check if any of the blocking UserGroups is tied to a paid offer
-        # If so, return HTTP 402 Payment Required (semantically distinct from 403 Forbidden)
-        for ugid in usergroup_ids:
-            offer_meta = await _get_offer_for_usergroup(ugid, db_session)
-            if offer_meta:
-                logger.info("[USERGROUP_ACCESS] Resource is behind paid offer %s, returning 402", offer_meta["offer_id"])
-                raise HTTPException(
-                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
-                    detail={
-                        "code": "PAYMENT_REQUIRED",
-                        "offer_id": offer_meta["offer_id"],
-                        "offer_name": offer_meta["offer_name"],
-                        "amount": offer_meta["amount"],
-                        "currency": offer_meta["currency"],
-                    },
-                )
+        # Check if the resource is behind a paid offer and the user is not
+        # enrolled — return HTTP 402 Payment Required (semantically distinct
+        # from 403 Forbidden) so the frontend can render the paywall.
+        offer_meta = await get_paywall_offer(resource_uuid, db_session)
+        if offer_meta:
+            logger.info("[USERGROUP_ACCESS] Resource is behind paid offer %s, returning 402", offer_meta["offer_id"])
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail={
+                    "code": "PAYMENT_REQUIRED",
+                    "offer_id": offer_meta["offer_id"],
+                    "offer_uuid": offer_meta.get("offer_uuid"),
+                    "offer_name": offer_meta["offer_name"],
+                    "amount": offer_meta["amount"],
+                    "currency": offer_meta["currency"],
+                },
+            )
 
     return membership is not None
 
@@ -506,11 +485,7 @@ async def authorization_verify_based_on_roles_and_authorship(
     # regardless of UserGroup membership state (e.g. if an admin removes them from the group).
     hasPaidEnrollmentAccess = False
     if action == "read":
-        try:
-            from ee.services.payments.payments_access import check_enrollment_access
-            hasPaidEnrollmentAccess = await check_enrollment_access(element_uuid, user_id, db_session)
-        except Exception:
-            pass  # payments module not available (community edition) — skip silently
+        hasPaidEnrollmentAccess = await check_enrollment_access(element_uuid, user_id, db_session)
     logger.info("[RBAC] hasPaidEnrollmentAccess=%s", hasPaidEnrollmentAccess)
 
     if isAuthor or isRole or hasUserGroupAccess or hasPaidEnrollmentAccess:

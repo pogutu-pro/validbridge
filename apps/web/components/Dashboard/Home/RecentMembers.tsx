@@ -10,6 +10,8 @@ import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { Users, ShieldCheck, Clock, EnvelopeSimple } from '@phosphor-icons/react'
+import { Card, CardSectionHeader } from '@components/ui/card'
+import { EmptyState } from '@components/ui/empty-state'
 
 export default function RecentMembers() {
   const { t, i18n } = useTranslation()
@@ -29,49 +31,41 @@ export default function RecentMembers() {
   const totalMembers = membersData?.total ?? 0
 
   return (
-    <div className="bg-white rounded-xl nice-shadow overflow-hidden">
-      <div className="flex items-center justify-between px-5 pt-4 pb-3">
-        <div className="flex items-center gap-3">
-          <h3 className="text-sm font-semibold text-gray-700">
-            {t('dashboard.home.recent_members')}
-          </h3>
-          {totalMembers > 0 && (
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
-              {totalMembers} {t('dashboard.home.total')}
-            </span>
-          )}
-        </div>
-        <Link
-          href="/dash/users/settings/users"
-          className="text-[11px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          {t('dashboard.home.view_all')} &rarr;
-        </Link>
-      </div>
+    <Card>
+      <CardSectionHeader
+        icon={<Users weight="duotone" />}
+        title={t('dashboard.home.recent_members')}
+        description={totalMembers > 0 ? `${totalMembers} ${t('dashboard.home.total')}` : undefined}
+        action={
+          <Link
+            href="/dash/users/settings/users"
+            className="text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            {t('dashboard.home.view_all')} &rarr;
+          </Link>
+        }
+      />
 
       {isLoading ? (
-        <div className="px-5 pb-4 space-y-3">
+        <div className="space-y-3 px-5 pb-5">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center gap-3 animate-pulse">
-              <div className="w-8 h-8 bg-gray-100 rounded-full shrink-0" />
+            <div key={i} className="flex animate-pulse items-center gap-3">
+              <div className="h-8 w-8 shrink-0 rounded-full bg-muted" />
               <div className="flex-1">
-                <div className="h-3 bg-gray-100 rounded w-32 mb-1.5" />
-                <div className="h-2 bg-gray-50 rounded w-44" />
+                <div className="mb-1.5 h-3 w-32 rounded bg-muted" />
+                <div className="h-2 w-44 rounded bg-muted/60" />
               </div>
             </div>
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div className="px-5 pb-5">
-          <div className="flex flex-col items-center justify-center py-6 text-center">
-            <div className="p-3 rounded-full bg-gray-100 mb-3">
-              <Users size={20} weight="duotone" className="text-gray-400" />
-            </div>
-            <p className="text-xs text-gray-400">{t('dashboard.home.no_members_yet')}</p>
-          </div>
-        </div>
+        <EmptyState
+          compact
+          icon={<Users weight="duotone" />}
+          title={t('dashboard.home.no_members_yet')}
+        />
       ) : (
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-border/60">
           {members.map((member: any) => {
             const user = member.user
             const role = member.role
@@ -90,36 +84,27 @@ export default function RecentMembers() {
             const initials = `${(user.first_name?.[0] || user.username?.[0] || '').toUpperCase()}${(user.last_name?.[0] || '').toUpperCase()}`
 
             return (
-              <div
-                key={user.user_uuid}
-                className="flex items-center gap-3 px-5 py-3"
-              >
-                {/* Avatar */}
-                <div className="w-8 h-8 rounded-full bg-orange-100 shrink-0 flex items-center justify-center">
-                  <span className="text-[11px] font-semibold text-orange-600">
-                    {initials}
-                  </span>
+              <div key={user.user_uuid} className="flex items-center gap-3 px-5 py-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <span className="text-[11px] font-semibold text-primary">{initials}</span>
                 </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-700 truncate">
-                      {displayName}
-                    </p>
+                    <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
                     {!user.email_verified && (
-                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-600">
+                      <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-medium text-amber-600">
                         {t('dashboard.home.unverified')}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <span className="flex items-center gap-1 text-[10px] text-gray-400 truncate">
+                  <div className="mt-0.5 flex items-center gap-3">
+                    <span className="flex min-w-0 items-center gap-1 truncate text-[10px] text-muted-foreground">
                       <EnvelopeSimple size={10} />
                       {user.email}
                     </span>
                     {joinedAt && (
-                      <span className="flex items-center gap-1 text-[10px] text-gray-400 shrink-0">
+                      <span className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
                         <Clock size={10} />
                         {joinedAt}
                       </span>
@@ -127,9 +112,8 @@ export default function RecentMembers() {
                   </div>
                 </div>
 
-                {/* Role badge */}
                 {role && (
-                  <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 shrink-0">
+                  <span className="flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                     <ShieldCheck size={10} />
                     {role.name}
                   </span>
@@ -139,6 +123,6 @@ export default function RecentMembers() {
           })}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

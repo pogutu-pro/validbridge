@@ -17,8 +17,8 @@ from datetime import datetime
 import asyncio
 import logging
 
-from src.core.ee_hooks import check_ee_activity_paid_access
 from src.security.rbac import check_resource_access, AccessAction
+from src.core.ee_hooks import check_ee_activity_paid_access
 from src.services.courses.activities.versioning import create_activity_version
 from src.services.courses.locks import (
     batch_accessible_restricted_uuids,

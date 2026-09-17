@@ -68,8 +68,8 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
   const isInputDisabled =
     aiEditorState.isWaitingForResponse || aiEditorState.isStreaming
   const inputClass = isInputDisabled
-    ? 'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30 opacity-30'
-    : 'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30'
+    ? 'border border-border bg-secondary w-full rounded-lg outline-hidden px-4 py-2 text-foreground text-sm placeholder:text-muted-foreground opacity-30'
+    : 'border border-border bg-secondary w-full rounded-lg outline-hidden px-4 py-2 text-foreground text-sm placeholder:text-muted-foreground'
 
   const accumulatedContentRef = useRef('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -1009,32 +1009,26 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
       }
       className="w-[400px] flex-shrink-0 mt-[120px] sticky top-[120px] self-start"
     >
-      <div
-        className="rounded-xl h-[calc(100vh-170px)] flex flex-col ring-1 ring-inset ring-white/10"
-        style={{
-          background:
-            'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
-        }}
-      >
+      <div className="rounded-xl h-[calc(100vh-170px)] flex flex-col bg-white border border-border">
         {/* Header */}
-        <div className="flex py-3 px-4 justify-between items-center border-b border-white/10">
+        <div className="flex py-3 px-4 justify-between items-center border-b border-border">
           <div
             className={`flex space-x-2 items-center ${
               isInputDisabled ? 'animate-pulse' : ''
             }`}
           >
             <Image
-              className={`outline outline-1 outline-neutral-200/20 rounded-lg ${
+              className={`border border-border rounded-lg ${
                 isInputDisabled ? 'animate-pulse' : ''
               }`}
               width={24}
               src={validbridgeAI_icon}
               alt=""
             />
-            <span className="text-sm font-semibold text-white/80">
+            <span className="text-sm font-semibold text-foreground">
               {t('editor.ai_panel.title')}
             </span>
-            <div className="bg-white/5 text-white/40 py-0.5 px-2 flex space-x-1 rounded-full items-center">
+            <div className="bg-secondary text-muted-foreground py-0.5 px-2 flex space-x-1 rounded-full items-center">
               <FlaskConical size={10} />
               <span className="text-[9px] font-semibold">
                 {t('ai.experimental')}
@@ -1046,14 +1040,14 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
               <button
                 onClick={clearChat}
                 title={t('editor.ai_panel.clear_chat')}
-                className="text-white/50 hover:text-white/70 hover:cursor-pointer bg-white/10 p-1 rounded-full items-center transition-colors"
+                className="text-muted-foreground hover:text-foreground hover:cursor-pointer bg-secondary p-1 rounded-full items-center transition-colors"
               >
                 <RotateCcw size={12} />
               </button>
             )}
             <X
               size={20}
-              className="text-white/50 hover:text-white/70 hover:cursor-pointer bg-white/10 p-1 rounded-full items-center transition-colors"
+              className="text-muted-foreground hover:text-foreground hover:cursor-pointer bg-secondary p-1 rounded-full items-center transition-colors"
               onClick={closeSidePanel}
             />
           </div>
@@ -1066,7 +1060,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
             className="flex flex-col flex-1 w-full space-y-3 overflow-y-auto scroll-smooth p-4"
             style={{
               scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(255,255,255,0.1) transparent',
+              scrollbarColor: 'rgba(0,0,0,0.15) transparent',
             }}
           >
             <AnimatePresence mode="popLayout">
@@ -1188,10 +1182,10 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="flex justify-center items-center gap-1.5 text-white/30 text-xs py-2"
+                        className="flex justify-center items-center gap-1.5 text-muted-foreground text-xs py-2"
                       >
                         <motion.span
-                          className="w-1 h-1 bg-white/40 rounded-full"
+                          className="w-1 h-1 bg-muted rounded-full"
                           animate={{ opacity: [0.3, 0.8, 0.3] }}
                           transition={{
                             duration: 1,
@@ -1200,7 +1194,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                           }}
                         />
                         <motion.span
-                          className="w-1 h-1 bg-white/40 rounded-full"
+                          className="w-1 h-1 bg-muted rounded-full"
                           animate={{ opacity: [0.3, 0.8, 0.3] }}
                           transition={{
                             duration: 1,
@@ -1210,7 +1204,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                           }}
                         />
                         <motion.span
-                          className="w-1 h-1 bg-white/40 rounded-full"
+                          className="w-1 h-1 bg-muted rounded-full"
                           animate={{ opacity: [0.3, 0.8, 0.3] }}
                           transition={{
                             duration: 1,
@@ -1234,7 +1228,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                             key={idx}
                             onClick={() => sendMessage(suggestion, 'follow_up')}
                             disabled={isInputDisabled}
-                            className="px-3 py-1.5 text-xs bg-white/5 text-white/60 rounded-full hover:bg-white/10 hover:text-white/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 text-xs bg-secondary text-muted-foreground rounded-full hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {suggestion}
                           </button>
@@ -1254,13 +1248,13 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
         {/* Error state */}
         {aiEditorState.error.isError && (
           <div className="flex items-center justify-center flex-1 p-4">
-            <div className="flex flex-col mx-auto w-full space-y-2 p-4 rounded-lg bg-red-500/20 outline outline-1 outline-red-500">
+            <div className="flex flex-col mx-auto w-full space-y-2 p-4 rounded-lg bg-red-50 border border-red-200">
               <AlertTriangle size={20} className="text-red-500" />
               <div className="flex flex-col">
-                <h3 className="font-semibold text-red-200">
+                <h3 className="font-semibold text-red-600">
                   {t('common.something_wrong_happened')}
                 </h3>
-                <span className="text-red-100 text-sm">
+                <span className="text-red-500 text-sm">
                   {aiEditorState.error.error_message}
                 </span>
               </div>
@@ -1269,14 +1263,14 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
         )}
 
         {/* Quick Actions */}
-        <div className="px-4 py-2 border-t border-white/5">
+        <div className="px-4 py-2 border-t border-border">
           <div className="flex flex-wrap gap-2">
             {quickActions.map((action, idx) => (
               <button
                 key={idx}
                 onClick={() => sendMessage(action.prompt, 'quick_action')}
                 disabled={isInputDisabled}
-                className="flex items-center gap-1.5 px-3 py-1 text-xs bg-white/5 text-white/60 rounded-full hover:bg-white/10 hover:text-white/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 py-1 text-xs bg-secondary text-muted-foreground rounded-full hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {action.icon}
                 <span>{action.label}</span>
@@ -1286,7 +1280,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-border">
           {/* Context indicators - show either text selection or block context */}
           <AnimatePresence>
             {/* Text selection indicator */}
@@ -1438,8 +1432,8 @@ function AIEditorMessageComponent({
             />
           </div>
         ) : (
-          <div className="inline-block bg-white/5 rounded-xl rounded-ss-sm px-3 py-2 max-w-[85%]">
-            <p className="text-white/90 text-sm leading-relaxed">
+          <div className="inline-block bg-secondary rounded-xl rounded-ss-sm px-3 py-2 max-w-[85%]">
+            <p className="text-foreground text-sm leading-relaxed">
               {message.message}
             </p>
           </div>
@@ -1491,7 +1485,7 @@ const AIEditorSidePanelPlaceholder = (props: { sendMessage: (_msg: string) => vo
               src={validbridgeAI_logo_black}
               alt=""
             />
-            <p className="pt-3 text-lg font-semibold text-white/70 flex flex-col justify-center items-center">
+            <p className="pt-3 text-lg font-semibold text-foreground flex flex-col justify-center items-center">
               <span className="flex items-center space-x-2">
                 <span>{t('common.hello')}</span>
                 <UserAvatar
@@ -1504,7 +1498,7 @@ const AIEditorSidePanelPlaceholder = (props: { sendMessage: (_msg: string) => vo
                   {session.data.user.username},
                 </span>
               </span>
-              <span className="text-white/50 text-sm mt-1">
+              <span className="text-muted-foreground text-sm mt-1">
                 {t('editor.ai_panel.how_can_i_help')}
               </span>
             </p>
@@ -1526,7 +1520,7 @@ const AIEditorSidePanelPlaceholder = (props: { sendMessage: (_msg: string) => vo
               <button
                 key={idx}
                 onClick={() => props.sendMessage(q.prompt)}
-                className="flex items-center justify-center space-x-1.5 bg-white/5 cursor-pointer px-4 py-2 rounded-xl outline outline-1 outline-neutral-100/10 text-xs font-semibold text-white/40 hover:text-white/60 hover:bg-white/10 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+                className="flex items-center justify-center space-x-1.5 bg-secondary cursor-pointer px-4 py-2 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border delay-75 ease-linear transition-all"
               >
                 <span>{q.label}</span>
               </button>

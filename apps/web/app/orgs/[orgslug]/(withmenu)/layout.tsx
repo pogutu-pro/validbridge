@@ -4,6 +4,7 @@ import '@styles/globals.css'
 import Watermark from '@components/Objects/Watermark'
 import { SessionGate } from '@components/Contexts/VBSessionContext'
 import { OrgMenu } from '@components/Objects/Menus/OrgMenu'
+import OrgSidebar from '@components/Objects/Menus/OrgSidebar'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { OrgJoinBanner, OrgJoinBannerProvider } from '@components/Objects/Banners/OrgJoinBanner'
 import { OrgMFAPolicyGate } from '@components/Objects/Banners/OrgMFAPolicyGate'
@@ -16,6 +17,8 @@ import { PageViewTracker } from '@components/Analytics/PageViewTracker'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { usePlan } from '@components/Hooks/usePlan'
 import { getGoogleFontUrl, DEFAULT_FONT } from '@/lib/fonts'
+import { AICopilotProvider } from '@components/Contexts/AI/AICopilotContext'
+import AICopilotDrawer from '@components/Copilot/AICopilotDrawer'
 
 // Helper to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number): string => {
@@ -106,28 +109,36 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
   const isFullBleedPage = noFooterPaths.some((p) => pathParts.includes(p))
 
   return (
-    <div
-      // vb-org-font-root gives globals.css a hook to override this inline
-      // font-family in Arabic, where Tajawal replaces the org's custom face
-      // outright. An inline style beats any normal rule, so the override has to
-      // target this element specifically.
-      className="vb-org-font-root flex flex-col min-h-screen"
-      style={{
-        backgroundColor: primaryColor ? hexToRgba(primaryColor, 0.05) : 'transparent',
-        ...(customFont ? { fontFamily: `'${customFont}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif` } : {}),
-      }}
-    >
-      <PageViewTracker />
-      {!chromeless && <OrgJoinBanner />}
-      {!chromeless && <OrgMenu orgslug={orgslug} />}
-      {/* Org-wide 2FA policy: renders nothing unless this user is non-compliant. */}
-      {!chromeless && <OrgMFAPolicyGate />}
-      <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
-        {children}
+    <AICopilotProvider>
+      <div
+        // vb-org-font-root gives globals.css a hook to override this inline
+        // font-family in Arabic, where Tajawal replaces the org's custom face
+        // outright. An inline style beats any normal rule, so the override has to
+        // target this element specifically.
+        className="vb-org-font-root flex min-h-screen"
+        style={{
+          backgroundColor: primaryColor ? hexToRgba(primaryColor, 0.05) : 'transparent',
+          ...(customFont ? { fontFamily: `'${customFont}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif` } : {}),
+        }}
+      >
+        <PageViewTracker />
+        {/* Fixed vertical navigation — the primary app navigation for learners and
+            administrators. Hidden on mobile where OrgMenu's slide-down takes over. */}
+        {!chromeless && <OrgSidebar orgslug={orgslug} />}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {!chromeless && <OrgJoinBanner />}
+          {!chromeless && <OrgMenu orgslug={orgslug} />}
+          {/* Org-wide 2FA policy: renders nothing unless this user is non-compliant. */}
+          {!chromeless && <OrgMFAPolicyGate />}
+          <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
+            {children}
+          </div>
+          {!isFullBleedPage && !chromeless && <OrgFooter />}
+          {!isFullBleedPage && !chromeless && <Watermark />}
+        </div>
       </div>
-      {!isFullBleedPage && !chromeless && <OrgFooter />}
-      {!isFullBleedPage && !chromeless && <Watermark />}
-    </div>
+      {!chromeless && <AICopilotDrawer orgslug={orgslug} />}
+    </AICopilotProvider>
   )
 }
 

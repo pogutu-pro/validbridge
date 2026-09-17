@@ -1,8 +1,6 @@
-import { useOrg } from '@components/Contexts/OrgContext'
-import { usePlan } from '@components/Hooks/usePlan'
 import { PlanLevel } from '@services/plans/plans'
-import { FeatureKey, getFeatureMeta } from '@services/features/featureMetadata'
-import { GateReason, resolveGateReason } from '@lib/features/gateReason'
+import { FeatureKey } from '@services/features/featureMetadata'
+import { GateReason } from '@lib/features/gateReason'
 
 export interface ResolvedFeatureState {
   /** Effective enabled flag from the backend (plan + overrides + admin toggles + packs). */
@@ -32,23 +30,21 @@ export interface UseResolvedFeatureOptions {
 }
 
 /**
- * Centralized read of org.config.config.resolved_features for one feature.
- * Replaces ad-hoc `org?.config?.config?.resolved_features?.X` lookups.
+ * Centralized read of `resolved_features` for one feature.
+ *
+ * Gating is disabled in this build: every feature is always granted, so the
+ * gate never blocks and the wrapped content renders.
  */
 export function useResolvedFeature(
   feature: FeatureKey,
   options?: UseResolvedFeatureOptions
 ): ResolvedFeatureState {
-  const currentPlan = usePlan()
-  const org = useOrg() as any
-
-  const gate = resolveGateReason({
-    resolved: org?.config?.config?.resolved_features?.[feature],
-    catalogPlan: getFeatureMeta(feature)?.upsellPlan,
-    currentPlan,
-    orgLoaded: Boolean(org),
-    allowWhenDisabled: options?.allowWhenDisabled,
-  })
-
-  return { ...gate, currentPlan }
+  return {
+    enabled: true,
+    requiredPlan: null,
+    currentPlan: 'enterprise',
+    meetsPlan: true,
+    loading: false,
+    reason: undefined,
+  }
 }

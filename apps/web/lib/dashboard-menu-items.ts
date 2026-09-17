@@ -53,7 +53,7 @@ export const DASHBOARD_MENU_ITEMS: DashboardMenuItem[] = [
   },
   {
     id: 'communities',
-    href: '/dash/communities',
+    href: '/dash/connect',
     icon: ChatsCircle,
     labelKey: 'communities.title',
     featureKey: 'communities',
@@ -75,7 +75,7 @@ export const DASHBOARD_MENU_ITEMS: DashboardMenuItem[] = [
   },
   {
     id: 'playgrounds',
-    href: '/dash/playgrounds',
+    href: '/dash/labs',
     icon: Cube,
     labelKey: 'common.playgrounds',
     featureKey: 'playgrounds',

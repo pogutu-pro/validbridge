@@ -28,8 +28,8 @@
       "description": "Every course, every update, for the whole team. Cancel whenever.",
       "offer_type": "subscription",
       "price_type": "fixed_price",
-      "amount": 19.0,
-      "currency": "USD",
+      "amount": 2500.0,
+      "currency": "KES",
       "benefits": "All six courses,New courses as they launch,Certificates on completion,Cohort reporting",
       "group": "all-access"
     },
@@ -39,8 +39,8 @@
       "description": "The full course, including the graded scenarios and the escalation playbook.",
       "offer_type": "one_time",
       "price_type": "fixed_price",
-      "amount": 49.0,
-      "currency": "USD",
+      "amount": 6500.0,
+      "currency": "KES",
       "benefits": "Lifetime access,Certificate on completion,Graded scenarios",
       "course": "customer-support-fundamentals"
     },
@@ -50,8 +50,8 @@
       "description": "Two courses at a lower price than buying them separately.",
       "offer_type": "one_time",
       "price_type": "fixed_price",
-      "amount": 79.0,
-      "currency": "USD",
+      "amount": 10000.0,
+      "currency": "KES",
       "benefits": "Two full courses,Lifetime access,Annual refresher included",
       "group": "compliance-pack"
     },
@@ -61,8 +61,8 @@
       "description": "Read a report without being misled by it. Four hours, no statistics.",
       "offer_type": "one_time",
       "price_type": "fixed_price",
-      "amount": 39.0,
-      "currency": "USD",
+      "amount": 5000.0,
+      "currency": "KES",
       "benefits": "Lifetime access,Worked examples,Report critique exercise",
       "course": "data-literacy"
     },
@@ -72,8 +72,8 @@
       "description": "Pay what you think it is worth. Suggested price below.",
       "offer_type": "one_time",
       "price_type": "customer_choice",
-      "amount": 15.0,
-      "currency": "USD",
+      "amount": 2000.0,
+      "currency": "KES",
       "benefits": "Lifetime access,Rewrite exercise with feedback",
       "course": "communication-at-work"
     }

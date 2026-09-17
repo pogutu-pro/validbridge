@@ -189,25 +189,22 @@ function MagicBlockModal({
               mass: 0.2,
               velocity: 2,
             }}
-            style={{
-              pointerEvents: 'auto',
-              background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
-            }}
-            className="relative w-[95vw] max-w-[1400px] h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-inset ring-white/10 backdrop-blur-md min-h-0"
+            style={{ pointerEvents: 'auto' }}
+            className="relative w-[95vw] max-w-[1400px] h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border bg-white backdrop-blur-md min-h-0"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 flex-shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <Image
-                    className="outline outline-1 outline-neutral-200/20 rounded-lg"
+                    className="border border-border rounded-lg"
                     width={24}
                     src={lrnaiIcon}
                     alt="Magic Block"
                   />
-                  <span className="text-sm font-semibold text-white/70">{t('editor.blocks.magic_block_content.title')}</span>
+                  <span className="text-sm font-semibold text-foreground">{t('editor.blocks.magic_block_content.title')}</span>
                 </div>
-                <div className="bg-white/5 text-white/40 py-0.5 px-3 flex space-x-1 rounded-full items-center">
+                <div className="bg-secondary text-muted-foreground py-0.5 px-3 flex space-x-1 rounded-full items-center">
                   <FlaskConical size={14} />
                   <span className="text-xs font-semibold antialiased">{t('editor.blocks.magic_block_content.experimental')}</span>
                 </div>
@@ -217,10 +214,10 @@ function MagicBlockModal({
                   onClick={handleSave}
                   disabled={!htmlContent}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all delay-75 ease-linear outline outline-1",
+                    "flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all delay-75 ease-linear border",
                     htmlContent
-                      ? "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 outline-neutral-100/10 hover:outline-neutral-200/40"
-                      : "bg-white/5 text-white/20 cursor-not-allowed outline-white/5"
+                      ? "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary border-border hover:border-border"
+                      : "bg-secondary text-muted-foreground cursor-not-allowed border-border"
                   )}
                 >
                   <Save className="w-4 h-4" />
@@ -228,7 +225,7 @@ function MagicBlockModal({
                 </button>
                 <X
                   size={20}
-                  className="text-white/50 hover:cursor-pointer bg-white/10 p-1 rounded-full items-center hover:bg-white/20 transition-colors"
+                  className="text-muted-foreground hover:cursor-pointer bg-secondary p-1 rounded-full items-center hover:bg-accent transition-colors"
                   onClick={onClose}
                 />
               </div>
@@ -236,7 +233,7 @@ function MagicBlockModal({
 
             {/* Error banner */}
             {error && (
-              <div className="px-6 py-3 bg-red-500/20 outline outline-1 outline-red-500 text-red-200 text-sm flex-shrink-0">
+              <div className="px-6 py-3 bg-red-50 border border-red-200 text-red-600 text-sm flex-shrink-0">
                 {error}
               </div>
             )}
@@ -244,7 +241,7 @@ function MagicBlockModal({
             {/* Content - Two panel layout */}
             <div className="flex-1 flex min-h-0">
               {/* Left panel - Preview */}
-              <div className="flex-1 border-e border-white/5 relative">
+              <div className="flex-1 border-e border-border relative">
                 <div className="absolute inset-0">
                   <MagicBlockPreview
                     htmlContent={htmlContent}

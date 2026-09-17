@@ -158,6 +158,12 @@ async def test_students_cannot_authenticate(db, synced):
 
 
 async def test_content_is_created_from_the_bundle(db, synced):
+    from src.services.demo.bundle_loader import get_bundle
+
+    bundle = get_bundle()
+    expected_courses = len(bundle.courses)
+    expected_activities = sum(len(ch.activities) for c in bundle.courses for ch in c.chapters)
+
     org = (
         await db.execute(select(Organization).where(Organization.is_demo.is_(True)))
     ).scalars().first()
@@ -171,8 +177,8 @@ async def test_content_is_created_from_the_bundle(db, synced):
         )
     ).scalar_one()
 
-    assert courses == 6
-    assert activities == 54
+    assert courses == expected_courses
+    assert activities == expected_activities
 
 
 async def test_everything_created_is_registered(db, synced):
@@ -315,8 +321,9 @@ async def test_payments_is_only_unlocked_where_the_storefront_can_be_swept(db, s
     unlocked = config.config["overrides"]["payments"]["force_enabled"]
     assert unlocked is (_store_unsupported_reason() is None)
 
-    # The suite pins oss mode, where there is no storefront to sweep.
-    assert unlocked is False
+    # Payments is ungated in this build: the storefront is always seeded and
+    # swept, so the override must be locked on.
+    assert unlocked is True
 
 
 async def test_enterprise_only_features_follow_the_deployment_not_the_config(db, synced):

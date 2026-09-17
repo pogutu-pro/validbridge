@@ -42,28 +42,25 @@ describe('language registry', () => {
   const src = read('lib/languages.ts')
   const entries = [...src.matchAll(/\{\s*code:\s*'([a-z]+)'[^}]*\}/g)]
 
+  // English-only build: the registry offers exactly one language.
+  test('English is the only registered language', () => {
+    expect(entries.map((e) => e[1])).toEqual(['en'])
+  })
+
   test('every language declares a direction', () => {
-    expect(entries.length).toBeGreaterThan(20)
+    expect(entries.length).toBeGreaterThan(0)
     for (const entry of entries) {
       expect(entry[0]).toMatch(/dir:\s*'(ltr|rtl)'/)
     }
   })
 
-  test('ar and fa are the RTL entries', () => {
-    const rtl = entries.filter((e) => /dir:\s*'rtl'/.test(e[0])).map((e) => e[1]).sort()
-    expect(rtl).toEqual(['ar', 'fa'])
-  })
-
-  // A locale that loads but isn't in the registry can never be picked, and one
-  // in the registry without a loader falls back to English with no warning.
-  test('registry and lazy loaders agree', () => {
+  // A non-English locale that loads but isn't offered can never be picked; the
+  // English-only build therefore pins i18next to `en` and ships no other bundle.
+  test('i18n is pinned to English with no other loaders', () => {
     const i18nSrc = read('lib/i18n.ts')
-    // The type annotation contains `=>`, so match lazily up to the assignment.
-    const loaderBlock = i18nSrc.match(/LOCALE_LOADERS[\s\S]*?=\s*\{([\s\S]*?)\n\}/)[1]
-    const loaderCodes = [...loaderBlock.matchAll(/^\s*(\w+):/gm)].map((m) => m[1]).sort()
-
-    const registryCodes = entries.map((e) => e[1]).filter((c) => c !== 'en').sort()
-    expect(loaderCodes).toEqual(registryCodes)
+    expect(i18nSrc).toMatch(/lng:\s*'en'/)
+    expect(i18nSrc).toMatch(/supportedLngs:\s*\[\s*'en'\s*\]/)
+    expect(i18nSrc).not.toMatch(/LOCALE_LOADERS/)
   })
 })
 

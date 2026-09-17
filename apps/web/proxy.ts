@@ -336,11 +336,12 @@ export default async function proxy(req: NextRequest) {
   if (authPaths.includes(pathname)) {
     const hasSession = !!req.cookies.get('VB_session')?.value
 
-    // A logged-in user has no business on /login — bounce them to the hub (the
-    // page itself re-verifies, so this is a best-effort UX shortcut).
-    if (pathname === '/login' && hasSession) {
-      return NextResponse.redirect(new URL('/home', req.url))
-    }
+    // NOTE: `/login` is intentionally NOT bounced to `/home` here. The marker
+    // cookie can outlive a real session (expired/refreshed tokens, a cleared
+    // backend), and bouncing on the marker alone trapped those users: the login
+    // page never rendered, so they could never sign back in. The login page
+    // itself redirects genuinely-authenticated users to `/home`, so letting it
+    // render is both correct and recovery-friendly.
 
     const resolved = await resolveTenant(req, instance)
 
@@ -413,7 +414,23 @@ export default async function proxy(req: NextRequest) {
     setInstanceCookies(response, instance)
     return response
   }
-  if (pathname.startsWith('/editor/playground/')) {
+  if (pathname.startsWith('/editor/labs/')) {
+    const response = NextResponse.rewrite(new URL(pathname + search, req.url))
+    setInstanceCookies(response, instance)
+    return response
+  }
+
+  // -------------------------------------------------------------------------
+  // 5b. /showcase — presentation mockup route, bypass org rewrite
+  //
+  //    /showcase/mobile is a static, hardcoded UI mockup of the planned
+  //    mobile app (see app/showcase/mobile/). It renders under the root
+  //    layout only — it must NOT be tenant-rewritten to /orgs/{slug}/... or
+  //    it would inherit org chrome (nav, footer) and lose its standalone
+  //    presentation frame, and it MUST NOT reach customers. It is not linked
+  //    from any navigation. Remove this branch if/when the route is removed.
+  // -------------------------------------------------------------------------
+  if (pathname === '/showcase' || pathname.startsWith('/showcase/')) {
     const response = NextResponse.rewrite(new URL(pathname + search, req.url))
     setInstanceCookies(response, instance)
     return response

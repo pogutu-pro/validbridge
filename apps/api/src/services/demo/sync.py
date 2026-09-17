@@ -993,6 +993,21 @@ async def _sync_resource_author(
     await _sync_resource_author_for(db_session, course.course_uuid, org, stats)
 
 
+async def _demo_role_user_ids(db_session: AsyncSession) -> set[int]:
+    """User ids of the well-known demo role accounts (see ``cli.py demo-roles``).
+
+    These accounts are demo-owned, so authorship rows they hold on bundle content
+    are legitimate — the sync must keep them rather than sweep them as visitor
+    drift.
+    """
+    rows = (
+        await db_session.execute(
+            select(User.id).where(User.email.in_(flags.DEMO_ROLE_EMAILS))
+        )
+    ).scalars().all()
+    return set(rows)
+
+
 async def _sync_resource_author_for(
     db_session: AsyncSession, resource_uuid: str, org: Organization, stats: SyncStats
 ) -> None:
@@ -1005,6 +1020,11 @@ async def _sync_resource_author_for(
     attributing every course and podcast to them publishes a real person's name
     and email as the author of content they have never seen. The byline belongs
     to a fictional person because the content is fictional.
+
+    The demo role accounts (admin / maintainer / instructor) are additionally
+    left as authors so each of those logins can actually edit the demo's courses
+    during a walkthrough — the instructor role only permits editing "own"
+    content, so without an authorship row the instructor login is read-only.
     """
     admin_id = (
         await db_session.execute(
@@ -1048,7 +1068,16 @@ async def _sync_resource_author_for(
     # without this a visitor could put their own name — or, since the
     # contributor endpoint resolves usernames globally with no org scoping, any
     # username on the platform — permanently on a demo course's byline.
-    intruders = [row.id for row in rows if row.user_id != admin_id and row.id]
+    #
+    # The demo role accounts are exempt: they are seeded by `demo-roles` to
+    # exercise each role, and their authorship is what lets the instructor
+    # (whose role can only edit "own" content) change the demo's courses.
+    role_user_ids = await _demo_role_user_ids(db_session)
+    intruders = [
+        row.id
+        for row in rows
+        if row.user_id != admin_id and row.user_id not in role_user_ids and row.id
+    ]
     if intruders:
         await db_session.execute(
             delete(ResourceAuthor).where(ResourceAuthor.id.in_(intruders))
@@ -1159,7 +1188,11 @@ async def _sync_activities(
         activity_type, activity_sub_type = _ACTIVITY_TYPES[activity_spec.kind]
         content = activity_spec.compiled_content()
         if activity_spec.kind == "video":
-            content = {"youtube_id": activity_spec.youtube_id}
+            # Stored as a uri like the API's own video service (services/courses/
+            # activities/video.py): the learner player reads activity.content.uri
+            # and extracts the YouTube id from it, so a bare youtube_id would
+            # render a blank player.
+            content = {"uri": f"https://www.youtube.com/watch?v={activity_spec.youtube_id}"}
 
         entry = registry.get(DemoEntityKind.ACTIVITY, activity_spec.slug)
         activity: Optional[Activity] = None
@@ -2156,54 +2189,9 @@ async def _sync_playground(
 def _store_unsupported_reason() -> Optional[str]:
     """Why this build cannot host the demo storefront, or None if it can.
 
-    The storefront is the only part of the demo whose models live in the
-    Enterprise tree, which ships on its own release cadence. So this asks what
-    the build in front of us can actually do instead of assuming, and names the
-    gap when it cannot: an older Enterprise release is not a fault, and is not a
-    community install either, and one undifferentiated "skipped" line cost a
-    debugging round trip while somebody watched a demo refuse to build.
-
-    Both store steps ask the same question here so they can never disagree
-    about whether the storefront exists — the seeding skipping while the drift
-    sweep carried on is exactly how the second production failure happened.
+    Payments is a first-class, ungated feature (models live in src/db/payments),
+    so the demo storefront is always supported on this build.
     """
-    from src.core.deployment_mode import get_deployment_mode
-
-    if get_deployment_mode() == "oss":
-        return "payments are unavailable in oss mode"
-
-    try:
-        from ee.db.payments.payments import (  # type: ignore[import-not-found]
-            PaymentProviderEnum,
-        )
-        from ee.db.payments.payments_enrollments import (  # type: ignore[import-not-found]
-            PaymentsEnrollment,
-        )
-    except ImportError as exc:
-        return (
-            f"payments models unavailable ({exc}) — expected on a community install"
-        )
-
-    # CUSTOM means "this organization drives its own enrolments", the only
-    # provider that takes no money. STRIPE would be a real checkout somebody
-    # could complete inside a sandbox anyone can enter as an admin, so without
-    # CUSTOM there is nothing safe to configure.
-    if not hasattr(PaymentProviderEnum, "CUSTOM"):
-        return (
-            "this Enterprise build's PaymentProviderEnum has no CUSTOM provider "
-            f"(has: {', '.join(p.name for p in PaymentProviderEnum)}), and the "
-            "demo will not point a storefront at a real payment provider"
-        )
-
-    # The drift sweep matches seeded enrolments by uuid. Older builds have the
-    # table without that column, and discovering it halfway through the sweep
-    # is what stopped the demo provisioning the second time.
-    if not hasattr(PaymentsEnrollment, "enrollment_uuid"):
-        return (
-            "this Enterprise build's PaymentsEnrollment has no enrollment_uuid, "
-            "so seeded enrolments could not be tracked or swept"
-        )
-
     return None
 
 
@@ -2218,57 +2206,27 @@ async def _sync_store(
 ) -> None:
     """Fill the storefront: offers, bundles and who has bought them.
 
-    Payments are an Enterprise Edition feature — the models live in the private
-    ee/ tree and their tables are created by SQLModel rather than a migration,
-    so a community install has no payments schema at all. The import is
-    therefore guarded and the whole step is skipped rather than failing the
-    sync, matching how src/security/rbac/rbac.py handles the same models.
+    Payments is a first-class feature; its models live in src/db/payments and
+    are created with the rest of the schema, so the storefront is seeded
+    unconditionally (using the ``custom`` provider, which takes no money).
     """
     store = bundle.store
     if not store.offers:
         return
 
-    # One question, asked in one place: can this build host the storefront at
-    # all? "Can I import the models?" is not the same as "is this feature on
-    # and complete?" — payments is Enterprise-gated, and an Enterprise tree can
-    # be present, importable, and still older than the demo needs.
-    unsupported = _store_unsupported_reason()
-    if unsupported:
-        logger.info("Demo store skipped: %s.", unsupported)
-        return
-
-    try:
-        from ee.db.payments.payments import (  # type: ignore[import-not-found]
-            PaymentProviderEnum,
-            PaymentsConfig,
-        )
-        from ee.db.payments.payments_enrollments import (  # type: ignore[import-not-found]
-            EnrollmentStatusEnum,
-            PaymentsEnrollment,
-        )
-        # PaymentsOfferResource lives in payments_groups, not payments_offers.
-        from ee.db.payments.payments_groups import (  # type: ignore[import-not-found]
-            PaymentsGroup,
-            PaymentsGroupResource,
-            PaymentsOfferResource,
-        )
-        from ee.db.payments.payments_offers import (  # type: ignore[import-not-found]
-            OfferPriceTypeEnum,
-            OfferTypeEnum,
-            PaymentsOffer,
-        )
-    except ImportError as exc:
-        # Community edition has no payments tables at all, which is a normal
-        # state rather than a fault. Logged with the reason: a bare "skipped"
-        # made an import typo look identical to a community install, and cost
-        # a debugging round trip.
-        logger.info(
-            "Demo store skipped: payments models unavailable (%s). "
-            "Expected on a community install.",
-            exc,
-        )
-        return
-
+    from src.db.payments.payments import PaymentProviderEnum, PaymentsConfig
+    from src.db.payments.payments_enrollments import EnrollmentStatusEnum, PaymentsEnrollment
+    from src.db.payments.payments_groups import (
+        PaymentsGroup,
+        PaymentsGroupResource,
+        PaymentsOfferResource,
+    )
+    from src.db.payments.payments_offers import (
+        OfferPriceTypeEnum,
+        OfferTypeEnum,
+        PaymentsOffer,
+        SubscriptionIntervalEnum,
+    )
 
     stats.steps.append("store")
 
@@ -2289,10 +2247,10 @@ async def _sync_store(
             org_id=org.id,
             enabled=True,
             active=True,
-            # CUSTOM, never STRIPE: the demo must show a working storefront
-            # without credentials, and a Stripe-backed offer in a shared
-            # sandbox is a checkout somebody could complete.
-            provider=PaymentProviderEnum.CUSTOM,
+            # custom, never a real provider: the demo must show a working
+            # storefront without credentials, and a real checkout in a shared
+            # sandbox is a payment somebody could actually complete.
+            provider=PaymentProviderEnum.custom,
             provider_config={},
             creation_date=_dt(HISTORY_DAYS),
             update_date=datetime.now(),
@@ -2300,7 +2258,7 @@ async def _sync_store(
         db_session.add(config)
         await db_session.flush()
         stats.created += 1
-    elif _apply(config, enabled=True, active=True, provider=PaymentProviderEnum.CUSTOM):
+    elif _apply(config, enabled=True, active=True, provider=PaymentProviderEnum.custom):
         db_session.add(config)
         stats.updated += 1
 
@@ -2391,12 +2349,17 @@ async def _sync_store(
             description=offer_spec.description,
             offer_type=OfferTypeEnum(offer_spec.offer_type),
             price_type=OfferPriceTypeEnum(offer_spec.price_type),
+            interval=(
+                SubscriptionIntervalEnum(offer_spec.interval)
+                if offer_spec.offer_type == "subscription"
+                else None
+            ),
             amount=offer_spec.amount,
             currency=offer_spec.currency,
             benefits=offer_spec.benefits,
             is_publicly_listed=True,
             payments_group_id=group.id if group else None,
-            # Reconciled, not merely set on create. A visitor-admin can point
+            # Reconciled, not just set on create. A visitor-admin can point
             # this at any URL, and the storefront sends buyers there — so an
             # unreconciled value is a phishing page living in the demo store
             # until someone notices. The bundle never sets one.
@@ -3003,34 +2966,15 @@ async def _delete_store_drift(
 ) -> None:
     """Remove store rows a visitor created.
 
-    Separate from the main sweep because the payments models are Enterprise
-    Edition only and must stay behind a guarded import. Without this an offer
-    a visitor invents — at whatever price they like — sits in the public
-    storefront until someone notices.
+    Without this an offer a visitor invents — at whatever price they like —
+    sits in the public storefront until someone notices.
 
     Groups are matched by primary key rather than uuid: PaymentsGroup has no
     uuid column, so the registry stores a synthetic one.
     """
-    # The same gate the seeding step uses. Asking a different question here is
-    # what broke production: the seeding skipped itself on an older Enterprise
-    # build while this sweep went ahead and referenced a column that build does
-    # not have.
-    unsupported = _store_unsupported_reason()
-    if unsupported:
-        return
-
-    try:
-        from ee.db.payments.payments_enrollments import (  # type: ignore[import-not-found]
-            PaymentsEnrollment,
-        )
-        from ee.db.payments.payments_groups import (  # type: ignore[import-not-found]
-            PaymentsGroup,
-        )
-        from ee.db.payments.payments_offers import (  # type: ignore[import-not-found]
-            PaymentsOffer,
-        )
-    except ImportError:
-        return
+    from src.db.payments.payments_enrollments import PaymentsEnrollment
+    from src.db.payments.payments_groups import PaymentsGroup
+    from src.db.payments.payments_offers import PaymentsOffer
 
     owned_offers = registry.uuids_of_kind(DemoEntityKind.PAYMENTS_OFFER)
     stale_offers = (

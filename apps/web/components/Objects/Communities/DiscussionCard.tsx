@@ -117,7 +117,7 @@ export function DiscussionCard({
     ? `${discussion.author.first_name} ${discussion.author.last_name}`.trim() || discussion.author.username
     : t('common.unknown')
 
-  const discussionLink = getUriWithOrg(orgslug, `/community/${communityId}/discussion/${discussionId}`)
+  const discussionLink = getUriWithOrg(orgslug, `/connect/${communityId}/discussion/${discussionId}`)
 
   const labelInfo = getLabelInfo(discussion.label || 'general')
   const isOwner = discussion.author_id === currentUserId

@@ -482,16 +482,8 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           {messages.length === 0 && !isLoadingSession && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-6 pb-10">
               <div className="flex items-center justify-center p-3 rounded-xl border border-orange-300 dark:border-orange-500/40">
-              <svg width="40" height="22" viewBox="0 37 304 152" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="lrn-icon-grad" x1="152" y1="30" x2="152" y2="200" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#fdba74" />
-                    <stop offset="1" stopColor="#ea580c" />
-                  </linearGradient>
-                </defs>
-                <path d="M152 37C152 56.9609 148.068 76.7264 140.43 95.1679C132.791 113.609 121.595 130.366 107.48 144.48C93.3657 158.595 76.6094 169.791 58.1679 177.43C39.7264 185.068 19.9609 189 0 189L3.19349e-06 115.941C10.3667 115.941 20.632 113.9 30.2096 109.932C39.7872 105.965 48.4896 100.15 55.82 92.82C63.1504 85.4896 68.9652 76.7872 72.9324 67.2096C76.8996 57.632 78.9414 47.3667 78.9414 37H152Z" fill="url(#lrn-icon-grad)" />
-                <path d="M304 189C284.039 189 264.274 185.068 245.832 177.43C227.391 169.791 210.634 158.595 196.52 144.48C182.405 130.366 171.209 113.609 163.57 95.1679C155.932 76.7264 152 56.9609 152 37L225.059 37C225.059 47.3667 227.1 57.632 231.068 67.2096C235.035 76.7872 240.85 85.4896 248.18 92.82C255.51 100.15 264.213 105.965 273.79 109.932C283.368 113.9 293.633 115.941 304 115.941V189Z" fill="url(#lrn-icon-grad)" />
-              </svg>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/validbridge-dash.svg" alt="ValidBridge" className="h-10 w-auto" />
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Course Copilot</h2>

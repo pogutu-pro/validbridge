@@ -29,12 +29,12 @@ export function buildResourceUrl(
     case 'board':
       return getUriWithOrg(orgslug, `/board/${resourceUuid.replace('board_', '')}`)
     case 'community':
-      return getUriWithOrg(orgslug, `/community/${resourceUuid.replace('community_', '')}`)
+      return getUriWithOrg(orgslug, `/connect/${resourceUuid.replace('community_', '')}`)
     case 'podcast':
       return getUriWithOrg(orgslug, `/podcast/${resourceUuid.replace('podcast_', '')}`)
     case 'playground':
       // Playgrounds use the full prefixed uuid.
-      return getUriWithOrg(orgslug, `/playground/${resourceUuid}`)
+      return getUriWithOrg(orgslug, `/labs/${resourceUuid}`)
     case 'course':
       return getUriWithOrg(orgslug, `/course/${resourceUuid.replace('course_', '')}`)
     default:

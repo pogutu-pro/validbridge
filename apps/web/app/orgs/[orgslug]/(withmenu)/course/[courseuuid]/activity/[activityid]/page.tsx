@@ -28,7 +28,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       params.activityid,
       { revalidate: 120, tags: ['activities'] },
       access_token || null
-    ),
+    ).catch(() => null),
   ])
 
   // Check if this is the course end page

@@ -1280,9 +1280,9 @@
 }
 
 .rotating-gradient-bg {
-  background: conic-gradient(from var(--gradient-angle) at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg);
+  background: conic-gradient(from var(--gradient-angle) at 50% 50%, #ff8a4d 0deg, #ff5a1f 120deg, #e64900 300deg);
   animation: rotateGradientAngle 20s linear infinite;
-  box-shadow: 0 2px 8px -2px rgba(164, 45, 238, 0.3);
+  box-shadow: 0 2px 8px -2px rgba(255, 90, 31, 0.3);
 }
 
 /* Export progress shimmer animation */
@@ -1325,7 +1325,7 @@
   display: inline-block;
   width: 2px;
   height: 1em;
-  background: linear-gradient(180deg, rgb(164, 45, 238) 0%, rgb(35, 40, 93) 100%);
+  background: linear-gradient(180deg, #ff8a4d 0%, #ff5a1f 100%);
   margin-inline-start: 2px;
   animation: ai-cursor-blink 1s ease-in-out infinite;
   vertical-align: text-bottom;
@@ -1333,9 +1333,7 @@
 
 /* AI Side Panel Styles */
 .ai-editor-side-panel {
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%),
-              radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%),
-              rgb(2 1 25 / 98%);
+  background: #ffffff;
 }
 
 /* AI Message streaming effect */
@@ -1350,7 +1348,7 @@
   bottom: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(164, 45, 238, 0.5) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 90, 31, 0.5) 50%, transparent 100%);
   animation: ai-text-reveal 1.5s linear infinite;
 }
 
@@ -1359,29 +1357,29 @@
   0% {
     opacity: 0;
     transform: translateY(10px) scale(0.98);
-    box-shadow: 0 0 0 0 rgba(164, 45, 238, 0);
+    box-shadow: 0 0 0 0 rgba(255, 90, 31, 0);
   }
   30% {
     opacity: 1;
     transform: translateY(0) scale(1);
-    box-shadow: 0 0 20px 5px rgba(164, 45, 238, 0.3);
+    box-shadow: 0 0 20px 5px rgba(255, 90, 31, 0.3);
   }
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
-    box-shadow: 0 0 0 0 rgba(164, 45, 238, 0);
+    box-shadow: 0 0 0 0 rgba(255, 90, 31, 0);
   }
 }
 
 @keyframes ai-block-glow {
   0% {
-    box-shadow: 0 0 5px rgba(164, 45, 238, 0.3), 0 0 10px rgba(35, 40, 93, 0.2);
+    box-shadow: 0 0 5px rgba(255, 90, 31, 0.3), 0 0 10px rgba(255, 138, 77, 0.2);
   }
   50% {
-    box-shadow: 0 0 15px rgba(164, 45, 238, 0.5), 0 0 25px rgba(35, 40, 93, 0.3);
+    box-shadow: 0 0 15px rgba(255, 90, 31, 0.5), 0 0 25px rgba(255, 138, 77, 0.3);
   }
   100% {
-    box-shadow: 0 0 5px rgba(164, 45, 238, 0.3), 0 0 10px rgba(35, 40, 93, 0.2);
+    box-shadow: 0 0 5px rgba(255, 90, 31, 0.3), 0 0 10px rgba(255, 138, 77, 0.2);
   }
 }
 
@@ -1410,11 +1408,11 @@
   padding: 2px;
   background: linear-gradient(
     90deg,
-    rgba(164, 45, 238, 0.8) 0%,
-    rgba(35, 40, 93, 0.8) 25%,
-    rgba(164, 45, 238, 0.8) 50%,
-    rgba(35, 40, 93, 0.8) 75%,
-    rgba(164, 45, 238, 0.8) 100%
+    rgba(255, 138, 77, 0.8) 0%,
+    rgba(255, 90, 31, 0.8) 25%,
+    rgba(255, 138, 77, 0.8) 50%,
+    rgba(255, 90, 31, 0.8) 75%,
+    rgba(255, 138, 77, 0.8) 100%
   );
   background-size: 200% 100%;
   animation: ai-border-flow 2s ease-in-out infinite;
@@ -1434,19 +1432,19 @@
 .ai-streaming-text {
   background: linear-gradient(
     90deg,
-    rgba(164, 45, 238, 1) 0%,
-    rgba(100, 60, 180, 1) 20%,
-    rgba(35, 40, 93, 1) 40%,
-    rgba(164, 45, 238, 0.9) 60%,
-    rgba(35, 40, 93, 1) 80%,
-    rgba(200, 180, 255, 1) 100%
+    rgba(255, 90, 31, 1) 0%,
+    rgba(255, 138, 77, 1) 20%,
+    rgba(255, 90, 31, 1) 40%,
+    rgba(230, 73, 0, 0.9) 60%,
+    rgba(255, 90, 31, 1) 80%,
+    rgba(255, 170, 120, 1) 100%
   );
   background-size: 200% auto;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   animation: ai-text-reveal 1.5s linear infinite;
-  text-shadow: 0 0 10px rgba(164, 45, 238, 0.3);
+  text-shadow: 0 0 10px rgba(255, 90, 31, 0.3);
 }
 
 /* Fade out animation when streaming completes */
@@ -1687,18 +1685,18 @@
 /* Magic Block button - uses rotating gradient from globals */
 .editor-tool-btn-magic {
   position: relative;
-  background: conic-gradient(from var(--gradient-angle) at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg);
+  background: conic-gradient(from var(--gradient-angle) at 50% 50%, #ff8a4d 0deg, #ff5a1f 120deg, #e64900 300deg);
   color: white;
   outline: none;
   border-radius: 6px;
   animation: rotateGradientAngle 20s linear infinite;
-  box-shadow: 0 2px 8px -2px rgba(164, 45, 238, 0.4);
+  box-shadow: 0 2px 8px -2px rgba(255, 90, 31, 0.4);
   padding: 6px;
 }
 
 .editor-tool-btn-magic:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px -2px rgba(164, 45, 238, 0.5);
+  box-shadow: 0 4px 12px -2px rgba(255, 90, 31, 0.5);
   cursor: pointer;
 }
 

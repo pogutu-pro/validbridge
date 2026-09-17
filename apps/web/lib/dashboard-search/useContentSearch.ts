@@ -53,7 +53,7 @@ function normalize(data: any): ContentResult[] {
       type: 'community',
       title: com.name,
       subtitle: com.description ?? undefined,
-      href: `/dash/communities/${stripPrefix(com.community_uuid, 'community_')}/general`,
+      href: `/dash/connect/${stripPrefix(com.community_uuid, 'community_')}/general`,
     })
   }
   for (const d of data.discussions ?? []) {
@@ -63,7 +63,7 @@ function normalize(data: any): ContentResult[] {
       type: 'discussion',
       title: d.title ?? d.content?.slice(0, 80) ?? '',
       subtitle: d.content ? d.content.slice(0, 100) : undefined,
-      href: community ? `/dash/communities/${community}/discussions` : '/dash/communities',
+      href: community ? `/dash/connect/${community}/discussions` : '/dash/connect',
     })
   }
   for (const p of data.playgrounds ?? []) {
@@ -72,7 +72,7 @@ function normalize(data: any): ContentResult[] {
       type: 'playground',
       title: p.name,
       subtitle: p.description ?? undefined,
-      href: '/dash/playgrounds',
+      href: '/dash/labs',
     })
   }
   for (const p of data.podcasts ?? []) {

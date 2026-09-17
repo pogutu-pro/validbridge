@@ -83,6 +83,12 @@ export default function GlobalError({
     <html lang="en" dir={dir} suppressHydrationWarning>
       <body className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
         <div className="flex flex-col items-center space-y-6 max-w-xl text-center">
+          <div className="flex items-center gap-2">
+            <img src="/validbridge.svg" alt="ValidBridge" width={30} height={30} />
+            <span className="text-lg font-black tracking-tight text-gray-900">
+              Valid<span className="text-[#FF5A1F]">Bridge</span>
+            </span>
+          </div>
           <div className="bg-rose-100 p-4 rounded-2xl">
             <AlertTriangle className="text-rose-700" size={44} />
           </div>

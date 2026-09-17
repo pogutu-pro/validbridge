@@ -1240,10 +1240,10 @@ const FEATURE_ORDER: { key: keyof AdminToggles; label: string; description: stri
   { key: 'boards', label: 'Boards', description: 'Kanban-style learning boards' },
   { key: 'collaboration', label: 'Collaboration', description: 'Real-time co-editing' },
   { key: 'folders', label: 'Folders', description: 'Organize courses and media into folders' },
-  { key: 'communities', label: 'Communities', description: 'Public/private community spaces' },
+  { key: 'communities', label: 'Connect', description: 'Public/private community spaces' },
   { key: 'members', label: 'Members', description: 'Member directory and roles' },
   { key: 'payments', label: 'Payments', description: 'Paid courses and checkout' },
-  { key: 'playgrounds', label: 'Playgrounds', description: 'Interactive code/exec environments' },
+  { key: 'playgrounds', label: 'Labs', description: 'Interactive code/exec environments' },
   { key: 'podcasts', label: 'Podcasts', description: 'Audio episodes inside courses' },
 ]
 

@@ -72,6 +72,14 @@ function ErrorUI({
         compact ? 'py-6 px-4 space-y-4 max-w-lg' : 'py-12 px-6 space-y-6 max-w-xl'
       }`}
     >
+      {!compact && (
+        <div className="flex items-center gap-2 opacity-90">
+          <img src="/validbridge.svg" alt="ValidBridge" width={28} height={28} />
+          <span className="text-base font-black tracking-tight text-gray-900">
+            Valid<span className="text-primary">Bridge</span>
+          </span>
+        </div>
+      )}
       <div className="flex items-center gap-4">
         <div className="bg-rose-100 p-3 rounded-2xl shrink-0">
           <AlertTriangle className="text-rose-700" size={compact ? 28 : 38} />

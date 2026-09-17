@@ -90,6 +90,10 @@ def startup_app(app: FastAPI) -> Callable:
         from src.services.utils.caption_jobs import start_consumer as start_captions_consumer
         start_captions_consumer()
 
+        # Start the audit-log writer (drains the bounded in-process queue; never raises).
+        from src.core.middleware.audit_log import start_audit_log_worker
+        start_audit_log_worker()
+
         # Start Enterprise Edition Startup tasks if available
         run_ee_startup(app)
 
@@ -121,6 +125,9 @@ def shutdown_app(app: FastAPI) -> Callable:
         # Stop the demo refresh tick.
         from src.services.demo.scheduler import stop_scheduler as stop_demo_scheduler
         await stop_demo_scheduler()
+        # Stop the audit-log writer and drain any remaining rows (bounded).
+        from src.core.middleware.audit_log import stop_audit_log_worker
+        await stop_audit_log_worker()
         await close_database(app)
 
     return close_app

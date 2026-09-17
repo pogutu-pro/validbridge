@@ -179,7 +179,7 @@ export function CommunitySidebar({
 
           {canManageCommunity && (
             <Link
-              href={getUriWithOrg(orgslug, '/dash/communities')}
+              href={getUriWithOrg(orgslug, '/dash/connect')}
               className="w-full bg-white text-neutral-600 border border-neutral-200 py-2.5 rounded-lg font-medium hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 text-sm"
             >
               <Settings className="w-4 h-4" />

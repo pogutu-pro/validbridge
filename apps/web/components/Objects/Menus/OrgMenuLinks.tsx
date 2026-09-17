@@ -13,18 +13,30 @@ const BUILTIN: Record<string, Builtin> = {
   courses: { feature: 'courses', link: '/courses', labelKey: 'courses.courses', Icon: Books },
   library: { feature: 'folders', link: '/library', labelKey: 'library.library', Icon: FolderSimple },
   podcasts: { feature: 'podcasts', link: '/podcasts', labelKey: 'podcasts.podcasts', Icon: Headphones },
-  communities: { feature: 'communities', link: '/communities', labelKey: 'communities.title', Icon: ChatsCircle },
-  playgrounds: { feature: 'playgrounds', link: '/playgrounds', labelKey: 'common.playgrounds', Icon: Cube },
-  store: { feature: 'payments', link: '/store', labelKey: 'common.store', Icon: ShoppingBag },
+  communities: { feature: 'communities', link: '/connect', labelKey: 'communities.title', Icon: ChatsCircle },
+  playgrounds: { feature: 'playgrounds', link: '/labs', labelKey: 'common.playgrounds', Icon: Cube },
+  store: { feature: 'payments', link: '/marketplace', labelKey: 'common.store', Icon: ShoppingBag },
 }
 
 // Default order when an org has no custom menu config.
 const DEFAULT_ORDER = ['courses', 'library', 'podcasts', 'communities', 'playgrounds', 'store']
 
-function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
+export interface OrgMenuItem {
+  key: string
+  label: string
+  href: string
+  external: boolean
+  Icon: any
+}
+
+/**
+ * Resolves the org's configured (or default) navigation items, applying
+ * feature/plan gating. Shared by the horizontal menu links and the vertical
+ * sidebar so both look identical and stay in sync.
+ */
+export function useOrgMenuItems(orgslug: string): OrgMenuItem[] {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const colors = getMenuColorClasses(props.primaryColor || '')
 
   const rf = org?.config?.config?.resolved_features
   const isEnabled = (feature: string) => rf?.[feature]?.enabled === true
@@ -38,7 +50,7 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
       ? [...configItems].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       : DEFAULT_ORDER.map((type, i) => ({ type, enabled: true, order: i, label: '', url: '' }))
 
-  const rendered = source
+  return source
     .map((item: any) => {
       if (item.type === 'custom') {
         if (!item.enabled || !item.url) return null
@@ -47,7 +59,7 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
           key: `custom-${item.url}`,
           label: item.label || item.url,
           Icon: menuIcon(item.icon),
-          href: external ? item.url : getUriWithOrg(props.orgslug, item.url),
+          href: external ? item.url : getUriWithOrg(orgslug, item.url),
           external,
         }
       }
@@ -59,11 +71,18 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
         key: item.type,
         label: item.label || t(meta.labelKey),
         Icon: meta.Icon,
-        href: getUriWithOrg(props.orgslug, meta.link),
+        href: getUriWithOrg(orgslug, meta.link),
         external: false,
       }
     })
-    .filter(Boolean) as any[]
+    .filter(Boolean) as OrgMenuItem[]
+}
+
+function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
+  const colors = getMenuColorClasses(props.primaryColor || '')
+  const rendered = useOrgMenuItems(props.orgslug)
+
+  if (!rendered.length) return null
 
   return (
     <div className="ps-1">

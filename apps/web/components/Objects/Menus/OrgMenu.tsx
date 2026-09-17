@@ -1,12 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import CopilotBubble from '@components/Copilot/CopilotBubble'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useQuery } from '@tanstack/react-query'
-import { queryKeys } from '@/lib/query/keys'
 import { getUriWithOrg } from '@services/config/config'
-import { fetchRAGChatSessions, RAGChatSession } from '@services/ai/ai'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
 import MenuLinks from './OrgMenuLinks'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
@@ -16,15 +12,15 @@ import { SearchBar } from '@components/Objects/Search/SearchBar'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
+import { useAICopilot } from '@components/Contexts/AI/AICopilotContext'
 import {
   Question,
   Book,
   Globe,
   ChatCircleDots,
-  ChatCircle,
+  Sparkle,
   SquaresFour,
   ChalkboardSimple,
-  Signpost,
 } from '@phosphor-icons/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import {
@@ -62,26 +58,7 @@ export const OrgMenu = (props: any) => {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
   const { isVisible: isJoinBannerVisible } = useJoinBannerVisible()
   const { track } = useVBAnalytics()
-
-  // Copilot bubble state
-  const [bubbleOpen, setBubbleOpen] = useState(false)
-  const [bubbleSessionToLoad, setBubbleSessionToLoad] = useState<string | null>(null)
-  const [isBubbleMode, setIsBubbleMode] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false
-    const stored = localStorage.getItem('copilot-bubble-mode')
-    return stored === 'true'
-  })
-
-  const toggleBubbleMode = (value: boolean) => {
-    setIsBubbleMode(value)
-    localStorage.setItem('copilot-bubble-mode', String(value))
-    if (!value) setBubbleOpen(false)
-  }
-
-  const openBubbleWithSession = (sessionUuid?: string) => {
-    if (sessionUuid) setBubbleSessionToLoad(sessionUuid)
-    setBubbleOpen(true)
-  }
+  const { openCopilot } = useAICopilot()
   const topOffset = isJoinBannerVisible ? JOIN_BANNER_HEIGHT : 0
 
   // Get primary color from org config (v2: customization.general.color, v1: general.color)
@@ -141,37 +118,31 @@ export const OrgMenu = (props: any) => {
 
   return (
     <>
-      <div className="backdrop-blur-lg h-[60px] blur-3xl" style={{ zIndex: 'var(--z-behind)', marginTop: topOffset }}></div>
       <nav
         aria-label="Top navigation"
-        className={`backdrop-blur-lg fixed start-0 end-0 h-[60px] ${!primaryColor ? 'bg-white/90 nice-shadow' : ''}`}
+        className={`sticky top-0 h-[60px] backdrop-blur-lg ${!primaryColor ? 'border-b border-border bg-background/85' : ''}`}
         style={{
           zIndex: 'var(--z-nav)',
           backgroundColor: primaryColor || undefined,
-          top: topOffset
         }}
       >
-        <div className="flex items-center justify-between w-full max-w-(--breakpoint-2xl) mx-auto px-4 sm:px-6 lg:px-8 h-full">
-          <div className="flex items-center space-x-5 md:w-auto w-full">
-            <div className="logo flex md:w-auto w-full justify-center">
-              <Link href={getUriWithOrg(orgslug, '/')}>
-                <div className="flex w-auto h-9 rounded-md items-center m-auto py-1 justify-center">
-                  {org?.logo_image ? (
-                    <img
-                      src={`${getOrgLogoMediaDirectory(org.org_uuid, org?.logo_image)}`}
-                      alt="ValidBridge"
-                      style={{ width: 'auto', height: '100%' }}
-                      className="rounded-md"
-                    />
-                  ) : (
-                    <ValidBridgeLogo logoFilter={colors.logoFilter} />
-                  )}
-                </div>
-              </Link>
-            </div>
-            <div className="hidden md:flex">
-              <MenuLinks orgslug={orgslug} primaryColor={primaryColor} />
-            </div>
+        <div className="flex h-full w-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+          {/* Brand is only shown on mobile — on desktop the sidebar carries it. */}
+          <div className="logo flex items-center lg:hidden">
+            <Link href={getUriWithOrg(orgslug, '/')}>
+              <div className="flex h-9 w-auto items-center justify-center rounded-md py-1">
+                {org?.logo_image ? (
+                  <img
+                    src={`${getOrgLogoMediaDirectory(org.org_uuid, org?.logo_image)}`}
+                    alt="ValidBridge"
+                    style={{ width: 'auto', height: '100%' }}
+                    className="rounded-md"
+                  />
+                ) : (
+                  <ValidBridgeLogo logoFilter={colors.logoFilter} />
+                )}
+              </div>
+            </Link>
           </div>
 
           {/* Search Section */}
@@ -180,27 +151,6 @@ export const OrgMenu = (props: any) => {
           </div>
 
           <div className="flex items-center space-x-2">
-            {/* Progress / Trail */}
-            <AuthenticatedClientElement checkMethod="authentication">
-              <div className="hidden md:flex">
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link
-                        href={getUriWithOrg(orgslug, '/trail')}
-                        className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
-                        aria-label={t('courses.progress')}
-                      >
-                        <Signpost size={20} weight="fill" />
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">
-                      {t('courses.progress')}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </AuthenticatedClientElement>
             {/* Boards */}
             {rf?.boards?.enabled && (
               <AuthenticatedClientElement checkMethod="authentication">
@@ -228,14 +178,26 @@ export const OrgMenu = (props: any) => {
             {rf?.ai?.enabled && config?.admin_toggles?.ai?.copilot_enabled !== false && (
               <AuthenticatedClientElement checkMethod="authentication">
                 <div className="hidden md:flex">
-                  <CopilotMenuButton
-                    orgslug={orgslug}
-                    iconBtnClass={colors.iconBtn}
-                    isBubbleMode={isBubbleMode}
-                    onToggleBubbleMode={toggleBubbleMode}
-                    bubbleOpen={bubbleOpen}
-                    onOpenBubble={openBubbleWithSession}
-                  />
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => {
+                            track(AnalyticsEvent.CopilotBubbleOpened, { current_path: pathname })
+                            openCopilot()
+                          }}
+                          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+                          aria-label={t('ai.ask_ai')}
+                        >
+                          <Sparkle size={18} weight="fill" />
+                          <span>{t('ai.ask_ai')}</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">
+                        {t('ai.ask_ai')}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </AuthenticatedClientElement>
             )}
@@ -410,150 +372,7 @@ export const OrgMenu = (props: any) => {
         userName={session?.data?.user?.username}
         userEmail={session?.data?.user?.email}
       />
-
-      {/* Copilot floating bubble */}
-      {isBubbleMode && (
-        <CopilotBubble
-          orgslug={orgslug}
-          open={bubbleOpen}
-          onOpenChange={setBubbleOpen}
-          sessionToLoad={bubbleSessionToLoad}
-        />
-      )}
     </>
-  )
-}
-
-const CopilotMenuButton = ({
-  orgslug,
-  isBubbleMode,
-  onToggleBubbleMode,
-  bubbleOpen,
-  onOpenBubble,
-}: {
-  orgslug: string
-  iconBtnClass: string
-  isBubbleMode: boolean
-  onToggleBubbleMode: (_v: boolean) => void
-  bubbleOpen: boolean
-  onOpenBubble: (_sessionUuid?: string) => void
-}) => {
-  const session = useVBSession() as any
-  const accessToken = session?.data?.tokens?.access_token
-  const [isOpen, setIsOpen] = useState(false)
-
-  // Only fetch when the dropdown is open — avoids firing on every page load
-  const { data: sessions } = useQuery<RAGChatSession[]>({
-    queryKey: queryKeys.ai.ragSessions(orgslug),
-    queryFn: () => fetchRAGChatSessions(accessToken, orgslug),
-    enabled: isOpen && !!accessToken && !!orgslug,
-    staleTime: 60_000,
-  })
-
-  const recentSessions = (sessions || []).slice(0, 5)
-
-  return (
-    <DropdownMenu onOpenChange={setIsOpen}>
-      <TooltipProvider delayDuration={0}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="relative p-2 rounded-lg transition-colors hover:bg-orange-500/10"
-                aria-label="Copilot"
-              >
-                <ChatCircle size={20} weight="fill" className="text-orange-500" />
-                {/* Active indicator dot */}
-                {isBubbleMode && bubbleOpen && (
-                  <span className="absolute top-1.5 end-1.5 w-2 h-2 rounded-full bg-orange-500 ring-2 ring-white dark:ring-neutral-900" />
-                )}
-              </button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs">
-            Copilot
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
-      <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel className="flex items-center gap-2">
-          <ChatCircle size={16} weight="fill" className="text-orange-500" />
-          <span>Copilot</span>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-
-        {recentSessions.length > 0 ? (
-          <>
-            {recentSessions.map((s) => (
-              isBubbleMode ? (
-                <DropdownMenuItem
-                  key={s.aichat_uuid}
-                  onSelect={() => onOpenBubble(s.aichat_uuid)}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <ChatCircleDots size={14} weight="fill" className="shrink-0 text-neutral-400" />
-                  <span className="truncate text-sm">{s.title || 'Untitled'}</span>
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem key={s.aichat_uuid} asChild>
-                  <Link href={getUriWithOrg(orgslug, `/copilot?chat=${s.aichat_uuid}`)} className="flex items-center gap-2">
-                    <ChatCircleDots size={14} weight="fill" className="shrink-0 text-neutral-400" />
-                    <span className="truncate text-sm">{s.title || 'Untitled'}</span>
-                  </Link>
-                </DropdownMenuItem>
-              )
-            ))}
-            <DropdownMenuSeparator />
-          </>
-        ) : (
-          <div className="px-2 py-3 text-center">
-            <p className="text-xs text-neutral-400">No conversations yet</p>
-          </div>
-        )}
-
-        {/* Primary action */}
-        {isBubbleMode ? (
-          <DropdownMenuItem
-            onSelect={() => onOpenBubble()}
-            className="flex items-center gap-2 font-medium cursor-pointer"
-          >
-            <ChatCircle size={14} weight="fill" className="text-orange-500" />
-            <span>{recentSessions.length > 0 ? 'New conversation' : 'Start a conversation'}</span>
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem asChild>
-            <Link href={getUriWithOrg(orgslug, '/copilot')} className="flex items-center gap-2 font-medium">
-              <ChatCircle size={14} weight="fill" className="text-orange-500" />
-              <span>{recentSessions.length > 0 ? 'View all conversations' : 'Start a conversation'}</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
-
-        <DropdownMenuSeparator />
-
-        {/* Bubble mode toggle */}
-        <button
-          onClick={() => onToggleBubbleMode(!isBubbleMode)}
-          className="w-full flex items-center justify-between px-2 py-2 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors group"
-        >
-          <span className="text-xs text-neutral-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-300 transition-colors">
-            Open in bubble
-          </span>
-          <span
-            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors flex-shrink-0 ${
-              isBubbleMode ? 'bg-orange-500' : 'bg-neutral-200 dark:bg-neutral-600'
-            }`}
-          >
-            <span
-              className={`inline-block h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
-                isBubbleMode ? 'translate-x-3.5 rtl:-translate-x-3.5' : 'translate-x-0.5 rtl:-translate-x-0.5'
-              }`}
-            />
-          </span>
-        </button>
-      </DropdownMenuContent>
-    </DropdownMenu>
   )
 }
 

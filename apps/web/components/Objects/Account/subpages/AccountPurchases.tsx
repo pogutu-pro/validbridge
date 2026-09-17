@@ -1,32 +1,33 @@
 'use client'
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUriWithOrg } from '@services/config/config'
-import { getUserEnrollments, getBillingPortalSession } from '@services/payments/offers'
+import { getUserEnrollments, cancelSubscription } from '@services/payments/offers'
 import {
   ShoppingBag, RefreshCcw, SquareCheck, ArrowRight,
-  ExternalLink, Loader2, CalendarDays, BadgeCheck
+  Loader2, CalendarDays, BadgeCheck
 } from 'lucide-react'
-import toast from 'react-hot-toast'
-import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
-import { meaningfulMessage } from '@lib/errors/classify'
 import { useTranslation } from 'react-i18next'
 import { formatCurrency, formatDate } from '@/lib/format'
+import toast from 'react-hot-toast'
+import { meaningfulMessage } from '@lib/errors/classify'
 
 interface AccountPurchasesProps {
   orgId: number
   orgslug: string
 }
 
-function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }: {
+function EnrollmentCard({ enrollment, orgslug, orgId, access_token }: {
   enrollment: any
   orgslug: string
-  onManageBilling: () => void
-  billingLoading: boolean
+  orgId: number
+  access_token: string
 }) {
   const { i18n } = useTranslation()
+  const queryClient = useQueryClient()
+  const [cancelling, setCancelling] = useState(false)
   const isSubscription = enrollment.offer_type === 'subscription'
   const isActive = enrollment.status === 'active'
 
@@ -37,6 +38,24 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
   const formattedDate = enrollment.creation_date
     ? formatDate(enrollment.creation_date, i18n.language, { dateStyle: undefined, year: 'numeric', month: 'short', day: 'numeric' })
     : null
+
+  const handleCancel = async () => {
+    if (!isActive || cancelling) return
+    setCancelling(true)
+    try {
+      const res = await cancelSubscription(orgId, enrollment.offer_id, access_token)
+      if (res?.success) {
+        toast.success('Subscription cancelled')
+        queryClient.invalidateQueries({ queryKey: ['payments', orgId, 'enrollments', 'mine'] })
+      } else {
+        toast.error(res?.data?.detail || 'Could not cancel subscription')
+      }
+    } catch (err) {
+      toast.error(meaningfulMessage(err))
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   return (
     <div className="bg-white rounded-xl nice-shadow overflow-hidden">
@@ -81,21 +100,18 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
         {/* Actions */}
         <div className="flex items-center gap-2 pt-1">
           <Link
-            href={getUriWithOrg(orgslug, `/store/offers/${enrollment.offer_id}`)}
+            href={getUriWithOrg(orgslug, `/marketplace/offers/${enrollment.offer_uuid ?? enrollment.offer_id}`)}
             className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors px-3 py-2 rounded-lg"
           >
             View offer <ArrowRight size={11} />
           </Link>
-          {isSubscription && (
+          {isSubscription && isActive && (
             <button
-              onClick={onManageBilling}
-              disabled={billingLoading}
-              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-60 transition-colors px-3 py-2 rounded-lg"
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="flex items-center justify-center gap-1.5 text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 transition-colors px-3 py-2 rounded-lg disabled:opacity-60"
             >
-              {billingLoading
-                ? <Loader2 size={12} className="animate-spin" />
-                : <><ExternalLink size={11} /> Manage subscription</>
-              }
+              {cancelling ? <Loader2 size={11} className="animate-spin" /> : 'Cancel'}
             </button>
           )}
         </div>
@@ -107,8 +123,6 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
 function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
   const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const [billingLoading, setBillingLoading] = useState(false)
-  const { track } = useVBAnalytics('learner')
 
   const { data: enrollmentsResult, isLoading, error } = useQuery({
     queryKey: ['payments', orgId, 'enrollments', 'mine'],
@@ -118,26 +132,6 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
   })
 
   const enrollments: any[] = Array.isArray(enrollmentsResult?.data) ? enrollmentsResult.data : []
-
-  const handleManageBilling = async (source: string) => {
-    if (!access_token) return
-    setBillingLoading(true)
-    try {
-      const return_url = `${window.location.origin}${getUriWithOrg(orgslug, '/account/purchases')}`
-      const result = await getBillingPortalSession(orgId, return_url, access_token)
-      const url = result?.data?.portal_url
-      if (url) {
-        track(AnalyticsEvent.AccountBillingPortalOpened, { source })
-        window.location.href = url
-      } else {
-        toast.error('Could not open billing portal. Please try again.')
-      }
-    } catch (err) {
-      toast.error(meaningfulMessage(err))
-    } finally {
-      setBillingLoading(false)
-    }
-  }
 
   if (isLoading) {
     return (
@@ -183,7 +177,7 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
             Your purchases and subscriptions will appear here once you buy something from the store.
           </p>
           <Link
-            href={getUriWithOrg(orgslug, '/store')}
+            href={getUriWithOrg(orgslug, '/marketplace')}
             className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors px-4 py-2 rounded-xl"
           >
             Browse store <ArrowRight size={14} />
@@ -196,25 +190,10 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
               key={enrollment.enrollment_id}
               enrollment={enrollment}
               orgslug={orgslug}
-              onManageBilling={() => handleManageBilling('subscription')}
-              billingLoading={billingLoading}
+              orgId={orgId}
+              access_token={access_token}
             />
           ))}
-          {/* Global billing portal link for one-time purchases (invoices) */}
-          <div className="bg-white rounded-xl nice-shadow p-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-gray-700">Invoices & receipts</p>
-              <p className="text-xs text-gray-400 mt-0.5">View and download all your invoices via the billing portal</p>
-            </div>
-            <button
-              onClick={() => handleManageBilling('invoices')}
-              disabled={billingLoading}
-              className="shrink-0 flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-800 disabled:opacity-60 transition-colors"
-            >
-              {billingLoading ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={13} />}
-              Open portal
-            </button>
-          </div>
         </div>
       )}
     </div>

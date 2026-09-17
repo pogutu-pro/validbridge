@@ -10,7 +10,7 @@ export const FOLDER_COLORS: Record<string, { tile: string; dot: string }> = {
   amber: { tile: 'bg-amber-50 text-amber-500', dot: 'bg-amber-500' },
   rose: { tile: 'bg-rose-50 text-rose-500', dot: 'bg-rose-500' },
   cyan: { tile: 'bg-cyan-50 text-cyan-500', dot: 'bg-cyan-500' },
-  fuchsia: { tile: 'bg-fuchsia-50 text-fuchsia-500', dot: 'bg-fuchsia-500' },
+  fuchsia: { tile: 'bg-orange-50 text-orange-500', dot: 'bg-orange-500' },
   slate: { tile: 'bg-slate-100 text-slate-500', dot: 'bg-slate-500' },
 }
 export const DEFAULT_FOLDER_COLOR = 'violet'

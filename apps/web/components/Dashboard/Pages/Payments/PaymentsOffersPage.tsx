@@ -265,7 +265,7 @@ const EditOfferForm = ({
     description: offer.description,
     amount: offer.amount,
     benefits: offer.benefits || '',
-    currency: offer.currency || 'USD',
+    currency: offer.currency || 'KES',
     offer_type: offer.offer_type as 'one_time' | 'subscription',
     price_type: (offer.price_type || 'fixed_price') as 'fixed_price' | 'customer_choice',
   };

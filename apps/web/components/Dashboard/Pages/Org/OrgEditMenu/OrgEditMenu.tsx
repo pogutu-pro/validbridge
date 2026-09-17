@@ -27,9 +27,9 @@ const BUILTIN_META: Record<string, BuiltinMeta> = {
   courses: { feature: 'courses', link: '/courses', labelKey: 'courses.courses', Icon: Books },
   library: { feature: 'folders', link: '/library', labelKey: 'library.library', Icon: FolderSimple },
   podcasts: { feature: 'podcasts', link: '/podcasts', labelKey: 'podcasts.podcasts', Icon: Headphones },
-  communities: { feature: 'communities', link: '/communities', labelKey: 'communities.title', Icon: ChatsCircle },
-  playgrounds: { feature: 'playgrounds', link: '/playgrounds', labelKey: 'common.playgrounds', Icon: Cube },
-  store: { feature: 'payments', link: '/store', labelKey: 'common.store', Icon: ShoppingBag },
+  communities: { feature: 'communities', link: '/connect', labelKey: 'communities.title', Icon: ChatsCircle },
+  playgrounds: { feature: 'playgrounds', link: '/labs', labelKey: 'common.playgrounds', Icon: Cube },
+  store: { feature: 'payments', link: '/marketplace', labelKey: 'common.store', Icon: ShoppingBag },
 }
 const BUILTIN_ORDER = ['courses', 'library', 'podcasts', 'communities', 'playgrounds', 'store']
 

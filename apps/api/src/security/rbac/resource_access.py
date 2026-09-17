@@ -32,6 +32,7 @@ from src.security.rbac.rbac import (
     authorization_verify_based_on_roles,
     authorization_verify_based_on_org_admin_status,
 )
+from src.services.payments.payments_access import check_enrollment_access, get_paywall_offer
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,8 @@ class ResourceAccessChecker:
         self._public_published_cache: dict[str, tuple[bool, bool]] = {}
         self._usergroup_cache: dict[tuple[str, bool], bool] = {}
         self._parent_uuid_cache: dict[str, Optional[str]] = {}
+        self._paywall_cache: dict[str, Optional[dict]] = {}
+        self._enrollment_cache: dict[tuple[str, int], bool] = {}
 
     async def check_access(
         self,
@@ -188,6 +191,12 @@ class ResourceAccessChecker:
         config: ResourceConfig,
     ) -> AccessDecision:
         """Check if anonymous user can read the resource."""
+        # Paywall: anonymous users cannot hold an enrollment, so a paywalled
+        # resource is denied outright (they discover offers via the storefront).
+        paywall_decision = await self._check_paid_access(resource_uuid, 0, config)
+        if paywall_decision is not None:
+            return paywall_decision
+
         is_public, is_published = await self._is_public_and_published(resource_uuid, config)
 
         # For resources with published field, both must be true
@@ -274,6 +283,13 @@ class ResourceAccessChecker:
     ) -> AccessDecision:
         """Check public view read access with full rule chain."""
         user_id = self._get_user_id()
+
+        # Paywall: a resource behind a paid offer is denied (402) unless the
+        # user is enrolled (authors/admins are exempt and granted below).
+        paywall_decision = await self._check_paid_access(resource_uuid, user_id, config)
+        if paywall_decision is not None:
+            return paywall_decision
+
         is_public, is_published = await self._is_public_and_published(resource_uuid, config)
 
         logger.info(f"[ACCESS_CHECK] resource_uuid={resource_uuid}, user_id={user_id}, is_public={is_public}, is_published={is_published}")
@@ -873,6 +889,66 @@ class ResourceAccessChecker:
         self._usergroup_cache[cache_key] = result
         return result
 
+    async def _get_paywall_offer_cached(self, resource_uuid: str) -> Optional[dict]:
+        if resource_uuid in self._paywall_cache:
+            return self._paywall_cache[resource_uuid]
+        offer = await get_paywall_offer(resource_uuid, self.db_session)
+        self._paywall_cache[resource_uuid] = offer
+        return offer
+
+    async def _is_enrolled(self, resource_uuid: str, user_id: int) -> bool:
+        key = (resource_uuid, user_id)
+        if key in self._enrollment_cache:
+            return self._enrollment_cache[key]
+        enrolled = await check_enrollment_access(resource_uuid, user_id, self.db_session)
+        self._enrollment_cache[key] = enrolled
+        return enrolled
+
+    async def _check_paid_access(
+        self, resource_uuid: str, user_id: int, config: ResourceConfig
+    ) -> Optional[AccessDecision]:
+        """Return a 402 decision when the resource is behind a paid offer and the
+        user lacks access; otherwise None (not paywalled, or has access).
+
+        Authors and admins own/manage the content and are exempt. Anonymous
+        users cannot hold an enrollment, so they are denied whenever the
+        resource is paywalled.
+        """
+        offer = await self._get_paywall_offer_cached(resource_uuid)
+        if offer is None:
+            return None
+
+        if user_id == 0:
+            return self._paywall_decision(resource_uuid, user_id, offer)
+
+        if config.supports_authorship and await self._is_resource_author(resource_uuid):
+            return None
+        if await self._is_admin_or_maintainer(resource_uuid):
+            return None
+
+        if await self._is_enrolled(resource_uuid, user_id):
+            return None
+        return self._paywall_decision(resource_uuid, user_id, offer)
+
+    @staticmethod
+    def _paywall_decision(resource_uuid: str, user_id: int, offer: dict) -> AccessDecision:
+        return AccessDecision(
+            allowed=False,
+            reason="Payment required",
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail={
+                "code": "PAYMENT_REQUIRED",
+                "offer_id": offer["offer_id"],
+                "offer_uuid": offer.get("offer_uuid"),
+                "offer_name": offer["offer_name"],
+                "amount": offer["amount"],
+                "currency": offer["currency"],
+            },
+            resource_uuid=resource_uuid,
+            user_id=user_id,
+            action="read",
+        )
+
     async def _is_member_of_resource_org(self, resource_uuid: str, user_id: int) -> bool:
         """Is the caller a member of the organization that owns this resource?
 
@@ -1038,8 +1114,8 @@ async def check_resource_access(
 
     if not decision.allowed and raise_on_deny:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=decision.reason,
+            status_code=decision.status_code,
+            detail=decision.detail if decision.detail is not None else decision.reason,
         )
 
     return decision

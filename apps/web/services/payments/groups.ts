@@ -67,34 +67,6 @@ export async function removeGroupResource(orgId: number, groupId: number, resour
 }
 
 // ---------------------------------------------------------------------------
-// Group Syncs (UserGroup bridge)
-// ---------------------------------------------------------------------------
-
-export async function getGroupSyncs(orgId: number, groupId: number, access_token: string) {
-  const result = await secureFetch(
-    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/groups/${encodeURIComponent(String(groupId))}/sync`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token)
-  );
-  return getResponseMetadata(result);
-}
-
-export async function addGroupSync(orgId: number, groupId: number, usergroupId: number, access_token: string) {
-  const result = await secureFetch(
-    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/groups/${encodeURIComponent(String(groupId))}/sync?usergroup_id=${encodeURIComponent(String(usergroupId))}`,
-    RequestBodyWithAuthHeader('POST', null, null, access_token)
-  );
-  return getResponseMetadata(result);
-}
-
-export async function removeGroupSync(orgId: number, groupId: number, usergroupId: number, access_token: string) {
-  const result = await secureFetch(
-    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/groups/${encodeURIComponent(String(groupId))}/sync?usergroup_id=${encodeURIComponent(String(usergroupId))}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
-  );
-  return getResponseMetadata(result);
-}
-
-// ---------------------------------------------------------------------------
 // Offer direct resources
 // ---------------------------------------------------------------------------
 

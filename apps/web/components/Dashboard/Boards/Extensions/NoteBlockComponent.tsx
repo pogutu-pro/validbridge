@@ -14,7 +14,6 @@ const NOTE_COLORS = [
   { name: 'blue', bg: '#e0f2fe', border: '#bae6fd', text: '#0c4a6e' },
   { name: 'green', bg: '#ecfccb', border: '#d9f99d', text: '#365314' },
   { name: 'orange', bg: '#fff7ed', border: '#fed7aa', text: '#9a3412' },
-  { name: 'purple', bg: '#fff7ed', border: '#e9d5ff', text: '#5b21b6' },
 ]
 
 function getColorSet(colorName: string) {

@@ -95,7 +95,7 @@ const ButtonsExtension: React.FC = (props: any) => {
     }
   }
 
-  const colors = ['sky', 'green', 'yellow', 'red', 'purple', 'teal', 'amber', 'indigo', 'neutral', 'blue']
+  const colors = ['sky', 'green', 'yellow', 'red', 'teal', 'amber', 'indigo', 'neutral', 'blue']
 
   return (
     <NodeViewWrapper className={`block-button ${getAlignmentClass()}`}>

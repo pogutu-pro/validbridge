@@ -81,29 +81,25 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                     />
                   )}
                   <div
-                    style={{
-                      pointerEvents: 'auto',
-                      background:
-                        'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
-                    }}
-                    className="rounded-2xl max-w-(--breakpoint-2xl) w-fit shadow-xl ring-1 ring-inset ring-white/10 text-white p-3 flex-col-reverse backdrop-blur-md"
+                    style={{ pointerEvents: 'auto' }}
+                    className="rounded-2xl max-w-(--breakpoint-2xl) w-fit shadow-xl border border-border text-foreground p-3 flex-col-reverse bg-white backdrop-blur-md"
                   >
                     <div className="flex space-x-2">
                       <div className="pe-1">
-                        <div className="flex w-full space-x-2 font-bold text-white/80 items-center">
+                        <div className="flex w-full space-x-2 font-bold text-foreground items-center">
                           <Image
-                            className="outline outline-1 outline-neutral-200/20 rounded-lg"
+                            className="border border-border rounded-lg"
                             width={24}
                             src={validbridgeAI_icon}
                             alt=""
                           />
                           <div className="flex items-center">
                             AI Editor{' '}
-                            <span className="text-[10px] px-2 py-1 rounded-3xl ms-3 bg-white/10 uppercase">
+                            <span className="text-[10px] px-2 py-1 rounded-3xl ms-3 bg-secondary uppercase">
                               PRE-ALPHA
                             </span>
                           </div>
-                          <MoreVertical className="text-white/50" size={12} />
+                          <MoreVertical className="text-muted-foreground" size={12} />
                         </div>
                       </div>
                       <div className="tools flex space-x-2">
@@ -124,7 +120,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                             ])
                           }
                           size={20}
-                          className="text-white/50 hover:cursor-pointer bg-white/10 p-1 rounded-full items-center"
+                          className="text-muted-foreground hover:cursor-pointer bg-secondary p-1 rounded-full items-center"
                         />
                       </div>
                     </div>
@@ -442,16 +438,12 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       style={{ pointerEvents: 'none' }}
     >
       <div
-        style={{
-          pointerEvents: 'auto',
-          background:
-            'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 95%)',
-        }}
-        className="backdrop-blur-md	z-modal rounded-2xl max-w-(--breakpoint-2xl) my-10 mx-auto w-[500px] h-[200px] fixed bottom-16 left-1/2 transform -translate-x-1/2 shadow-xl ring-1 ring-inset ring-white/10 text-white p-3 flex-col-reverse"
+        style={{ pointerEvents: 'auto' }}
+        className="backdrop-blur-md	z-modal rounded-2xl max-w-(--breakpoint-2xl) my-10 mx-auto w-[500px] h-[200px] fixed bottom-16 left-1/2 transform -translate-x-1/2 shadow-xl border border-border text-foreground p-3 flex-col-reverse bg-white"
       >
         <div className="flex space-x-2 justify-center">
           <Image
-            className="outline outline-1 outline-neutral-200/20 rounded-lg"
+            className="border border-border rounded-lg"
             width={24}
             src={validbridgeAI_icon}
             alt=""
@@ -469,7 +461,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               value={aiEditorState.chatInputValue}
               onChange={handleChange}
               placeholder="Ask AI"
-              className="ring-1 ring-inset ring-white/20 w-full bg-gray-950/20 rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30"
+              className="border border-border w-full bg-secondary rounded-lg outline-hidden px-4 py-2 text-foreground text-sm placeholder:text-muted-foreground"
             ></input>
             <div
               onClick={() =>
@@ -478,11 +470,11 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                   aiEditorState.chatInputValue
                 )
               }
-              className="bg-white/10 px-3  rounded-md outline outline-1 outline-neutral-200/20 py-2 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+              className="bg-secondary px-3  rounded-md border border-border py-2 hover:bg-accent hover:border-border delay-75 ease-linear transition-all"
             >
               <BetweenHorizontalStart
                 size={20}
-                className="text-white/50 hover:cursor-pointer"
+                className="text-muted-foreground hover:cursor-pointer"
               />
             </div>
           </div>
@@ -533,7 +525,7 @@ const AiEditorToolButton = (props: any) => {
   return (
     <button
       onClick={() => handleToolButtonClick(props.label)}
-      className="flex space-x-1.5 items-center bg-white/10 px-2 py-0.5 rounded-md outline outline-1 outline-neutral-200/20 text-sm font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+      className="flex space-x-1.5 items-center bg-secondary px-2 py-0.5 rounded-md border border-border text-sm font-semibold text-foreground hover:bg-accent hover:border-border delay-75 ease-linear transition-all"
     >
       {props.label === 'Writer' && <Feather size={14} />}
       {props.label === 'ContinueWriting' && <FastForward size={14} />}
@@ -565,7 +557,7 @@ const AiEditorActionScreen = ({
       {aiEditorState.selectedTool === 'Writer' &&
         !aiEditorState.isWaitingForResponse &&
         !aiEditorState.error.isError && (
-          <div className="text-xl text-white/90 font-extrabold space-x-2">
+          <div className="text-xl text-foreground font-extrabold space-x-2">
             <span>Write about...</span>
           </div>
         )}
@@ -573,7 +565,7 @@ const AiEditorActionScreen = ({
         !aiEditorState.isWaitingForResponse &&
         !aiEditorState.error.isError && (
           <div className="flex flex-col mx-auto justify-center align-middle items-center">
-            <p className="mx-auto flex p-2 text-white/80 mt-4 font-bold justify-center text-sm align-middle">
+            <p className="mx-auto flex p-2 text-foreground mt-4 font-bold justify-center text-sm align-middle">
               Place your cursor at the end of a sentence to continue writing{' '}
             </p>
             <div
@@ -583,7 +575,7 @@ const AiEditorActionScreen = ({
                   aiEditorState.chatInputValue
                 )
               }}
-              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline outline-1 outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-secondary  rounded-md border border-border text-2xl font-semibold text-foreground hover:bg-accent hover:border-border delay-75 ease-linear transition-all"
             >
               <FastForward size={24} />
             </div>
@@ -593,7 +585,7 @@ const AiEditorActionScreen = ({
         !aiEditorState.isWaitingForResponse &&
         !aiEditorState.error.isError && (
           <div className="flex flex-col mx-auto justify-center align-middle items-center">
-            <p className="mx-auto flex p-2 text-white/80 mt-4 font-bold justify-center text-sm align-middle">
+            <p className="mx-auto flex p-2 text-foreground mt-4 font-bold justify-center text-sm align-middle">
               Select text to make longer{' '}
             </p>
             <div
@@ -603,7 +595,7 @@ const AiEditorActionScreen = ({
                   aiEditorState.chatInputValue
                 )
               }}
-              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline outline-1 outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-secondary  rounded-md border border-border text-2xl font-semibold text-foreground hover:bg-accent hover:border-border delay-75 ease-linear transition-all"
             >
               <FileStack size={24} />
             </div>
@@ -613,13 +605,13 @@ const AiEditorActionScreen = ({
         !aiEditorState.isWaitingForResponse &&
         !aiEditorState.error.isError && (
           <div className="flex flex-col mx-auto justify-center align-middle items-center">
-            <div className="mx-auto flex p-2 text-white/80 mt-4 font-bold justify-center text-sm align-middle space-x-6">
+            <div className="mx-auto flex p-2 text-foreground mt-4 font-bold justify-center text-sm align-middle space-x-6">
               <p>Translate selected text to </p>
               <input
                 value={aiEditorState.chatInputValue}
                 onChange={handleChange}
                 placeholder="Japanese, Arabic, German, etc. "
-                className="ring-1 ring-inset ring-white/20 w-full bg-gray-950/20 rounded-lg outline-hidden px-4 py- text-white text-sm placeholder:text-white/30"
+                className="border border-border w-full bg-secondary rounded-lg outline-hidden px-4 py- text-foreground text-sm placeholder:text-muted-foreground"
               ></input>
             </div>
             <div
@@ -629,7 +621,7 @@ const AiEditorActionScreen = ({
                   aiEditorState.chatInputValue
                 )
               }}
-              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline outline-1 outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-secondary  rounded-md border border-border text-2xl font-semibold text-foreground hover:bg-accent hover:border-border delay-75 ease-linear transition-all"
             >
               <Languages size={24} />
             </div>
@@ -638,7 +630,7 @@ const AiEditorActionScreen = ({
       {aiEditorState.isWaitingForResponse && !aiEditorState.error.isError && (
         <div className="flex flex-col mx-auto justify-center align-middle items-center">
           <svg
-            className="animate-spin mt-10 h-10 w-10 text-white"
+            className="animate-spin mt-10 h-10 w-10 text-foreground"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -657,19 +649,19 @@ const AiEditorActionScreen = ({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          <p className="font-bold mt-4 text-white/90">Thinking...</p>
+          <p className="font-bold mt-4 text-foreground">Thinking...</p>
         </div>
       )}
 
       {aiEditorState.error.isError && (
         <div className="flex items-center h-auto pt-7">
-          <div className="flex flex-col mx-auto w-full space-y-2 p-5 rounded-lg bg-red-500/20 outline outline-1 outline-red-500">
+          <div className="flex flex-col mx-auto w-full space-y-2 p-5 rounded-lg bg-red-50 border border-red-200">
             <AlertTriangle size={20} className="text-red-500" />
             <div className="flex flex-col">
-              <h3 className="font-semibold text-red-200">
+              <h3 className="font-semibold text-red-600">
                 Something wrong happened
               </h3>
-              <span className="text-red-100 text-sm ">
+              <span className="text-red-500 text-sm ">
                 {aiEditorState.error.error_message}
               </span>
             </div>

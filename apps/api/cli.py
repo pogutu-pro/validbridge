@@ -586,6 +586,247 @@ async def _demo_status() -> None:
         await async_engine.dispose()
 
 
+@cli.command(name="demo-roles")
+def demo_roles():
+    """
+    Ensure well-known role test users exist in the demo organisation.
+
+    Idempotent — run after demo-sync whenever you want fresh passwords or want
+    to recover accounts that have drifted.  All users carry signup_method="demo"
+    so ``demo-teardown`` removes them alongside the rest of the demo.
+
+    Accounts created:
+        role-admin@demo.example.com        Admin (role 1)
+        role-maintainer@demo.example.com   Maintainer (role 2)
+        role-instructor@demo.example.com   Instructor (role 3)
+        role-learner@demo.example.com      User (role 4)
+
+    Password for all: demo1234
+    """
+    asyncio.run(_demo_roles())
+
+
+async def _demo_roles() -> None:
+    from datetime import datetime
+    from uuid import uuid4
+
+    from sqlalchemy import select
+
+    from src.db.organizations import Organization
+    from src.db.roles import Role
+    from src.db.user_organizations import UserOrganization
+    from src.db.users import User
+    from src.security.security import security_hash_password
+    from src.services.demo import flags
+
+    ROLE_USERS = [
+        {
+            "email": "role-admin@demo.example.com",
+            "username": "role_admin",
+            "first_name": "Demo",
+            "last_name": "Admin",
+            "role_name": "Admin",
+            "password": "demo1234",
+        },
+        {
+            "email": "role-maintainer@demo.example.com",
+            "username": "role_maintainer",
+            "first_name": "Demo",
+            "last_name": "Maintainer",
+            "role_name": "Maintainer",
+            "password": "demo1234",
+        },
+        {
+            "email": "role-instructor@demo.example.com",
+            "username": "role_instructor",
+            "first_name": "Demo",
+            "last_name": "Instructor",
+            "role_name": "Instructor",
+            "password": "demo1234",
+        },
+        {
+            "email": "role-learner@demo.example.com",
+            "username": "role_learner",
+            "first_name": "Demo",
+            "last_name": "Learner",
+            "role_name": "User",
+            "password": "demo1234",
+        },
+    ]
+
+    validbridge_config = get_validbridge_config()
+    sql_url = validbridge_config.database_config.sql_connection_string  # type: ignore
+    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
+
+    try:
+        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
+            org = (
+                await db_session.execute(
+                    select(Organization).where(Organization.slug == flags.demo_slug())
+                )
+            ).scalars().first()
+            if org is None:
+                print(f"No demo organisation '{flags.demo_slug()}' found — run demo-sync first.")
+                return
+
+            role_rows = (
+                await db_session.execute(select(Role.name, Role.id))
+            ).all()
+            role_map = {name: rid for name, rid in role_rows}
+            if not role_map:
+                print("No roles found in the database — run the setup first.")
+                return
+
+            created: list[str] = []
+            updated: list[str] = []
+
+            for spec in ROLE_USERS:
+                hashed = security_hash_password(spec["password"])
+                user = (
+                    await db_session.execute(
+                        select(User).where(User.email == spec["email"])
+                    )
+                ).scalars().first()
+
+                if user is None:
+                    user = User(
+                        username=spec["username"],
+                        first_name=spec["first_name"],
+                        last_name=spec["last_name"],
+                        email=spec["email"],
+                        password=hashed,
+                        email_verified=True,
+                        signup_method=flags.DEMO_SIGNUP_METHOD,
+                        user_uuid=f"user_{uuid4()}",
+                    )
+                    db_session.add(user)
+                    await db_session.flush()
+                    created.append(spec["email"])
+                else:
+                    changed = False
+                    if user.password != hashed:
+                        user.password = hashed
+                        changed = True
+                    if user.signup_method != flags.DEMO_SIGNUP_METHOD:
+                        user.signup_method = flags.DEMO_SIGNUP_METHOD
+                        changed = True
+                    if not user.email_verified:
+                        user.email_verified = True
+                        changed = True
+                    # Role users are looked up by id in the session service; a
+                    # missing user_uuid (the model's default) breaks that lookup
+                    # and makes every role account resolve to the same user.
+                    if not user.user_uuid:
+                        user.user_uuid = f"user_{uuid4()}"
+                        changed = True
+                    if changed:
+                        db_session.add(user)
+                        updated.append(spec["email"])
+
+                membership = (
+                    await db_session.execute(
+                        select(UserOrganization).where(
+                            UserOrganization.user_id == user.id,
+                            UserOrganization.org_id == org.id,
+                        )
+                    )
+                ).scalars().first()
+
+                target_role_id = role_map.get(spec["role_name"])
+                if target_role_id is None:
+                    print(f"  Warning: role {spec['role_name']!r} not found — skipping membership for {spec['email']}")
+                    continue
+
+                if membership is None:
+                    db_session.add(
+                        UserOrganization(
+                            user_id=user.id,
+                            org_id=org.id,
+                            role_id=target_role_id,
+                            creation_date=str(datetime.now()),
+                            update_date=str(datetime.now()),
+                        )
+                    )
+                    created.append(f"{spec['email']} (membership)")
+                elif membership.role_id != target_role_id:
+                    membership.role_id = target_role_id
+                    db_session.add(membership)
+                    updated.append(f"{spec['email']} (role → {spec['role_name']})")
+
+            # Make the staff role logins authors (CONTRIBUTOR) of every demo
+            # course. The instructor role only grants `action_update_own`, so
+            # without an authorship row the instructor login cannot edit the
+            # demo's courses during a walkthrough — and a non-author would also
+            # be blocked by the paywall on the store courses. The learner is
+            # deliberately excluded: it must stay read-only.
+            staff_emails = [u["email"] for u in ROLE_USERS if u["role_name"] != "User"]
+            staff_ids = set(
+                (
+                    await db_session.execute(
+                        select(User.id).where(User.email.in_(staff_emails))
+                    )
+                ).scalars().all()
+            )
+            if staff_ids:
+                from src.db.courses.courses import Course
+                from src.db.resource_authors import (
+                    ResourceAuthor,
+                    ResourceAuthorshipEnum,
+                    ResourceAuthorshipStatusEnum,
+                )
+
+                course_uuids = (
+                    await db_session.execute(
+                        select(Course.course_uuid).where(Course.org_id == org.id)
+                    )
+                ).scalars().all()
+
+                existing_authors = {
+                    (row.user_id, row.resource_uuid)
+                    for row in (
+                        await db_session.execute(
+                            select(ResourceAuthor).where(
+                                ResourceAuthor.resource_uuid.in_(course_uuids)
+                            )
+                        )
+                    ).scalars().all()
+                }
+
+                now = str(datetime.now())
+                authored = 0
+                for user_id in staff_ids:
+                    for course_uuid in course_uuids:
+                        if (user_id, course_uuid) in existing_authors:
+                            continue
+                        db_session.add(
+                            ResourceAuthor(
+                                resource_uuid=course_uuid,
+                                user_id=user_id,
+                                authorship=ResourceAuthorshipEnum.CONTRIBUTOR,
+                                authorship_status=ResourceAuthorshipStatusEnum.ACTIVE,
+                                creation_date=now,
+                                update_date=now,
+                            )
+                        )
+                        authored += 1
+                if authored:
+                    created.append(
+                        f"staff authorship on {len(course_uuids)} course(s) × "
+                        f"{len(staff_ids)} user(s) ({authored} rows)"
+                    )
+
+            await db_session.commit()
+
+            for line in created:
+                print(f"  Created:  {line}")
+            for line in updated:
+                print(f"  Updated:  {line}")
+            if not created and not updated:
+                print("  No changes — role users already in place.")
+    finally:
+        await async_engine.dispose()
+
+
 @cli.command(name="demo-teardown")
 def demo_teardown(
     yes: Annotated[bool, typer.Option("--yes", help="Skip the confirmation")] = False,

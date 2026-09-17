@@ -28,6 +28,7 @@ import CourseCommunitySection from '@components/Objects/Communities/CourseCommun
 import CourseShare from '@components/Objects/Courses/CourseShare/CourseShare'
 import { JsonLd } from '@components/SEO/JsonLd'
 import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
+import PaymentWall from '@components/Payments/PaymentWall'
 
 const CourseClient = (props: any) => {
   const { t } = useTranslation()
@@ -167,6 +168,19 @@ const CourseClient = (props: any) => {
 
   // Show error if course fetch failed
   if (!course && activeError) {
+    // A 402 means the course is behind a paid offer — render the paywall with
+    // the offer metadata the API returns, instead of a generic error.
+    if (activeError?.status === 402 && activeError?.detail) {
+      return (
+        <GeneralWrapperStyled>
+          <PaymentWall
+            offer={activeError.detail}
+            resourceName={activeError.detail?.offer_name}
+            orgslug={orgslug}
+          />
+        </GeneralWrapperStyled>
+      )
+    }
     return (
       <GeneralWrapperStyled>
         <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">

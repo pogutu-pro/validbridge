@@ -42,8 +42,8 @@ export default function PlaygroundCard({ playground, orgslug: _orgslug, canEdit 
         )
       : null
 
-  const playgroundLink = `/playground/${playground.playground_uuid}`
-  const editLink = `/editor/playground/${playground.playground_uuid}/edit`
+  const playgroundLink = `/labs/${playground.playground_uuid}`
+  const editLink = `/editor/labs/${playground.playground_uuid}/edit`
 
   return (
     <div className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">

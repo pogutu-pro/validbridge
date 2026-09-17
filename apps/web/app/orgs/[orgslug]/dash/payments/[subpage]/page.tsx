@@ -5,7 +5,6 @@ import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { Settings, Users, Gem, CreditCard, Layers, ShoppingBag, ExternalLink } from 'lucide-react'
-import { SiStripe } from '@icons-pack/react-simple-icons'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage'
@@ -130,7 +129,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
           <div className="flex items-center space-x-2 pb-1 shrink-0">
             {paymentsEnabled && (
               <Link
-                href={getUriWithOrg(params.orgslug, '/store')}
+                href={getUriWithOrg(params.orgslug, '/marketplace')}
                 target="_blank"
                 className="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               >
@@ -140,13 +139,13 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
               </Link>
             )}
             <a
-              href="https://dashboard.stripe.com"
+              href="https://dashboard.paystack.com"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <SiStripe size={14} className="text-[#635BFF]" />
-              <span>Stripe Dashboard</span>
+              <CreditCard size={14} className="text-gray-500" />
+              <span>Paystack Dashboard</span>
               <ExternalLink size={12} className="text-gray-400" />
             </a>
           </div>

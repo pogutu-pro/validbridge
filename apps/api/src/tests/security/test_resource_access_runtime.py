@@ -74,6 +74,7 @@ class TestResourceAccessRuntime:
     @pytest.mark.asyncio
     async def test_check_access_child_resource_delegates_to_parent(self, mock_request, session, anonymous_user):
         checker = self._checker(mock_request, session, anonymous_user)
+        checker._check_paid_access = AsyncMock(return_value=None)
         chapter = SimpleNamespace(chapter_uuid="chapter_1", course_id=101)
         course = SimpleNamespace(course_uuid="course_101", public=True, published=True, org_id=1)
         exec_results = []

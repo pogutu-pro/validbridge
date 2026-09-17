@@ -32,8 +32,8 @@ export default function OnboardingSidebarBox() {
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       className="relative"
     >
-      {/* Blueprint grid — purple, edge-to-edge, fading down from the top border
-          (same motif as the upgrade box, in the onboarding's violet tone). */}
+      {/* Blueprint grid — orange, edge-to-edge, fading down from the top border
+          (same motif as the upgrade box, in the onboarding's orange tone). */}
       <div
         className="absolute -start-3 -end-3 -top-2 bottom-0 pointer-events-none"
         style={{

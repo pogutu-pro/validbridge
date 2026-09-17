@@ -52,4 +52,13 @@ export VALIDBRIDGE_DEMO_REFRESH_MINUTES=10
 
 export VALIDBRIDGE_INITIAL_ADMIN_EMAIL=admin@school.dev
 
+# Code execution (the CODE blocks and code playgrounds) talks to a hosted Judge0.
+# Leave these unset and the playgrounds still render — running a submission
+# returns a clear 503 "Code execution is not configured" instead. To switch the
+# demo's code execution on, point at any Judge0 instance that speaks the CE HTTP
+# API and restart this script:
+#   export VALIDBRIDGE_JUDGE0_API_URL="https://your-hosted-judge0.example.com"
+#   export VALIDBRIDGE_JUDGE0_CLIENT_ID=""
+#   export VALIDBRIDGE_JUDGE0_CLIENT_SECRET=""
+
 exec uv run uvicorn app:app --host 0.0.0.0 --port 1348 --log-level info

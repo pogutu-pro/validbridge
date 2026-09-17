@@ -65,8 +65,8 @@ const PREDEFINED_GRADIENTS = {
     colors: ['#7f1d1d', '#ea580c'] as Array<string>,
     direction: '45deg'
   },
-  'midnight-purple': {
-    colors: ['#581c87', '#7e22ce'] as Array<string>,
+  'teal-mist': {
+    colors: ['#134e4a', '#14b8a6'] as Array<string>,
     direction: '90deg'
   },
   'forest-depths': {
@@ -78,7 +78,7 @@ const PREDEFINED_GRADIENTS = {
     direction: '135deg'
   },
   'cosmic-night': {
-    colors: ['#1e1b4b', '#4338ca'] as Array<string>,
+    colors: ['#0f172a', '#1d4ed8'] as Array<string>,
     direction: '45deg'
   },
   'autumn-fire': {
@@ -101,8 +101,8 @@ const PREDEFINED_GRADIENTS = {
     colors: ['#0f172a', '#475569'] as Array<string>,
     direction: '90deg'
   },
-  'grape-punch': {
-    colors: ['#6b21a8', '#d946ef'] as Array<string>,
+  'citrus-burst': {
+    colors: ['#a16207', '#facc15'] as Array<string>,
     direction: '135deg'
   },
   'marine-blue': {

@@ -40,7 +40,7 @@ export function CommunityActionsMobile({
           <div className="flex items-center gap-2">
             {canManageCommunity && (
               <Link
-                href={getUriWithOrg(orgslug, '/dash/communities')}
+                href={getUriWithOrg(orgslug, '/dash/connect')}
                 className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 aria-label="Manage community"
               >

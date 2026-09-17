@@ -81,8 +81,8 @@ const DEFAULT_STEPS: Omit<OnboardingStep, 'completed'>[] = [
     title: 'Keep learners coming back',
     description: 'Open a community space so your learners stay active — and bring their friends.',
     action: 'Open community',
-    href: '/dash/communities',
-    completePath: '/dash/communities',
+    href: '/dash/connect',
+    completePath: '/dash/connect',
   },
 ]
 

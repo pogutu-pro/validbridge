@@ -259,7 +259,7 @@ const sections: SectionDescriptor<any>[] = [
     itemKey: (c: ApiCommunity) => c.community_uuid,
     renderCard: (community: ApiCommunity, ctx) => (
       <ResourceCard
-        href={getUriWithOrg(ctx.orgSlug, `/community/${community.community_uuid.replace('community_', '')}`)}
+        href={getUriWithOrg(ctx.orgSlug, `/connect/${community.community_uuid.replace('community_', '')}`)}
         imageUrl={community.thumbnail_image
           ? getCommunityThumbnailMediaDirectory(ctx.orgUuid, community.community_uuid, community.thumbnail_image)
           : undefined}
@@ -281,7 +281,7 @@ const sections: SectionDescriptor<any>[] = [
       const href = communityUuid
         ? getUriWithOrg(
             ctx.orgSlug,
-            `/community/${communityUuid}/discussion/${discussionUuid}`,
+            `/connect/${communityUuid}/discussion/${discussionUuid}`,
           )
         : getUriWithOrg(ctx.orgSlug, `/discussion/${discussionUuid}`)
       return (
@@ -303,7 +303,7 @@ const sections: SectionDescriptor<any>[] = [
     itemKey: (p: ApiPlayground) => p.playground_uuid,
     renderCard: (playground: ApiPlayground, ctx) => (
       <ResourceCard
-        href={getUriWithOrg(ctx.orgSlug, `/playground/${playground.playground_uuid}`)}
+        href={getUriWithOrg(ctx.orgSlug, `/labs/${playground.playground_uuid}`)}
         imageUrl={playground.thumbnail_image && playground.org_uuid
           ? getPlaygroundThumbnailMediaDirectory(
               playground.org_uuid,

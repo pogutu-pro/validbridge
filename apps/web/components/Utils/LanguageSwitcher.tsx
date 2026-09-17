@@ -21,6 +21,9 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])
 
+  // English-only build — nothing to switch between.
+  if (AVAILABLE_LANGUAGES.length <= 1) return null
+
   const currentLangCode = mounted ? i18n.language.split('-')[0].toUpperCase() : ''
 
   return (

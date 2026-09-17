@@ -100,6 +100,53 @@ def _quiz(spec: dict) -> dict:
     }
 
 
+def _code_playground(spec: dict) -> dict:
+    """Compile a codePlayground block into the editor's blockCode node.
+
+    The attrs mirror ``CodePlayground.ts`` addAttributes so the compiled
+    document renders with a live code editor. Test cases carry a stable id
+    derived from the block, so a refresh never rewrites a saved submission's
+    test case ids out from under it.
+    """
+    slug = str(spec.get("slug") or "playground")
+    test_cases = spec.get("test_cases") or []
+    tests: list[dict] = []
+    for index, test in enumerate(test_cases or []):
+        label = str(test.get("label") or f"Test {index + 1}")
+        tests.append(
+            {
+                "id": _stable_id("test", slug, label),
+                "label": label,
+                "stdin": str(test.get("stdin") or ""),
+                "expectedStdout": str(test.get("expected") or ""),
+            }
+        )
+
+    return {
+        "type": "blockCode",
+        "attrs": {
+            "mode": spec.get("mode", "advanced"),
+            "languageId": spec.get("language_id", 71),
+            "languageName": spec.get("language_name", "Python 3"),
+            "starterCode": str(spec.get("starter_code") or ""),
+            "testCases": tests,
+            "description": str(spec.get("description") or ""),
+            "hints": list(spec.get("hints") or []),
+            "difficulty": spec.get("difficulty", "medium"),
+            "solutionCode": str(spec.get("solution_code") or ""),
+            "maxAttemptsBeforeReveal": spec.get("max_attempts_before_reveal", 3),
+            "timeComplexity": str(spec.get("time_complexity") or ""),
+            "spaceComplexity": str(spec.get("space_complexity") or ""),
+            "timeLimitMs": spec.get("time_limit_ms", 10000),
+            "sqliteDbPath": str(spec.get("sqlite_db_path") or ""),
+            "sqliteDbName": str(spec.get("sqlite_db_name") or ""),
+            "timedMode": bool(spec.get("timed_mode", False)),
+            "timedDurationMs": spec.get("timed_duration_ms", 300000),
+            "additionalFiles": list(spec.get("additional_files") or []),
+        },
+    }
+
+
 def _compile_block(block: Any) -> dict:
     if isinstance(block, str):
         prefix, separator, value = block.partition(":")
@@ -144,6 +191,8 @@ def _compile_block(block: Any) -> dict:
             "attrs": {"language": payload.get("lang")},
             "content": _text(payload.get("text", "")),
         }
+    if kind == "codePlayground":
+        return _code_playground(payload)
     if kind == "rule":
         return {"type": "horizontalRule"}
 
@@ -177,4 +226,7 @@ def plain_text(blocks: list[Any]) -> str:
                 words.extend(text for text, _ in payload.get("a") or [])
             elif kind == "code":
                 words.append(payload.get("text", ""))
+            elif kind == "codePlayground":
+                words.append(payload.get("description", ""))
+                words.append(payload.get("starter_code", ""))
     return " ".join(w for w in words if w)

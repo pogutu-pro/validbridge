@@ -176,7 +176,7 @@ function AssignmentStudentActivity() {
               </div>
             )}
             {showAttemptBadge && (
-              <div className='flex gap-1.5 items-center text-xs px-2.5 py-1 rounded-full bg-fuchsia-50 text-fuchsia-700 font-semibold nice-shadow'>
+              <div className='flex gap-1.5 items-center text-xs px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 font-semibold nice-shadow'>
                 <RotateCcw size={12} />
                 <span>
                   {maxRetries

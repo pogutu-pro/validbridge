@@ -185,7 +185,7 @@ class TestFeatureResolve:
             ee_disabled = resolve_feature("analytics", config, org_id=0)
 
         with patch("src.security.features_utils.resolve.get_deployment_mode", return_value="oss"):
-            oss_blocked = resolve_feature("sso", config, org_id=0)
+            oss_sso = resolve_feature("sso", config, org_id=0)
             oss_allowed = resolve_feature("analytics", config_allowed, org_id=0)
 
         # EE: available (everything is), but the admin toggle still turned it off.
@@ -195,10 +195,11 @@ class TestFeatureResolve:
             "limit": 0,
             "required_plan": "standard",
         }
-        # OSS: an EE-only feature is unavailable.
-        assert oss_blocked == {
-            "enabled": False,
-            "available": False,
+        # This build is ungated (EE_ONLY_FEATURES is empty), so even in a forced
+        # oss mode an otherwise-enterprise feature stays available.
+        assert oss_sso == {
+            "enabled": True,
+            "available": True,
             "limit": 0,
             "required_plan": "enterprise",
         }

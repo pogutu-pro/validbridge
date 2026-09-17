@@ -34,7 +34,10 @@ def bundle():
 def test_bundle_loads_and_validates(bundle):
     """Loading runs the full validation pass; this failing means it is unusable."""
     assert bundle.manifest.bundle_version
-    assert len(bundle.courses) == 6
+    assert len(bundle.courses) >= 6
+    # The catalogue on disk must match the manifest's declared order exactly
+    # (the validator already enforces this; the pin here keeps it honest).
+    assert [course.slug for course in bundle.courses] == bundle.manifest.courses
 
 
 def test_every_course_sits_in_a_declared_section(bundle):
@@ -44,11 +47,19 @@ def test_every_course_sits_in_a_declared_section(bundle):
 
 
 def test_sections_are_evenly_filled(bundle):
-    """Three sections of two. A lopsided catalogue looks unfinished."""
+    """Sections should sit within one course of each other.
+
+    A lopsided catalogue — one section full, another with a single lonely
+    course or none at all — reads as unfinished on a first impression.
+    """
     counts: dict[str, int] = {}
     for course in bundle.courses:
         counts[course.section] = counts.get(course.section, 0) + 1
-    assert sorted(counts.values()) == [2, 2, 2]
+    assert counts, "the catalogue has no courses at all"
+    assert min(counts.values()) >= 1, "a section with no courses looks unfinished"
+    assert max(counts.values()) - min(counts.values()) <= 1, (
+        "sections are too far apart in size: " + repr(sorted(counts.values()))
+    )
 
 
 def test_every_course_has_an_assignment(bundle):

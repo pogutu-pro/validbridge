@@ -29,7 +29,7 @@ export function resourceHref(
     case 'communities': {
       const id = (resource.community_uuid || '').replace('community_', '')
       return id
-        ? getUriWithOrg(orgslug, dash ? `/dash/communities/${id}/general` : `/community/${id}`)
+        ? getUriWithOrg(orgslug, dash ? `/dash/connect/${id}/general` : `/connect/${id}`)
         : null
     }
     case 'boards': {
@@ -47,7 +47,7 @@ export function resourceHref(
     case 'playgrounds': {
       // Playgrounds use the full prefixed uuid and have no separate dash route.
       return resource.playground_uuid
-        ? getUriWithOrg(orgslug, `/playground/${resource.playground_uuid}`)
+        ? getUriWithOrg(orgslug, `/labs/${resource.playground_uuid}`)
         : null
     }
     default:

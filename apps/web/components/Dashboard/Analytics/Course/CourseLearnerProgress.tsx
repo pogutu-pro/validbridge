@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveCo
 import { ChartBar } from '@phosphor-icons/react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
-const BAR_COLORS = ['#fdba74', '#fb923c', '#f97316', '#ea580c', '#c2410c', '#5b21b6']
+const BAR_COLORS = ['#fdba74', '#fb923c', '#f97316', '#ea580c', '#c2410c', '#7c2d12']
 
 function kFormatter(v: number) {
   return v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)

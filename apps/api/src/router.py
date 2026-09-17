@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from src.routers import admin as admin_router_module
 from src.routers import analytics as analytics_router_module
 from src.routers import audit as audit_router_module
+from src.routers import audit_logs as audit_logs_router_module
 from src.routers import code_execution
 from src.routers import code_submissions
 from src.routers import health
@@ -10,6 +11,7 @@ from src.routers import instance
 from src.routers import plans
 from src.routers import usergroups
 from src.routers import dev, trail, users, auth, orgs, roles, search
+from src.routers import superadmin as superadmin_router_module
 from src.routers import mfa as mfa_router_module
 from src.routers import monitoring
 from src.routers import nudges as nudges_router_module
@@ -22,7 +24,7 @@ from src.routers.boards import boards_playground
 from src.routers.orgs import ai_credits
 from src.routers.orgs import custom_domains
 from src.routers.orgs import packs
-from src.routers.orgs import org_plan
+from src.routers import payments as payments_router_module
 from src.routers.courses import chapters, courses, assignments, certifications
 from src.routers.folders import folders as folders_router_module
 from src.routers.media import media as media_router_module
@@ -33,6 +35,7 @@ from src.routers.courses.activities import activities, blocks
 from src.routers.podcasts import podcasts as podcasts_router_module
 from src.routers.podcasts import episodes as episodes_router_module
 from src.routers.boards import boards as boards_router_module
+from src.routers.orgs import org_plan
 from src.routers.playgrounds import playgrounds as playgrounds_router_module
 from src.routers.playgrounds import playgrounds_generator as playgrounds_generator_router
 from src.core.ee_hooks import register_ee_routers
@@ -170,6 +173,14 @@ v1_router.include_router(
     prefix="/orgs",
     tags=["packs"],
     dependencies=[Depends(require_authenticated_user)],
+)
+# Payments (org-scoped storefront + provider integration). Public storefront and
+# the Paystack webhook are unauthenticated; org-facing management and checkout
+# authorize inside the router.
+v1_router.include_router(
+    payments_router_module.router,
+    prefix="/payments",
+    tags=["payments"],
 )
 # Internal cloud plan-state endpoint (protected by cloud internal key).
 # SaaS-only: absent in oss/ee deployments. Extracted into a function so the
@@ -357,6 +368,14 @@ v1_router.include_router(
     dependencies=[Depends(require_authenticated_user)],
 )
 
+# Org-wide request audit log viewer (org-admin only; enforced inside the router)
+v1_router.include_router(
+    audit_logs_router_module.router,
+    prefix="/ee/audit_logs",
+    tags=["audit_logs"],
+    dependencies=[Depends(require_authenticated_user)],
+)
+
 v1_router.include_router(
     code_execution.router,
     prefix="/code",
@@ -390,7 +409,6 @@ v1_router.include_router(
 v1_router.include_router(plans.router, prefix="/plans", tags=["plans"])
 
 # Register EE Routers if available
-register_ee_routers(v1_router)
 
 v1_router.include_router(
     health.router,
@@ -421,3 +439,12 @@ v1_router.include_router(
     tags=["stream"],
     dependencies=[Depends(get_non_api_token_user)]
 )
+# First-party platform superadmin API (replaces the absent Enterprise package).
+# Mounted at the /ee/superadmin prefix the web admin client already targets.
+v1_router.include_router(
+    superadmin_router_module.router,
+    prefix="/ee/superadmin",
+    tags=["superadmin"],
+)
+
+register_ee_routers(v1_router)

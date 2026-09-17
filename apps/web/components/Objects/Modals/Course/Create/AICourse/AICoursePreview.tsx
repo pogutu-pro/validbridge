@@ -253,7 +253,7 @@ function PlanTabContent({
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div
-          style={{ background: 'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)' }}
+          style={{ background: 'linear-gradient(135deg, #ff8a4d 0%, #ff5a1f 50%, #e64900 100%)' }}
           className="p-4 rounded-full drop-shadow-md animate-pulse"
         >
           <Image src={lrnaiIcon} alt="AI" width={32} height={32} />
@@ -275,7 +275,7 @@ function PlanTabContent({
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div
-          style={{ background: 'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)' }}
+          style={{ background: 'linear-gradient(135deg, #ff8a4d 0%, #ff5a1f 50%, #e64900 100%)' }}
           className="p-4 rounded-full drop-shadow-md"
         >
           <Image src={lrnaiIcon} alt="AI" width={32} height={32} />
@@ -586,7 +586,7 @@ function CoursePlanHeader({ plan, onUpdatePlan }: { plan: CoursePlan; onUpdatePl
     <div className="bg-white/5 rounded-xl p-5 ring-1 ring-inset ring-white/10">
       <div className="flex items-start gap-4">
         <div
-          style={{ background: 'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)' }}
+          style={{ background: 'linear-gradient(135deg, #ff8a4d 0%, #ff5a1f 50%, #e64900 100%)' }}
           className="p-3 rounded-xl drop-shadow-md flex-shrink-0"
         >
           <BookOpen className="w-6 h-6 text-white" />

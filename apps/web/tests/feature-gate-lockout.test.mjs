@@ -57,8 +57,8 @@ describe("resolveGateReason — admin-disabled features", () => {
   });
 });
 
-describe("resolveGateReason — the escape hatch is not a paywall bypass", () => {
-  test("still demands an upgrade when the plan is too low", () => {
+describe("resolveGateReason — plan gating is disabled in this build", () => {
+  test("does not demand an upgrade when the plan is too low", () => {
     const result = resolveGateReason({
       resolved: { enabled: true, required_plan: "standard" },
       catalogPlan: "standard",
@@ -67,12 +67,13 @@ describe("resolveGateReason — the escape hatch is not a paywall bypass", () =>
       allowWhenDisabled: true,
     });
 
-    expect(result.reason).toBe("plan");
-    expect(result.meetsPlan).toBe(false);
+    // planMeetsRequirement() always returns true in the ungated build.
+    expect(result.reason).toBeUndefined();
+    expect(result.meetsPlan).toBe(true);
     expect(result.requiredPlan).toBe("standard");
   });
 
-  test("prefers the plan reason when the feature is both locked and off", () => {
+  test("never prefers a plan reason when the feature is both locked and off", () => {
     const result = resolveGateReason({
       resolved: { enabled: false, required_plan: "pro" },
       catalogPlan: "standard",
@@ -81,7 +82,7 @@ describe("resolveGateReason — the escape hatch is not a paywall bypass", () =>
       allowWhenDisabled: true,
     });
 
-    expect(result.reason).toBe("plan");
+    expect(result.reason).toBeUndefined();
   });
 });
 
@@ -131,7 +132,7 @@ describe("resolveGateReason — the catalog fallback", () => {
     expect(result.reason).toBeUndefined();
   });
 
-  test("gates by the catalog tier once the org has loaded without the feature", () => {
+  test("reports the catalog tier but does not gate by it (ungated build)", () => {
     const result = resolveGateReason({
       resolved: undefined,
       catalogPlan: "standard",
@@ -141,7 +142,7 @@ describe("resolveGateReason — the catalog fallback", () => {
 
     expect(result.loading).toBe(false);
     expect(result.requiredPlan).toBe("standard");
-    expect(result.reason).toBe("plan");
+    expect(result.reason).toBeUndefined();
   });
 
   test("ignores catalog tiers that gate nothing", () => {

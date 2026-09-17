@@ -37,6 +37,21 @@ export default function GlobalAnalytics({ days = 30 }: { days?: number }) {
 
   const queryNames = Object.keys(data)
 
+  // Analytics is configured but returned no series (e.g. no events yet, or the
+  // backend degrades to an empty payload). Render the same explanatory state as
+  // the unconfigured case instead of an empty grid.
+  if (queryNames.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-white/40">
+        <ChartBar size={48} weight="fill" />
+        <p className="mt-4 text-lg">No analytics data available</p>
+        <p className="text-sm text-white/25 mt-1">
+          Data will appear once activity is recorded.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {queryNames.map((queryName) => {

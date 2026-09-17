@@ -12,13 +12,9 @@ import {
   getGroupResources,
   addGroupResource,
   removeGroupResource,
-  getGroupSyncs,
-  addGroupSync,
-  removeGroupSync,
 } from '@services/payments/groups';
 import {
-  Plus, Pencil, Trash2, X, BookOpen, Users, RefreshCcw, Layers,
-  ChevronDown,
+  Plus, Pencil, Trash2, X, BookOpen, Layers,
 } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -156,96 +152,6 @@ function GroupResourcePanel({ group, orgId, token }: { group: any; orgId: number
 }
 
 // ---------------------------------------------------------------------------
-// UserGroup Sync Panel
-// ---------------------------------------------------------------------------
-
-function GroupSyncPanel({ group, orgId, token }: { group: any; orgId: number; token: string }) {
-  const queryClient = useQueryClient();
-
-  const syncQueryKey = ['payments', orgId, 'groups', group.id, 'sync'];
-
-  const { data: syncs } = useQuery({
-    queryKey: syncQueryKey,
-    queryFn: () => getGroupSyncs(orgId, group.id, token),
-    enabled: !!(orgId && token),
-    staleTime: 60_000,
-  });
-
-  const { data: usergroups } = useQuery({
-    queryKey: queryKeys.usergroups.list(orgId),
-    queryFn: async () => {
-      const { getUserGroups } = await import('@services/usergroups/usergroups');
-      const res = await getUserGroups(orgId, token);
-      return res?.data ?? res ?? [];
-    },
-    enabled: !!(orgId && token),
-    staleTime: 60_000,
-  });
-
-  const syncList: any[] = Array.isArray(syncs?.data) ? syncs.data : Array.isArray(syncs) ? syncs : [];
-  const syncedIds = new Set(syncList.map((s: any) => s.usergroup_id));
-  const available = (usergroups ?? []).filter((ug: any) => !syncedIds.has(ug.id));
-
-  const handleAdd = async (ugId: number) => {
-    await addGroupSync(orgId, group.id, ugId, token);
-    queryClient.invalidateQueries({ queryKey: syncQueryKey });
-    toast.success('UserGroup synced — enrolled users will be auto-added');
-  };
-
-  const handleRemove = async (ugId: number) => {
-    await removeGroupSync(orgId, group.id, ugId, token);
-    queryClient.invalidateQueries({ queryKey: syncQueryKey });
-    toast.success('Sync removed');
-  };
-
-  return (
-    <div className="space-y-2">
-      <p className="text-xs text-gray-400 leading-relaxed">
-        When a user enrolls, they're automatically added to these groups. When cancelled, they're removed.
-      </p>
-
-      {syncList.length > 0 && (
-        <ul className="space-y-1">
-          {syncList.map((s: any) => (
-            <li key={s.usergroup_id} className="flex items-center justify-between bg-orange-50 rounded-lg px-3 py-2">
-              <div className="flex items-center gap-2">
-                <Users size={13} className="text-orange-500 shrink-0" />
-                <span className="text-sm font-medium text-gray-800">{s.usergroup_name ?? `Group #${s.usergroup_id}`}</span>
-              </div>
-              <button
-                onClick={() => handleRemove(s.usergroup_id)}
-                className="text-gray-300 hover:text-red-500 transition-colors ms-2 shrink-0"
-                title="Remove sync"
-              >
-                <X size={13} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {available.length > 0 ? (
-        <div className="relative">
-          <select
-            className="w-full appearance-none text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 cursor-pointer pe-7"
-            value=""
-            onChange={(e) => { if (e.target.value) handleAdd(Number(e.target.value)); }}
-          >
-            <option value="">+ Link a UserGroup…</option>
-            {available.map((ug: any) => (
-              <option key={ug.id} value={ug.id}>{ug.name}</option>
-            ))}
-          </select>
-          <ChevronDown size={12} className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-        </div>
-      ) : syncList.length === 0 ? (
-        <p className="text-xs text-gray-400 italic">No UserGroups available to link.</p>
-      ) : null}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Group Card
 // ---------------------------------------------------------------------------
 
@@ -279,7 +185,7 @@ function GroupCard({ group, orgId, token, onEdit, onDelete }: {
           </button>
           <ConfirmationModal
             confirmationButtonText="Delete Group"
-            confirmationMessage="All resources and syncs will be removed. Active offers linked to this group will lose their group."
+            confirmationMessage="All resources will be removed. Active offers linked to this group will lose their group."
             dialogTitle={`Delete "${group.name}"?`}
             dialogTrigger={
               <button className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors" title="Delete">
@@ -300,15 +206,6 @@ function GroupCard({ group, orgId, token, onEdit, onDelete }: {
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Courses</span>
           </div>
           <GroupResourcePanel group={group} orgId={orgId} token={token} />
-        </div>
-
-        {/* UserGroup sync section */}
-        <div className="px-4 py-3">
-          <div className="flex items-center gap-1.5 mb-2.5">
-            <RefreshCcw size={12} className="text-orange-400" />
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Access Groups</span>
-          </div>
-          <GroupSyncPanel group={group} orgId={orgId} token={token} />
         </div>
       </div>
     </div>

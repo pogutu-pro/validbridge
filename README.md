@@ -74,7 +74,9 @@ cd apps/api && uv sync && uv run python app.py
 cd apps/web && bun install && bun run dev
 
 # 3. Collaboration server — ws://localhost:4000 (required for boards & real-time editing)
-cd apps/collab && bun install && node --import tsx src/index.ts
+cd apps/collab && bun install
+lsof -ti:4000 | xargs kill -9 2>/dev/null || true  # free port 4000 if occupied
+node --import tsx src/index.ts
 ```
 
 Open <http://localhost:3000> and log in with an account from [Default accounts](#default-accounts).
@@ -122,12 +124,32 @@ Required only for real-time course editing and boards:
 ```bash
 cd apps/collab
 bun install
+
+# Free port 4000 if a previous collab server is still bound to it
+lsof -ti:4000 | xargs kill -9 2>/dev/null || true
+
+# Run in the foreground (Ctrl+C to stop)
 node --import tsx src/index.ts
 ```
 
-The collaboration server listens on port **4000**.
+To keep it running after you close the terminal, start it detached:
+
+```bash
+cd apps/collab
+setsid nohup node --import tsx src/index.ts > /tmp/collab.log 2>&1 < /dev/null &
+```
+
+The collaboration server listens on port **4000** (`ws://localhost:4000`).
 
 > **Note:** run the collab server with `node --import tsx src/index.ts`, not `bun run dev`. The `tsx` CLI resolves its loader incorrectly under Bun (a Bun/`tsx` module-resolution bug), so the watcher exits with `Cannot find module './cjs/index.cjs'`. Node resolves it correctly.
+
+**The collab server must trust the same JWT the API issues.** It verifies board tokens with `VALIDBRIDGE_AUTH_JWT_SECRET_KEY` and confirms membership by calling `VALIDBRIDGE_API_URL`, so both must match the running API. If the secret differs (or `VALIDBRIDGE_API_URL` points at the wrong port), the server still starts but every board hangs on "connecting". The defaults come from `apps/collab/.env` — keep them in sync with `apps/api/.env`.
+
+For the local demo stack (multi-tenancy on `lvh.me`, API on `:1348`), use the wrapper, which sources `.demo-secrets` so the keys match:
+
+```bash
+cd apps/collab && ./run_demo_collab.sh
+```
 
 ## Default accounts
 
@@ -213,4 +235,6 @@ scripts/    Repository tooling
 - **"You appear to be offline" in the web app** — the API is unreachable. Confirm it is running on `http://localhost:8000` and that `NEXT_PUBLIC_VALIDBRIDGE_BACKEND_URL` points to it.
 - **API fails to start on the database step** — verify `VALIDBRIDGE_SQL_CONNECTION_STRING` and that PostgreSQL is reachable. The API retries transient connection failures on startup.
 - **Missing JWT secret** — set `VALIDBRIDGE_AUTH_JWT_SECRET_KEY` to a value of at least 32 characters.
+- **`EADDRINUSE: address already in use :::4000`** — a previous collaboration server is still bound to port `4000`. Free it before restarting: `lsof -ti:4000 | xargs kill -9`, then start the collab server again.
+- **Boards stuck on "connecting"** — the collaboration server can't authenticate against the API. Confirm it is running on port `4000` and that its `VALIDBRIDGE_AUTH_JWT_SECRET_KEY` matches the API's secret and `VALIDBRIDGE_API_URL` points at the API (for the demo, start it with `apps/collab/run_demo_collab.sh`).
 - **Collaborative editing stays on "connecting"** — start the collaboration server (`apps/collab`).

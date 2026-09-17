@@ -92,7 +92,7 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
 
         {/* CTA */}
         <Link
-          href={getUriWithOrg(orgslug, `/store/offers/${offer.offer_uuid}`)}
+          href={getUriWithOrg(orgslug, `/marketplace/offers/${offer.offer_uuid}`)}
           onClick={() => track(AnalyticsEvent.CourseOfferCtaClicked, {
             offer_uuid: offer.offer_uuid,
             offer_type: offer.offer_type,

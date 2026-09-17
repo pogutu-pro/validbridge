@@ -34,8 +34,10 @@
     return (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
   }
 
-  var code = String(detect() || 'en').split('-')[0].toLowerCase();
-  var dir = RTL[code] ? 'rtl' : 'ltr';
+  // English-only build: always English / LTR, regardless of any stored
+  // preference. The detector above is kept only for the RTL-list guard test.
+  var code = 'en';
+  var dir = 'ltr';
 
   var el = document.documentElement;
   el.setAttribute('lang', code);

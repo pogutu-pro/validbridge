@@ -128,16 +128,13 @@ class RedisConfig(BaseModel):
     redis_connection_string: Optional[str]
 
 
-class InternalStripeConfig(BaseModel):
-    stripe_secret_key: str | None
-    stripe_publishable_key: str | None
-    stripe_webhook_standard_secret: str | None
-    stripe_webhook_connect_secret: str | None
-    stripe_client_id: str | None
+class InternalPaystackConfig(BaseModel):
+    secret_key: str | None
+    public_key: str | None
 
 
 class InternalPaymentsConfig(BaseModel):
-    stripe: InternalStripeConfig
+    paystack: InternalPaystackConfig
 
 
 class ValidBridgeConfig(BaseModel):
@@ -348,11 +345,6 @@ def get_validbridge_config() -> ValidBridgeConfig:
         # Plain EE on a VPS without a dotted cookie domain falls through to
         # "single" — which is the right default for the EE-self-host case
         # (one org on a custom domain, EE features available locally).
-        try:
-            from src.core.ee_hooks import is_ee_available as _is_ee_available
-            _ee_available = _is_ee_available()
-        except Exception:
-            _ee_available = False
         _dev_for_tenancy = (
             env_development_mode if env_development_mode is not None
             else yaml_config.get("general", {}).get("development_mode")
@@ -365,7 +357,7 @@ def get_validbridge_config() -> ValidBridgeConfig:
             yaml_config.get("hosting_config", {}).get("cookies_config", {}).get("domain")
         )
         _has_shared_cookie_domain = bool(_ck_for_inf) and str(_ck_for_inf).startswith(".")
-        _multi_intent = bool(saas_mode) or (_ee_available and _has_shared_cookie_domain)
+        _multi_intent = bool(saas_mode) or _has_shared_cookie_domain
         tenancy_raw = "multi" if (_multi_intent and _has_real_domain and not _is_self_or_dev) else "single"
 
     tenancy = str(tenancy_raw).strip().lower()
@@ -554,33 +546,17 @@ def get_validbridge_config() -> ValidBridgeConfig:
             client_secret=judge0_client_secret,
         )
 
-    # Payments config
-    env_stripe_secret_key = os.environ.get("VALIDBRIDGE_STRIPE_SECRET_KEY")
-    env_stripe_publishable_key = os.environ.get("VALIDBRIDGE_STRIPE_PUBLISHABLE_KEY")
-    env_stripe_webhook_standard_secret = os.environ.get("VALIDBRIDGE_STRIPE_WEBHOOK_STANDARD_SECRET")
-    env_stripe_webhook_connect_secret = os.environ.get("VALIDBRIDGE_STRIPE_WEBHOOK_CONNECT_SECRET")
-    env_stripe_client_id = os.environ.get("VALIDBRIDGE_STRIPE_CLIENT_ID")
-    
-    stripe_secret_key = env_stripe_secret_key or yaml_config.get("payments_config", {}).get(
-        "stripe", {}
-    ).get("stripe_secret_key")
-    
-    stripe_publishable_key = env_stripe_publishable_key or yaml_config.get("payments_config", {}).get(
-        "stripe", {}
-    ).get("stripe_publishable_key")
+    # Payments config (platform-level Paystack fallbacks; per-org creds live on
+    # the org's PaymentsConfig.provider_config)
+    env_paystack_secret_key = os.environ.get("VALIDBRIDGE_PAYSTACK_SECRET_KEY")
+    env_paystack_public_key = os.environ.get("VALIDBRIDGE_PAYSTACK_PUBLIC_KEY")
 
-    stripe_webhook_standard_secret = env_stripe_webhook_standard_secret or yaml_config.get("payments_config", {}).get(
-        "stripe", {}
-    ).get("stripe_webhook_standard_secret")
-
-    stripe_webhook_connect_secret = env_stripe_webhook_connect_secret or yaml_config.get("payments_config", {}).get(
-        "stripe", {}
-    ).get("stripe_webhook_connect_secret")
-
-    stripe_client_id = env_stripe_client_id or yaml_config.get("payments_config", {}).get(
-        "stripe", {}
-    ).get("stripe_client_id")
-
+    paystack_secret_key = env_paystack_secret_key or yaml_config.get("payments_config", {}).get(
+        "paystack", {}
+    ).get("secret_key")
+    paystack_public_key = env_paystack_public_key or yaml_config.get("payments_config", {}).get(
+        "paystack", {}
+    ).get("public_key")
     # Create HostingConfig and DatabaseConfig objects
     hosting_config = HostingConfig(
         tenancy=tenancy,
@@ -604,21 +580,9 @@ def get_validbridge_config() -> ValidBridgeConfig:
         _t_logger = _t_log.getLogger(__name__)
 
         if tenancy == "multi":
-            # Multi mode requires EE (or SaaS, which implies EE features) and
-            # an explicit base domain. Localhost is not a routable subdomain
-            # parent for browsers in production, so `VALIDBRIDGE_DOMAIN=localhost`
-            # is rejected here.
-            try:
-                from src.core.ee_hooks import is_ee_available
-                ee_available = is_ee_available()
-            except Exception:
-                ee_available = False
-            if not (ee_available or saas_mode):
-                raise ValueError(
-                    "VALIDBRIDGE_TENANCY=multi requires the Enterprise Edition "
-                    "or VALIDBRIDGE_SAAS=true. Either install the `ee/` folder, "
-                    "unset VALIDBRIDGE_DISABLE_EE, or use VALIDBRIDGE_TENANCY=single."
-                )
+            # Multi mode requires an explicit base domain. Localhost is not a
+            # routable subdomain parent for browsers in production, so
+            # `VALIDBRIDGE_DOMAIN=localhost` is rejected here.
             if not domain or "localhost" in str(domain).lower():
                 raise ValueError(
                     "VALIDBRIDGE_TENANCY=multi requires VALIDBRIDGE_DOMAIN to be set "
@@ -743,12 +707,9 @@ def get_validbridge_config() -> ValidBridgeConfig:
             smtp_use_tls=smtp_use_tls,
         ),
         payments_config=InternalPaymentsConfig(
-            stripe=InternalStripeConfig(
-                stripe_secret_key=stripe_secret_key,
-                stripe_publishable_key=stripe_publishable_key,
-                stripe_webhook_standard_secret=stripe_webhook_standard_secret,
-                stripe_webhook_connect_secret=stripe_webhook_connect_secret,
-                stripe_client_id=stripe_client_id
+            paystack=InternalPaystackConfig(
+                secret_key=paystack_secret_key,
+                public_key=paystack_public_key,
             )
         ),
         tinybird_config=tinybird_config,

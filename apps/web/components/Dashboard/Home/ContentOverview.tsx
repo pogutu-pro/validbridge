@@ -1,6 +1,5 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import {
@@ -19,6 +18,7 @@ import { getCommunities } from '@services/communities/communities'
 import { getBoards } from '@services/boards/boards'
 import { getOrgCourses } from '@services/courses/courses'
 import { getOrgPodcasts } from '@services/podcasts/podcasts'
+import { StatCard } from '@components/ui/stat-card'
 
 export default function ContentOverview() {
   const { t } = useTranslation()
@@ -35,7 +35,6 @@ export default function ContentOverview() {
     return defaultDisabled ? v1?.enabled === true : v1?.enabled !== false
   }
 
-  // Courses
   const { data: coursesData, isLoading: coursesLoading } = useQuery({
     queryKey: [...queryKeys.courses.list(orgslug), 'overview'],
     queryFn: () => getOrgCourses(orgslug, null, token, true),
@@ -43,7 +42,6 @@ export default function ContentOverview() {
     staleTime: 60_000,
   })
 
-  // Members
   const { data: membersData, isLoading: membersLoading } = useQuery({
     queryKey: [...queryKeys.org.users(orgId), 'overview'],
     queryFn: () => apiFetch(`${getAPIUrl()}orgs/${orgId}/users?page=1&limit=1`, token),
@@ -51,7 +49,6 @@ export default function ContentOverview() {
     staleTime: 60_000,
   })
 
-  // Communities
   const communitiesEnabled = isEnabled('communities')
   const { data: communitiesData } = useQuery({
     queryKey: queryKeys.community.list(orgId),
@@ -60,7 +57,6 @@ export default function ContentOverview() {
     staleTime: 60_000,
   })
 
-  // Podcasts
   const podcastsEnabled = isEnabled('podcasts', true)
   const { data: podcastsData } = useQuery({
     queryKey: [...queryKeys.podcasts.list(orgslug), 'overview'],
@@ -69,7 +65,6 @@ export default function ContentOverview() {
     staleTime: 60_000,
   })
 
-  // Boards
   const boardsEnabled = isEnabled('boards', true)
   const { data: boardsData } = useQuery({
     queryKey: [...queryKeys.boards.list(orgslug), 'overview'],
@@ -89,52 +84,52 @@ export default function ContentOverview() {
 
   const cards = [
     {
+      key: 'courses',
       label: t('dashboard.home.courses'),
       value: courses.length,
-      sub: `${publishedCourses} ${t('dashboard.home.published')} · ${draftCourses} ${t('dashboard.home.draft')}`,
-      icon: BookOpen,
-      iconColor: 'text-blue-500',
-      iconBg: 'bg-blue-50',
+      hint: `${publishedCourses} ${t('dashboard.home.published')} · ${draftCourses} ${t('dashboard.home.draft')}`,
+      icon: <BookOpen weight="duotone" />,
+      tone: 'primary' as const,
       href: '/dash/courses',
       show: true,
     },
     {
+      key: 'members',
       label: t('dashboard.home.members'),
       value: totalMembers,
-      sub: t('dashboard.home.total_users'),
-      icon: Users,
-      iconColor: 'text-orange-500',
-      iconBg: 'bg-orange-50',
+      hint: t('dashboard.home.total_users'),
+      icon: <Users weight="duotone" />,
+      tone: 'blue' as const,
       href: '/dash/users/settings/users',
       show: true,
     },
     {
+      key: 'communities',
       label: t('dashboard.home.communities'),
       value: communities.length,
-      sub: `${communities.filter((c: any) => c.public).length} ${t('dashboard.home.public')}`,
-      icon: ChatCircle,
-      iconColor: 'text-orange-500',
-      iconBg: 'bg-orange-50',
-      href: '/dash/communities',
+      hint: `${communities.filter((c: any) => c.public).length} ${t('dashboard.home.public')}`,
+      icon: <ChatCircle weight="duotone" />,
+      tone: 'violet' as const,
+      href: '/dash/connect',
       show: communitiesEnabled,
     },
     {
+      key: 'podcasts',
       label: t('dashboard.home.podcasts'),
       value: podcasts.length,
-      sub: `${podcasts.reduce((sum: number, p: any) => sum + (p.episode_count || 0), 0)} ${t('dashboard.home.episodes')}`,
-      icon: Microphone,
-      iconColor: 'text-amber-500',
-      iconBg: 'bg-amber-50',
+      hint: `${podcasts.reduce((sum: number, p: any) => sum + (p.episode_count || 0), 0)} ${t('dashboard.home.episodes')}`,
+      icon: <Microphone weight="duotone" />,
+      tone: 'amber' as const,
       href: '/dash/podcasts',
       show: podcastsEnabled,
     },
     {
+      key: 'boards',
       label: t('dashboard.home.boards'),
       value: boards.length,
-      sub: `${boards.reduce((sum: number, b: any) => sum + (b.member_count || 0), 0)} ${t('dashboard.home.participants')}`,
-      icon: Chalkboard,
-      iconColor: 'text-rose-500',
-      iconBg: 'bg-rose-50',
+      hint: `${boards.reduce((sum: number, b: any) => sum + (b.member_count || 0), 0)} ${t('dashboard.home.participants')}`,
+      icon: <Chalkboard weight="duotone" />,
+      tone: 'green' as const,
       href: '/dash/boards',
       show: boardsEnabled,
     },
@@ -145,18 +140,15 @@ export default function ContentOverview() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="bg-white rounded-xl nice-shadow px-5 py-4 animate-pulse"
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 bg-gray-100 rounded-lg" />
-              <div className="h-2.5 bg-gray-100 rounded w-16" />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-muted" />
+              <div className="h-2.5 w-16 rounded bg-muted" />
             </div>
-            <div className="h-7 bg-gray-100 rounded w-10 mb-1.5" />
-            <div className="h-2 bg-gray-50 rounded w-24" />
+            <div className="mb-1.5 h-6 w-10 rounded bg-muted" />
+            <div className="h-2 w-24 rounded bg-muted/60" />
           </div>
         ))}
       </div>
@@ -164,34 +156,17 @@ export default function ContentOverview() {
   }
 
   return (
-    <div
-      className={`grid gap-4 ${
-        visibleCards.length <= 4
-          ? 'grid-cols-2 sm:grid-cols-4'
-          : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6'
-      }`}
-    >
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       {visibleCards.map((card) => (
-        <Link
-          key={card.label}
+        <StatCard
+          key={card.key}
+          icon={card.icon}
+          label={card.label}
+          value={card.value}
+          hint={card.hint}
+          tone={card.tone}
           href={card.href}
-          className="bg-white rounded-xl nice-shadow px-5 py-4 hover:bg-gray-50 transition-colors group"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <div className={`p-1.5 rounded-lg ${card.iconBg}`}>
-              <card.icon
-                size={14}
-                weight="duotone"
-                className={card.iconColor}
-              />
-            </div>
-            <span className="text-xs font-medium text-gray-400">
-              {card.label}
-            </span>
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{card.value}</div>
-          <p className="text-[11px] text-gray-300 mt-0.5">{card.sub}</p>
-        </Link>
+        />
       ))}
     </div>
   )

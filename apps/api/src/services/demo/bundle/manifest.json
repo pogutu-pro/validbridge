@@ -19,6 +19,7 @@
   "sections": [
     { "slug": "getting-started", "name": "Getting Started", "color": "violet" },
     { "slug": "core-skills", "name": "Core Skills", "color": "blue" },
+    { "slug": "technical-skills", "name": "Technical Skills", "color": "teal" },
     { "slug": "compliance-and-data", "name": "Compliance & Data", "color": "amber" }
   ],
 
@@ -103,6 +104,7 @@
     "customer-support-fundamentals",
     "product-knowledge",
     "data-literacy",
-    "compliance-essentials"
+    "compliance-essentials",
+    "coding-practice"
   ]
 }

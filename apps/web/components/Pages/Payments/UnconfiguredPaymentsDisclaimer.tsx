@@ -6,7 +6,7 @@ const STEPS = [
   {
     icon: CreditCard,
     title: 'Connect a payment provider',
-    description: 'Link Stripe or another provider to start accepting payments.',
+    description: 'Link Paystack to start accepting payments.',
   },
   {
     icon: ShoppingBag,

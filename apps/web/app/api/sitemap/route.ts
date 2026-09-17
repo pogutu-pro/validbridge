@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         { loc: `${baseUrl}courses`, priority: 0.9, changefreq: 'weekly' },
         { loc: `${baseUrl}library`, priority: 0.9, changefreq: 'weekly' },
         { loc: `${baseUrl}podcasts`, priority: 0.9, changefreq: 'weekly' },
-        { loc: `${baseUrl}communities`, priority: 0.9, changefreq: 'weekly' },
+        { loc: `${baseUrl}connect`, priority: 0.9, changefreq: 'weekly' },
       ]
       break
     }
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
       const communities = await getCommunities(orgInfo.id, 1, 1000, null).catch(() => [])
       for (const community of communities) {
         sitemapUrls.push({
-          loc: `${baseUrl}community/${community.community_uuid.replace('community_', '')}`,
+          loc: `${baseUrl}connect/${community.community_uuid.replace('community_', '')}`,
           priority: 0.6,
           changefreq: 'weekly',
           lastmod: community.update_date,

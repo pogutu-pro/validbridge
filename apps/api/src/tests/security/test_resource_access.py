@@ -473,6 +473,7 @@ class TestDashboardContext:
         checker._check_usergroup_membership = AsyncMock(
             return_value=overrides.get("usergroup", False)
         )
+        checker._check_paid_access = AsyncMock(return_value=None)
         return checker
 
     @pytest.mark.asyncio
@@ -537,6 +538,7 @@ class TestDashboardContext:
         # Anonymous path goes straight to _check_anonymous_read_access which
         # only inspects public/published flags.
         checker._is_public_and_published = AsyncMock(return_value=(False, False))
+        checker._check_paid_access = AsyncMock(return_value=None)
 
         decision = await checker.check_access(
             "course_unpub_4", AccessAction.READ, AccessContext.DASHBOARD

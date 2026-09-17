@@ -5,17 +5,8 @@ import validbridgeAI_icon from 'public/validbridge_ai.png'
 import Image from 'next/image'
 import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import {
-  AIChatBotStateTypes,
-  useAIChatBot,
-  useAIChatBotDispatch,
-} from '@components/Contexts/AI/AIChatBotContext'
-import {
-  sendActivityAIChatMessage,
-  startActivityAIChatSession,
-} from '@services/ai/ai'
+import { useAICopilot } from '@components/Contexts/AI/AICopilotContext'
 import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures'
-import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { usePathname } from 'next/navigation'
 
 type AICanvaToolkitProps = {
@@ -144,15 +135,11 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
       }}
     >
       <div
-        style={{
-          background:
-            'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgba(2, 1, 25, 0.98)',
-        }}
-        className="py-1 h-10 px-2 w-max text-white rounded-xl shadow-md cursor-pointer flex items-center space-x-2 antialiased animate-in fade-in-0 zoom-in-95 duration-200"
+        className="flex h-10 w-max cursor-pointer items-center space-x-2 rounded-xl border border-border bg-white px-2 py-1 text-primary shadow-md antialiased animate-in fade-in-0 zoom-in-95 duration-200"
       >
-        <div className="flex w-full space-x-2 font-bold text-white/80">
+        <div className="flex w-full items-center space-x-2 font-bold text-foreground">
           <Image
-            className="outline-1 outline-neutral-200/10 rounded-lg"
+            className="rounded-lg outline outline-1 outline-neutral-200/10"
             width={24}
             src={validbridgeAI_icon}
             alt=""
@@ -160,7 +147,7 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
           <div>AI</div>
         </div>
         <div>
-          <MoreVertical className="text-white/50" size={12} />
+          <MoreVertical className="text-muted-foreground" size={12} />
         </div>
         <div className="flex space-x-2">
           <AIActionButton
@@ -197,16 +184,12 @@ function AIActionButton(props: {
   label: string
   activity: any
 }) {
-  const session = useVBSession() as any
-  const access_token = session?.data?.tokens?.access_token;
-  const dispatchAIChatBot = useAIChatBotDispatch() as any
-  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
+  const { openCopilot } = useAICopilot()
 
-  async function handleAction(label: string) {
+  function handleAction(label: string) {
     const selection = getTipTapEditorSelectedText()
     const prompt = getPrompt(label, selection)
-    dispatchAIChatBot({ type: 'setIsModalOpen' })
-    await sendMessage(prompt)
+    openCopilot(prompt)
   }
 
   const getTipTapEditorSelectedText = () => {
@@ -229,74 +212,6 @@ function AIActionButton(props: {
     }
   }
 
-  const sendMessage = async (message: string) => {
-    if (aiChatBotState.aichat_uuid) {
-      await dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'user', message: message, type: 'user' },
-      })
-      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' })
-      const response = await sendActivityAIChatMessage(
-        message,
-        aiChatBotState.aichat_uuid,
-        props.activity.activity_uuid, access_token
-      )
-      if (response.success == false) {
-        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
-        await dispatchAIChatBot({
-          type: 'setError',
-          payload: {
-            isError: true,
-            status: response.status,
-            error_message: response.data.detail,
-          },
-        })
-        return
-      }
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
-      await dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      })
-    } else {
-      await dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'user', message: message, type: 'user' },
-      })
-      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' })
-      const response = await startActivityAIChatSession(
-        message,
-        access_token,
-        props.activity.activity_uuid
-      )
-      if (response.success == false) {
-        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
-        await dispatchAIChatBot({
-          type: 'setError',
-          payload: {
-            isError: true,
-            status: response.status,
-            error_message: response.data.detail,
-          },
-        })
-        return
-      }
-      await dispatchAIChatBot({
-        type: 'setAichat_uuid',
-        payload: response.data.aichat_uuid,
-      })
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
-      await dispatchAIChatBot({
-        type: 'addMessage',
-        payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      })
-    }
-  }
-
   const tooltipLabel =
     props.label === 'Explain'
       ? 'Explain a word or a sentence with AI'
@@ -310,13 +225,13 @@ function AIActionButton(props: {
       <ToolTip sideOffset={10} slateBlack content={tooltipLabel}>
         <button
           onClick={() => handleAction(props.label)}
-          className="flex space-x-1.5 items-center bg-white/10 px-2 py-0.5 rounded-md outline-1 outline-neutral-200/20 text-sm font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+          className="flex items-center space-x-1.5 rounded-md bg-accent px-2 py-0.5 text-sm font-semibold text-accent-foreground outline outline-1 outline-primary/20 transition-all delay-75 ease-linear hover:bg-primary/10 hover:outline-primary/40"
         >
           {props.label === 'Explain' && <BookOpen size={16} />}
           {props.label === 'Summarize' && <FormInput size={16} />}
           {props.label === 'Translate' && <Languages size={16} />}
           {props.label === 'Examples' && (
-            <div className="text-white/50">Ex</div>
+            <div className="text-primary/60">Ex</div>
           )}
           <div>{props.label}</div>
         </button>

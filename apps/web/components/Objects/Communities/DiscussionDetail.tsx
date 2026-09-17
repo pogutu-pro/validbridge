@@ -92,7 +92,7 @@ export function DiscussionDetail({
   const handleDelete = async () => {
     try {
       await deleteDiscussion(discussion.discussion_uuid, accessToken)
-      router.push(getUriWithOrg(orgslug, `/community/${communityId}`))
+      router.push(getUriWithOrg(orgslug, `/connect/${communityId}`))
       router.refresh()
     } catch (err: any) {
       const message =

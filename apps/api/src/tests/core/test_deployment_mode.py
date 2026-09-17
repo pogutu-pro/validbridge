@@ -1,91 +1,38 @@
-from types import SimpleNamespace
-from unittest.mock import patch
+"""Tests for the deployment-mode contract (src/core/deployment_mode.py).
 
-from src.core.deployment_mode import get_deployment_mode
+This build is ungated: the separate Enterprise package, its licence checks and
+the feature gates have been removed. ``get_deployment_mode()`` therefore always
+resolves to the single fully-enabled mode — these tests pin that contract so a
+future change cannot silently reintroduce gating.
+"""
 
-
-def _config(saas_mode: bool):
-    return SimpleNamespace(general_config=SimpleNamespace(saas_mode=saas_mode))
-
-
-def test_get_deployment_mode_prefers_saas_over_ee():
-    with (
-        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(True)),
-        patch("src.core.deployment_mode.is_ee_available", return_value=True),
-    ):
-        assert get_deployment_mode() == "saas"
+from src.core.deployment_mode import (
+    EE_ONLY_FEATURES,
+    DeploymentMode,
+    get_deployment_mode,
+)
 
 
-def test_get_deployment_mode_fails_closed_when_ee_hooks_do_not_load():
-    """An unimportable EE package must NOT grant EE.
-
-    This used to assert "ee". is_ee_available() only checks that an `ee`
-    directory exists, so any import error in the EE tree — a missing
-    dependency, a broken submodule, a stray empty directory — reached this
-    branch and unlocked every EE feature with the license check never run and
-    verify_manifest() never called, since its only caller lives inside the
-    module that failed to import.
-    """
-    with (
-        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
-        patch("src.core.deployment_mode.is_ee_available", return_value=True),
-        patch("src.core.deployment_mode.get_ee_hooks", return_value=None),
-    ):
-        assert get_deployment_mode() == "oss"
+def test_get_deployment_mode_always_returns_ee():
+    """The ungated build resolves to 'ee' regardless of config or env."""
+    assert get_deployment_mode() == "ee"
 
 
-def test_get_deployment_mode_returns_oss_when_ee_unavailable():
-    with (
-        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
-        patch("src.core.deployment_mode.is_ee_available", return_value=False),
-    ):
-        assert get_deployment_mode() == "oss"
+def test_deployment_mode_is_a_valid_literal():
+    """The return type stays one of the documented modes."""
+    assert get_deployment_mode() in DeploymentMode.__args__
 
 
-def test_get_deployment_mode_returns_ee_when_license_active():
-    hooks = SimpleNamespace(is_license_active=lambda: True)
-    with (
-        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
-        patch("src.core.deployment_mode.is_ee_available", return_value=True),
-        patch("src.core.deployment_mode.get_ee_hooks", return_value=hooks),
-    ):
-        assert get_deployment_mode() == "ee"
-
-
-def test_get_deployment_mode_degrades_to_oss_when_license_inactive():
-    hooks = SimpleNamespace(is_license_active=lambda: False)
-    with (
-        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
-        patch("src.core.deployment_mode.is_ee_available", return_value=True),
-        patch("src.core.deployment_mode.get_ee_hooks", return_value=hooks),
-    ):
-        assert get_deployment_mode() == "oss"
-
-
-def test_get_deployment_mode_fails_closed_for_hooks_without_license_check():
-    """Hooks lacking is_license_active must NOT grant EE.
-
-    This also used to assert "ee", to keep pre-licensing EE builds working.
-    That grace period is over — the license client shipped in 1.2.2 — and the
-    branch was a license bypass anyone could reach by removing one function
-    from an unsigned file. Deliberate behaviour change: an EE build older than
-    1.2.2 now runs as OSS instead of unlicensed EE.
-    """
-    hooks = SimpleNamespace()
-    with (
-        patch("src.core.deployment_mode.get_validbridge_config", return_value=_config(False)),
-        patch("src.core.deployment_mode.is_ee_available", return_value=True),
-        patch("src.core.deployment_mode.get_ee_hooks", return_value=hooks),
-    ):
-        assert get_deployment_mode() == "oss"
+def test_no_features_are_gated():
+    """Nothing is restricted in this build."""
+    assert EE_ONLY_FEATURES == frozenset()
 
 
 def test_empty_ee_dir_does_not_count_as_ee_available(tmp_path, monkeypatch):
     """A directory named "ee" with no hooks.py is not an EE install.
 
-    get_deployment_mode() already fails closed on a hooks module it cannot
-    load, but is_ee_available() is consulted on its own elsewhere, so it
-    should not claim EE is present either.
+    is_ee_available() lives in ee_hooks (not deployment_mode) and is consulted
+    on its own for hook wiring, so it should not claim EE is present either.
     """
     from src.core.ee_hooks import is_ee_available
 

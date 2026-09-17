@@ -1,39 +1,27 @@
 'use client'
-import { Loader2 } from 'lucide-react'
 import { motion } from 'motion/react'
 
 function PageLoading() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className="fixed inset-0 flex flex-col items-center justify-center gap-4 bg-white">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ 
-          opacity: [0, 0.5, 1], 
-          scale: 1,
-          transition: {
-            duration: 0.8,
-            scale: {
-              type: "spring",
-              stiffness: 50,
-              damping: 15,
-              delay: 0.2
-            },
-            opacity: {
-              duration: 0.6,
-              times: [0, 0.6, 1]
-            }
-          }
-        }}
-        exit={{ 
-          opacity: 0, 
-          scale: 0.95,
-          transition: {
-            duration: 0.4,
-            ease: "easeOut"
-          }
-        }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="flex flex-col items-center gap-4"
       >
-        <Loader2 className="w-10 h-10 text-gray-400 animate-spin" />
+        <motion.img
+          src="/validbridge.svg"
+          alt="ValidBridge"
+          width={44}
+          height={44}
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <span className="text-sm font-semibold tracking-wide text-black/40">
+          Valid<span className="text-[#FF5A1F]">Bridge</span>
+        </span>
       </motion.div>
     </div>
   )

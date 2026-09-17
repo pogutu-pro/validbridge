@@ -21,6 +21,18 @@ from src.services.demo.sync import sync_demo
 EPOCH_DAY = date(2026, 8, 9)
 
 
+def _expected_course_count() -> int:
+    """Number of courses the demo bundle currently ships.
+
+    Kept in one place so the storefront-failure tests assert against the same
+    figure as the catalogue seeding, and so bumping the bundle only needs to
+    change this line.
+    """
+    from src.services.demo.bundle_loader import get_bundle
+
+    return len(get_bundle().courses)
+
+
 @pytest.fixture
 def no_uploads(monkeypatch):
     from src.services.demo import sync as sync_module
@@ -436,7 +448,7 @@ async def test_a_storefront_failure_does_not_cost_the_whole_demo(db, monkeypatch
             select(func.count()).select_from(Course).where(Course.org_id == org.id)
         )
     ).scalar_one()
-    assert courses == 6, "the catalogue is incomplete"
+    assert courses == _expected_course_count(), "the catalogue is incomplete"
     assert "store:failed" in stats.steps, "the failure was not recorded"
 
 
@@ -467,142 +479,34 @@ async def test_a_storefront_drift_failure_does_not_cost_the_whole_demo(db, monke
             select(func.count()).select_from(Course).where(Course.org_id == org.id)
         )
     ).scalar_one()
-    assert courses == 6
+    assert courses == _expected_course_count()
     assert "store-drift:failed" in stats.steps
 
 
-def test_both_store_steps_ask_the_same_capability_question():
-    """They disagreed once, and the demo stopped provisioning because of it.
-
-    The seeding skipped itself on an older Enterprise build while the drift
-    sweep went ahead and referenced a column that build does not have.
-    """
+def test_both_store_steps_import_payments_models_directly():
+    """Payments is a first-class feature: both store steps import the models
+    from src.db.payments directly, with no EE capability gate."""
     import inspect
 
     from src.services.demo import sync as sync_module
 
     for fn in (sync_module._sync_store, sync_module._delete_store_drift):
         source = inspect.getsource(fn)
-        assert "_store_unsupported_reason()" in source, (
-            f"{fn.__name__} does not use the shared storefront capability gate"
+        assert "src.db.payments" in source, (
+            f"{fn.__name__} does not import from the first-class payments module"
         )
 
 
 # ---------------------------------------------------------------------------
 # the storefront capability gate
 #
-# This is the code that decides whether a build can host the storefront, and
-# it exists for an environment CI does not have: an Enterprise tree, present
-# and importable, but older than the demo needs. Both production failures lived
-# in exactly that gap, so the decision is tested here against stand-in modules
-# rather than left to the next deploy to evaluate.
+# Payments is a first-class, ungated feature (models live in src/db/payments),
+# so the gate that used to decide whether an EE tree was new enough to host the
+# storefront has been removed: the demo storefront is always supported.
 # ---------------------------------------------------------------------------
 
-def _fake_ee(monkeypatch, *, provider_members, enrolment_attrs):
-    """Install a stand-in Enterprise payments package for one test."""
-    import sys
-    import types
-    from enum import Enum
-
-    provider = Enum("PaymentProviderEnum", provider_members, type=str)
-    enrolment = type("PaymentsEnrollment", (), dict(enrolment_attrs))
-
-    payments = types.ModuleType("ee.db.payments.payments")
-    payments.PaymentProviderEnum = provider
-    enrolments = types.ModuleType("ee.db.payments.payments_enrollments")
-    enrolments.PaymentsEnrollment = enrolment
-
-    for name, module in (
-        ("ee", types.ModuleType("ee")),
-        ("ee.db", types.ModuleType("ee.db")),
-        ("ee.db.payments", types.ModuleType("ee.db.payments")),
-        ("ee.db.payments.payments", payments),
-        ("ee.db.payments.payments_enrollments", enrolments),
-    ):
-        monkeypatch.setitem(sys.modules, name, module)
-
-    # The gate asks the deployment first; the suite pins oss.
-    monkeypatch.setattr(
-        "src.core.deployment_mode.get_deployment_mode", lambda: "saas"
-    )
-
-
-def test_the_gate_refuses_a_community_install(monkeypatch):
-    """No payments package at all — normal, and not a fault."""
-    import sys
-
+def test_the_storefront_is_always_supported(monkeypatch):
+    """No payments package gating anymore — the storefront is always seeded."""
     from src.services.demo.sync import _store_unsupported_reason
-
-    monkeypatch.setattr(
-        "src.core.deployment_mode.get_deployment_mode", lambda: "saas"
-    )
-    for name in list(sys.modules):
-        if name == "ee" or name.startswith("ee."):
-            monkeypatch.delitem(sys.modules, name, raising=False)
-    monkeypatch.setattr(sys, "path", [p for p in sys.path if "ee" not in p])
-
-    reason = _store_unsupported_reason()
-    assert reason is not None
-    assert "community install" in reason
-
-
-def test_the_gate_refuses_a_build_without_the_custom_provider(monkeypatch):
-    """Production's build. STRIPE would be a checkout somebody could complete."""
-    from src.services.demo.sync import _store_unsupported_reason
-
-    _fake_ee(
-        monkeypatch,
-        provider_members={"STRIPE": "stripe"},
-        enrolment_attrs={"enrollment_uuid": "x"},
-    )
-
-    reason = _store_unsupported_reason()
-    assert reason is not None
-    assert "CUSTOM" in reason
-    assert "STRIPE" in reason, "the message should name what the build does have"
-
-
-def test_the_gate_refuses_a_build_without_enrollment_uuid(monkeypatch):
-    """The second production failure: the sweep matches enrolments by uuid."""
-    from src.services.demo.sync import _store_unsupported_reason
-
-    _fake_ee(
-        monkeypatch,
-        provider_members={"STRIPE": "stripe", "CUSTOM": "custom"},
-        enrolment_attrs={},
-    )
-
-    reason = _store_unsupported_reason()
-    assert reason is not None
-    assert "enrollment_uuid" in reason
-
-
-def test_the_gate_allows_a_complete_build(monkeypatch):
-    """Everything present: the storefront is seeded and swept as before."""
-    from src.services.demo.sync import _store_unsupported_reason
-
-    _fake_ee(
-        monkeypatch,
-        provider_members={"STRIPE": "stripe", "CUSTOM": "custom"},
-        enrolment_attrs={"enrollment_uuid": "x"},
-    )
 
     assert _store_unsupported_reason() is None
-
-
-def test_the_gate_refuses_oss_regardless_of_what_is_installed(monkeypatch):
-    """Payments is Enterprise-gated, so an oss deployment has no storefront."""
-    from src.services.demo.sync import _store_unsupported_reason
-
-    _fake_ee(
-        monkeypatch,
-        provider_members={"STRIPE": "stripe", "CUSTOM": "custom"},
-        enrolment_attrs={"enrollment_uuid": "x"},
-    )
-    monkeypatch.setattr(
-        "src.core.deployment_mode.get_deployment_mode", lambda: "oss"
-    )
-
-    reason = _store_unsupported_reason()
-    assert reason is not None
-    assert "oss mode" in reason

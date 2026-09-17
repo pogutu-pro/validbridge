@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -284,27 +285,60 @@ def test_is_multi_org_allowed(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_check_ee_activity_paid_access(monkeypatch):
-    calls = []
-
-    async def check_activity_paid_access(request, activity_id, user, db_session):
-        calls.append((request, activity_id, user, db_session))
-        return False
-
-    hooks = SimpleNamespace(check_activity_paid_access=check_activity_paid_access)
-    monkeypatch.setattr(ee_hooks, "get_ee_hooks", lambda: hooks)
-
-    result = await ee_hooks.check_ee_activity_paid_access("req", 7, "user", "db")
+async def test_check_ee_activity_paid_access_fails_closed_without_user(monkeypatch):
+    # A user principal with no id must be denied (fail-closed), never granted.
+    result = await ee_hooks.check_ee_activity_paid_access("req", 7, object(), "db")
     assert result is False
-    assert calls == [("req", 7, "user", "db")]
 
 
 @pytest.mark.asyncio
-async def test_check_ee_activity_paid_access_defaults_to_free(monkeypatch):
-    monkeypatch.setattr(ee_hooks, "get_ee_hooks", lambda: None)
+async def test_check_ee_activity_paid_access_free_course_grants(monkeypatch):
+    user = SimpleNamespace(id=11)
+    session = _FakeAsyncSession("course_abc", [])
 
-    result = await ee_hooks.check_ee_activity_paid_access("req", 7, "user", "db")
+    monkeypatch.setattr("src.security.superadmin.is_user_superadmin", AsyncMock(return_value=False))
+    monkeypatch.setattr(
+        "src.services.payments.payments_access.get_paywall_offer", AsyncMock(return_value=None)
+    )
+
+    result = await ee_hooks.check_ee_activity_paid_access("req", 7, user, session)
     assert result is True
+
+
+@pytest.mark.asyncio
+async def test_check_ee_activity_paid_access_enrolled_grants(monkeypatch):
+    user = SimpleNamespace(id=11)
+    session = _FakeAsyncSession("course_abc", [])
+
+    monkeypatch.setattr("src.security.superadmin.is_user_superadmin", AsyncMock(return_value=False))
+    monkeypatch.setattr(
+        "src.services.payments.payments_access.get_paywall_offer",
+        AsyncMock(return_value={"offer_id": 1, "offer_name": "Pro", "amount": 9.0, "currency": "USD"}),
+    )
+    monkeypatch.setattr(
+        "src.services.payments.payments_access.check_enrollment_access", AsyncMock(return_value=True)
+    )
+
+    result = await ee_hooks.check_ee_activity_paid_access("req", 7, user, session)
+    assert result is True
+
+
+@pytest.mark.asyncio
+async def test_check_ee_activity_paid_access_unenrolled_denies(monkeypatch):
+    user = SimpleNamespace(id=11)
+    session = _FakeAsyncSession("course_abc", [])
+
+    monkeypatch.setattr("src.security.superadmin.is_user_superadmin", AsyncMock(return_value=False))
+    monkeypatch.setattr(
+        "src.services.payments.payments_access.get_paywall_offer",
+        AsyncMock(return_value={"offer_id": 1, "offer_name": "Pro", "amount": 9.0, "currency": "USD"}),
+    )
+    monkeypatch.setattr(
+        "src.services.payments.payments_access.check_enrollment_access", AsyncMock(return_value=False)
+    )
+
+    result = await ee_hooks.check_ee_activity_paid_access("req", 7, user, session)
+    assert result is False
 
 
 @pytest.mark.asyncio

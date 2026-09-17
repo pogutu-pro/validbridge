@@ -193,8 +193,8 @@ async def add_org_ai_credits(
     # admin here lets a tenant mint unlimited free AI credits for itself
     # (revenue/quota bypass), so this must be a billing-platform / superadmin
     # operation — same posture as the /set endpoint.
-    ensure_ee_superadmin_surface()
     user_id = resolve_acting_user_id(current_user)
+    ensure_ee_superadmin_surface()
     if not user_id or not await is_user_superadmin(user_id, db_session):
         raise HTTPException(
             status_code=403,
@@ -260,8 +260,8 @@ async def reset_org_ai_credits(
     # Resetting consumed usage effectively grants free metered AI usage, letting
     # a tenant zero out its own usage at will and bypass the plan's AI quota.
     # This is a billing-platform / superadmin operation (same posture as /set).
-    ensure_ee_superadmin_surface()
     user_id = resolve_acting_user_id(current_user)
+    ensure_ee_superadmin_surface()
     if not user_id or not await is_user_superadmin(user_id, db_session):
         raise HTTPException(
             status_code=403,
@@ -304,8 +304,8 @@ async def set_org_ai_credits(
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
-    ensure_ee_superadmin_surface()
     user_id = resolve_acting_user_id(current_user)
+    ensure_ee_superadmin_surface()
     if not user_id or not await is_user_superadmin(user_id, db_session):
         raise HTTPException(status_code=403, detail="Superadmin access required")
 

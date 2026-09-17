@@ -160,7 +160,7 @@ const FlipcardExtension: React.FC = (props: any) => {
     return baseColors[color as keyof typeof baseColors] || baseColors.blue
   }
 
-  const colors = ['sky', 'green', 'yellow', 'red', 'purple', 'teal', 'amber', 'indigo', 'neutral', 'blue']
+  const colors = ['sky', 'green', 'yellow', 'red', 'teal', 'amber', 'indigo', 'neutral', 'blue']
 
   const handleQuestionEdit = () => {
     setIsEditingQuestion(true)

@@ -9,7 +9,7 @@
     "assignments": "Assignments",
     "boards": "Boards",
     "payments": "Payments",
-    "playgrounds": "Playgrounds",
+    "playgrounds": "Labs",
     "organization": "Organization",
     "analytics": "Analytics",
     "dashboard": "Dashboard",
@@ -91,7 +91,7 @@
         },
         "communities": {
           "title": "Standard Feature",
-          "description": "Communities is a premium feature available only to organizations on our Standard plan or higher. Upgrade to unlock discussion communities for your members."
+          "description": "Connect is a premium feature available only to organizations on our Standard plan or higher. Upgrade to unlock discussion spaces for your members."
         },
         "podcasts": {
           "title": "Standard Feature",
@@ -131,7 +131,7 @@
         },
         "playgrounds": {
           "title": "Standard Feature",
-          "description": "Playgrounds is a premium feature available only to organizations on our Standard plan or higher. Upgrade to create interactive AI-generated experiences for your learners."
+          "description": "Labs is a premium feature available only to organizations on our Standard plan or higher. Upgrade to create interactive AI-generated experiences for your learners."
         },
         "scorm": {
           "title": "Enterprise Feature",
@@ -151,12 +151,12 @@
           "courses": "Courses",
           "library": "Library",
           "folders": "Library",
-          "communities": "Communities",
+          "communities": "Connect",
           "podcasts": "Podcasts",
           "payments": "Payments",
           "trail": "Progress Tracking",
           "boards": "Boards",
-          "playgrounds": "Playgrounds"
+          "playgrounds": "Labs"
         },
         "public": {
           "title": "{{feature}} Not Available",
@@ -211,7 +211,7 @@
     "no_content_yet": "No content yet",
     "other": "Other",
     "disabled": "Disabled",
-    "store": "Store",
+    "store": "Marketplace",
     "organizations": "Organizations",
     "billing": "Billing",
     "create_organization": "Create organization",
@@ -703,7 +703,7 @@
     "sign_in_to_see_courses_description": "Courses in this academy may only be visible once you are signed in."
   },
   "communities": {
-    "title": "Communities",
+    "title": "Connect",
     "new_community": "New Community",
     "no_communities": "No communities yet",
     "no_communities_description": "Create a community to start discussions",
@@ -1221,15 +1221,15 @@
     }
   },
   "library": {
-    "library": "Library",
+    "library": "Resources",
     "my_library": "My Library",
     "new_folder": "New Folder",
     "tabs": {
       "courses": "Courses",
       "podcasts": "Podcasts",
-      "communities": "Communities",
+      "communities": "Connect",
       "boards": "Boards",
-      "playgrounds": "Playgrounds",
+      "playgrounds": "Labs",
       "media": "Media"
     },
     "add_content": "Add content",
@@ -1601,9 +1601,9 @@
       "all": "All",
       "courses": "Courses",
       "users": "Members",
-      "communities": "Communities",
+      "communities": "Connect",
       "discussions": "Discussions",
-      "playgrounds": "Playgrounds",
+      "playgrounds": "Labs",
       "podcasts": "Podcasts"
     },
     "course": "Course",
@@ -2026,7 +2026,7 @@
       "members": "Members",
       "settings": "Settings",
       "courses": "Courses",
-      "communities": "Communities",
+      "communities": "Connect",
       "podcasts": "Podcasts",
       "boards": "Boards",
       "published": "published",
@@ -2463,7 +2463,7 @@
         }
       },
       "communities": {
-        "title": "Communities",
+        "title": "Connect",
         "new_community": "New Community",
         "no_communities": "No communities yet",
         "no_communities_description": "Create your first community to start discussions",
@@ -3236,7 +3236,7 @@
             "description": "Enable courses and progress tracking for your organization"
           },
           "communities": {
-            "title": "Communities",
+            "title": "Connect",
             "description": "Enable discussion communities for your organization members"
           },
           "payments": {
@@ -3252,7 +3252,7 @@
             "description": "Create collaborative boards with lists and cards for project management"
           },
           "playgrounds": {
-            "title": "Playgrounds",
+            "title": "Labs",
             "description": "Create interactive AI-generated experiences for your learners"
           }
         },
@@ -3498,7 +3498,7 @@
           "google_search_console_hint": "Verification code from Google Search Console",
           "indexing_controls": "Indexing Controls",
           "indexing_controls_hint": "Control which pages search engines can index",
-          "hide_communities": "Hide Communities",
+          "hide_communities": "Hide Connect",
           "hide_communities_hint": "Hide community pages from search engines"
         },
         "copied_to_clipboard": "Copied to clipboard",
@@ -4889,9 +4889,9 @@
         "pages": "Pages",
         "courses": "Courses",
         "users": "Users",
-        "communities": "Communities",
+        "communities": "Connect",
         "discussions": "Discussions",
-        "playgrounds": "Playgrounds",
+        "playgrounds": "Labs",
         "podcasts": "Podcasts"
       },
       "entries": {
@@ -5841,9 +5841,9 @@
         "interactive_blocks": "Interactive blocks"
       },
       "try_playgrounds": {
-        "title": "Interactive learning with Playgrounds",
+        "title": "Interactive learning with Labs",
         "description": "Build interactive pages for self-paced learning.",
-        "action": "Try Playgrounds"
+        "action": "Try Labs"
       },
       "invite_users": {
         "title": "Invite your team & learners",
@@ -5946,7 +5946,7 @@
           "members_desc": "Grow your learner base and manage them in one place.",
           "payments": "Accept payments",
           "payments_desc": "Sell courses and offer subscriptions to generate revenue.",
-          "communities": "Community discussions",
+          "communities": "Connect",
           "communities_desc": "Let learners connect, ask questions, and share ideas.",
           "podcasts": "Create podcasts",
           "podcasts_desc": "Deliver audio content and reach learners on the go.",
@@ -6035,7 +6035,7 @@
       "open_editor_to_generate": "Open the editor to generate content.",
       "check_back_later": "Check back later.",
       "open_editor": "Open Editor",
-      "breadcrumb": "Playgrounds",
+      "breadcrumb": "Labs",
       "about": "About",
       "author": "Author",
       "access": "Access",

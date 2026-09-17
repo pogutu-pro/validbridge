@@ -28,6 +28,7 @@ const validationSchema = Yup.object().shape({
   currency: Yup.string().required('Currency is required'),
   offer_type: Yup.string().oneOf(['one_time', 'subscription']).required('Offer type is required'),
   price_type: Yup.string().oneOf(['fixed_price', 'customer_choice']).required('Price type is required'),
+  interval: Yup.string().oneOf(['monthly', 'yearly']),
 });
 
 interface OfferFormValues {
@@ -35,6 +36,7 @@ interface OfferFormValues {
   description: string;
   offer_type: 'one_time' | 'subscription';
   price_type: 'fixed_price' | 'customer_choice';
+  interval: 'monthly' | 'yearly';
   benefits: string;
   amount: number;
   currency: string;
@@ -80,9 +82,10 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
     description: '',
     offer_type: 'one_time',
     price_type: 'fixed_price',
+    interval: 'monthly',
     benefits: '',
     amount: 1,
-    currency: 'USD',
+    currency: 'KES',
     payments_group_id: '',
     resource_uuids: [],
   };
@@ -135,21 +138,37 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
               <Label htmlFor="offer_type">Offer Type</Label>
               <Select
                 value={values.offer_type}
-                onValueChange={(value) => {
-                  setFieldValue('offer_type', value);
-                  if (value === 'subscription') setFieldValue('price_type', 'fixed_price');
-                }}
+                onValueChange={(value) => setFieldValue('offer_type', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Offer Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="one_time">One Time</SelectItem>
+                  <SelectItem value="one_time">One-time payment</SelectItem>
                   <SelectItem value="subscription">Subscription</SelectItem>
                 </SelectContent>
               </Select>
               <ErrorMessage name="offer_type" component="div" className="text-red-500 text-sm mt-1" />
             </div>
+
+            {values.offer_type === 'subscription' && (
+              <div>
+                <Label htmlFor="interval">Billing Interval</Label>
+                <Select
+                  value={values.interval}
+                  onValueChange={(value) => setFieldValue('interval', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Billing Interval" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+                <ErrorMessage name="interval" component="div" className="text-red-500 text-sm mt-1" />
+              </div>
+            )}
 
             <div>
               <Label htmlFor="price_type">Price Type</Label>
@@ -162,9 +181,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fixed_price">Fixed Price</SelectItem>
-                  {values.offer_type !== 'subscription' && (
-                    <SelectItem value="customer_choice">Customer Choice</SelectItem>
-                  )}
+                  <SelectItem value="customer_choice">Customer Choice</SelectItem>
                 </SelectContent>
               </Select>
               <ErrorMessage name="price_type" component="div" className="text-red-500 text-sm mt-1" />

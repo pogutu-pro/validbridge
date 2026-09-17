@@ -79,15 +79,15 @@ function SparkleIllustration() {
   return (
     <svg width="64" height="48" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Main sparkle */}
-      <path d="M32 6L35 18L44 22L35 26L32 38L29 26L20 22L29 18Z" fill="#e9d5ff" stroke="#c084fc" strokeWidth="1" />
+      <path d="M32 6L35 18L44 22L35 26L32 38L29 26L20 22L29 18Z" fill="#ffedd5" stroke="#f97316" strokeWidth="1" />
       {/* Small sparkles */}
-      <path d="M14 12L15.5 16L19 18L15.5 20L14 24L12.5 20L9 18L12.5 16Z" fill="#f3e8ff" stroke="#d8b4fe" strokeWidth="0.8" />
-      <path d="M50 10L51.2 13.5L54 15L51.2 16.5L50 20L48.8 16.5L46 15L48.8 13.5Z" fill="#f3e8ff" stroke="#d8b4fe" strokeWidth="0.8" />
-      <path d="M48 32L49 35L52 36L49 37L48 40L47 37L44 36L47 35Z" fill="#f3e8ff" stroke="#d8b4fe" strokeWidth="0.8" />
+      <path d="M14 12L15.5 16L19 18L15.5 20L14 24L12.5 20L9 18L12.5 16Z" fill="#fff7ed" stroke="#fdba74" strokeWidth="0.8" />
+      <path d="M50 10L51.2 13.5L54 15L51.2 16.5L50 20L48.8 16.5L46 15L48.8 13.5Z" fill="#fff7ed" stroke="#fdba74" strokeWidth="0.8" />
+      <path d="M48 32L49 35L52 36L49 37L48 40L47 37L44 36L47 35Z" fill="#fff7ed" stroke="#fdba74" strokeWidth="0.8" />
       {/* Dots */}
-      <circle cx="10" cy="34" r="1.5" fill="#e9d5ff" />
-      <circle cx="54" cy="26" r="1" fill="#e9d5ff" />
-      <circle cx="22" cy="40" r="1" fill="#e9d5ff" />
+      <circle cx="10" cy="34" r="1.5" fill="#ffedd5" />
+      <circle cx="54" cy="26" r="1" fill="#ffedd5" />
+      <circle cx="22" cy="40" r="1" fill="#ffedd5" />
     </svg>
   )
 }
@@ -429,29 +429,26 @@ function PlaygroundModal({
         style={{ pointerEvents: 'auto' }}
       />
       <div
-        className="relative w-[95vw] max-w-[1400px] h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-inset ring-white/10 backdrop-blur-md min-h-0"
-        style={{
-          pointerEvents: 'auto',
-          background: 'linear-gradient(0deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255,255,255,0.18) 0%, rgba(0,0,0,0) 100%), rgb(2 1 25 / 98%)',
-        }}
+        className="relative w-[95vw] max-w-[1400px] h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border bg-white backdrop-blur-md min-h-0"
+        style={{ pointerEvents: 'auto' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <Sparkles size={13} className="text-white" />
             </div>
-            <span className="text-sm font-semibold text-white/70">{t('boards.playground_block.title')}</span>
+            <span className="text-sm font-semibold text-foreground">{t('boards.playground_block.title')}</span>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={onSave}
               disabled={!localHtml}
               className={cn(
-                'flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all outline outline-1',
+                'flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all border',
                 localHtml
-                  ? 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 outline-neutral-100/10 hover:outline-neutral-200/40'
-                  : 'bg-white/5 text-white/20 cursor-not-allowed outline-white/5'
+                  ? 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary border-border hover:border-border'
+                  : 'bg-secondary text-muted-foreground cursor-not-allowed border-border'
               )}
             >
               <Save className="w-4 h-4" />
@@ -459,27 +456,27 @@ function PlaygroundModal({
             </button>
             <X
               size={20}
-              className="text-white/50 hover:cursor-pointer bg-white/10 p-1 rounded-full items-center hover:bg-white/20 transition-colors"
+              className="text-muted-foreground hover:cursor-pointer bg-secondary p-1 rounded-full items-center hover:bg-accent transition-colors"
               onClick={onClose}
             />
           </div>
         </div>
 
         {error && (
-          <div className="px-6 py-3 bg-red-500/20 outline outline-1 outline-red-500 text-red-200 text-sm flex-shrink-0">
+          <div className="px-6 py-3 bg-red-50 border border-red-200 text-red-600 text-sm flex-shrink-0">
             {error}
           </div>
         )}
 
         <div className="flex-1 flex min-h-0">
           {/* Preview */}
-          <div className="flex-1 border-e border-white/5 relative">
-            <div className="absolute inset-0 bg-black/20">
+          <div className="flex-1 border-e border-border relative">
+            <div className="absolute inset-0 bg-secondary">
               {showLoading && (
                 <div className="flex items-center justify-center w-full h-full">
                   <div className="text-center space-y-3">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-orange-400" />
-                    <p className="text-sm text-white/50">{t('boards.playground_block.generating')}</p>
+                    <p className="text-sm text-muted-foreground">{t('boards.playground_block.generating')}</p>
                   </div>
                 </div>
               )}
@@ -487,9 +484,9 @@ function PlaygroundModal({
               {showPreview && previewSrcdoc && (
                 <div className="relative w-full h-full">
                   {showStreaming && (
-                    <div className="absolute top-4 end-4 z-10 flex items-center gap-2 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm ring-1 ring-inset ring-white/10">
+                    <div className="absolute top-4 end-4 z-10 flex items-center gap-2 bg-secondary backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-border">
                       <Loader2 className="w-4 h-4 animate-spin text-orange-400" />
-                      <span className="text-xs text-white/70">{t('boards.playground_block.streaming')}</span>
+                      <span className="text-xs text-foreground">{t('boards.playground_block.streaming')}</span>
                     </div>
                   )}
                   <iframe
@@ -503,10 +500,10 @@ function PlaygroundModal({
               )}
 
               {!showLoading && !showPreview && (
-                <div className="flex items-center justify-center w-full h-full border-2 border-dashed border-white/10 rounded-lg m-2">
+                <div className="flex items-center justify-center w-full h-full border-2 border-dashed border-border rounded-lg m-2">
                   <div className="text-center space-y-2 px-4">
                     <div className="text-4xl">✨</div>
-                    <p className="text-sm text-white/50">{t('boards.playground_block.empty_state')}</p>
+                    <p className="text-sm text-muted-foreground">{t('boards.playground_block.empty_state')}</p>
                   </div>
                 </div>
               )}
@@ -515,14 +512,14 @@ function PlaygroundModal({
 
           {/* Chat */}
           <div className="w-[400px] flex flex-col min-h-0">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <div className="flex items-center gap-2">
                 <Sparkles size={14} className="text-orange-400" />
-                <span className="font-semibold text-sm text-white/70">{t('boards.playground_block.chat_header')}</span>
+                <span className="font-semibold text-sm text-foreground">{t('boards.playground_block.chat_header')}</span>
               </div>
               <div className={cn(
                 'text-xs font-semibold px-3 py-1 rounded-full',
-                isExhausted ? 'bg-red-500/20 text-red-300 outline outline-1 outline-red-500/30' : 'bg-white/5 text-white/40 outline outline-1 outline-neutral-100/10'
+                isExhausted ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-secondary text-muted-foreground border border-border'
               )}>
                 {localIterCount}/{MAX_ITERATIONS}
               </div>
@@ -531,13 +528,13 @@ function PlaygroundModal({
             <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
               {messages.length === 0 && !isLoading && (
                 <div className="space-y-4 pt-4">
-                  <p className="text-sm text-white/50 text-center">{t('boards.playground_block.prompt_text')}</p>
+                  <p className="text-sm text-muted-foreground text-center">{t('boards.playground_block.prompt_text')}</p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {SUGGESTION_CHIPS.map((chip) => (
                       <button
                         key={chip.labelKey}
                         onClick={() => !isLoading && localIterCount < MAX_ITERATIONS && onSend(chip.prompt)}
-                        className="px-4 py-1.5 text-xs font-semibold bg-white/5 text-white/40 rounded-xl hover:text-white/60 hover:bg-white/10 transition-all outline outline-1 outline-neutral-100/10 hover:outline-neutral-200/40"
+                        className="px-4 py-1.5 text-xs font-semibold bg-secondary text-muted-foreground rounded-xl hover:text-muted-foreground hover:bg-secondary transition-all border border-border hover:border-border"
                       >
                         {t(chip.labelKey)}
                       </button>
@@ -549,14 +546,14 @@ function PlaygroundModal({
                 <div key={i} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
                   <div className={cn(
                     'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
-                    msg.role === 'user' ? 'bg-orange-600/80 text-white rounded-ee-md' : 'bg-white/5 text-white/80 rounded-es-md ring-1 ring-inset ring-white/10'
+                    msg.role === 'user' ? 'bg-orange-600/80 text-white rounded-ee-md' : 'bg-secondary text-foreground rounded-es-md border border-border'
                   )}>
                     {msg.role === 'user' ? (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     ) : (
                       <div className="space-y-2">
-                        <p className="text-xs text-white/50 font-medium">{t('boards.playground_block.ai_content')}</p>
-                        <p className="text-white/60 text-xs">{t('boards.playground_block.check_preview')}</p>
+                        <p className="text-xs text-muted-foreground font-medium">{t('boards.playground_block.ai_content')}</p>
+                        <p className="text-muted-foreground text-xs">{t('boards.playground_block.check_preview')}</p>
                       </div>
                     )}
                   </div>
@@ -564,10 +561,10 @@ function PlaygroundModal({
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white/5 rounded-2xl rounded-es-md px-4 py-3 ring-1 ring-inset ring-white/10">
+                  <div className="bg-secondary rounded-2xl rounded-es-md px-4 py-3 border border-border">
                     <div className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-orange-400" />
-                      <span className="text-sm text-white/50">{t('boards.playground_block.creating')}</span>
+                      <span className="text-sm text-muted-foreground">{t('boards.playground_block.creating')}</span>
                     </div>
                   </div>
                 </div>
@@ -575,9 +572,9 @@ function PlaygroundModal({
               <div ref={chatEndRef} />
             </div>
 
-            <div className="border-t border-white/5 p-4">
+            <div className="border-t border-border p-4">
               {isExhausted ? (
-                <div className="text-center text-sm text-white/50 py-2">{t('boards.playground_block.max_iterations')}</div>
+                <div className="text-center text-sm text-muted-foreground py-2">{t('boards.playground_block.max_iterations')}</div>
               ) : (
                 <form onSubmit={handleSubmit} className="relative">
                   <textarea
@@ -589,8 +586,8 @@ function PlaygroundModal({
                     disabled={isLoading}
                     rows={2}
                     className={cn(
-                      'w-full resize-none rounded-lg ring-1 ring-inset ring-white/10 bg-gray-950/40 px-4 py-3 pe-12',
-                      'text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-white/20',
+                      'w-full resize-none rounded-lg border border-border bg-secondary px-4 py-3 pe-12',
+                      'text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border',
                       isLoading ? 'opacity-30' : ''
                     )}
                   />
@@ -599,7 +596,7 @@ function PlaygroundModal({
                     disabled={!canSend}
                     className={cn(
                       'absolute end-3 bottom-3 p-2 rounded-lg transition-all',
-                      canSend ? 'bg-white/10 text-white/70 hover:text-white hover:bg-white/20 outline outline-1 outline-neutral-100/10 hover:outline-neutral-200/40' : 'bg-white/5 text-white/30 cursor-not-allowed'
+                      canSend ? 'bg-secondary text-foreground hover:text-foreground hover:bg-accent border border-border hover:border-border' : 'bg-secondary text-muted-foreground cursor-not-allowed'
                     )}
                   >
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

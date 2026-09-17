@@ -1,6 +1,7 @@
 'use client';
 import DashLeftMenu from '@components/Dashboard/Menus/DashLeftMenu';
 import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu';
+import DashTopbar from '@components/Dashboard/Menus/DashTopbar';
 import OnboardingTracker from '@components/Dashboard/Onboarding/OnboardingTracker';
 import WelcomeModal from '@components/Dashboard/Onboarding/WelcomeModal';
 import DemoBanner from '@components/Objects/Demo/DemoBanner';
@@ -37,6 +38,7 @@ function ClientAdminLayout({
                         <div translate="no" className="notranslate flex flex-col lg:flex-row">
                             {!isMobile && <DashLeftMenu />}
                             <div className="flex flex-col w-full min-w-0 relative isolate pb-24 lg:pb-0">
+                                <DashTopbar />
                                 {/* Renders nothing outside the demo organization. */}
                                 <DemoBanner />
                                 {children}

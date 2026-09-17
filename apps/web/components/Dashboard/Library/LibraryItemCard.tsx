@@ -44,7 +44,7 @@ const TYPE_TONE: Record<string, string> = {
   podcasts: 'bg-rose-50 text-rose-500',
   communities: 'bg-emerald-50 text-emerald-500',
   boards: 'bg-orange-50 text-orange-500',
-  playgrounds: 'bg-fuchsia-50 text-fuchsia-500',
+  playgrounds: 'bg-orange-50 text-orange-500',
 }
 
 function mediaIcon(resource: any) {

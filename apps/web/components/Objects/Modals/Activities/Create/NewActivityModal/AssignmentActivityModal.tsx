@@ -285,7 +285,7 @@ function NewAssignment({ submitActivity: _submitActivity, chapterId, course, clo
             <div className="flex items-start justify-between gap-3 p-3">
               <div className="flex items-start gap-2.5 flex-1 min-w-0">
                 <div className="mt-0.5 flex-none">
-                  <RotateCcw size={16} className="text-fuchsia-500" />
+                  <RotateCcw size={16} className="text-primary" />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <p className="text-xs font-bold text-gray-900">
@@ -328,7 +328,7 @@ function NewAssignment({ submitActivity: _submitActivity, chapterId, course, clo
                     <p className="text-[10px] text-gray-500 leading-snug mt-0.5 flex items-center gap-1">
                       {maxRetries === 0 ? (
                         <>
-                          <InfinityIcon size={11} className="text-fuchsia-500" />
+                          <InfinityIcon size={11} className="text-primary" />
                           <span>{t('dashboard.assignments.modals.edit.form.max_retries_unlimited')}</span>
                         </>
                       ) : (

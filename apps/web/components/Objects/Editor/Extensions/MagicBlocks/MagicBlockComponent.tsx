@@ -235,27 +235,24 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
     <>
       <NodeViewWrapper className="block-magic w-full">
         <div
-          style={{
-            background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
-          }}
-          className="rounded-2xl px-5 py-4 shadow-lg transition-all ease-linear ring-1 ring-inset ring-white/10 backdrop-blur-md"
+          className="rounded-2xl border border-border bg-white px-5 py-4 shadow-sm transition-all ease-linear"
         >
           {/* Header */}
           <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <Image
-                  className="outline outline-1 outline-neutral-200/20 rounded-lg"
+                  className="outline outline-1 outline-neutral-200 rounded-lg"
                   width={20}
                   src={lrnaiIcon}
                   alt="Magic Block"
                 />
-                <span className="text-sm font-semibold text-white/70">
+                <span className="text-sm font-semibold text-foreground">
                   {t('editor.blocks.magic_block_content.title')}
                 </span>
               </div>
               {sessionUuid && (
-                <div className="bg-white/5 text-white/40 py-0.5 px-3 flex space-x-1 rounded-full items-center outline outline-1 outline-neutral-100/10">
+                <div className="bg-secondary text-muted-foreground py-0.5 px-3 flex space-x-1 rounded-full items-center border border-border">
                   <span className="text-xs font-semibold antialiased">
                     {t('editor.blocks.magic_block_content.iterations', { count: iterationCount, max: 6 })}
                   </span>
@@ -265,7 +262,7 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
             {htmlContent && (
               <X
                 size={20}
-                className="text-white/50 hover:cursor-pointer bg-white/10 p-1 rounded-full items-center hover:bg-red-500/30 hover:text-red-300 transition-colors"
+                className="text-muted-foreground hover:cursor-pointer bg-secondary p-1 rounded-full items-center hover:bg-red-50 hover:text-red-600 transition-colors"
                 onClick={handleRemove}
               />
             )}
@@ -279,24 +276,24 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
                 <div className="inline-flex flex-col items-center gap-3">
                   <div
                     style={{
-                      background: 'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)',
+                      background: 'linear-gradient(135deg, #ff8a4d 0%, #ff5a1f 50%, #e64900 100%)',
                     }}
                     className="p-4 rounded-full drop-shadow-md"
                   >
                     <Image src={lrnaiIcon} alt="Magic Block" width={32} height={32} />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-semibold text-white/80">
+                    <p className="font-semibold text-foreground">
                       {t('editor.blocks.magic_block_content.create_interactive')}
                     </p>
-                    <p className="text-sm text-white/50">
+                    <p className="text-sm text-muted-foreground">
                       {t('editor.blocks.magic_block_content.generate_description')}
                     </p>
                   </div>
                   <button
                     onClick={() => setIsModalOpen(true)}
                     style={{
-                      background: 'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)',
+                      background: 'linear-gradient(135deg, #ff8a4d 0%, #ff5a1f 50%, #e64900 100%)',
                     }}
                     className="mt-2 px-5 py-2.5 text-white text-sm font-bold rounded-full transition-all duration-300 ease-in-out hover:scale-105 flex items-center gap-2 drop-shadow-md"
                   >
@@ -311,19 +308,19 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
                 </div>
               ) : (
                 <div className="inline-flex flex-col items-center gap-3">
-                  <div className="p-4 rounded-full bg-white/10">
-                    <Lock className="w-8 h-8 text-white/40" />
+                  <div className="p-4 rounded-full bg-secondary">
+                    <Lock className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-semibold text-white/80 flex items-center gap-2 justify-center">
+                    <p className="font-semibold text-foreground flex items-center gap-2 justify-center">
                       {t('editor.blocks.magic_block_content.title')}
                       <PlanBadge currentPlan={currentPlan} requiredPlan={(rf?.ai?.required_plan || 'standard') as PlanLevel} size="sm" alwaysShow />
                     </p>
-                    <p className="text-sm text-white/50">
+                    <p className="text-sm text-muted-foreground">
                       {t('editor.blocks.magic_block_content.upgrade_required')}
                     </p>
                   </div>
-                  <div className="mt-2 px-5 py-2.5 bg-white/10 text-white/50 text-sm font-bold rounded-full flex items-center gap-2 cursor-not-allowed">
+                  <div className="mt-2 px-5 py-2.5 bg-secondary text-muted-foreground text-sm font-bold rounded-full flex items-center gap-2 cursor-not-allowed">
                     <Image
                       className="outline outline-1 outline-neutral-200/20 rounded-md opacity-50 grayscale"
                       width={16}
@@ -339,7 +336,7 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
             // Has content - show preview with edit button
             <div className="space-y-3">
               <div
-                className="rounded-lg overflow-hidden ring-1 ring-inset ring-white/10 relative"
+                className="rounded-lg overflow-hidden border border-border relative"
                 style={{ height: `${height}px` }}
               >
                 <MagicBlockPreview htmlContent={htmlContent} />
@@ -356,8 +353,8 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
                         className={cn(
                           "px-2 py-0.5 text-xs font-medium rounded transition-colors",
                           height === preset.value
-                            ? "bg-white/20 text-white/70"
-                            : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                         )}
                         title={`${preset.value}px`}
                       >
@@ -369,8 +366,8 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
                   <div
                     onMouseDown={handleResizeStart}
                     className={cn(
-                      "flex items-center gap-1 px-2 py-0.5 cursor-ns-resize text-white/30 hover:text-white/50 transition-colors select-none rounded bg-white/5 hover:bg-white/10",
-                      isResizing && "text-white/60 bg-white/15"
+                      "flex items-center gap-1 px-2 py-0.5 cursor-ns-resize text-muted-foreground hover:text-foreground transition-colors select-none rounded bg-secondary hover:bg-accent",
+                      isResizing && "text-foreground bg-accent"
                     )}
                     title={t('editor.blocks.magic_block_content.drag_resize')}
                   >
@@ -381,7 +378,7 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsPreviewModalOpen(true)}
-                    className="flex space-x-1.5 items-center bg-white/5 cursor-pointer px-4 py-1.5 rounded-xl outline outline-1 outline-neutral-100/10 text-xs font-semibold text-white/40 hover:text-white/60 hover:bg-white/10 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+                    className="flex space-x-1.5 items-center bg-secondary cursor-pointer px-4 py-1.5 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent delay-75 ease-linear transition-all"
                   >
                     <Expand className="w-4 h-4" />
                     <span>{t('editor.blocks.common.expand')}</span>
@@ -389,7 +386,7 @@ function MagicBlockComponent(props: ExtendedNodeViewProps) {
                   {iterationCount < 6 && (
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="flex space-x-1.5 items-center bg-white/5 cursor-pointer px-4 py-1.5 rounded-xl outline outline-1 outline-neutral-100/10 text-xs font-semibold text-white/40 hover:text-white/60 hover:bg-white/10 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+                      className="flex space-x-1.5 items-center bg-secondary cursor-pointer px-4 py-1.5 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent delay-75 ease-linear transition-all"
                     >
                       <Edit3 className="w-4 h-4" />
                       <span>{t('editor.blocks.magic_block_content.edit_left', { count: 6 - iterationCount })}</span>

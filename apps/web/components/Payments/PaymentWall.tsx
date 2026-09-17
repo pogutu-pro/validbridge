@@ -11,6 +11,7 @@ import { formatCurrency } from '@/lib/format';
 
 interface OfferMeta {
   offer_id: number;
+  offer_uuid: string;
   offer_name: string;
   amount: number;
   currency: string;
@@ -48,8 +49,9 @@ function PaymentWall({ offer, resourceName, resourceThumbnail, orgslug }: Paymen
 
   const formattedPrice = formatCurrency(offer.amount, offer.currency, i18n.language);
 
+  const offerHref = offer.offer_uuid ?? String(offer.offer_id)
   const storeHref = slug
-    ? getUriWithOrg(slug, `/store/offers/${offer.offer_id}`)
+    ? getUriWithOrg(slug, `/marketplace/offers/${offerHref}`)
     : '#';
 
   return (

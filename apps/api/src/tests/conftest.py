@@ -77,6 +77,15 @@ from src.db.roles import (
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
 
+# Register every model with SQLModel.metadata before the in-memory SQLite
+# fixtures create their schema. Production does the same at startup via
+# src.core.events.database.import_all_models(); without it, tables whose models
+# are imported lazily inside service functions (e.g. payments) are absent from
+# the fixture DB and queries fail with "no such table".
+from src.core.events.database import import_all_models
+
+import_all_models()
+
 
 # ---------------------------------------------------------------------------
 # Rights helpers

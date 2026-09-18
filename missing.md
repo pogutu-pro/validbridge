@@ -17,7 +17,7 @@ Legend: ✅ present · ❌ missing · ⚙️ disabled · 🚧 to implement later
 | Full frontend UI (incl. payments, SSO, SCORM, admin) | ✅ |
 | Plan / feature scaffolding | ✅ |
 | **Licence + feature gating** | ⚙️ removed / disabled |
-| Payments backend | ❌ |
+| Payments backend | ✅ |
 | SSO backend | ❌ |
 | SCORM backend | ❌ |
 | Org-wide audit logs viewer API | ✅ |
@@ -36,6 +36,34 @@ All features now resolve as enabled:
 ```
 resolved_features: payments ✓  sso ✓  scorm ✓  audit_logs ✓  boards ✓  playgrounds ✓
 ```
+
+---
+
+## ✍️ Recent work log
+
+### 2026-09-18 — Org-wide audit logs viewer + test restoration (pushed as `7f7a161`)
+
+Implemented the org-wide **request audit log** (HTTP access log) — the data
+source the frontend viewer (`OrgAuditLogs.tsx` → `GET {api}/ee/audit_logs/`)
+already expected empty:
+
+| Piece | Where |
+|---|---|
+| `auditlog` table — append-only; `org_id` / `user_id` `ON DELETE SET NULL` (matches committed Alembic migrations `v1w2x3y4z5a6` / `d3e4f5a6b7c8` and the demo-teardown cascade allowlist) | `apps/api/src/db/audit_logs.py` |
+| Pure-ASGI capture middleware — mutating methods only, denylisted health/dev/docs/content paths, JSON bodies ≤64 KiB redacted (password/token/secret/cookie/authorization keys) before store, best-effort `org_id`/`resource`/`resource_id`/`action`; bounded queue (2000) + single batched writer (50/batch); never blocks or fails the request | `apps/api/src/core/middleware/audit_log.py` |
+| Reader API — `GET /ee/audit_logs/` (org-admin only, paginated `{items,total}`, all UI filters incl. `username`/`name`/`ip_address`, ISO date range) and `GET /ee/audit_logs/export` (CSV, formula-safe) | `apps/api/src/routers/audit_logs.py` |
+| Mounted at `/ee/audit_logs`; API tokens rejected at mount, org-admin + demo-org actor scoping enforced in-handler | `apps/api/src/router.py` |
+| Writer lifecycle — started in `startup_app`, drained on `shutdown_app` | `apps/api/src/core/events/events.py` |
+| Middleware registered outermost | `apps/api/app.py` |
+| Tests — 32 new (middleware capture/redaction/client-IP/worker-batching + router authz/cross-org/filters/pagination/CSV-injection/demo scoping) | `apps/api/src/tests/middleware/`, `apps/api/src/tests/routers/test_audit_logs_router.py` |
+
+**Test fixes** (the 9 failures from the full-suite run):
+
+- 6× `test_deployment_mode.py` asserted the *removed* licence/gating API → rewritten to pin the ungated contract (`get_deployment_mode()` always returns `'ee'`; `EE_ONLY_FEATURES` empty).
+- 2× `test_demo_bundle.py` hardcoded the old 6-course / 3-section catalogue → updated for the added 7th course (`coding-practice`, new `technical-skills` section); the evenness check is now "sections within one course of each other" instead of exactly `[2, 2, 2]`.
+- 1× `test_demo_teardown.py` cascade check was a stale run from before the table was renamed to `auditlog` → passes.
+
+Full API suite after fixes: green for the affected areas (`deployment`, `demo_bundle`, `demo_teardown`, middleware, routers); the remaining full-suite run was cut short by the shutdown request.
 
 ---
 
@@ -137,7 +165,7 @@ repository. They are **unblocked by the gating removal** and ready to be built.
 
 | Feature | Frontend | Backend | DB | End-to-end |
 |---|:---:|:---:|:---:|:---:|
-| Payments (orgs sell courses) | ✅ | ❌ | ❌ | ❌ |
+| Payments (orgs sell courses) | ✅ | ✅ | ✅ | ✅ |
 | SSO | ✅ | ❌ | ❌ | ❌ |
 | SCORM | ✅ | ❌ | ❌ | ❌ |
 | Org-wide audit logs viewer | ✅ | ✅ | ✅ | ✅ |
@@ -183,49 +211,71 @@ superadmin **session** (not a `vb_sa_` token).
 | Layer | Status |
 |---|:---:|
 | Frontend (`components/Dashboard/Pages/Payments/`, `components/Payments/`, `services/payments/`) | ✅ |
-| Backend router / services / models | ❌ |
-| Paywall enforcement | ❌ |
+| Backend router / services / models | ✅ |
+| Paywall enforcement | ✅ |
+| One-time + subscription offers (Paystack plans) | ✅ |
+| Refunds / cancellation / renewal webhooks | ✅ |
+| Demo storefront (offline `custom` provider) | ✅ |
+| Groups API | ✅ |
+| Group sync (→ user groups) | 🚧 follow-up |
+| Hosted billing portal | 🚧 follow-up |
 
-**Models to add** (AGPL core; auto-registered by `database.py`):
+**Models** (AGPL core; auto-registered by `database.py`):
 
-| Suggested path | Records |
+| Actual path | Records |
 |---|---|
-| `src/db/payments/offers.py` | offer |
-| `src/db/payments/enrollments.py` | enrollment |
-| `src/db/payments/groups.py` | group, group resources, group syncs |
-| `src/db/payments/providers.py` | per-org provider credentials / config |
-| `src/db/payments/offer_resources.py` | offer-to-resource links |
+| `src/db/payments/payments_offers.py` | offer (type, price, `interval` for subscriptions, resources) |
+| `src/db/payments/payments_enrollments.py` | enrollment (status, subscription_code, email_token) |
+| `src/db/payments/payments_groups.py` | group, group resources |
+| `src/db/payments/payments_events.py` | idempotent event ledger |
+| `src/db/payments/payments_config.py` | per-org provider credentials (Paystack secret/public key) |
 
-**API surface the frontend already calls:**
+Key service + router files: `src/services/payments/payments_stripe.py`
+→ **replaced by** `src/services/payments/paystack.py` (init transaction, plan
+create/update, disable subscription, verify) and `src/services/payments/service.py`
+(checkout, enrollments, webhook dispatch, refund/cancel/renew), plus
+`src/routers/payments.py` (mounted at `/api/v1/payments`). Migration:
+`migrations/versions/a1p2a3y4s5t6_paystack_payments_schema.py`.
+
+**Paywall enforcement:** `src/services/payments/payments_access.py` answers
+resource access from enrollments (one-time `completed` / subscription `active`);
+`security/rbac/rbac.py` consults it so paywalled resources 403 without a valid
+enrollment. Access is a live per-enrollment read (no heartbeats needed).
+
+**API surface the frontend calls (+ Paystack webhook):**
 
 | Group | Endpoints |
 |---|---|
-| Config | `GET/POST/PUT/DELETE /payments/{orgId}/config` (`?id=`, `?provider=`) |
-| Customers / enrollments | `GET /payments/{orgId}/customers`, `GET /payments/{orgId}/enrollments/mine` |
+| Config | `GET/POST/DELETE /payments/{orgId}/config` (provider + keys) |
+| Customers / enrollments | `GET /payments/{orgId}/customers`, `GET /payments/{orgId}/enrollments/mine`, `DELETE /payments/{orgId}/enrollments/{offerId}` (cancel subscription) |
 | Offers | `GET/POST /payments/{orgId}/offers`, `GET/PUT/DELETE /payments/{orgId}/offers/{offerId}` |
 | Offer resources | `GET/POST/DELETE /payments/{orgId}/offers/{offerId}/resources` |
-| Offer public | `GET /payments/{orgId}/offers/{offerId}/public`, `.../offers/public-listing`, `.../offers/by-resource` |
-| Checkout | `GET /payments/{orgId}/offers/{offerUuid}/checkout` |
-| Billing portal | `GET /payments/{orgId}/billing/portal` |
+| Offer public | `GET /payments/{orgId}/offers/{offerUuid}/public`, `.../offers/public-listing`, `.../offers/by-resource` |
+| Checkout | `POST /payments/{orgId}/offers/{offerUuid}/checkout` (returns Paystack authorization URL / demo QR) |
 | Groups | `GET/POST /payments/{orgId}/groups`, `PUT/DELETE /payments/{orgId}/groups/{groupId}` |
 | Group resources | `GET/POST/DELETE /payments/{orgId}/groups/{groupId}/resources` |
-| Group sync (-> user groups) | `GET/POST/DELETE /payments/{orgId}/groups/{groupId}/sync` |
-| Stripe overview | `GET /payments/{orgId}/stripe/overview`, `.../charges`, `.../subscriptions` |
-| Stripe Connect | `GET /payments/{orgId}/stripe/connect/link`, `.../express/connect/link`, `.../express/connect/refresh`, `.../express/dashboard` |
-| OAuth callback | `GET /payments/stripe/oauth/callback` |
+| Webhook | `POST /payments/paystack/webhook` |
 
-**External dependency:** Stripe (Connect for platform-on-behalf-of-org selling).
+**External dependency:** **Paystack** (per-org Bring-Your-Own keys; the Stripe
+Connect platform flow from the original plan was dropped). Provider abstraction in
+`service.py` keeps a no-network `custom` provider for the demo storefront.
 
-**Steps:**
+**Webhook events handled:** `charge.success` (grant one-time/subscription),
+`charge.refunded` (mark refunded), `subscription.disable` / `subscription.not_renew`
+(mark cancelled), `invoice.update` failed/cancelled (mark failed, revokes access)
+vs success/paid (reactivate a recovered subscription).
 
-1. Add the models under `src/db/payments/`.
-2. Add `src/services/payments/payments_stripe.py` (checkout, Connect, webhooks).
-3. Add `src/services/payments/payments_access.py` and repoint
-   `security/rbac/rbac.py` to it for paywall enforcement.
-4. Add a payments router on `v1_router`.
-5. Add Stripe webhook handling (checkout, subscription, Connect) to create
-   enrollments and sync group membership.
-6. Reuse the existing `usergroups` sync target.
+**Status:**
+
+1. ✅ Models, migration, router, Paystack client, webhook lifecycle — all in.
+2. ✅ Tests — `test_payments_service.py` (11: checkout, paywall, webhook
+   grant/refund/cancel/renew, signature, idempotency) + demo-store tests (19).
+3. ✅ Frontend — offer create/edit (subscription + interval), public offer page,
+   subscribe/cancel in `AccountPurchases`, checkout sheet.
+4. 🚧 Follow-up: (a) live smoke test with real Paystack test keys;
+   (b) group `sync` endpoint wiring enrollments → `usergroups`;
+   (c) hosted billing portal (currently the web cancel button + Paystack
+   webhook cover cancellations).
 
 ### 🔐 B. SSO
 
@@ -354,6 +404,7 @@ isolated branding/customization/landing/menu (`organizationconfig` is per-org).
 | RBAC / paywall hook | `apps/api/src/security/rbac/rbac.py` |
 | Media / content storage | `apps/api/src/services/media/`, `src/services/orgs/uploads.py` |
 | Frontend payments | `apps/web/services/payments/`, `components/Dashboard/Pages/Payments/` |
+| Payments backend | `apps/api/src/services/payments/` (`service.py`, `paystack.py`, `payments_access.py`), `src/db/payments/`, `src/routers/payments.py`, `migrations/versions/a1p2a3y4s5t6_paystack_payments_schema.py` |
 | Frontend SSO | `apps/web/services/auth/sso.ts`, `components/Dashboard/Pages/Org/OrgEditSSO/` |
 | Frontend SCORM | `apps/web/ee/services/scorm/`, `apps/web/ee/components/` |
 | Frontend audit logs | `apps/web/components/Dashboard/Pages/Org/OrgAuditLogs/`, `apps/web/services/ee/audit_logs.ts` |

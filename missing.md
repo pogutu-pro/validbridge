@@ -283,6 +283,7 @@ vs success/paid (reactivate a recovered subscription).
 |---|:---:|
 | Frontend (`services/auth/sso.ts`, `OrgEditSSO`, `app/auth/sso/callback`) | ✅ |
 | Backend router / service / providers / model | ❌ |
+| Implementation plan | ✅ `sso-implementation-plan.md` (ordered milestones, exact contracts, fake-IdP test strategy) |
 
 **Model shape** (`SSOConfig`):
 

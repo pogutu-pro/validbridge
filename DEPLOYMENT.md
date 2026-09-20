@@ -174,6 +174,36 @@ State and artifacts live **outside** the git tree at
 `~/validbridge-deployments/`: `logs/`, `backups/` (DB dumps, kept 14 days),
 `state/` (last deployed SHA). Every run appends a full log there.
 
+### If the database predates Alembic (one-time baseline)
+
+The API owns its schema with `SQLModel.metadata.create_all` at container boot
+(the VM's DB was built this way — 71 tables — and never had an
+`alembic_version` row). On the first pipeline deploy, `alembic upgrade head`
+therefore replays DDL that already exists and aborts (e.g. *column "published"
+of relation "activity" already exists*).
+
+Reconcile it **once** by proving the live schema already matches the models,
+then recording that as the Alembic baseline:
+
+```
+# 1. Confirm the DB matches the app models (same table + column sets).
+#    Locally: dump SQLModel.metadata and diff it against information_schema.
+#    (On 2026-09-20 this compared equal: 71/71 tables, 0 column differences.)
+
+# 2. On the VM, baseline the existing schema at head (one-off):
+cd ~/projects/validbridge
+docker compose run --rm --no-deps --entrypoint sh backend -c "uv run alembic stamp head"
+
+# 3. Verify:
+docker compose exec -T db psql -U validbridge -d validbridge \
+  -tAc "select version_num from alembic_version;"      # -> the head revision
+docker compose run --rm --no-deps --entrypoint sh backend -c "uv run alembic current"
+```
+
+After that, `alembic upgrade head` applies only genuinely new migrations, and
+future deploys need no manual step. Do **not** stamp a DB whose schema does not
+match the models — that would skip migrations the code needs.
+
 ### Manual / emergency deploy
 
 Open **Actions → Deploy Production → Run workflow** and enter a ref. The

@@ -55,6 +55,21 @@ def db_session():
     return session
 
 
+def test_sso_routes_are_mounted_under_auth_sso():
+    """Regression guard for the real router assembly (src/router.py).
+
+    The frontend (services/auth/sso.ts) and ``_callback_url()`` both use
+    ``/api/v1/auth/sso/...``. The per-test ``app`` fixture mounts the router
+    manually, so it cannot catch a wrong production prefix — this does.
+    """
+    from app import app as real_app
+
+    paths = set(real_app.openapi().get("paths", {}))
+    assert "/api/v1/auth/sso/check" in paths
+    assert "/api/v1/auth/sso/callback" in paths
+    assert "/api/v1/auth/check" not in paths
+
+
 @pytest.fixture
 def app(db_session):
     app = FastAPI()

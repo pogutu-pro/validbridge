@@ -100,6 +100,7 @@ Provider is `resend` or `smtp`.
   - Get: `https://dashboard.workos.com` → create Environment → **API Keys** → copy **Client ID** + **API key (secret)**.
   - [x] `VALIDBRIDGE_WORKOS_CLIENT_SECRET` set and validated live; `VALIDBRIDGE_WORKOS_REDIRECT_URI=https://api.validbridge.co.ke/api/v1/auth/sso/callback` set.
   - [ ] ❌ **`VALIDBRIDGE_WORKOS_CLIENT_ID` is still missing** — paste the Client ID; without it the provider reports `available: false`.
+  - [x] **Routes fixed 2026-09-20:** the SSO router was mounted at `/auth` instead of `/auth/sso`, so every frontend call (`/api/v1/auth/sso/check|providers|authorize|callback`) and the WorkOS redirect URI 404'd. Now mounted at `/auth/sso` (`apps/api/src/router.py`); verified live (`/auth/sso/check` → 200, old `/auth/check` → 404). Guard test added.
   - [ ] In WorkOS **Redirects** add the same callback URL; create a **Connection** and put its `org_...` id in the per-org SSO card.
 - [ ] **Custom OIDC** (bring your own IdP)
   - Get from your IdP (Keycloak/Okta/Auth0/Authentik): client id + secret + issuer/discovery; register redirect `https://<api>/api/v1/auth/sso/callback`.

@@ -92,10 +92,11 @@ v1_router.include_router(
     ],
 )
 v1_router.include_router(auth.router, prefix="/auth", tags=["auth"])
-# SSO: admin CRUD + public authorize/callback flow. Mounted alongside auth
-# (same prefix) so routes resolve to /api/v1/auth/sso/... exactly as the
-# frontend expects. Its own module — see the SSO implementation plan.
-v1_router.include_router(sso_router_module.router, prefix="/auth", tags=["auth"])
+# SSO: admin CRUD + public authorize/callback flow. Mounted under /auth/sso so
+# routes resolve to /api/v1/auth/sso/... exactly as the frontend expects and as
+# _callback_url() advertises for the OAuth redirect_uri. Its own module — see
+# the SSO implementation plan.
+v1_router.include_router(sso_router_module.router, prefix="/auth/sso", tags=["auth"])
 # Two-factor: enrollment/management plus the /auth/login/mfa challenge.
 v1_router.include_router(mfa_router_module.router, prefix="/auth", tags=["auth"])
 v1_router.include_router(

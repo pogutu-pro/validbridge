@@ -83,6 +83,7 @@ and change the `secrets.*` references to `vars.*` in the workflow.
 | Secret | Value |
 |---|---|
 | `ORACLE_VPS_SSH_KEY` | a deploy SSH private key the VM will accept (see below). |
+| `ORACLE_VPS_GIT_TOKEN` | a read-only PAT so the **private** repo can be fetched on the VM (see below). |
 | `ORACLE_VPS_HOST` | `84.12.116.16` |
 | `ORACLE_VPS_USER` | `ubuntu` *(defaults to `ubuntu` if unset)* |
 | `SERVER_WORKDIR` | `/home/ubuntu/projects/validbridge` |
@@ -110,10 +111,31 @@ echo "command=\"true\",no-agent-forwarding,no-port-forwarding" >> /dev/null  # o
 cat ~/.ssh/id_validbridge_deploy.pub >> ~/.ssh/authorized_keys
 ```
 
-Paste the **private** key file contents into the `SSH_PRIVATE_KEY` secret.
+Paste the **private** key file contents into the `ORACLE_VPS_SSH_KEY` secret.
 > The runner connects with strict host-key checking. If the VM later gets
 > re-provisioned with a new host key, update `SSH_KNOWN_HOSTS` or the run will
 > fail fast instead of silently MITM-ing.
+
+### Creating the repo read-only token
+
+The repository is **private**, so the first thing the server-side deploy does
+(`git fetch`) needs credentials. Create a **fine-grained PAT** that can only
+read this repo:
+
+1. GitHub → **Settings → Developer settings → Fine-grained tokens → Generate
+   new token**.
+2. Under **Repository access** choose **Only select repositories** →
+   `pogutu-pro/validbridge`.
+3. Under **Permissions → Repository permissions → Contents** set
+   **Read-only** (everything else stays "No access").
+4. Generate and copy the token (`github_pat_…`).
+5. Paste it into the **`ORACLE_VPS_GIT_TOKEN`** secret.
+
+`deploy.sh` sends it as an HTTP `Authorization` header for the fetch only
+(`git -c http.extraheader=…`), so the token never lands in the remote URL or
+on disk. A classic PAT (scope: `repo`) works too; GitHub ignores the Basic-auth
+username, so no other config is needed. If the repo ever becomes public, the
+token secret can be deleted (anonymous HTTPS works).
 
 ## Deploying
 

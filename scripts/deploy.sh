@@ -35,6 +35,12 @@ TARGET="${1:?usage: deploy.sh <commit-sha|ref>}"
 WORKDIR="${SERVER_WORKDIR:-$HOME/projects/validbridge}"
 GIT_REMOTE_URL="${GIT_REMOTE_URL:-https://github.com/pogutu-pro/validbridge.git}"
 
+# Private repositories need credentials for `git fetch`. A read-only PAT can be
+# passed through GIT_REMOTE_TOKEN; it travels as an HTTP Authorization header
+# (git -c http.extraheader) so it never lands in the remote URL or on disk.
+# For public repositories leave it unset — anonymous HTTPS works.
+GIT_REMOTE_TOKEN="${GIT_REMOTE_TOKEN:-}"
+
 # Maintenance state lives OUTSIDE the git tree so repo checkouts can never
 # disturb logs, backups or the deploy lock.
 MAINT_DIR="${DEPLOY_MAINTENANCE_DIR:-validbridge-deployments}"
@@ -96,7 +102,12 @@ fi
 git remote set-url origin "$GIT_REMOTE_URL"
 
 log "Fetching from origin..."
-git fetch --prune --tags origin
+if [ -n "$GIT_REMOTE_TOKEN" ]; then
+  GIT_AUTH="Authorization: Basic $(printf 'x-access-token:%s' "$GIT_REMOTE_TOKEN" | base64 -w0)"
+  git -c "http.extraheader=$GIT_AUTH" fetch --prune --tags origin
+else
+  git fetch --prune --tags origin
+fi
 
 # Resolve the target to a full SHA. Accepts short SHAs and refs.
 TARGET_SHA="$(git rev-parse --verify --quiet "${TARGET}^{commit}")" || \

@@ -74,6 +74,7 @@ jobs:
         env:
           SERVER_HOST: ${{ secrets.ORACLE_VPS_HOST }}
           SSH_PRIVATE_KEY_PRESENT: ${{ secrets.ORACLE_VPS_SSH_KEY != '' }}
+          GIT_REMOTE_TOKEN_PRESENT: ${{ secrets.ORACLE_VPS_GIT_TOKEN != '' }}
         run: |
           if [ -z "$SERVER_HOST" ]; then
             echo "::error::secrets.ORACLE_VPS_HOST is not set. Configure it (see DEPLOYMENT.md)."
@@ -81,6 +82,10 @@ jobs:
           fi
           if [ "$SSH_PRIVATE_KEY_PRESENT" = "false" ]; then
             echo "::error::secrets.ORACLE_VPS_SSH_KEY is not set. Configure the deploy SSH key (see DEPLOYMENT.md)."
+            exit 1
+          fi
+          if [ "$GIT_REMOTE_TOKEN_PRESENT" = "false" ]; then
+            echo "::error::secrets.ORACLE_VPS_GIT_TOKEN is not set. The repository is private, so the server needs a read-only PAT to fetch it (see DEPLOYMENT.md)."
             exit 1
           fi
 
@@ -128,6 +133,7 @@ jobs:
           SERVER_PORT: ${{ vars.ORACLE_VPS_PORT || '22' }}
           SERVER_WORKDIR: ${{ secrets.SERVER_WORKDIR }}
           GIT_REMOTE_URL: ${{ vars.GIT_REMOTE_URL || 'https://github.com/pogutu-pro/validbridge.git' }}
+          GIT_REMOTE_TOKEN: ${{ secrets.ORACLE_VPS_GIT_TOKEN }}
           DEPLOY_MAINTENANCE_DIR: validbridge-deployments
           TARGET_SHA: ${{ steps.resolve.outputs.target-sha }}
         run: |
@@ -155,7 +161,7 @@ jobs:
             -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa \
             -p "$SERVER_PORT" \
             "${SERVER_USER}@${SERVER_HOST}" \
-            "env SERVER_WORKDIR='${SERVER_WORKDIR}' GIT_REMOTE_URL='${GIT_REMOTE_URL}' DEPLOY_MAINTENANCE_DIR='${DEPLOY_MAINTENANCE_DIR}' bash /tmp/validbridge-deploy.sh '${TARGET_SHA}'"
+            "env SERVER_WORKDIR='${SERVER_WORKDIR}' GIT_REMOTE_URL='${GIT_REMOTE_URL}' GIT_REMOTE_TOKEN='${GIT_REMOTE_TOKEN:-}' DEPLOY_MAINTENANCE_DIR='${DEPLOY_MAINTENANCE_DIR}' bash /tmp/validbridge-deploy.sh '${TARGET_SHA}'"
           echo "::endgroup::"
 
       - name: Report deployment to GitHub

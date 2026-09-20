@@ -132,21 +132,21 @@ export default function CommandPalette() {
         key={p.id}
         value={`${title} ${description ?? ''} ${keywords}`}
         onSelect={() => onSelect(p.href, 'page', index)}
-        className="group/item flex cursor-pointer items-center gap-3.5 rounded-lg px-3 py-2.5 text-white/70 transition-colors aria-selected:bg-white/[0.06] aria-selected:text-white"
+        className="group/item flex cursor-pointer items-center gap-3.5 rounded-lg px-3 py-2.5 text-foreground/70 transition-colors aria-selected:bg-foreground/[0.06] aria-selected:text-foreground"
         data-href={p.href}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/[0.04] text-white/60 group-aria-selected/item:bg-white/[0.08] group-aria-selected/item:text-white">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-foreground/[0.04] text-muted-foreground group-aria-selected/item:bg-foreground/[0.08] group-aria-selected/item:text-foreground">
           <Icon size={15} />
         </span>
         <span className="flex min-w-0 flex-1 flex-col leading-snug">
-          <span className="truncate text-[14px] font-medium text-white/90 group-aria-selected/item:text-white">
+          <span className="truncate text-[14px] font-medium text-foreground/90 group-aria-selected/item:text-foreground">
             {title}
           </span>
           {description ? (
-            <span className="truncate text-[12.5px] text-white/40">{description}</span>
+            <span className="truncate text-[12.5px] text-muted-foreground">{description}</span>
           ) : null}
         </span>
-        <span className="hidden text-white/40 group-aria-selected/item:inline">↵</span>
+        <span className="hidden text-muted-foreground group-aria-selected/item:inline">↵</span>
       </Command.Item>
     )
   }
@@ -158,21 +158,21 @@ export default function CommandPalette() {
         key={`${r.type}-${r.id}`}
         value={`${r.title} ${r.subtitle ?? ''}`}
         onSelect={() => onSelect(r.href, r.type, index)}
-        className="group/item flex cursor-pointer items-center gap-3.5 rounded-lg px-3 py-2.5 text-white/70 transition-colors aria-selected:bg-white/[0.06] aria-selected:text-white"
+        className="group/item flex cursor-pointer items-center gap-3.5 rounded-lg px-3 py-2.5 text-foreground/70 transition-colors aria-selected:bg-foreground/[0.06] aria-selected:text-foreground"
         data-href={r.href}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/[0.04] text-white/60 group-aria-selected/item:bg-white/[0.08] group-aria-selected/item:text-white">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-foreground/[0.04] text-muted-foreground group-aria-selected/item:bg-foreground/[0.08] group-aria-selected/item:text-foreground">
           <Icon size={15} />
         </span>
         <span className="flex min-w-0 flex-1 flex-col leading-snug">
-          <span className="truncate text-[14px] font-medium text-white/90 group-aria-selected/item:text-white">
+          <span className="truncate text-[14px] font-medium text-foreground/90 group-aria-selected/item:text-foreground">
             {r.title}
           </span>
           {r.subtitle ? (
-            <span className="truncate text-[12.5px] text-white/40">{r.subtitle}</span>
+            <span className="truncate text-[12.5px] text-muted-foreground">{r.subtitle}</span>
           ) : null}
         </span>
-        <span className="hidden text-white/40 group-aria-selected/item:inline">↵</span>
+        <span className="hidden text-muted-foreground group-aria-selected/item:inline">↵</span>
       </Command.Item>
     )
   }
@@ -181,12 +181,12 @@ export default function CommandPalette() {
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
-          className="fixed inset-0 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:duration-100 data-[state=closed]:duration-75 ease-out"
+          className="fixed inset-0 bg-black/20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:duration-100 data-[state=closed]:duration-75 ease-out"
           style={{ zIndex: 'var(--z-modal-backdrop)' as any }}
         />
         <DialogPrimitive.Content
           aria-label={t('dashboard.search.placeholder')}
-          className="fixed left-1/2 top-[10%] flex w-[94vw] max-w-[760px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-black/85 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl backdrop-saturate-150 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
+          className="fixed left-1/2 top-[10%] flex w-[94vw] max-w-[760px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-[0_30px_80px_-20px_rgba(0,0,0,0.25)] backdrop-blur-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
           style={{ zIndex: 'var(--z-modal)' as any }}
           onOpenAutoFocus={(e) => {
             e.preventDefault()
@@ -197,11 +197,11 @@ export default function CommandPalette() {
           {/* Top rim highlight + soft top glow */}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent"
           />
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/[0.06] via-white/[0.015] to-transparent"
+            className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-foreground/[0.06] via-foreground/[0.01] to-transparent"
           />
           <DialogPrimitive.Title className="sr-only">
             {t('dashboard.search.placeholder')}
@@ -218,17 +218,17 @@ export default function CommandPalette() {
               const tokens = needle.split(/\s+/u).filter(Boolean)
               return tokens.every((tok: string) => haystack.includes(tok)) ? 0.8 : 0
             }}
-            className="flex flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:text-[10.5px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em] [&_[cmdk-group-heading]]:text-white/35"
+            className="flex flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:text-[10.5px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em] [&_[cmdk-group-heading]]:text-muted-foreground"
           >
             {/* Header */}
             <div className="flex items-start gap-4 px-4 sm:px-7 pt-5 sm:pt-6 pb-4 sm:pb-5">
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px] font-medium text-white/45">
+                  <span className="text-[12px] font-medium text-muted-foreground">
                     {t('dashboard.search.trigger')}
                   </span>
                   {(isLoading || isWaiting) && (
-                    <span className="text-[11px] text-white/35">
+                    <span className="text-[11px] text-muted-foreground">
                       · {t('dashboard.search.loading')}
                     </span>
                   )}
@@ -247,7 +247,7 @@ export default function CommandPalette() {
                       openSelectedInNewTab(root)
                     }
                   }}
-                  className="w-full bg-transparent text-[18px] sm:text-[22px] font-medium leading-tight tracking-tight text-white outline-none placeholder:font-medium placeholder:text-white/35"
+                  className="w-full bg-transparent text-[18px] sm:text-[22px] font-medium leading-tight tracking-tight text-foreground outline-none placeholder:font-medium placeholder:text-muted-foreground"
                 />
               </div>
               <img
@@ -260,14 +260,14 @@ export default function CommandPalette() {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-white/[0.06]" />
+            <div className="border-t border-border" />
 
             {/* List */}
             <Command.List
-              className="min-h-[260px] max-h-[55vh] overflow-y-auto px-2 pt-1 pb-2 scroll-py-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20"
-              style={{ scrollbarColor: 'rgba(255,255,255,0.15) transparent', scrollbarWidth: 'thin' }}
+              className="min-h-[260px] max-h-[55vh] overflow-y-auto px-2 pt-1 pb-2 scroll-py-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/10 hover:[&::-webkit-scrollbar-thumb]:bg-foreground/20"
+              style={{ scrollbarColor: 'rgba(0,0,0,0.15) transparent', scrollbarWidth: 'thin' }}
             >
-              <Command.Empty className="px-4 py-14 text-center text-sm text-white/45">
+              <Command.Empty className="px-4 py-14 text-center text-sm text-muted-foreground">
                 {isLoading || isWaiting
                   ? t('dashboard.search.loading')
                   : t('dashboard.search.no_results')}
@@ -289,7 +289,7 @@ export default function CommandPalette() {
             </Command.List>
 
             {/* Footer */}
-            <div className="flex items-center gap-3 sm:gap-5 border-t border-white/[0.06] bg-black/20 px-4 sm:px-7 py-3 text-[12px] text-white/40">
+            <div className="flex items-center gap-3 sm:gap-5 border-t border-border bg-muted/50 px-4 sm:px-7 py-3 text-[12px] text-muted-foreground">
               <FooterHint label="Navigate" keys={['↑', '↓']} />
               <FooterHint label="Open" keys={['↵']} />
               <span className="hidden sm:contents">
@@ -311,7 +311,7 @@ function FooterHint({ label, keys }: { label: string; keys: string[] }) {
       {keys.map((k) => (
         <kbd
           key={k}
-          className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded bg-white/[0.06] px-1 font-sans text-[10.5px] font-medium leading-none text-white/55"
+          className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded bg-foreground/[0.06] px-1 font-sans text-[10.5px] font-medium leading-none text-foreground/60"
         >
           {k}
         </kbd>

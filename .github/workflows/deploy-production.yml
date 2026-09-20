@@ -92,6 +92,18 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
 
+      - name: Validate deploy key
+        run: |
+          if ! ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null 2>&1; then
+            echo "::error::ORACLE_VPS_SSH_KEY does not parse as a private key (OpenSSH: error in libcrypto)."
+            echo "::error::It is usually an encrypted key (needs a passphrase) or pasted with wrong formatting/line endings."
+            echo "::error::Fix: generate a keypair with: ssh-keygen -t ed25519 -N '' -f /tmp/id_deploy"
+            echo "::error::Then store the WHOLE 'cat /tmp/id_deploy' output (LF endings, no extra text) as the ORACLE_VPS_SSH_KEY secret."
+            echo "::error::And add /tmp/id_deploy.pub to ~/.ssh/authorized_keys on the server."
+            exit 1
+          fi
+          echo "Deploy key parses and is unencrypted."
+
       - name: Pin server host key
         env:
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}

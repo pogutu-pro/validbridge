@@ -35,8 +35,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 load_dotenv()  # picks up apps/api/.env when run from apps/api
 
-from config.config import get_validbridge_config
-from src.services.payments import paystack
+from config.config import get_validbridge_config  # noqa: E402
+from src.services.payments import paystack  # noqa: E402
 
 SMOKE_ENABLED_ENV = "PAYSTACK_SMOKE"
 

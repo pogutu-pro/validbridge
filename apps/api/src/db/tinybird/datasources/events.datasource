@@ -1,3 +1,6 @@
+TOKEN validbridge_ingest APPEND
+TOKEN validbridge_read READ
+
 DESCRIPTION >
     Unified analytics events table for ValidBridge
 

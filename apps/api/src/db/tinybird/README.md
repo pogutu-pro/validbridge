@@ -40,10 +40,21 @@ tb workspace current
 
 ### Creating Tokens
 
-In the Tinybird dashboard under **Tokens**, create two tokens:
+Tokens are declared as resource-scoped `TOKEN` directives inside
+`datasources/events.datasource` and created by the deployment (Forward mode):
 
-1. **Ingest token**: Scope it to `DATASOURCES:CREATE` and `DATASOURCES:APPEND` on the `events` datasource
-2. **Read token**: Scope it to `PIPES:READ` or use a token with SQL query access
+```
+TOKEN validbridge_ingest APPEND
+TOKEN validbridge_read READ
+```
+
+- `validbridge_ingest` → `DATASOURCES:APPEND` on `events` (Events API writes)
+- `validbridge_read` → `DATASOURCES:READ` on `events` (Query API / SQL reads)
+
+Deploy the datasources directory, then fetch the generated values from the
+Tokens API (`GET /v0/tokens?page=1&per_page=100`) — the response includes each
+token's `token` field — and set them as
+`VALIDBRIDGE_TINYBIRD_INGEST_TOKEN` / `VALIDBRIDGE_TINYBIRD_READ_TOKEN`:
 
 ## Initial Setup
 

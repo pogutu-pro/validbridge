@@ -11,7 +11,7 @@ import PostHogProvider from '../components/Analytics/PostHogProvider'
 export const metadata = {
   title: {
     default: 'ValidBridge Docs',
-    template: '%s – ValidBridge Docs',
+    template: '%s | ValidBridge Docs',
   },
   description:
     'Official documentation for ValidBridge, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',

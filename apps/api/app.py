@@ -155,7 +155,7 @@ app.add_middleware(SelectiveGZipMiddleware, minimum_size=1000, compresslevel=6)
 # Registered last → outermost: the request audit middleware observes every
 # request (and the response status) before any other middleware, and must never
 # interfere with the request path. No-op for GET/denylisted paths.
-from src.core.middleware.audit_log import AuditLogMiddleware
+from src.core.middleware.audit_log import AuditLogMiddleware  # noqa: E402
 app.add_middleware(AuditLogMiddleware)
 register_ee_middlewares(app)
 

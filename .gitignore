@@ -71,3 +71,8 @@ apps/api/ee
 # Playwright MCP session artifacts
 .playwright-mcp/
 .demo-secrets
+
+# CI/CD deploy artifacts (kept outside the repo on the VM by default;
+# ignored defensively in case they are ever placed under the tree)
+validbridge-deployments/
+deploy.lock

@@ -218,6 +218,25 @@ cd apps/web
 bun test tests
 ```
 
+## CI/CD & production deployment
+
+Continuous integration runs on every push and PR via GitHub Actions
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): lockfile drift, ruff
+lint, API tests with coverage, web lint/typecheck/tests, Docker compose + image
+builds, and (on PRs) dependency review.
+
+A successful CI run on `main` automatically triggers production deployment
+([`.github/workflows/deploy-production.yml`](.github/workflows/deploy-production.yml),
+which drives [`scripts/deploy.sh`](scripts/deploy.sh) on
+the production VM). Only the exact commit CI validated is ever deployed; the
+pipeline backs up the database before schema changes, runs migrations before
+swapping containers, health-checks the running stack, and rolls back the
+application automatically on failure. The production `.env` is never touched by
+deploys.
+
+**See [`DEPLOYMENT.md`](DEPLOYMENT.md)** for the full setup guide, operator
+procedures, and rollback instructions.
+
 ## Project structure
 
 ```

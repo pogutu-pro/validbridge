@@ -16,8 +16,8 @@ feature · 🟡 optional / nice-to-have · 🔵 infra (not a key)
 >   are now set on the server.
 > - ⚠️ **AI key is rejected by Google** ("consumer suspended") — AI features will
 >   fail until a valid AI Studio key replaces it.
-> - ⚠️ **Tinybird `events` datasource is not deployed** (workspace is Forward
->   mode) — analytics stays empty until deployed.
+> - ✅ **Tinybird is live** — `events` datasource deployed + `validbridge_ingest`
+>   / `validbridge_read` scoped tokens set on the server.
 > - ❌ **WorkOS Client ID is still missing**; **Paystack**, **Judge0** and
 >   **Google sign-in** are still unset on the server.
 > - ✅ **Per-org subdomains are live** (`{slug}.validbridge.co.ke`) — tenancy
@@ -147,13 +147,13 @@ Uploaded MP4/WebM plays immediately (progressive `Range` streaming). HLS
 adaptive streaming + preview sprites are **opt-in**.
 
 - [x] **ffmpeg + ffprobe** on the host (and any transcode worker) — installed 2026-09-20 (`ffmpeg 6.1.1`)
-- [ ] **Enable HLS** → `VALIDBRIDGE_HLS_ENABLED=true`
-- [ ] **Worker model** (pick one):
-  - In-process on the API pod: `VALIDBRIDGE_HLS_INPROCESS_WORKER=true`
-  - or one-off backfill only: `uv run python cli.py transcode-backfill --limit 0`
-- [ ] Tuning: `VALIDBRIDGE_HLS_CONCURRENCY` (default 1), `VALIDBRIDGE_HLS_FFMPEG_THREADS` (default 1; `0`=all cores), `VALIDBRIDGE_HLS_MAX_RETRIES` (6), `VALIDBRIDGE_HLS_ENCRYPT` (default true, AES-128 segments).
-- [ ] Redis must be reachable (the queue lives there).
-- [ ] Recommended with HLS + heavy video: `VALIDBRIDGE_CONTENT_DELIVERY_TYPE=s3api` (R2/S3) — see §2.
+- [x] **Enable HLS** → `VALIDBRIDGE_HLS_ENABLED=true` — set on server 2026-09-20, backend recreated
+- [x] **Worker model** — in-process on the API pod confirmed running: `HLS in-app consumer started (concurrency=1)` (no standalone worker needed; backfill one-off available via `uv run python cli.py transcode-backfill --limit 0`)
+- [x] Tuning — defaults in place (`VALIDBRIDGE_HLS_CONCURRENCY=1`, `_FFMPEG_THREADS=1`, `_MAX_RETRIES=6`, `_ENCRYPT=true` AES-128)
+- [x] Redis reachable (the queue lives there — Tier 0 Redis is up)
+- [ ] What's left depends on **S3/R2** (§2): heavy HLS is best served off the VPS disk → `VALIDBRIDGE_CONTENT_DELIVERY_TYPE=s3api`.
+- ⚠️ Transcoding is **CPU-heavy in-process on this VM** — monitor before heavy uploads.
+- 💰 **Cost decision 2026-09-20:** keep transcode on the VM — Oracle Always Free (`VM.Standard.A1.Flex`, 4 OCPU/23GB) → compute + egress (≤10TB/mo) are **free**, so HLS here is $0. Revisit **R2** (existing `s3api` backend, ≈free egress) or **Cloudflare Stream** (~$5/1k min stored/mo) only when video volume slows the app or forces a paid compute shape.
 - Unlocks: adaptive HLS ladder (1080/720/480/360p), hover-scrub sprite, encrypted segments.
 
 ---
@@ -179,7 +179,7 @@ Cloudflare-terminated).
 
 ## 8. Optional integrations 🟡
 
-- [~] **Analytics** (Tinybird): API URL + a workspace **admin** token are set on the server, ⚠️ but the workspace is **Forward mode**, the `events` datasource is **not deployed**, and no scoped tokens exist yet. Deploy `apps/api/src/db/tinybird/datasources/events.datasource` plus `validbridge_ingest`/`validbridge_read` tokens via `tb deploy` (see `apps/api/src/db/tinybird/README.md`), then replace both token vars. `VALIDBRIDGE_TINYBIRD_API_URL=https://api.europe-west2.gcp.tinybird.co`.
+- [x] **Analytics** (Tinybird): ✅ **done 2026-09-20.** `events` datasource deployed (Forward mode, `tb deploy`) and two least-privilege resource-scoped tokens created via `TOKEN` directives in `events.datasource`: `validbridge_ingest` (`DATASOURCES:APPEND`) and `validbridge_read` (`DATASOURCES:READ`). Server env set to `VALIDBRIDGE_TINYBIRD_API_URL=https://api.europe-west2.gcp.tinybird.co` + the two scoped tokens (verified: read query 200, ingest 202). To re-deploy after schema changes: `cd apps/api/src/db/tinybird/datasources && TB_TOKEN=<admin> TB_HOST=https://api.europe-west2.gcp.tinybird.co tb --cloud deploy`.
 - [ ] **Code execution** (Judge0): RapidAPI Judge0 or self-host → `VALIDBRIDGE_JUDGE0_API_URL`, `VALIDBRIDGE_JUDGE0_CLIENT_ID`, `VALIDBRIDGE_JUDGE0_CLIENT_SECRET`.
 - [ ] **Google sign-in**: `https://console.cloud.google.com` → OAuth 2.0 Client → `VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID` (or `VALIDBRIDGE_GOOGLE_CLIENT_ID`). (A Gemini/AI Studio key is **not** a Google OAuth client id.)
 - [ ] **Marketing email (Loops)**: `https://loops.so` → API key → `LOOPS_API_KEY`.
@@ -202,8 +202,8 @@ verify end-to-end. `missing.md` also flags these.
 | SCORM | No (EE flag; CI uses fixtures) | `ee/` overlay present (gitignored) | ✅ code |
 | Email (magic link, verify, invites) | **Yes** | Resend key+domain or SMTP | ⚠️ key set, verify domain |
 | AI (chat/plan/quiz/RAG/captions/image/audio) | **Yes** | AI provider key (+ Gemini for embeddings/media) | ❌ supplied key suspended |
-| Video HLS | **Yes** (transcode) | ffmpeg + Redis + `VALIDBRIDGE_HLS_ENABLED` (+ worker) | ✅ ffmpeg installed; HLS flag still off |
-| Analytics | **Yes** | Tinybird tokens | ⚠️ datasource not deployed |
+| Video HLS | **Yes** (transcode) | ffmpeg + Redis + `VALIDBRIDGE_HLS_ENABLED` (+ worker) | ✅ ffmpeg + HLS enabled, in-app consumer live |
+| Analytics | **Yes** | Tinybird tokens | ✅ datasource + scoped tokens live |
 | Code execution | **Yes** | Judge0 endpoint/creds | ⏳ unset |
 | Google sign-in | **Yes** | Google OAuth client id | ⏳ unset |
 | Multi-tenant / custom domains | **Yes** (infra) | wildcard DNS + TLS + proxy | ✅ per-org subdomains live |
@@ -263,3 +263,30 @@ verify end-to-end. `missing.md` also flags these.
 | `NEXT_PUBLIC_VALIDBRIDGE_*` / `NEXTAUTH_*` / `BACKEND_URL` / `HTTP_PORT` | 🔴/🟡 | — | frontend wiring |
 
 ¹ Defaults to a catch-all regexp — **scope it in production**. ² Set one of WorkOS **or** OIDC to make SSO available.
+
+---
+
+## 11. Remaining follow-ups (operator-owned — as of 2026-09-20)
+
+**Everything code / config / infra is done.** Only secrets and a few dashboard
+steps remain. After editing the server `.env`, run
+`cd ~/projects/validbridge && docker compose up -d backend` (add `frontend` when
+a `NEXT_PUBLIC_*` value changes).
+
+| # | Item | Action | Env var(s) | Impact while unset |
+|--:|---|---|---|---|
+| 1 | **WorkOS Client ID** | dashboard.workos.com → API Keys → copy Client ID | `VALIDBRIDGE_WORKOS_CLIENT_ID` | SSO card stays `available: false` (secret already set) |
+| 2 | **Gemini / AI Studio key** | aistudio.google.com/apikey → create a real `AIza…` key (the supplied one is **suspended**) | `VALIDBRIDGE_AI_API_KEY`, `VALIDBRIDGE_GEMINI_API_KEY` | all AI features fail |
+| 3 | **Paystack keys** | dashboard.paystack.com → Settings → API Keys & Webhooks | `VALIDBRIDGE_PAYSTACK_SECRET_KEY`, `VALIDBRIDGE_PAYSTACK_PUBLIC_KEY` | no checkout/billing |
+| 3b | **Paystack webhook** | set URL `https://api.validbridge.co.ke/api/v1/payments/paystack/webhook` | — | payments not confirmed |
+| 4 | **Google OAuth Client ID** | console.cloud.google.com → OAuth 2.0 Client | `VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID` | Google sign-in hidden |
+| 5 | **Resend domain + webhook** | verify sending domain (SPF/DKIM); add bounce/complaint webhook | `VALIDBRIDGE_RESEND_WEBHOOK_SECRET` (+ `VALIDBRIDGE_NUDGES_ENABLED=true`) | sends may fail; nudges idle |
+| 6 | *(optional)* **Loops** | loops.so API key | `LOOPS_API_KEY` | marketing email off |
+| 7 | *(optional)* **Judge0** | self-host or RapidAPI | `VALIDBRIDGE_JUDGE0_API_URL`, `_CLIENT_ID`, `_CLIENT_SECRET` | code execution returns 503 |
+| 8 | *(optional)* **S3/R2 storage** | bucket + R2 token — see §2 | `VALIDBRIDGE_CONTENT_DELIVERY_TYPE`, `_S3_API_*`, `AWS_*` | filesystem only (fine for single VPS) |
+| 9 | ✅ **HLS video — done 2026-09-20** | `VALIDBRIDGE_HLS_ENABLED=true` set; in-app consumer live; MP4 fallback until transcoded | — | see §6 |
+
+**Not a secret — usage step:** create organizations; each is served at
+`{slug}.validbridge.co.ke` (the seeded org is `default.validbridge.co.ke`).
+Custom domains per org are supported via Dashboard → Domains (needs the org's
+DNS TXT/CNAME).

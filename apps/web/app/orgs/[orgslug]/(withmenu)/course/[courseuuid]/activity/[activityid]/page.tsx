@@ -34,7 +34,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   // Check if this is the course end page
   const isCourseEnd = params.activityid === 'end';
   const seoConfig = getOrgSeoConfig(org)
-  const rawTitle = isCourseEnd ? `Congratulations — ${course_meta.name} Course` : `${activity.name} — ${course_meta.name} Course`
+  const rawTitle = isCourseEnd ? `Congratulations | ${course_meta.name} Course` : `${activity.name} | ${course_meta.name} Course`
   const pageTitle = seoConfig.default_meta_title_suffix ? `${rawTitle}${seoConfig.default_meta_title_suffix}` : rawTitle
 
   const orgOgImageUrl = seoConfig.default_og_image

@@ -79,6 +79,13 @@ jobs:
     name: API tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # A handful of router tests (SSO callback) validate one-time OAuth state in
+    # Redis against the localhost connection string the app uses under TESTING.
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -222,6 +229,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
+
+      # docker-compose.yml declares `env_file: .env`; CI has none, so create an
+      # empty one. Every ${VAR} in compose has a default, so an empty file is
+      # enough for `docker compose config` (and the Dockerfiles never COPY .env).
+      - name: Prepare minimal .env for compose validation
+        run: touch .env
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4

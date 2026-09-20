@@ -89,7 +89,10 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.ORACLE_VPS_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
+          # LibreSSL/OpenSSL PEM parsing chokes on CRLF line endings and on a
+          # leading blank line, both typical when a key is copied from Windows
+          # or from a rich-text view. Normalise before writing.
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
 
       - name: Validate deploy key

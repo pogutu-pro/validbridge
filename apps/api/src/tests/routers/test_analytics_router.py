@@ -778,3 +778,29 @@ class TestAnalyticsRouter:
         for route in routes:
             response = await client.get(route)
             assert response.status_code == 401
+
+
+def test_allowed_frontend_events_cover_the_web_registry():
+    """The proxy whitelist must mirror apps/web/services/analytics/events.ts.
+
+    The web hook fans every registry event into this backend sink, so a name
+    missing here is rejected with 400. Fail loudly if the two drift; skip when
+    the web package isn't checked out beside the API (e.g. an isolated image).
+    """
+    import re
+    from pathlib import Path
+
+    from src.services.analytics.events import ALLOWED_FRONTEND_EVENTS
+
+    registry = (
+        Path(__file__).resolve().parents[4] / "web" / "services" / "analytics" / "events.ts"
+    )
+    if not registry.is_file():
+        pytest.skip(f"web analytics registry not found at {registry}")
+
+    # Only enum members (`Name = 'wire_name'`), not the POSTHOG_NAME_OVERRIDES map.
+    wire_names = set(
+        re.findall(r"(?m)^\s*[A-Za-z]\w*\s*=\s*'([a-z0-9_]+)'", registry.read_text(encoding="utf-8"))
+    )
+    missing = wire_names - ALLOWED_FRONTEND_EVENTS
+    assert not missing, f"backend whitelist missing frontend events: {sorted(missing)}"

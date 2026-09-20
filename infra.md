@@ -124,17 +124,20 @@ Provider is `resend` or `smtp`.
 
 ## 5. AI (chat, course planning, quiz/assignment gen, RAG search, captions, images, TTS) 🟠
 
-- [x] `VALIDBRIDGE_IS_AI_ENABLED=true` (set on server — ⚠️ see key status)
+- [x] `VALIDBRIDGE_IS_AI_ENABLED=true` (set on server)
 - [x] `VALIDBRIDGE_AI_PROVIDER=google` (set on server)
-- [~] `VALIDBRIDGE_AI_API_KEY=...` — set, **but Google reports it suspended**:
-  `403 "Consumer 'api_key:AQ.Ab8…' has been suspended."` Looks like an expired
-  OAuth token, not an AI Studio key. Replace with a valid key (below).
-  - Google/Gemini: `https://aistudio.google.com/apikey` → **Create API key** (format `AIza...`); also set `VALIDBRIDGE_GEMINI_API_KEY` for embeddings + image/audio generation.
-  - OpenAI: `https://platform.openai.com/api-keys`
-  - Anthropic: `https://console.anthropic.com`
-  - OpenRouter: `https://openrouter.ai/keys`
-  - Ollama (local, no key): `VALIDBRIDGE_AI_PROVIDER=ollama`, `VALIDBRIDGE_AI_BASE_URL=http://localhost:11434`.
-- [ ] Optional overrides: `VALIDBRIDGE_AI_BASE_URL`, `VALIDBRIDGE_AI_MODEL_FAST/STANDARD/PRO`, `VALIDBRIDGE_AI_EMBEDDING_PROVIDER`, `VALIDBRIDGE_AI_EMBEDDING_MODEL`, `VALIDBRIDGE_AI_EMBEDDING_DIMENSIONS` (default 768 — changing needs a migration + re-index), `VALIDBRIDGE_AI_IMAGE_MODEL`, `VALIDBRIDGE_AI_TTS_MODEL`.
+- [x] **`VALIDBRIDGE_AI_API_KEY` — valid 2026-09-20.** Previous key was suspended; the
+  replacement was verified live (list/generateContent `200`; in-app `pydantic_ai` →
+  `google-genai` roundtrip returned "AI is online"; `VALIDBRIDGE_GEMINI_API_KEY`
+  set to the same key for embeddings + image/audio).
+  - ⚠️ **Model compatibility (new `AQ`-styled key, 2026):** `gemini-2.5-flash` is no
+    longer usable by this (new) account, and `gemini-3.1-pro-preview` /
+    `gemini-2.5-flash-image` 429 (free-tier/no-billing). Resolved via overrides:
+    `VALIDBRIDGE_AI_MODEL_PRO=gemini-3.5-flash`, `VALIDBRIDGE_AI_IMAGE_MODEL=gemini-3.1-flash-image`,
+    `VALIDBRIDGE_AI_TTS_MODEL=gemini-3.1-flash-tts-preview`. Tiers `fast`/`standard`
+    keep their verified defaults (`gemini-3.1-flash-lite` / `gemini-3.5-flash`).
+  - ⚠️ Image/TTS gen may still 429 randomly on the **free tier** (no billing) — not a config bug.
+- [~] Optional overrides: `VALIDBRIDGE_AI_BASE_URL`, `VALIDBRIDGE_AI_MODEL_FAST/STANDARD/PRO`, `VALIDBRIDGE_AI_EMBEDDING_PROVIDER`, `VALIDBRIDGE_AI_EMBEDDING_MODEL`, `VALIDBRIDGE_AI_EMBEDDING_DIMENSIONS` (default 768 — changing needs a migration + re-index), `VALIDBRIDGE_AI_IMAGE_MODEL`, `VALIDBRIDGE_AI_TTS_MODEL` <small>(model overrides now set — see above)</small>.
 - [x] **ffmpeg + ffprobe** on the host (used for AI captions) → installed on the VM 2026-09-20 (`ffmpeg 6.1.1`); override paths with `VALIDBRIDGE_FFMPEG_PATH` / `VALIDBRIDGE_FFPROBE_PATH`.
 - Unlocks: all AI features, semantic search, auto-captions, AI image/audio.
 - ⚠️ Embeddings fall back to Google when the chosen provider lacks embeddings — keep `VALIDBRIDGE_GEMINI_API_KEY` set if you want RAG with non-Google providers.
@@ -201,7 +204,7 @@ verify end-to-end. `missing.md` also flags these.
 | SSO | **Yes** (live IdP login) | WorkOS (or OIDC) client id/secret + callback | ⚠️ secret set, **Client ID missing** |
 | SCORM | No (EE flag; CI uses fixtures) | `ee/` overlay present (gitignored) | ✅ code |
 | Email (magic link, verify, invites) | **Yes** | Resend key+domain or SMTP | ⚠️ key set, verify domain |
-| AI (chat/plan/quiz/RAG/captions/image/audio) | **Yes** | AI provider key (+ Gemini for embeddings/media) | ❌ supplied key suspended |
+| AI (chat/plan/quiz/RAG/captions/image/audio) | **Yes** | AI provider key (+ Gemini for embeddings/media) | ✅ **key valid** — chat/tiers verified live; free-tier 429 possible on image/TTS |
 | Video HLS | **Yes** (transcode) | ffmpeg + Redis + `VALIDBRIDGE_HLS_ENABLED` (+ worker) | ✅ ffmpeg + HLS enabled, in-app consumer live |
 | Analytics | **Yes** | Tinybird tokens | ✅ datasource + scoped tokens live |
 | Code execution | **Yes** | Judge0 endpoint/creds | ⏳ unset |
@@ -276,7 +279,7 @@ a `NEXT_PUBLIC_*` value changes).
 | # | Item | Action | Env var(s) | Impact while unset |
 |--:|---|---|---|---|
 | 1 | **WorkOS Client ID** | dashboard.workos.com → API Keys → copy Client ID | `VALIDBRIDGE_WORKOS_CLIENT_ID` | SSO card stays `available: false` (secret already set) |
-| 2 | **Gemini / AI Studio key** | aistudio.google.com/apikey → create a real `AIza…` key (the supplied one is **suspended**) | `VALIDBRIDGE_AI_API_KEY`, `VALIDBRIDGE_GEMINI_API_KEY` | all AI features fail |
+| 2 | ✅ **Gemini key — done 2026-09-20** | replacement key validated live + in-app; model overrides set for pro/image/tts (§5) | — | chat/tiers work; free-tier 429 possible on image/TTS |
 | 3 | **Paystack keys** | dashboard.paystack.com → Settings → API Keys & Webhooks | `VALIDBRIDGE_PAYSTACK_SECRET_KEY`, `VALIDBRIDGE_PAYSTACK_PUBLIC_KEY` | no checkout/billing |
 | 3b | **Paystack webhook** | set URL `https://api.validbridge.co.ke/api/v1/payments/paystack/webhook` | — | payments not confirmed |
 | 4 | **Google OAuth Client ID** | console.cloud.google.com → OAuth 2.0 Client | `VALIDBRIDGE_GOOGLE_OAUTH_CLIENT_ID` | Google sign-in hidden |

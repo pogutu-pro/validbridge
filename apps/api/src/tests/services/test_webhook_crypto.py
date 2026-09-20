@@ -1,15 +1,15 @@
 import pytest
 
-from src.services.webhooks.crypto import (
-    compute_signature,
+from src.security.secret_crypto import (
     decrypt_secret,
     encrypt_secret,
 )
+from src.services.webhooks.crypto import compute_signature
 
 
 @pytest.fixture(autouse=True)
 def clear_fernet_cache():
-    from src.services.webhooks.crypto import _fernet_key
+    from src.security.secret_crypto import _fernet_key
 
     _fernet_key.cache_clear()
     yield

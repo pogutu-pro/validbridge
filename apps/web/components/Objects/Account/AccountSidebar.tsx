@@ -2,7 +2,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { User, Lock, ShoppingBag, Settings } from 'lucide-react'
+import { User, Lock, ShoppingBag, ReceiptText, Settings } from 'lucide-react'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { getUriWithOrg } from '@services/config/config'
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { id: 'profile', icon: User, labelKey: 'account.profile' },
   { id: 'security', icon: Lock, labelKey: 'account.security' },
   { id: 'purchases', icon: ShoppingBag, labelKey: 'account.purchases' },
+  { id: 'billing', icon: ReceiptText, labelKey: 'account.billing' },
 ]
 
 export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps) {

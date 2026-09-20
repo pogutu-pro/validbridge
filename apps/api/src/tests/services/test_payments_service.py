@@ -15,9 +15,14 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi import HTTPException
 
+from src.db.payments.payments import PaymentProviderEnum, PaymentsConfig
 from src.db.payments.payments_enrollments import EnrollmentStatusEnum, PaymentsEnrollment
 from src.db.payments.payments_events import PaymentsEvent
-from src.services.payments import service
+from src.db.payments.payments_groups import PaymentsGroup
+from src.db.usergroup_resources import UserGroupResource
+from src.db.usergroup_user import UserGroupUser
+from src.db.usergroups import UserGroup
+from src.services.payments import group_sync, service
 
 
 class _Scalars:
@@ -38,6 +43,9 @@ class _Result:
     def scalars(self):
         return _Scalars(self._row)
 
+    def all(self):
+        return self._row if isinstance(self._row, list) else []
+
 
 class FakeSession:
     """AsyncSession stand-in that returns the queued rows in order and records adds."""
@@ -45,6 +53,8 @@ class FakeSession:
     def __init__(self, rows):
         self.rows = list(rows)
         self.added = []
+        self.deleted = []
+        self._id_seq = 1000
 
     async def execute(self, statement):
         return _Result(self.rows.pop(0) if self.rows else None)
@@ -52,8 +62,18 @@ class FakeSession:
     def add(self, obj):
         self.added.append(obj)
 
+    async def delete(self, obj):
+        self.deleted.append(obj)
+
+    async def flush(self):
+        # Approximate SQLAlchemy's autoincrement id assignment on flush.
+        for obj in self.added:
+            if getattr(obj, "id", None) is None:
+                self._id_seq += 1
+                obj.id = self._id_seq
+
     async def commit(self):
-        pass
+        await self.flush()
 
     async def refresh(self, obj):
         pass
@@ -282,3 +302,177 @@ async def test_webhook_invoice_paid_does_not_revive_cancelled(monkeypatch):
     }
     await service.handle_webhook(json.dumps(body).encode(), "sig", session)
     assert existing.status == EnrollmentStatusEnum.cancelled
+
+
+# ── Group sync ───────────────────────────────────────────────────────────────
+
+def _group(usergroup_id=None):
+    return PaymentsGroup(id=2, org_id=7, name="Premium", usergroup_id=usergroup_id)
+
+
+def _usergroup():
+    return UserGroup(
+        id=11, org_id=7, name="Payments — Premium", description="auto"
+    )
+
+
+@pytest.mark.asyncio
+async def test_webhook_subscription_charge_syncs_buyer_into_group(monkeypatch):
+    _patch_provider(monkeypatch)
+    import json
+
+    offer = SimpleNamespace(
+        id=5, amount=2500.0, price_type="fixed_price", currency="KES",
+        offer_type="subscription", payments_group_id=2,
+    )
+    session = FakeSession([None, offer, None, _group(), None])
+    result = await service.handle_webhook(
+        json.dumps(_subscription_charge_body()).encode(), "sig", session
+    )
+    assert result == {"result": "charge.success", "ok": True}
+    membership = next(o for o in session.added if isinstance(o, UserGroupUser))
+    assert membership.user_id == 42
+    assert membership.org_id == 7
+    updated_group = next(o for o in session.added if isinstance(o, PaymentsGroup))
+    assert updated_group.usergroup_id == membership.usergroup_id
+
+
+@pytest.mark.asyncio
+async def test_webhook_disable_syncs_membership_removal(monkeypatch):
+    _patch_provider(monkeypatch)
+    import json
+
+    existing = PaymentsEnrollment(
+        enrollment_uuid="enr_1", offer_id=5, user_id=42, org_id=7,
+        status=EnrollmentStatusEnum.active, subscription_code="SUB_y",
+    )
+    offer = SimpleNamespace(id=5, payments_group_id=2)
+    membership = UserGroupUser(
+        usergroup_id=11, user_id=42, org_id=7, creation_date="", update_date=""
+    )
+    # org by code; idempotency; find enrollment; offer; group; usergroup;
+    # group offer ids; granting-enrollment check; current membership.
+    session = FakeSession([7, None, existing, offer, _group(11), _usergroup(), [5], None, membership])
+    body = {"event": "subscription.disable", "data": {"id": 1000, "code": "SUB_y"}}
+    result = await service.handle_webhook(json.dumps(body).encode(), "sig", session)
+    assert result == {"result": "subscription.disable", "ok": True}
+    assert existing.status == EnrollmentStatusEnum.cancelled
+    assert membership in session.deleted
+
+
+@pytest.mark.asyncio
+async def test_reconcile_group_members(monkeypatch):
+    usergroup = _usergroup()
+    # usergroup lookup; group offer ids; granting enrollment user ids; current members.
+    session = FakeSession([usergroup, [5, 9], [42, 7], []])
+    added, removed = await group_sync.reconcile_group_members(_group(11), session)
+    assert (added, removed) == (2, 0)
+    assert [o.user_id for o in session.added if isinstance(o, UserGroupUser)] == [42, 7]
+
+
+@pytest.mark.asyncio
+async def test_reconcile_group_resources(monkeypatch):
+    stale = UserGroupResource(
+        usergroup_id=11, resource_uuid="course_c", org_id=7, creation_date="", update_date=""
+    )
+    # usergroup lookup; group resources; group offer ids; offer resources; current rows.
+    session = FakeSession([_usergroup(), ["course_a"], [5], ["course_b"], [stale]])
+    added, removed = await group_sync.reconcile_group_resources(_group(11), session)
+    assert (added, removed) == (2, 1)
+    assert stale in session.deleted
+
+
+@pytest.mark.asyncio
+async def test_manual_group_sync_reconciles_all(monkeypatch):
+    usergroup = _usergroup()
+    # group load; members → (usergroup, offer ids, user ids, current members);
+    # resources → (usergroup, group resources, offer ids, offer resources, current).
+    session = FakeSession([
+        _group(11), usergroup, [5], [42], [],
+        usergroup, ["course_a"], [5], ["course_b"], [],
+    ])
+    result = await service.sync_group(7, 2, session)
+    assert result["usergroup_id"] == 11
+    assert result["members_added"] == 1
+    assert result["resources_mirrored"] == 2
+
+
+# ── Billing portal ───────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_billing_overview_custom_provider_falls_back(monkeypatch):
+    offer = SimpleNamespace(
+        id=5, offer_uuid="offer_x", name="Course A", offer_type="one_time", amount=100.0,
+        currency="KES", interval=None,
+    )
+    enr = PaymentsEnrollment(
+        enrollment_uuid="enr_1", offer_id=5, user_id=42, org_id=7,
+        status=EnrollmentStatusEnum.completed,
+        provider_specific_data={"reference": "vb_7_1"},
+    )
+    config = PaymentsConfig(org_id=7, provider=PaymentProviderEnum.custom)
+    # overview join; (no sub code → no config query); user lookup; transactions
+    # custom config; fallback join.
+    session = FakeSession([[(enr, offer)], SimpleNamespace(email="buyer@example.com"), config, [(enr, offer)]])
+    overview = await service.billing_overview(7, 42, session)
+    assert overview["subscriptions"][0]["offer_name"] == "Course A"
+    assert overview["subscriptions"][0]["subscription"]["remote"] is False
+    assert overview["transactions"][0]["reference"] == "vb_7_1"
+
+
+@pytest.mark.asyncio
+async def test_billing_overview_enriches_active_subscription(monkeypatch):
+    from unittest.mock import AsyncMock
+
+    monkeypatch.setattr(
+        "src.services.payments.service.paystack.resolve_paystack_credentials",
+        AsyncMock(return_value=SimpleNamespace(secret_key="sk_test", public_key="pk_test")),
+    )
+    monkeypatch.setattr(
+        "src.services.payments.service.paystack.get_subscription",
+        AsyncMock(
+            return_value={
+                "status": "active",
+                "next_payment_date": "2026-10-18T09:00:00.000Z",
+                "plan": {"name": "Premium"},
+            }
+        ),
+    )
+    monkeypatch.setattr(
+        "src.services.payments.service.paystack.list_customer_transactions",
+        AsyncMock(
+            return_value=[
+                {
+                    "reference": "vb_7_99",
+                    "amount": 250000,
+                    "currency": "KES",
+                    "status": "success",
+                    "created_at": "2026-01-01T00:00:00.000Z",
+                    "metadata": {"offer_id": 5},
+                }
+            ]
+        ),
+    )
+
+    offer = SimpleNamespace(
+        id=5, offer_uuid="offer_x", name="Premium", offer_type="subscription", amount=2500.0,
+        currency="KES", interval="monthly",
+    )
+    enr = PaymentsEnrollment(
+        enrollment_uuid="enr_1", offer_id=5, user_id=42, org_id=7,
+        status=EnrollmentStatusEnum.active, subscription_code="SUB_y",
+    )
+    config = PaymentsConfig(org_id=7, provider=PaymentProviderEnum.paystack)
+    # overview join; sub summary config; user lookup; transactions config;
+    # offer-name lookup.
+    session = FakeSession([
+        [(enr, offer)], config,
+        SimpleNamespace(email="buyer@example.com"), config,
+        [(5, "Premium")],
+    ])
+    overview = await service.billing_overview(7, 42, session)
+    sub = overview["subscriptions"][0]["subscription"]
+    assert sub["remote"] is True
+    assert sub["next_payment_date"] == "2026-10-18T09:00:00.000Z"
+    assert overview["transactions"][0]["reference"] == "vb_7_99"
+    assert overview["transactions"][0]["description"] == "Premium"

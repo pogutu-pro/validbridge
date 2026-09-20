@@ -57,9 +57,15 @@ exactly.
    `available: false` unless backend config exists. Keycloak/Okta/Auth0/custom
    SAML become "configure via WorkOS" in their `description`, or get a native
    OIDC preset later. **Do not write native SAML in this pass.**
-2. **Provider secrets never hit the DB.** `SSOConfig.provider_config` stores
-   only non-secret values (public endpoints, issuer, display overrides). Secrets
-   live in `config.yaml`/env (see §5). Persisting a secret is a reject-worthy bug.
+2. **Secrets are never stored in plaintext.** Custom OIDC is BYOK: the org's
+   `SSOConfig.provider_config` may carry `issuer_url` / `client_id` /
+   `client_secret` / `scopes`. The `client_secret` is Fernet-encrypted at rest
+   (`src/security/secret_crypto.py`) and is **never returned** to the client
+   (read responses omit it; an empty value on update keeps the stored secret).
+   Non-secret endpoints/issuer are stored plaintext. WorkOS credentials
+   (`client_id`/`client_secret`) stay in `config.yaml`/env; the org supplies only
+   its non-secret `organization_id`. (Superseded §2's original blanket ban — the
+   frontend collects a per-org OIDC secret, and the contract wins.)
 3. **Reuse the existing auth/session machinery.** Never mint a session by any
    path other than `mint_session_tokens` / `issue_session_or_challenge`.
 4. **Never emit an existing error code for a different meaning.** The frontend

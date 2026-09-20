@@ -72,6 +72,10 @@ _SET_NULL_ALLOWED = {
     # The demo state row deliberately outlives its organization so the next
     # provision can read last_error and bundle_version off it.
     ("demo_state", "org_id"),
+    # An SSO config's default_role reference: deleting a custom role must not
+    # destroy the org's SSO configuration (it falls back to the org default
+    # role), so that FK is SET NULL rather than cascade.
+    ("sso_config", "default_role_id"),
 }
 
 

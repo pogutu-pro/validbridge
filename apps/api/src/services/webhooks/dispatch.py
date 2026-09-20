@@ -23,7 +23,8 @@ from src.services.utils.ssrf_guard import (
     assert_connected_peer_allowed,
     resolve_and_validate_url,
 )
-from src.services.webhooks.crypto import decrypt_secret, compute_signature
+from src.security.secret_crypto import decrypt_secret
+from src.services.webhooks.crypto import compute_signature
 from src.services.webhooks.events import validate_event_data
 
 logger = logging.getLogger(__name__)

@@ -1,38 +1,12 @@
 """
-Cryptographic helpers for webhook secrets.
+Cryptographic helpers for webhook payload signatures.
 
-- Fernet symmetric encryption for storing secrets at rest (key derived from JWT secret).
-- HMAC-SHA256 for signing outgoing payloads.
+Secret encryption lives in :mod:`src.security.secret_crypto` (shared with the
+BYOK credential storage).
 """
 
-import base64
-import functools
 import hashlib
 import hmac
-
-from cryptography.fernet import Fernet
-
-from config.config import get_validbridge_config
-
-
-@functools.lru_cache(maxsize=1)
-def _fernet_key() -> bytes:
-    """Derive a 32-byte Fernet key from the application's JWT secret."""
-    secret = get_validbridge_config().security_config.auth_jwt_secret_key
-    digest = hashlib.sha256(secret.encode()).digest()
-    return base64.urlsafe_b64encode(digest)
-
-
-def encrypt_secret(plaintext: str) -> str:
-    """Encrypt a webhook signing secret for database storage."""
-    f = Fernet(_fernet_key())
-    return f.encrypt(plaintext.encode()).decode()
-
-
-def decrypt_secret(ciphertext: str) -> str:
-    """Decrypt a stored webhook signing secret."""
-    f = Fernet(_fernet_key())
-    return f.decrypt(ciphertext.encode()).decode()
 
 
 def compute_signature(payload: bytes, secret: str) -> str:

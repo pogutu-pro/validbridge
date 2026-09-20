@@ -38,6 +38,7 @@ import {
   ChalkboardSimple,
   Cube,
   ShoppingBag,
+  Receipt,
   FolderSimple,
   Plus,
   Code,
@@ -1218,6 +1219,12 @@ function DashLeftMenu() {
                   <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-foreground hover:bg-black/[0.04] cursor-pointer transition-colors">
                     <ShoppingBag size={16} weight="fill" />
                     <span>{t('account.purchases')}</span>
+                  </Link>
+                </HoverMenuItem>
+                <HoverMenuItem asChild>
+                  <Link href={getUriWithOrg(org?.slug, '/account/billing')} className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-foreground hover:bg-black/[0.04] cursor-pointer transition-colors">
+                    <Receipt size={16} weight="fill" />
+                    <span>{t('account.billing')}</span>
                   </Link>
                 </HoverMenuItem>
                 <HoverMenuSeparator />

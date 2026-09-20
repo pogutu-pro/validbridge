@@ -9,12 +9,13 @@ import {
   createPaymentsGroup,
   updatePaymentsGroup,
   deletePaymentsGroup,
+  syncPaymentsGroup,
   getGroupResources,
   addGroupResource,
   removeGroupResource,
 } from '@services/payments/groups';
 import {
-  Plus, Pencil, Trash2, X, BookOpen, Layers,
+  Plus, Pencil, Trash2, X, BookOpen, Layers, Users, RefreshCw,
 } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -155,10 +156,11 @@ function GroupResourcePanel({ group, orgId, token }: { group: any; orgId: number
 // Group Card
 // ---------------------------------------------------------------------------
 
-function GroupCard({ group, orgId, token, onEdit, onDelete }: {
+function GroupCard({ group, orgId, token, onEdit, onDelete, onSync }: {
   group: any; orgId: number; token: string;
   onEdit: (g: any) => void;
   onDelete: (id: number) => void;
+  onSync: (g: any) => Promise<void>;
 }) {
   return (
     <div className="bg-white rounded-xl border border-gray-100 nice-shadow overflow-hidden flex flex-col">
@@ -206,6 +208,28 @@ function GroupCard({ group, orgId, token, onEdit, onDelete }: {
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Courses</span>
           </div>
           <GroupResourcePanel group={group} orgId={orgId} token={token} />
+        </div>
+
+        {/* Usergroup sync section */}
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <Users size={12} className="text-blue-400" />
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Usergroup access</span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-gray-500">
+              {group.usergroup_id
+                ? <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" /> Linked — buyers get automatic access.</span>
+                : 'Not linked yet. Sync to grant buyers access.'}
+            </span>
+            <button
+              onClick={() => onSync(group)}
+              className="shrink-0 flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 border border-blue-200 hover:bg-blue-50 rounded-lg px-2.5 py-1.5 transition-colors"
+              title="Mirror members and resources into a usergroup"
+            >
+              <RefreshCw size={11} /> Sync now
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -346,6 +370,17 @@ export default function PaymentsGroupsPage() {
     }
   };
 
+  const handleSync = async (group: any) => {
+    const res = await syncPaymentsGroup(org.id, group.id, token);
+    if (res.success) {
+      const data = res.data ?? {};
+      toast.success(`Synced — ${data.members_added ?? 0} member(s), ${data.resources_mirrored ?? 0} resource(s)`);
+      queryClient.invalidateQueries({ queryKey: queryKeys.payments.groups(org.id) });
+    } else {
+      toast.error(res.data?.detail || 'Failed to sync group');
+    }
+  };
+
   return (
     <div className="ms-10 me-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
       <Modal
@@ -407,6 +442,7 @@ export default function PaymentsGroupsPage() {
               token={token}
               onEdit={setEditingGroup}
               onDelete={handleDelete}
+              onSync={handleSync}
             />
           ))}
         </div>

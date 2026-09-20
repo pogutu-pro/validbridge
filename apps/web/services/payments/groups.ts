@@ -38,6 +38,14 @@ export async function deletePaymentsGroup(orgId: number, groupId: number, access
   return getResponseMetadata(result);
 }
 
+export async function syncPaymentsGroup(orgId: number, groupId: number, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/groups/${encodeURIComponent(String(groupId))}/sync`,
+    RequestBodyWithAuthHeader('POST', null, null, access_token)
+  );
+  return getResponseMetadata(result);
+}
+
 // ---------------------------------------------------------------------------
 // Group Resources
 // ---------------------------------------------------------------------------

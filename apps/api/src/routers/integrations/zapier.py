@@ -31,7 +31,7 @@ from src.db.webhooks import WebhookEndpoint
 from src.security.auth import get_current_user
 from src.security.features_utils.plan_check import get_org_plan
 from src.security.features_utils.plans import plan_meets_requirement
-from src.services.webhooks.crypto import encrypt_secret
+from src.security.secret_crypto import encrypt_secret
 from src.services.webhooks.events import WEBHOOK_EVENTS
 # Reuse the same SSRF guard as the manual webhook create path so both code
 # paths enforce identical validation. The leading underscore is conventional,

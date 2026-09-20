@@ -7,12 +7,14 @@ to the offer's resources, independent of UserGroup membership state (e.g. if an
 admin later removes them from a synced group).
 """
 
-from typing import Optional
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from src.db.payments.payments_enrollments import EnrollmentStatusEnum, PaymentsEnrollment
+from src.db.payments.payments_enrollments import (
+    EnrollmentStatusEnum,
+    PaymentsEnrollment,
+)
 from src.db.payments.payments_groups import PaymentsGroupResource, PaymentsOfferResource
 from src.db.payments.payments_offers import PaymentsOffer
 
@@ -61,7 +63,7 @@ async def _offer_ids_for_resource(resource_uuid: str, db_session: AsyncSession) 
     return offer_ids
 
 
-async def get_paywall_offer(resource_uuid: str, db_session: AsyncSession) -> Optional[dict]:
+async def get_paywall_offer(resource_uuid: str, db_session: AsyncSession) -> dict | None:
     """Return offer metadata if this resource is behind a paid offer, else None."""
     offer_ids = await _offer_ids_for_resource(resource_uuid, db_session)
     if not offer_ids:

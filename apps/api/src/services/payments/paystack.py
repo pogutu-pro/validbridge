@@ -13,13 +13,14 @@ import hmac
 import json
 import uuid
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.db.payments.payments import PaymentsConfig
+from src.security.secret_crypto import resolve_secret
 
 PAYSTACK_BASE_URL = "https://api.paystack.co"
 
@@ -49,7 +50,7 @@ async def resolve_paystack_credentials(
     ).scalars().first()
 
     provider_config = (config.provider_config or {}) if config else {}
-    secret_key = provider_config.get("secret_key") or platform.secret_key
+    secret_key = resolve_secret(provider_config.get("secret_key")) or platform.secret_key
     public_key = provider_config.get("public_key") or platform.public_key or ""
 
     if not secret_key:
@@ -72,7 +73,7 @@ def make_reference(org_id: int) -> str:
     return f"vb_{org_id}_{uuid.uuid4().hex[:16]}"
 
 
-def reference_to_org_id(reference: str) -> Optional[int]:
+def reference_to_org_id(reference: str) -> int | None:
     parts = reference.split("_")
     if len(parts) >= 3 and parts[0] == "vb":
         try:
@@ -91,7 +92,7 @@ async def initialize_transaction(
     reference: str,
     callback_url: str,
     metadata: dict,
-    plan: Optional[str] = None,
+    plan: str | None = None,
 ) -> dict:
     """Initialize a Paystack transaction; returns {authorization_url, reference}.
 
@@ -200,7 +201,49 @@ async def disable_subscription(
         raise RuntimeError(data.get("message", "Paystack subscription disable failed"))
 
 
-async def verify_transaction(secret_key: str, reference: str) -> Optional[dict]:
+async def get_subscription(secret_key: str, subscription_code: str) -> dict | None:
+    """Return Paystack subscription metadata (status, next_payment_date, …).
+
+    Returns None when Paystack cannot resolve the code.
+    """
+    async with httpx.AsyncClient(timeout=15) as client:
+        resp = await client.get(
+            f"{PAYSTACK_BASE_URL}/subscription/{subscription_code}",
+            headers=_auth_headers(secret_key),
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    if not data.get("status"):
+        return None
+    return data["data"]
+
+
+async def list_customer_transactions(
+    secret_key: str,
+    customer: str | None = None,
+) -> list[dict]:
+    """Return the customer's recent transactions from Paystack.
+
+    ``customer`` is the Paystack customer id/code or email. Returns [] when
+    Paystack does not know the customer.
+    """
+    params: dict[str, str] = {}
+    if customer:
+        params["customer"] = customer
+    async with httpx.AsyncClient(timeout=15) as client:
+        resp = await client.get(
+            f"{PAYSTACK_BASE_URL}/transaction",
+            headers=_auth_headers(secret_key),
+            params=params,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    if not data.get("status"):
+        return []
+    return data.get("data") or []
+
+
+async def verify_transaction(secret_key: str, reference: str) -> dict | None:
     """Return the full transaction data if successful, else None."""
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.get(
@@ -214,7 +257,7 @@ async def verify_transaction(secret_key: str, reference: str) -> Optional[dict]:
     return data["data"]
 
 
-def verify_webhook_signature(secret_key: str, raw_body: bytes, signature: Optional[str]) -> bool:
+def verify_webhook_signature(secret_key: str, raw_body: bytes, signature: str | None) -> bool:
     """Verify the ``x-paystack-signature`` header (HMAC-SHA512 of raw body)."""
     if not signature:
         return False

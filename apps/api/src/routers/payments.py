@@ -158,6 +158,14 @@ async def api_remove_group_resource(
     return {"detail": "Resource removed"}
 
 
+@router.post("/{org_id}/groups/{group_id}/sync")
+async def api_sync_group(
+    org_id: int, group_id: int, db_session: AsyncSession = Depends(get_db_session), _=Depends(require_payments_admin)
+):
+    """Manually reconcile a payments group into its usergroup."""
+    return await service.sync_group(org_id, group_id, db_session)
+
+
 # ── Offers ───────────────────────────────────────────────────────────────────
 
 @router.get("/{org_id}/offers")
@@ -281,6 +289,30 @@ async def api_customers(
     org_id: int, db_session: AsyncSession = Depends(get_db_session), _=Depends(require_payments_admin)
 ):
     return await service.list_customers(org_id, db_session)
+
+
+# ── Billing portal (buyer self-service) ──────────────────────────────────────
+
+@router.get("/{org_id}/billing/overview")
+async def api_billing_overview(
+    org_id: int,
+    current_user=Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_db_session),
+):
+    user_id = resolve_acting_user_id(current_user)
+    await require_org_membership(user_id, org_id, db_session)
+    return await service.billing_overview(org_id, user_id, db_session)
+
+
+@router.get("/{org_id}/billing/invoices")
+async def api_billing_invoices(
+    org_id: int,
+    current_user=Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_db_session),
+):
+    user_id = resolve_acting_user_id(current_user)
+    await require_org_membership(user_id, org_id, db_session)
+    return await service.billing_transactions(org_id, user_id, db_session)
 
 
 # ── Webhook (public, Paystack signature-verified) ────────────────────────────

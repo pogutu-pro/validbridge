@@ -1,10 +1,34 @@
-# ValidBridge Local Demo — Credentials & Notes
+# ValidBridge — Environments, Credentials & Notes
+
+## 1. Production Live Instance (`validbridge.co.ke`)
+
+| Service  | URL                                            | Notes                                      |
+| -------- | ---------------------------------------------- | ------------------------------------------ |
+| Web App  | https://validbridge.co.ke                      | Main platform & default org (ValidBridge)  |
+| Sign In  | https://validbridge.co.ke/login                | Login page                                 |
+| API      | https://api.validbridge.co.ke/api/v1           | FastAPI backend                            |
+| Server   | `84.12.116.16` (Oracle Cloud)                  | Nginx + Docker (PostgreSQL 16, Redis 7.2)  |
+
+### Production Accounts (`validbridge.co.ke`)
+
+> All 4 roles below are provisioned and verified working on the live production database.
+
+| Role                       | Email                        | Password          | Permissions |
+| -------------------------- | ---------------------------- | ----------------- | ----------- |
+| Administrator (superadmin) | `admin@validbridge.dev`      | `ValidBridge123!` | Full platform & org admin access |
+| Maintainer                 | `maintainer@validbridge.dev` | `Maintainer123!`  | Org content & course maintenance |
+| Instructor                 | `instructor@validbridge.dev` | `Instructor123!`  | Course creation & grading |
+| Learner (student)          | `student@validbridge.dev`    | `Student123!`     | Student learning & enrollments |
+
+---
+
+## 2. Local Demo Instance (localhost / `lvh.me`)
 
 Dev instance for the localhost presentation. All services run locally; no external
 third-party keys are required (except optionally a hosted Judge0 for code execution,
 see below).
 
-## Running services
+### Running services (Local)
 
 | Service  | URL                                       | Notes                                  |
 | -------- | ----------------------------------------- | -------------------------------------- |
@@ -16,7 +40,7 @@ see below).
 `lvh.me` resolves to 127.0.0.1, so any `demo.lvh.me` subdomain works without hosts
 edits. Multi-tenancy is on: `demo.*` routes to the demo org.
 
-## Login credentials
+### Login credentials (Local)
 
 > All logins below are verified working against the running instance. This build
 > is ungated (`get_deployment_mode()` → `ee`), so SaaS email-verification is NOT

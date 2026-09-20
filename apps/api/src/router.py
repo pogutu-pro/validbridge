@@ -10,7 +10,7 @@ from src.routers import demo as demo_router_module
 from src.routers import instance
 from src.routers import plans
 from src.routers import usergroups
-from src.routers import dev, trail, users, auth, orgs, roles, search
+from src.routers import dev, trail, users, auth, orgs, roles, search, sso as sso_router_module
 from src.routers import superadmin as superadmin_router_module
 from src.routers import mfa as mfa_router_module
 from src.routers import monitoring
@@ -92,6 +92,10 @@ v1_router.include_router(
     ],
 )
 v1_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+# SSO: admin CRUD + public authorize/callback flow. Mounted alongside auth
+# (same prefix) so routes resolve to /api/v1/auth/sso/... exactly as the
+# frontend expects. Its own module — see the SSO implementation plan.
+v1_router.include_router(sso_router_module.router, prefix="/auth", tags=["auth"])
 # Two-factor: enrollment/management plus the /auth/login/mfa challenge.
 v1_router.include_router(mfa_router_module.router, prefix="/auth", tags=["auth"])
 v1_router.include_router(

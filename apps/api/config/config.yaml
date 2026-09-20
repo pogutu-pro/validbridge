@@ -71,6 +71,25 @@ payments_config:
     secret_key: ""       # sk_live_... / sk_test_...  (VALIDBRIDGE_PAYSTACK_SECRET_KEY)
     public_key: ""       # pk_live_... / pk_test_...  (VALIDBRIDGE_PAYSTACK_PUBLIC_KEY)
 
+sso:
+  # Single sign-on (SSO) provider credentials. SECRETS LIVE HERE ONLY — the
+  # per-org SSOConfig row stores only non-secret values (public endpoints,
+  # issuer, display overrides). A provider is "available" only when its
+  # required values below are non-empty.
+  enabled: true          # VALIDBRIDGE_SSO_ENABLED
+  workos:
+    client_id: ""        # VALIDBRIDGE_WORKOS_CLIENT_ID
+    client_secret: ""    # VALIDBRIDGE_WORKOS_CLIENT_SECRET
+    redirect_uri: ""     # VALIDBRIDGE_WORKOS_REDIRECT_URI
+  oidc:
+    client_id: ""        # VALIDBRIDGE_OIDC_CLIENT_ID
+    client_secret: ""    # VALIDBRIDGE_OIDC_CLIENT_SECRET
+    issuer: ""           # discovery base URL (https only) — VALIDBRIDGE_OIDC_ISSUER
+    authorization_endpoint: ""  # VALIDBRIDGE_OIDC_AUTHORIZATION_ENDPOINT
+    token_endpoint: ""          # VALIDBRIDGE_OIDC_TOKEN_ENDPOINT
+    userinfo_endpoint: ""       # VALIDBRIDGE_OIDC_USERINFO_ENDPOINT
+    redirect_uri: ""            # VALIDBRIDGE_OIDC_REDIRECT_URI
+
 ai_config:
   is_ai_enabled: false
   # Provider-agnostic generation (Pydantic AI). Set provider + api_key to use any

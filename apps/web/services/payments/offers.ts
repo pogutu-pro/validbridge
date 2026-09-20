@@ -93,3 +93,23 @@ export async function cancelSubscription(orgId: number, offerId: number, access_
   );
   return getResponseMetadata(result);
 }
+
+export async function getBillingOverview(orgId: number, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/billing/overview`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
+  );
+  const metadata = await getResponseMetadata(result);
+  if (!metadata.success) throw new Error(metadata.HTTPmessage || 'Failed to fetch billing overview')
+  return metadata;
+}
+
+export async function getBillingInvoices(orgId: number, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/billing/invoices`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
+  );
+  const metadata = await getResponseMetadata(result);
+  if (!metadata.success) throw new Error(metadata.HTTPmessage || 'Failed to fetch billing invoices')
+  return metadata;
+}

@@ -28,7 +28,7 @@ from src.db.users import PublicUser, AnonymousUser, APITokenUser
 from src.security.auth import resolve_acting_user_id
 from src.security.rbac.rbac import authorization_verify_if_user_is_anon
 from src.security.org_auth import require_org_admin
-from src.services.webhooks.crypto import encrypt_secret
+from src.security.secret_crypto import encrypt_secret
 from src.services.webhooks.events import WEBHOOK_EVENTS
 
 

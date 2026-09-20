@@ -1,8 +1,9 @@
 import os
+from typing import Literal
+
 import yaml
-from typing import Literal, Optional
-from pydantic import BaseModel
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 # One-shot guard for the missing-credential report below: config is loaded on
 # every request, and repeating the report drowns out every other startup log.
@@ -111,21 +112,21 @@ class MailingConfig(BaseModel):
     # configurable would break DKIM alignment and burn a shared sending
     # reputation. Organizations may override this name per-org; see
     # ``src/services/email/sender.py``.
-    system_email_sender_name: Optional[str] = "ValidBridge"
-    resend_api_key: Optional[str] = None
-    smtp_host: Optional[str] = None
-    smtp_port: Optional[int] = 587
-    smtp_username: Optional[str] = None
-    smtp_password: Optional[str] = None
-    smtp_use_tls: Optional[bool] = True
+    system_email_sender_name: str | None = "ValidBridge"
+    resend_api_key: str | None = None
+    smtp_host: str | None = None
+    smtp_port: int | None = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_use_tls: bool | None = True
 
 
 class DatabaseConfig(BaseModel):
-    sql_connection_string: Optional[str]
+    sql_connection_string: str | None
 
 
 class RedisConfig(BaseModel):
-    redis_connection_string: Optional[str]
+    redis_connection_string: str | None
 
 
 class InternalPaystackConfig(BaseModel):
@@ -135,6 +136,37 @@ class InternalPaystackConfig(BaseModel):
 
 class InternalPaymentsConfig(BaseModel):
     paystack: InternalPaystackConfig
+
+
+class SSOWorkOSConfig(BaseModel):
+    """WorkOS credentials. Client secret is a secret — never persisted to the DB."""
+
+    client_id: str | None = None
+    client_secret: str | None = None
+    redirect_uri: str | None = None
+
+
+class SSOOIDCConfig(BaseModel):
+    """Platform-level custom-OIDC credentials.
+
+    ``client_secret`` is a secret — never persisted to the DB. The endpoint /
+    issuer values are public and may also be overridden per-org inside
+    ``SSOConfig.provider_config``.
+    """
+
+    client_id: str | None = None
+    client_secret: str | None = None
+    issuer: str | None = None
+    authorization_endpoint: str | None = None
+    token_endpoint: str | None = None
+    userinfo_endpoint: str | None = None
+    redirect_uri: str | None = None
+
+
+class SSOFeatureConfig(BaseModel):
+    enabled: bool = True
+    workos: SSOWorkOSConfig = SSOWorkOSConfig()
+    oidc: SSOOIDCConfig = SSOOIDCConfig()
 
 
 class ValidBridgeConfig(BaseModel):
@@ -151,6 +183,7 @@ class ValidBridgeConfig(BaseModel):
     payments_config: InternalPaymentsConfig
     tinybird_config: TinybirdConfig | None
     judge0_config: Judge0Config | None
+    sso: SSOFeatureConfig = SSOFeatureConfig()
 
 
 def _env_bool(env_value, yaml_value):
@@ -265,9 +298,7 @@ def get_validbridge_config() -> ValidBridgeConfig:
     if len(auth_jwt_secret_key) < 32:
         raise ValueError(
             "SECURITY ERROR: VALIDBRIDGE_AUTH_JWT_SECRET_KEY must be at least 32 characters. "
-            "Current length: {}. Generate a secure key with: python -c \"import secrets; print(secrets.token_urlsafe(32))\"".format(
-                len(auth_jwt_secret_key)
-            )
+            f"Current length: {len(auth_jwt_secret_key)}. Generate a secure key with: python -c \"import secrets; print(secrets.token_urlsafe(32))\""
         )
 
     # Check if environment variables are defined
@@ -557,6 +588,40 @@ def get_validbridge_config() -> ValidBridgeConfig:
     paystack_public_key = env_paystack_public_key or yaml_config.get("payments_config", {}).get(
         "paystack", {}
     ).get("public_key")
+
+    # SSO config (platform-level provider credentials). Secrets live here, not
+    # in the DB — SSOConfig.provider_config stores only non-secret values.
+    sso_yaml = yaml_config.get("sso", {}) or {}
+    sso_workos_yaml = sso_yaml.get("workos", {}) or {}
+    sso_oidc_yaml = sso_yaml.get("oidc", {}) or {}
+
+    sso = SSOFeatureConfig(
+        enabled=bool(_env_bool(os.environ.get("VALIDBRIDGE_SSO_ENABLED"), sso_yaml.get("enabled", True))),
+        workos=SSOWorkOSConfig(
+            client_id=os.environ.get("VALIDBRIDGE_WORKOS_CLIENT_ID")
+            or sso_workos_yaml.get("client_id"),
+            client_secret=os.environ.get("VALIDBRIDGE_WORKOS_CLIENT_SECRET")
+            or sso_workos_yaml.get("client_secret"),
+            redirect_uri=os.environ.get("VALIDBRIDGE_WORKOS_REDIRECT_URI")
+            or sso_workos_yaml.get("redirect_uri"),
+        ),
+        oidc=SSOOIDCConfig(
+            client_id=os.environ.get("VALIDBRIDGE_OIDC_CLIENT_ID")
+            or sso_oidc_yaml.get("client_id"),
+            client_secret=os.environ.get("VALIDBRIDGE_OIDC_CLIENT_SECRET")
+            or sso_oidc_yaml.get("client_secret"),
+            issuer=os.environ.get("VALIDBRIDGE_OIDC_ISSUER") or sso_oidc_yaml.get("issuer"),
+            authorization_endpoint=os.environ.get("VALIDBRIDGE_OIDC_AUTHORIZATION_ENDPOINT")
+            or sso_oidc_yaml.get("authorization_endpoint"),
+            token_endpoint=os.environ.get("VALIDBRIDGE_OIDC_TOKEN_ENDPOINT")
+            or sso_oidc_yaml.get("token_endpoint"),
+            userinfo_endpoint=os.environ.get("VALIDBRIDGE_OIDC_USERINFO_ENDPOINT")
+            or sso_oidc_yaml.get("userinfo_endpoint"),
+            redirect_uri=os.environ.get("VALIDBRIDGE_OIDC_REDIRECT_URI")
+            or sso_oidc_yaml.get("redirect_uri"),
+        ),
+    )
+
     # Create HostingConfig and DatabaseConfig objects
     hosting_config = HostingConfig(
         tenancy=tenancy,
@@ -714,6 +779,7 @@ def get_validbridge_config() -> ValidBridgeConfig:
         ),
         tinybird_config=tinybird_config,
         judge0_config=judge0_config,
+        sso=sso,
     )
 
     return config

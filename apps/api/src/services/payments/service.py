@@ -8,17 +8,19 @@ authorized the acting user (see routers/payments.py).
 
 import uuid
 from datetime import datetime
-from typing import Any, Optional
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from src.db.payments.payments import PaymentProviderEnum, PaymentsConfig, PaymentsConfigRead
+from src.db.payments.payments import (
+    PaymentProviderEnum,
+    PaymentsConfig,
+    PaymentsConfigRead,
+)
 from src.db.payments.payments_enrollments import (
     EnrollmentStatusEnum,
     PaymentsEnrollment,
-    PaymentsEnrollmentRead,
 )
 from src.db.payments.payments_events import PaymentsEvent
 from src.db.payments.payments_groups import (
@@ -34,11 +36,21 @@ from src.db.payments.payments_offers import (
     PaymentsOfferRead,
     SubscriptionIntervalEnum,
 )
-from src.services.payments import paystack
+from src.security.secret_crypto import encrypt_secret
+from src.services.payments import group_sync, paystack
 
 
 def _now() -> datetime:
     return datetime.now()
+
+
+def _encrypt_provider_secrets(provider_config: dict) -> dict:
+    """Encrypt BYOK secrets before they touch the database — never plaintext."""
+    config = dict(provider_config)
+    secret_key = config.get("secret_key")
+    if secret_key:
+        config["secret_key"] = encrypt_secret(secret_key)
+    return config
 
 
 # ── Config ───────────────────────────────────────────────────────────────────
@@ -68,6 +80,7 @@ async def initialize_config(
 ) -> dict:
     # ``active`` is a column, not provider-specific data — never persist it.
     requested_active = provider_config.pop("active", None)
+    provider_config = _encrypt_provider_secrets(provider_config)
 
     existing = (
         await db_session.execute(
@@ -194,6 +207,7 @@ async def add_group_resource(org_id: int, group_id: int, resource_uuid: str, db_
             )
         )
         await db_session.commit()
+    await _reconcile_group_resources_sync(group_id, db_session)
 
 
 async def remove_group_resource(org_id: int, group_id: int, resource_uuid: str, db_session: AsyncSession) -> None:
@@ -208,6 +222,15 @@ async def remove_group_resource(org_id: int, group_id: int, resource_uuid: str, 
     ).scalars().all()
     for r in rows:
         await db_session.delete(r)
+    await db_session.commit()
+    await _reconcile_group_resources_sync(group_id, db_session)
+
+
+async def _reconcile_group_resources_sync(group_id: int, db_session: AsyncSession) -> None:
+    group = await group_sync.load_group(group_id, db_session)
+    if group is None:
+        return
+    await group_sync.reconcile_group_resources(group, db_session)
     await db_session.commit()
 
 
@@ -256,6 +279,8 @@ async def create_offer(
         )
     await db_session.commit()
     await db_session.refresh(offer)
+    if offer.payments_group_id:
+        await _reconcile_group_resources_sync(offer.payments_group_id, db_session)
     return PaymentsOfferRead.model_validate(offer)
 
 
@@ -281,17 +306,19 @@ async def update_offer(org_id: int, offer_id: int, data: dict, db_session: Async
         db_session.add(offer)
         await db_session.commit()
         await db_session.refresh(offer)
+    if offer.payments_group_id:
+        await _reconcile_group_resources_sync(offer.payments_group_id, db_session)
     return PaymentsOfferRead.model_validate(offer)
 
 
-def _interval_from(data: dict) -> Optional[SubscriptionIntervalEnum]:
+def _interval_from(data: dict) -> SubscriptionIntervalEnum | None:
     if data.get("offer_type") != "subscription":
         return None
     value = data.get("interval") or "monthly"
     return SubscriptionIntervalEnum(value)
 
 
-async def _provision_plan(org_id: int, offer: PaymentsOffer, db_session: AsyncSession) -> Optional[str]:
+async def _provision_plan(org_id: int, offer: PaymentsOffer, db_session: AsyncSession) -> str | None:
     """Create/update the Paystack plan backing a subscription offer.
 
     Returns the plan code to store in ``provider_product_id``. If the org uses a
@@ -362,6 +389,57 @@ async def _get_offer(org_id: int, offer_id: int, db_session: AsyncSession) -> Pa
     if offer is None:
         raise HTTPException(status_code=404, detail="Offer not found")
     return offer
+
+
+# ── Payments → usergroup sync ────────────────────────────────────────────────
+
+async def _sync_membership_for_offer(
+    offer: PaymentsOffer, user_id: int, db_session: AsyncSession, *, granted: bool
+) -> None:
+    """Sync a buyer into the offer's payments group (no-op when none linked)."""
+    group_id = getattr(offer, "payments_group_id", None)
+    if group_id is None:
+        return
+    group = await group_sync.load_group(group_id, db_session)
+    if group is None:
+        return
+    await group_sync.sync_offer_buyer(
+        group, offer.id, user_id, granted=granted, db_session=db_session
+    )
+
+
+async def _sync_membership_for_enrollment(
+    enrollment: PaymentsEnrollment, db_session: AsyncSession, *, granted: bool
+) -> None:
+    """Sync membership based on the enrollment's offer group."""
+    offer = (
+        await db_session.execute(
+            select(PaymentsOffer).where(PaymentsOffer.id == enrollment.offer_id)
+        )
+    ).scalars().first()
+    if offer is None:
+        return
+    await _sync_membership_for_offer(offer, enrollment.user_id, db_session, granted=granted)
+
+
+async def sync_group(org_id: int, group_id: int, db_session: AsyncSession) -> dict:
+    """Full manual sync of a payments group into its usergroup (admin trigger)."""
+    group = await _get_group(org_id, group_id, db_session)
+    members_added, members_removed = await group_sync.reconcile_group_members(
+        group, db_session
+    )
+    resources_added, resources_removed = await group_sync.reconcile_group_resources(
+        group, db_session
+    )
+    await db_session.commit()
+    return {
+        "group_id": group.id,
+        "usergroup_id": group.usergroup_id,
+        "members_added": members_added,
+        "members_removed": members_removed,
+        "resources_mirrored": resources_added,
+        "resources_removed": resources_removed,
+    }
 
 
 async def _offer_public_shape(offer: PaymentsOffer, db_session: AsyncSession) -> dict:
@@ -536,6 +614,7 @@ async def add_offer_resource(org_id: int, offer_id: int, resource_uuid: str, db_
             PaymentsOfferResource(offer_id=offer_id, resource_uuid=resource_uuid, org_id=org_id)
         )
         await db_session.commit()
+    await _reconcile_offer_group_resources(org_id, offer_id, db_session)
 
 
 async def remove_offer_resource(org_id: int, offer_id: int, resource_uuid: str, db_session: AsyncSession) -> None:
@@ -551,6 +630,13 @@ async def remove_offer_resource(org_id: int, offer_id: int, resource_uuid: str, 
     for r in rows:
         await db_session.delete(r)
     await db_session.commit()
+    await _reconcile_offer_group_resources(org_id, offer_id, db_session)
+
+
+async def _reconcile_offer_group_resources(org_id: int, offer_id: int, db_session: AsyncSession) -> None:
+    offer = await _get_offer(org_id, offer_id, db_session)
+    if offer.payments_group_id:
+        await _reconcile_group_resources_sync(offer.payments_group_id, db_session)
 
 
 # ── Enrollments ──────────────────────────────────────────────────────────────
@@ -582,6 +668,193 @@ async def list_my_enrollments(org_id: int, user_id: int, db_session: AsyncSessio
             }
         )
     return result
+
+
+# ── Billing portal ───────────────────────────────────────────────────────────
+
+async def _org_uses_custom_provider(org_id: int, db_session: AsyncSession) -> bool:
+    config = (
+        await db_session.execute(
+            select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+        )
+    ).scalars().first()
+    return config is not None and config.provider == PaymentProviderEnum.custom
+
+
+async def _subtraction_value(value) -> str:
+    return value.value if isinstance(value, SubscriptionIntervalEnum) else str(value or "")
+
+
+async def _fetch_subscription_summary(
+    org_id: int, enrollment: PaymentsEnrollment, db_session: AsyncSession
+) -> dict:
+    """Best-effort remote subscription status for an active subscription."""
+    local_status = (
+        enrollment.status.value
+        if isinstance(enrollment.status, EnrollmentStatusEnum)
+        else enrollment.status
+    )
+    if not enrollment.subscription_code or await _org_uses_custom_provider(org_id, db_session):
+        return {
+            "status": local_status,
+            "next_payment_date": None,
+            "plan_name": None,
+            "remote": False,
+        }
+    try:
+        credentials = await paystack.resolve_paystack_credentials(org_id, db_session)
+        remote = await paystack.get_subscription(
+            credentials.secret_key, enrollment.subscription_code
+        )
+    except Exception:
+        return {
+            "status": local_status,
+            "next_payment_date": None,
+            "plan_name": None,
+            "remote": False,
+        }
+    if not remote:
+        return {
+            "status": local_status,
+            "next_payment_date": None,
+            "plan_name": None,
+            "remote": False,
+        }
+    return {
+        "status": remote.get("status") or local_status,
+        "next_payment_date": remote.get("next_payment_date"),
+        "plan_name": (remote.get("plan") or {}).get("name"),
+        "remote": True,
+    }
+
+
+def _transaction_shape(t: dict, offer_names: dict = None) -> dict:
+    offer_id = (t.get("metadata") or {}).get("offer_id")
+    offer_names = offer_names or {}
+    return {
+        "reference": t.get("reference"),
+        "amount": (t.get("amount") or 0) / 100,
+        "currency": t.get("currency"),
+        "status": t.get("status"),
+        "created_at": t.get("created_at"),
+        "description": offer_names.get(offer_id) or "Store purchase",
+    }
+
+
+async def billing_transactions(
+    org_id: int, user_id: int, db_session: AsyncSession
+) -> list[dict]:
+    """The caller's payment history (Paystack when live, local fallback)."""
+    from src.db.users import User
+
+    user = (
+        await db_session.execute(select(User).where(User.id == user_id))
+    ).scalars().first()
+    email = getattr(user, "email", None) or ""
+
+    if not await _org_uses_custom_provider(org_id, db_session):
+        try:
+            credentials = await paystack.resolve_paystack_credentials(org_id, db_session)
+            remote = await paystack.list_customer_transactions(
+                credentials.secret_key, customer=email
+            )
+        except Exception:
+            remote = []
+        if remote:
+            offer_ids = [
+                (t.get("metadata") or {}).get("offer_id")
+                for t in remote
+                if (t.get("metadata") or {}).get("offer_id")
+            ]
+            offer_names: dict = {}
+            if offer_ids:
+                rows = (
+                    await db_session.execute(
+                        select(PaymentsOffer.id, PaymentsOffer.name).where(
+                            PaymentsOffer.id.in_(offer_ids)
+                        )
+                    )
+                ).all()
+                for offer_id, name in rows:
+                    offer_names[offer_id] = name
+            return [_transaction_shape(t, offer_names) for t in remote]
+
+    # Local fallback: surrenders only when the org is on the demo ``custom``
+    # provider or Paystack is unreachable/then-unknown customer.
+    rows = (
+        await db_session.execute(
+            select(PaymentsEnrollment, PaymentsOffer)
+            .join(PaymentsOffer, PaymentsOffer.id == PaymentsEnrollment.offer_id)
+            .where(
+                PaymentsEnrollment.org_id == org_id,
+                PaymentsEnrollment.user_id == user_id,
+            )
+        )
+    ).all()
+    return [
+        {
+            "reference": (enrollment.provider_specific_data or {}).get("reference"),
+            "amount": offer.amount,
+            "currency": offer.currency,
+            "status": (
+                enrollment.status.value
+                if isinstance(enrollment.status, EnrollmentStatusEnum)
+                else enrollment.status
+            ),
+            "created_at": enrollment.creation_date,
+            "description": offer.name,
+        }
+        for enrollment, offer in rows
+    ]
+
+
+async def billing_overview(
+    org_id: int, user_id: int, db_session: AsyncSession
+) -> dict:
+    """The caller's billing portal data: subscriptions + payment history.
+
+    Subscription extras are fetched best-effort from Paystack; the raw
+    ``subscription_code``/``email_token`` are never exposed.
+    """
+    rows = (
+        await db_session.execute(
+            select(PaymentsEnrollment, PaymentsOffer)
+            .join(PaymentsOffer, PaymentsOffer.id == PaymentsEnrollment.offer_id)
+            .where(
+                PaymentsEnrollment.org_id == org_id,
+                PaymentsEnrollment.user_id == user_id,
+            )
+        )
+    ).all()
+    subscriptions = []
+    for enrollment, offer in rows:
+        entry = {
+            "enrollment_id": enrollment.id,
+            "offer_id": offer.id,
+            "offer_uuid": offer.offer_uuid,
+            "offer_name": offer.name,
+            "offer_type": (
+                offer.offer_type.value
+                if isinstance(offer.offer_type, OfferTypeEnum)
+                else offer.offer_type
+            ),
+            "amount": offer.amount,
+            "currency": offer.currency,
+            "interval": await _subtraction_value(offer.interval),
+            "status": (
+                enrollment.status.value
+                if isinstance(enrollment.status, EnrollmentStatusEnum)
+                else enrollment.status
+            ),
+            "creation_date": enrollment.creation_date,
+            "subscription": await _fetch_subscription_summary(
+                org_id, enrollment, db_session
+            ),
+        }
+        subscriptions.append(entry)
+
+    transactions = await billing_transactions(org_id, user_id, db_session)
+    return {"subscriptions": subscriptions, "transactions": transactions}
 
 
 async def cancel_subscription(
@@ -623,6 +896,7 @@ async def cancel_subscription(
     enrollment.status = EnrollmentStatusEnum.cancelled
     enrollment.update_date = _now()
     db_session.add(enrollment)
+    await _sync_membership_for_enrollment(enrollment, db_session, granted=False)
     await db_session.commit()
     return {"status": "cancelled"}
 
@@ -673,7 +947,7 @@ async def create_checkout_session(
     user_id: int,
     redirect_uri: str,
     db_session: AsyncSession,
-    amount: Optional[float] = None,
+    amount: float | None = None,
 ) -> dict:
     offer = (
         await db_session.execute(
@@ -944,10 +1218,14 @@ async def _grant_enrollment(org_id: int, data: dict, db_session: AsyncSession) -
         enrollment.update_date = _now()
         db_session.add(enrollment)
 
+    # Grant through the platform usergroup machinery when the offer is part of
+    # a payments group (the sync is idempotent and runs in this transaction).
+    await _sync_membership_for_offer(offer, user_id, db_session, granted=True)
+
 
 async def _find_enrollment_by_subscription(
     org_id: int, subscription_code: str, db_session: AsyncSession
-) -> Optional[PaymentsEnrollment]:
+) -> PaymentsEnrollment | None:
     return (
         await db_session.execute(
             select(PaymentsEnrollment).where(
@@ -960,7 +1238,7 @@ async def _find_enrollment_by_subscription(
 
 async def _find_enrollment_by_reference(
     org_id: int, reference: str, db_session: AsyncSession
-) -> Optional[PaymentsEnrollment]:
+) -> PaymentsEnrollment | None:
     rows = (
         await db_session.execute(
             select(PaymentsEnrollment).where(PaymentsEnrollment.org_id == org_id)
@@ -983,6 +1261,7 @@ async def _cancel_subscription(org_id: int, data: dict, db_session: AsyncSession
     enrollment.status = EnrollmentStatusEnum.cancelled
     enrollment.update_date = _now()
     db_session.add(enrollment)
+    await _sync_membership_for_enrollment(enrollment, db_session, granted=False)
 
 
 async def _fail_subscription(org_id: int, data: dict, db_session: AsyncSession) -> None:
@@ -996,6 +1275,7 @@ async def _fail_subscription(org_id: int, data: dict, db_session: AsyncSession) 
     enrollment.status = EnrollmentStatusEnum.failed
     enrollment.update_date = _now()
     db_session.add(enrollment)
+    await _sync_membership_for_enrollment(enrollment, db_session, granted=False)
 
 
 async def _renew_subscription(org_id: int, data: dict, db_session: AsyncSession) -> None:
@@ -1017,6 +1297,7 @@ async def _renew_subscription(org_id: int, data: dict, db_session: AsyncSession)
     enrollment.status = EnrollmentStatusEnum.active
     enrollment.update_date = _now()
     db_session.add(enrollment)
+    await _sync_membership_for_enrollment(enrollment, db_session, granted=True)
 
 
 async def _refund_enrollment(org_id: int, data: dict, db_session: AsyncSession) -> None:
@@ -1030,3 +1311,4 @@ async def _refund_enrollment(org_id: int, data: dict, db_session: AsyncSession) 
     enrollment.status = EnrollmentStatusEnum.refunded
     enrollment.update_date = _now()
     db_session.add(enrollment)
+    await _sync_membership_for_enrollment(enrollment, db_session, granted=False)

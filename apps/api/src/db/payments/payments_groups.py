@@ -6,7 +6,12 @@ from sqlmodel import Field, SQLModel
 
 
 class PaymentsGroup(SQLModel, table=True):
-    """A named bundle of resources an org can sell via an offer."""
+    """A named bundle of resources an org can sell via an offer.
+
+    ``usergroup_id`` links the group to its sync target: a usergroup that
+    mirrors the group's buyers and resources so paid members get access through
+    the platform's standard usergroup machinery (see services/payments/group_sync.py).
+    """
 
     __tablename__ = "payments_groups"
 
@@ -16,6 +21,10 @@ class PaymentsGroup(SQLModel, table=True):
     )
     name: str
     description: Optional[str] = None
+    usergroup_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(BigInteger, ForeignKey("usergroup.id", ondelete="SET NULL")),
+    )
     creation_date: datetime = Field(default_factory=datetime.now)
     update_date: datetime = Field(default_factory=datetime.now)
 
@@ -59,3 +68,4 @@ class PaymentsGroupRead(SQLModel):
     org_id: int
     name: str
     description: Optional[str]
+    usergroup_id: Optional[int] = None

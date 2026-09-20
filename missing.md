@@ -18,8 +18,8 @@ Legend: ✅ present · ❌ missing · ⚙️ disabled · 🚧 to implement later
 | Plan / feature scaffolding | ✅ |
 | **Licence + feature gating** | ⚙️ removed / disabled |
 | Payments backend | ✅ |
-| SSO backend | ❌ |
-| SCORM backend | ❌ |
+| SSO backend | ✅ |
+| SCORM backend | ✅ |
 | Org-wide audit logs viewer API | ✅ |
 | Platform superadmin API | ✅ |
 | Multi-tenant DNS/TLS infrastructure | ❌ (config only) |
@@ -37,9 +37,42 @@ All features now resolve as enabled:
 resolved_features: payments ✓  sso ✓  scorm ✓  audit_logs ✓  boards ✓  playgrounds ✓
 ```
 
+### 🔌 Live-testing requirements
+
+Everything below is **implemented and CI-covered with fakes**; a real end-to-end
+check needs the external service/key. Tick-list + "how to get" for every key is
+in **`infra.md`**.
+
+| Feature | Needs a live key/service to test? | What to provide |
+|---|---|---|
+| Payments | **Yes** | Paystack test keys + webhook URL |
+| SSO | **Yes** (real IdP login) | WorkOS (`VALIDBRIDGE_WORKOS_*`) or OIDC (`VALIDBRIDGE_OIDC_*`) |
+| Email flows (magic link, verify, invite, reset) | **Yes** | Resend key + verified domain, or SMTP |
+| AI (chat/plan/quiz/RAG/captions/image/audio) | **Yes** | AI provider key (+ Gemini for embeddings/media) |
+| Video HLS transcoding | **Yes** | ffmpeg + Redis + `VALIDBRIDGE_HLS_ENABLED` (+ worker) |
+| Analytics | **Yes** | Tinybird tokens |
+| Code execution | **Yes** | Judge0 endpoint/creds |
+| Google sign-in | **Yes** | Google OAuth client id |
+| Object storage (S3/R2) | **Yes** | bucket + `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` |
+| Multi-tenant / custom domains | **Yes** (infra) | wildcard DNS + TLS + reverse proxy + cert issuance |
+| Nudges / marketing | **Yes** | Resend + Loops |
+| Core LMS, SCORM, audit logs, superadmin | **No** (CI + fixtures) | — |
+
 ---
 
 ## ✍️ Recent work log
+
+### 2026-09-18 — SSO + SCORM backends
+
+**SSO** (first-party): `SSOConfig` model + migration; WorkOS/OIDC adapters +
+registry; single-use state; provisioning; router (`/api/v1/auth/sso/*`).
+Live WorkOS verification pending keys (see §B).
+
+**SCORM** (EE, under the gitignored `apps/api/ee/` overlay): `ee/db/scorm.py`,
+`ee/services/scorm/{scorm,scorm_runtime}.py`, `ee/routers/scorm.py`, mounted by
+`ee/hooks.py`. Built against the already-committed `test_scorm_*.py` executable
+spec — all 88 SCORM tests + `test_demo_teardown` green. See §C and
+`scorm-implementation-plan.md`.
 
 ### 2026-09-18 — Org-wide audit logs viewer + test restoration (pushed as `7f7a161`)
 
@@ -166,8 +199,8 @@ repository. They are **unblocked by the gating removal** and ready to be built.
 | Feature | Frontend | Backend | DB | End-to-end |
 |---|:---:|:---:|:---:|:---:|
 | Payments (orgs sell courses) | ✅ | ✅ | ✅ | ✅ |
-| SSO | ✅ | ❌ | ❌ | ❌ |
-| SCORM | ✅ | ❌ | ❌ | ❌ |
+| SSO | ✅ | ✅ | ✅ | ✅ |
+| SCORM | ✅ | ✅ | ✅ | ✅ |
 | Org-wide audit logs viewer | ✅ | ✅ | ✅ | ✅ |
 | Platform superadmin API | ✅ | ✅ | ✅ | ✅ |
 
@@ -217,8 +250,8 @@ superadmin **session** (not a `vb_sa_` token).
 | Refunds / cancellation / renewal webhooks | ✅ |
 | Demo storefront (offline `custom` provider) | ✅ |
 | Groups API | ✅ |
-| Group sync (→ user groups) | 🚧 follow-up |
-| Hosted billing portal | 🚧 follow-up |
+| Group sync (→ user groups) | ✅ |
+| Hosted billing portal | ✅ |
 
 **Models** (AGPL core; auto-registered by `database.py`):
 
@@ -254,6 +287,8 @@ enrollment. Access is a live per-enrollment read (no heartbeats needed).
 | Checkout | `POST /payments/{orgId}/offers/{offerUuid}/checkout` (returns Paystack authorization URL / demo QR) |
 | Groups | `GET/POST /payments/{orgId}/groups`, `PUT/DELETE /payments/{orgId}/groups/{groupId}` |
 | Group resources | `GET/POST/DELETE /payments/{orgId}/groups/{groupId}/resources` |
+| Group sync | `POST /payments/{orgId}/groups/{groupId}/sync` (mirror members + resources into a `usergroup`) |
+| Billing portal | `GET /payments/{orgId}/billing/overview`, `GET /payments/{orgId}/billing/invoices` (caller-scoped) |
 | Webhook | `POST /payments/paystack/webhook` |
 
 **External dependency:** **Paystack** (per-org Bring-Your-Own keys; the Stripe
@@ -268,22 +303,57 @@ vs success/paid (reactivate a recovered subscription).
 **Status:**
 
 1. ✅ Models, migration, router, Paystack client, webhook lifecycle — all in.
-2. ✅ Tests — `test_payments_service.py` (11: checkout, paywall, webhook
-   grant/refund/cancel/renew, signature, idempotency) + demo-store tests (19).
+2. ✅ Tests — `test_payments_service.py` (18: checkout, paywall, webhook
+   grant/refund/cancel/renew, signature, idempotency, group sync, billing
+   overview) + demo-store tests (19).
 3. ✅ Frontend — offer create/edit (subscription + interval), public offer page,
-   subscribe/cancel in `AccountPurchases`, checkout sheet.
-4. 🚧 Follow-up: (a) live smoke test with real Paystack test keys;
-   (b) group `sync` endpoint wiring enrollments → `usergroups`;
-   (c) hosted billing portal (currently the web cancel button + Paystack
-   webhook cover cancellations).
+   subscribe/cancel in `AccountPurchases`, checkout sheet, group sync button
+   on payment groups, hosted billing portal at `/account/billing`.
+4. ✅ Group sync — `src/services/payments/group_sync.py` lazily creates a
+   `usergroup` per payments group (`PaymentsGroup.usergroup_id`), mirrors
+   granting enrollments as members and group+offer resources as usergroup
+   resources on every grant/renew/cancel/fail/refund and via the manual
+   `/sync` endpoint. Migration
+   `b5c6d7e8f9a1_add_usergroup_id_to_payments_groups.py`.
+5. ✅ Hosted billing portal — `GET /payments/{orgId}/billing/*` (best-effort
+   Paystack subscription enrichment + transaction history, local fallback for
+   the demo `custom` provider); web page on the account sidebar
+   (`/account/billing`) with statuses, next-payment dates and invoice list.
+6. ✅ Live smoke test — `apps/api/scripts/payments_smoke.py` (gated on
+   `PAYSTACK_SMOKE=1`); ran clean 8/8 against the test account: reachability,
+   plan creation, one-time + subscription transaction initialize, verify,
+   webhook signature round-trip. Only the final paid-event loop remains manual
+   (open the printed `authorization_url` and pay with test card
+   `4084084084084081`; the `charge.success` webhook grants the enrollment —
+   the webhook URL must be set on the Paystack account to a reachable
+   `/api/v1/payments/paystack/webhook`).
 
 ### 🔐 B. SSO
 
 | Layer | Status |
 |---|:---:|
 | Frontend (`services/auth/sso.ts`, `OrgEditSSO`, `app/auth/sso/callback`) | ✅ |
-| Backend router / service / providers / model | ❌ |
+| Backend router / service / providers / model | ✅ |
 | Implementation plan | ✅ `sso-implementation-plan.md` (ordered milestones, exact contracts, fake-IdP test strategy) |
+
+> Backend is implemented as first-party code: `SSOConfig` model
+> (`src/db/sso.py`) + migration `c0d1e2f3a4b5`; provider registry + adapters
+> (`workos`, `custom_oidc`; the other four present as WorkOS-backed cards) in
+> `src/services/sso/providers/`; single-use state in `src/services/sso/state.py`;
+> reconciliation/provisioning in `src/services/sso/provision.py`; router
+> `src/routers/sso.py` mounted at `/api/v1/auth/sso/*`. CI-tested against a fake
+> OIDC IdP.
+>
+> **Credentials:** custom OIDC is **BYOK** — an org supplies its own
+> `issuer_url` / `client_id` / `client_secret` / `scopes` (org-first, platform
+> `VALIDBRIDGE_OIDC_*` as fallback); the client secret is **Fernet-encrypted at
+> rest** and never echoed back. WorkOS remains platform-level (the org supplies
+> only its non-secret `organization_id`). The SSO card is selectable even when
+> the platform has no OIDC client, because the org brings its own.
+>
+> **Remaining (manual, one-time — not CI-blocking):** verify WorkOS end-to-end
+> with live credentials. Steps in `sso-implementation-plan.md` §9.3; key
+> acquisition below.
 
 **Model shape** (`SSOConfig`):
 
@@ -312,39 +382,92 @@ default_role_id, provider_config (JSON), created_at, updated_at
 **External dependency:** an IdP (`workos` is already a dependency) or native
 SAML/OIDC.
 
-**Steps:** add the `SSOConfig` model; implement a provider abstraction + adapter;
-add the router; on callback validate, map domains, auto-provision, and issue the
-session via the existing auth service; keep `sso` in `allowed_auth_methods`.
+**Steps (done):** `SSOConfig` model + migration; provider abstraction + adapters;
+router with the exact 10 endpoints above; callback validates state, maps domains,
+auto-provisions, and issues the session via `issue_session_or_challenge`
+(`amr="sso"`, so `sso` is honored by `allowed_auth_methods`).
+
+### 🔑 SSO provider credentials — what's waiting & where to get them
+
+The code is done and CI-green; the only outstanding task is a one-time **live
+WorkOS** verification (real IdP login). Until then the SSO admin card shows
+`available: false` because the platform credentials below are empty.
+
+**WorkOS (the recommended single path — fronts SAML/OIDC/Google/Okta/Auth0/Keycloak):**
+
+1. Create a free account at **https://dashboard.workos.com/sign-up**.
+2. Create an **Environment** (use *Sandbox* for testing; *Production* when live).
+3. Open **API Keys** → copy:
+   - **Client ID** → `VALIDBRIDGE_WORKOS_CLIENT_ID`
+   - **API key (secret)** → `VALIDBRIDGE_WORKOS_CLIENT_SECRET`
+4. In **Redirects**, add the callback URL of your API:
+   `https://<api-host>/api/v1/auth/sso/callback`
+5. Create an SSO **Connection** (SAML or OIDC) in the WorkOS dashboard/admin
+   portal for your org, and paste the resulting **Organization ID** (`org_…`)
+   into the SSO admin card's `organization_id` field.
+
+**Custom OIDC (bring your own IdP — Keycloak, Okta, Auth0, Authentik, …):**
+
+1. In your IdP, register a new OIDC/OAuth2 **client** (confidential, grant type
+   `authorization_code`, redirect URI `https://<api-host>/api/v1/auth/sso/callback`).
+2. Copy the client **id** / **secret** and the **issuer** (discovery) URL.
+
+**Where to put them** (either works — env wins over YAML):
+
+- env vars in `.env` (names listed in `.env.example`):
+  `VALIDBRIDGE_WORKOS_CLIENT_ID/SECRET`, `VALIDBRIDGE_WORKOS_REDIRECT_URI`,
+  `VALIDBRIDGE_OIDC_CLIENT_ID/SECRET/ISSUER/…_ENDPOINT/…_REDIRECT_URI`, and
+  `VALIDBRIDGE_SSO_ENABLED`.
+- or `apps/api/config/config.yaml` under the `sso:` block.
+
+After setting them, restart the API; the provider card flips to
+`available: true` and the SSO button appears on the org login page.
 
 ### 📚 C. SCORM
 
 | Layer | Status |
 |---|:---:|
 | Frontend (`apps/web/ee/services/scorm/`, components, wired in `activity.tsx`, `client.tsx`) | ✅ |
-| Backend proxy / analyze / import / runtime / results | ❌ |
+| Backend proxy / analyze / import / runtime / results | ✅ |
 | Activity enums (`TYPE_SCORM`, `SUBTYPE_SCORM_12`, `SUBTYPE_SCORM_2004`) | ✅ already present |
+| Alembic migration for the enum values (`f8a3c2d1e5b7`) | ✅ already present |
 
-**Models to add** (AGPL core): version enum, completion-status enum, package,
-SCO, SCO assignment, attempt/completion.
+> Backend implemented under the **`ee/` package** (SCORM is EE-only — the
+> committed tests + e2e client import `ee.db.scorm` / `ee.services.scorm.*`, and
+> `apps/api/ee` is in `.gitignore` as the EE overlay; OSS builds skip these
+> tests). `SSO` is first-party, SCORM is EE. See `scorm-implementation-plan.md`.
+>
+> - `ee/db/scorm.py` — `ScormVersionEnum`, `CompletionStatusEnum`,
+>   `SuccessStatusEnum`, `ScormRuntimeData` (table), `ScormScoAssignment` (DTO).
+> - `ee/services/scorm/scorm.py` — manifest parsing (1.2 + 2004, xml:base,
+>   nested items, first-`<file>` fallback), hardened zip extraction
+>   (traversal/symlink/size/zip-bomb guards), shared-package storage,
+>   `import_scorm_package`.
+> - `ee/services/scorm/scorm_runtime.py` — CMI store, resume (`entry`),
+>   completion/success normalisation, no-double-count `total_time`, trail sync.
+> - `ee/routers/scorm.py` — the 10 endpoints (analyze / analyze-for-import /
+>   import / import-as-course / content / runtime×4 / results), mounted at
+>   `/api/v1/scorm` by `ee/hooks.py::register_routers`.
+>
+> **Verified:** all 8 committed `test_scorm_*.py` files green (88 tests) plus
+> `test_demo_teardown` (FK cascades); e2e specs run against an EE stack.
 
-**API surface the frontend already calls:**
+**API surface (implemented):**
 
 | Endpoint | Purpose |
 |---|---|
-| `GET /scorm/{path}` | serve package content (same-origin for the SCORM API bridge) |
 | `POST /scorm/analyze/{courseUuid}` | inspect an uploaded package |
 | `POST /scorm/analyze-for-import/{orgId}` | inspect before import |
 | `POST /scorm/import/{courseUuid}` | attach package to a course |
 | `POST /scorm/import-as-course` | create a course from a package |
-| `GET /scorm/{activityUuid}/results` | learner results / grading |
+| `GET · HEAD /scorm/{activityUuid}/content/{path}` | serve package content (same-origin for the SCORM API bridge) |
+| `POST /scorm/{activityUuid}/runtime/{initialize,commit,terminate}` | CMI runtime |
+| `GET /scorm/{activityUuid}/runtime/data` | current CMI state |
+| `GET /scorm/{activityUuid}/results` | instructor results / grading |
 
-**Runtime:** implement the SCORM 1.2 / 2004 client API
-(Initialize / GetValue / SetValue / Commit / Finish) server-side; the frontend
-`ScormRuntimeAPI.ts` bridges to it.
-
-**Steps:** add `src/db/scorm/` models; parse `imsmanifest.xml`; store package
-files via the media layer; create the SCORM activity; implement the proxy +
-runtime + results; register the router on `v1_router`.
+**Runtime:** the browser owns the SCORM JS API (`window.API` / `window.API_1484_11`);
+`ScormRuntimeAPI.ts` bridges to the initialize/commit/terminate endpoints above,
+which persist the CMI map server-side.
 
 ### 📝 D. Org-wide audit logs viewer — implemented
 

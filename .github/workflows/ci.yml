@@ -214,8 +214,10 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
         working-directory: ./apps/web
+      # --isolate: run each test file in its own process so module mocks (bun
+      # mock.module, process-global in a shared process) can never cross files.
       - name: Run tests
-        run: bun test tests
+        run: bun test --isolate tests
         working-directory: ./apps/web
 
   # ── Docker configuration + image build validation ─────────────────────────

@@ -12,7 +12,16 @@ import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "b
 
 // mocks in this file must not leak into sibling test files run in the same process
 mock.module("server-only", () => ({}));
-afterAll(() => { mock.restore(); });
+
+// Snapshot the real orgPlan module before mocking it below. mock.restore()
+// only clears function mocks; a module mock stays in bun's process-global
+// module cache until re-pointed, so this snapshot undoes it at the end.
+const realOrgPlan = await import("@services/billing/orgPlan");
+
+afterAll(() => {
+  mock.restore();
+  mock.module("@services/billing/orgPlan", () => ({ ...realOrgPlan }));
+});
 
 // --- test doubles -----------------------------------------------------------
 

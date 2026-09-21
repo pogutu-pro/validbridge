@@ -297,6 +297,13 @@ export default function AICopilotDrawer({ orgslug }: AICopilotDrawerProps) {
                     </button>
                   ))}
                 </div>
+                <Link
+                  href={`${getUriWithOrg(orgslug, '/help')}#ai-copilot`}
+                  onClick={closeCopilot}
+                  className="mt-6 text-xs font-medium text-muted-foreground underline decoration-border underline-offset-2 transition-colors hover:text-foreground"
+                >
+                  Learn how to use the Copilot
+                </Link>
               </div>
             )}
 

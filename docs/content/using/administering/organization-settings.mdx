@@ -1,0 +1,53 @@
+import { Callout } from 'nextra/components'
+
+# Organization Settings
+
+The **Organization settings** area controls how the workspace behaves. It lives in the dashboard under **Organization → Settings**, with a tab per topic.
+
+| Tab | What it controls |
+| --- | --- |
+| **General** | The organization's core details and defaults. |
+| **Branding** | Logo, colours and appearance — see [Branding & Landing Page](/using/administering/branding-and-landing). |
+| **Menu** | What appears in the navigation. |
+| **Landing** | The organization's home page — see [Branding & Landing Page](/using/administering/branding-and-landing). |
+| **AI** | Whether AI is enabled, and whether the learner Copilot is available. |
+| **Usage** | How much of your plan the organization is consuming. |
+| **Other** | Miscellaneous settings. |
+| **Danger Zone** | Destructive actions that cannot be undone. |
+
+## General
+
+The **General** tab holds the organization's identity and defaults: its name, slug (the short identifier in its URL), description, and contact details. Changing the slug changes the organization's web address, so do it deliberately.
+
+## Menu
+
+The **Menu** tab decides what appears in the organization's navigation. You can control which sections learners see — for example hiding **Boards** or **Podcasts** if you do not use them — and how the sidebar is arranged.
+
+## AI
+
+The **AI** tab is where AI is turned on or off:
+
+- **AI enabled** — master switch for the whole AI feature set, including authoring tools and in-course assistance.
+- **Copilot enabled** — controls the learner-facing assistant specifically.
+
+Both are organization-wide. Disabling AI removes magic blocks, AI selection tools and the Copilot everywhere. See [AI Authoring Tools](/using/teaching/ai-tools) for what these features do.
+
+<Callout type="info">
+The AI tab is available on supported plans. If an admin cannot see it, the plan may not include AI, or the feature is not enabled for your deployment.
+</Callout>
+
+## Usage
+
+The **Usage** tab shows how the organization is consuming its plan — for example seats, storage or AI usage, depending on your plan. Use it to spot a limit before you hit it.
+
+## Danger Zone
+
+The **Danger Zone** contains destructive operations, such as deleting the organization or wiping content. These actions are permanent.
+
+<Callout type="warning">
+Read every confirmation carefully. Actions in the Danger Zone cannot be undone, and a deleted organization takes its courses, users and progress with it.
+</Callout>
+
+## Who can change settings
+
+Only roles with the organization-update permission can edit settings. If a tab is read-only or missing, your role does not include that permission — see [Users, Roles & Groups](/using/administering/users-and-roles).

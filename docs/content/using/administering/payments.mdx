@@ -1,0 +1,55 @@
+import { Callout } from 'nextra/components'
+
+# Payments & Monetization
+
+ValidBridge can sell access to your courses. This page explains the pieces: **offers** (what you sell), **groups** (who gets access), **customers**, and **configuration** (how you get paid).
+
+Everything lives in the dashboard under **Payments**.
+
+## The model in one paragraph
+
+You create an **offer** that contains one or more courses, set a price, and connect a payment provider. When someone buys, they become a **customer**, are added to the relevant **group**, and gain access to the courses in the offer. That is the whole loop.
+
+## Configuration
+
+The **Configuration** tab connects your payment provider and sets the currency and related options. Complete this before creating offers — offers need a configured provider to be sellable.
+
+## Offers
+
+An **offer** is a bundle of one or more courses sold together at a price. To create one:
+
+1. Open **Payments → Offers** and create a new offer.
+2. Give it a name and description.
+3. Select the courses it unlocks.
+4. Set the price and currency.
+5. Publish the offer.
+
+Offers can be one-off purchases or subscriptions, depending on the provider and your setup. Use offers whenever learners should pay before they can enrol.
+
+<Callout type="tip">
+Name offers by outcome, not by content — "Data Analytics Certificate Programme" sells better than "Courses 1, 2 and 3".
+</Callout>
+
+## Groups and bundles
+
+**Groups** in the payments context let you sell several offers or courses together, or manage who is entitled to what:
+
+- Bundle related courses into one purchasable group.
+- Attach an offer to a [user group](/using/administering/users-and-roles) so buyers are automatically added and gain access.
+
+See the **Groups** tab under Payments for the payment-specific bundles.
+
+## Customers
+
+The **Customers** view lists everyone who has bought from you, with what they purchased and their status. Use it to answer "did this person pay?" and to support refunds or access issues.
+
+## Checkout for learners
+
+When a course requires payment, a learner who clicks **Enrol** is sent to checkout to pay for the offer. Once payment succeeds, access is granted automatically. If a learner says they paid but cannot get in, check the **Customers** list — the issue is almost always that the payment did not complete or the buyer used a different email.
+
+## Good practice
+
+- Set prices and currency in Configuration before you advertise anything.
+- Test the full purchase flow with a real (small) payment or the provider's test mode.
+- Keep offer descriptions accurate — a mismatch leads to disputes.
+- Review Customers after a launch to catch anyone stuck at checkout.

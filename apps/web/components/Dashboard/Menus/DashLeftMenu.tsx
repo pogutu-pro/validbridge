@@ -43,6 +43,7 @@ import {
   Plus,
   Code,
   Lightning,
+  Lifebuoy,
 } from '@phosphor-icons/react'
 import { motion } from 'motion/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
@@ -1085,6 +1086,15 @@ function DashLeftMenu() {
                 </HoverMenuLabel>
                 <HoverMenuSeparator />
                 <HoverMenuItem asChild>
+                  <Link
+                    href={getUriWithOrg(org.slug, '/help')}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-foreground hover:bg-black/[0.04] cursor-pointer transition-colors"
+                  >
+                    <Lifebuoy size={16} weight="fill" />
+                    <span>Help Center</span>
+                  </Link>
+                </HoverMenuItem>
+                <HoverMenuItem asChild>
                   <a
                     href="https://docs.validbridge.co.ke"
                     target="_blank"
@@ -1108,7 +1118,7 @@ function DashLeftMenu() {
                 </HoverMenuItem>
                 <HoverMenuItem asChild>
                   <a
-                    href="https://discord.gg/your-invite-link"
+                    href="https://discord.gg/CMyZjjYZ6x"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-foreground hover:bg-black/[0.04] cursor-pointer transition-colors"

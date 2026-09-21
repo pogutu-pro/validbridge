@@ -21,6 +21,7 @@ import {
   Sparkle,
   SquaresFour,
   ChalkboardSimple,
+  Lifebuoy,
 } from '@phosphor-icons/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import {
@@ -276,6 +277,15 @@ export const OrgMenu = (props: any) => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
+                      <Link
+                        href={getUriWithOrg(orgslug, '/help')}
+                        className="flex items-center gap-2"
+                      >
+                        <Lifebuoy size={16} weight="fill" />
+                        <span>Help Center</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <a
                         href="https://docs.validbridge.co.ke"
                         target="_blank"
@@ -299,7 +309,7 @@ export const OrgMenu = (props: any) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://discord.gg/your-invite-link"
+                        href="https://discord.gg/CMyZjjYZ6x"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"

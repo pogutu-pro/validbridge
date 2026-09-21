@@ -1,0 +1,105 @@
+import { Callout } from 'nextra/components'
+
+# Getting Started
+
+This page covers what ValidBridge is, who can do what, how to find your way around, and how to get help when you need it.
+
+## What ValidBridge is
+
+ValidBridge is a learning platform for building and delivering courses. Everything you create lives inside an **organization** — a self-contained workspace with its own courses, people, branding and settings. You may belong to one organization or several.
+
+The platform is organized around four ideas you will see everywhere:
+
+- **Course** — a program of study, made up of chapters.
+- **Chapter** — a module or unit inside a course, containing activities.
+- **Activity** — a single piece of learning content: a rich page, a video, a document, or a gradable assignment.
+- **Trail** — your personal progress record across every course you have started.
+
+## Accounts
+
+You sign in with an email and password, or with Google if your organization has enabled it. Enterprise organizations can also use single sign-on (SSO). Once signed in, what you can see and do is decided by your **role**.
+
+Sessions are kept alive with JWT tokens: a short-lived access token and a longer-lived refresh token, so you stay signed in across page loads.
+
+### Creating an account
+
+How you join depends on the organization's signup mechanism:
+
+- **Open signup** — anyone can create an account and join the organization.
+- **Invite-only** — only people who receive an invitation can join.
+
+Some organizations also require new accounts to be approved before they become active. If your email needs verifying, check your inbox (and spam) for the verification link.
+
+## Roles
+
+Every organization is seeded with four default roles. A role is really a bundle of per-resource permissions, so an admin can create custom roles and fine-tune each permission individually.
+
+| Role | Best for | Can do |
+| --- | --- | --- |
+| **User** | Learners | Browse and enrol in courses, complete activities and assignments, view their Trail and certificates, and chat with the AI Copilot. |
+| **Instructor** | Teachers | Everything a User can do, plus create and edit their own courses, chapters and activities, grade assignments, and use the AI authoring tools. |
+| **Maintainer** | Team leads | Manage courses, collections and published content, manage users, and moderate communities and boards. Cannot change platform-level settings. |
+| **Admin** | Owners | Full control of the organization: users and roles, branding, AI, payments, developers settings, and every feature. |
+
+<Callout>
+To find your own role, open your account menu (your avatar, top-right) or go to **Account settings**. If you believe you are missing access, an admin can adjust your role under **Users** in the dashboard.
+</Callout>
+
+The dashboard itself is gated by a **dashboard access** permission. If you do not see a **Dashboard** link, your role does not include it.
+
+For a deep dive, see [Roles & Permissions](/using/administering/users-and-roles).
+
+## Finding your way around
+
+There are two shells in ValidBridge: the **learning shell** that everyone uses, and the **dashboard shell** that instructors, maintainers and admins use to build and manage.
+
+### The learning shell
+
+This is what you see on the organization home, courses, your Trail and the rest of the learner-facing pages.
+
+- **Left sidebar** — your primary destinations: your courses, your learning (Trail), and anything the organization has added to its menu. The logo at the top returns to the organization home.
+- **Top bar** — search, the help menu, and your profile. On mobile the sidebar collapses and the top bar menu takes over.
+- **Collapse handle** — the icon at the sidebar's top-right shrinks it to an icon rail when you want more room.
+
+### The dashboard shell
+
+Reachable from the **Dashboard** link (if your role allows it), this is the management side of the platform. Its sidebar groups everything by intent:
+
+| Group | What lives there |
+| --- | --- |
+| Learning | Courses, assignments |
+| Content | Library, communities, podcasts, boards, playgrounds (Labs) |
+| People | Users, groups, roles, signups, two-factor, audit logs |
+| Monetization | Payments — offers, groups, customers |
+| Administration | Organization settings and developers tools |
+| Insights | Analytics |
+
+### The command palette
+
+The fastest way to move around is the command palette.
+
+1. Press **Ctrl + K** (or **⌘ + K** on macOS), or click the search box at the top of the dashboard sidebar.
+2. Type a few letters — results are grouped by type (pages, courses, assignments).
+3. Use the arrow keys to highlight a result and **Enter** to open it.
+4. Press **Esc** to dismiss it.
+
+### Onboarding checklist
+
+New organizations get an onboarding checklist at the top of the dashboard sidebar. It tracks a few setup steps (create a course, invite people, brand the workspace) and disappears once you finish or dismiss it.
+
+## Getting help
+
+There are several ways to get help, depending on what you need.
+
+- **Help Center (in-app)** — open **Help** in the top bar or the dashboard sidebar for a section-by-section guide to every feature.
+- **Documentation** — this site, for longer-form guides and reference material.
+- **AI Copilot** — ask questions about a course or activity in plain language. See [Ask AI (the Copilot)](/using/learning/ai-copilot).
+- **Discord** — the community chat, for questions and discussion with other users.
+- **Report feedback** — the in-app form for bugs and feature requests. Open **Help** → **Report Issue or Feedback**, describe what happened, and attach a screenshot if you can.
+
+### How to write a good support request
+
+1. Say what you were trying to do, and what you expected to happen.
+2. Say what actually happened — include the exact wording of any error.
+3. Mention where you were (page name) and your role.
+4. Attach a screenshot if the problem is visual.

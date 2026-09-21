@@ -5,6 +5,11 @@
     "title": "Getting Started"
   },
   "getting-started": "Getting Started",
+  "-- User Guide": {
+    "type": "separator",
+    "title": "User Guide"
+  },
+  "using": "Using ValidBridge",
   "-- Platform": {
     "type": "separator",
     "title": "Platform"

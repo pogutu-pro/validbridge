@@ -78,17 +78,17 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
 
   return (
     // overflow-hidden prevents tabs from blowing out the page layout
-    <div className="relative min-w-0 overflow-hidden">
+    <div className="relative min-w-0 overflow-hidden border-b border-gray-200/80">
       {/* Left gradient + button */}
       <div
-        className={`absolute start-0 inset-y-0 w-12 bg-gradient-to-r from-[#fcfbfc] to-transparent z-10 flex items-center pointer-events-none transition-opacity duration-200 ${
+        className={`absolute start-0 inset-y-0 w-12 bg-gradient-to-r from-white to-transparent z-10 flex items-center pointer-events-none transition-opacity duration-200 ${
           canScrollLeft ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <button
           onClick={() => scroll('left')}
           aria-label="Scroll tabs left"
-          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-white nice-shadow text-gray-500 hover:text-gray-900 transition-colors duration-150"
+          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-gray-900 transition-colors duration-150 shadow-sm"
         >
           <ChevronLeft size={13} strokeWidth={2.5} />
         </button>
@@ -96,24 +96,24 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
 
       <div
         ref={scrollRef}
-        className="flex space-x-1 font-black text-sm overflow-x-auto scrollbar-hide"
+        className="flex space-x-6 overflow-x-auto scrollbar-hide pt-1"
       >
         {tabs.map((tab) => {
           const inner = (
-            <div className="flex items-center space-x-2.5 mx-2.5">
+            <div className="flex items-center space-x-2">
               {tab.icon}
-              <div className="flex items-center whitespace-nowrap">
+              <span className="whitespace-nowrap">
                 {tab.label}
-                {tab.requiresPlan && (
-                  <PlanBadge currentPlan={currentPlan} requiredPlan={tab.requiresPlan} />
-                )}
-              </div>
+              </span>
+              {tab.requiresPlan && (
+                <PlanBadge currentPlan={currentPlan} requiredPlan={tab.requiresPlan} />
+              )}
             </div>
           )
 
           if (tab.disabled) {
             const el = (
-              <div className="py-2 w-fit text-center border-black transition-all ease-linear opacity-30 cursor-not-allowed">
+              <div className="py-2.5 px-1 font-medium text-sm text-gray-300 border-b-2 border-transparent cursor-not-allowed">
                 {inner}
               </div>
             )
@@ -126,8 +126,10 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
             )
           }
 
-          const tabClass = `py-2 w-fit text-center border-black transition-all ease-linear cursor-pointer ${
-            tab.active ? 'border-b-4' : 'opacity-50 hover:opacity-75'
+          const tabClass = `py-2.5 px-1 font-semibold text-sm border-b-2 transition-all duration-150 ease-in-out cursor-pointer ${
+            tab.active
+              ? 'border-[#FF5A1F] text-[#FF5A1F]'
+              : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
           }`
 
           if (tab.href) {
@@ -156,14 +158,14 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
 
       {/* Right gradient + button */}
       <div
-        className={`absolute end-0 inset-y-0 w-12 bg-gradient-to-l from-[#fcfbfc] to-transparent z-10 flex items-center justify-end pointer-events-none transition-opacity duration-200 ${
+        className={`absolute end-0 inset-y-0 w-12 bg-gradient-to-l from-white to-transparent z-10 flex items-center justify-end pointer-events-none transition-opacity duration-200 ${
           canScrollRight ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <button
           onClick={() => scroll('right')}
           aria-label="Scroll tabs right"
-          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-white nice-shadow text-gray-500 hover:text-gray-900 transition-colors duration-150"
+          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-gray-900 transition-colors duration-150 shadow-sm"
         >
           <ChevronRight size={13} strokeWidth={2.5} />
         </button>

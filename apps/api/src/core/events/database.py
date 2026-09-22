@@ -213,12 +213,14 @@ def _register_cache_invalidation_hooks():
         # copy for another five minutes and showed the old values back.
         slug = None
         try:
-            key = sa_inspect(Organization).identity_key_from_primary_key(
-                (target.org_id,)
-            )
-            org = session.identity_map.get(key)
-            if org and org.slug:
-                slug = org.slug
+            ins = sa_inspect(Organization)
+            if ins is not None:
+                key = ins.identity_key_from_primary_key(
+                    (target.org_id,)
+                )
+                org = session.identity_map.get(key)
+                if org and org.slug:
+                    slug = org.slug
         except Exception:
             logging.debug(
                 "Identity-map lookup failed for org_id=%s", target.org_id, exc_info=True
@@ -260,12 +262,14 @@ def _register_cache_invalidation_hooks():
         if not target.org_id:
             return
         try:
-            key = sa_inspect(Organization).identity_key_from_primary_key(
-                (target.org_id,)
-            )
-            org = session.identity_map.get(key)
-            if org and org.slug:
-                _ensure_set(session).add(org.slug)
+            ins = sa_inspect(Organization)
+            if ins is not None:
+                key = ins.identity_key_from_primary_key(
+                    (target.org_id,)
+                )
+                org = session.identity_map.get(key)
+                if org and org.slug:
+                    _ensure_set(session).add(org.slug)
         except Exception:
             try:
                 from sqlalchemy import text as sa_text
@@ -292,13 +296,15 @@ def _register_cache_invalidation_hooks():
         if not session or not getattr(target, 'course_id', None):
             return
         try:
-            course_key = sa_inspect(Course).identity_key_from_primary_key(
-                (target.course_id,)
-            )
-            course = session.identity_map.get(course_key)
-            if course and course.course_uuid:
-                _ensure_course_uuids(session).add(course.course_uuid)
-                return
+            ins = sa_inspect(Course)
+            if ins is not None:
+                course_key = ins.identity_key_from_primary_key(
+                    (target.course_id,)
+                )
+                course = session.identity_map.get(course_key)
+                if course and course.course_uuid:
+                    _ensure_course_uuids(session).add(course.course_uuid)
+                    return
         except Exception:
             logging.debug("Could not look up course UUID from identity map for course_id=%s", target.course_id, exc_info=True)
         try:

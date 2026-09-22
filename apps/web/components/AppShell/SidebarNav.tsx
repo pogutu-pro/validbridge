@@ -37,10 +37,10 @@ export function SidebarGroupLabel({
   collapsed?: boolean
 }) {
   if (collapsed) {
-    return <div aria-hidden className="mx-3 my-2 h-px bg-border" />
+    return <div aria-hidden className="mx-3 my-2 h-px bg-slate-200" />
   }
   return (
-    <p className="px-3 pb-1.5 pt-5 text-[10px] font-bold uppercase tracking-wider text-foreground first:pt-0">
+    <p className="px-3 pb-1 pt-4 text-[10px] font-bold uppercase tracking-wider text-slate-400 first:pt-0">
       {children}
     </p>
   )
@@ -58,23 +58,17 @@ export function SidebarNavLink({
   const content = (
     <div
       className={cn(
-        'group relative flex items-center rounded-lg text-sm transition-colors',
-        collapsed ? 'mx-auto h-10 w-10 justify-center' : 'gap-3 px-3 py-2',
+        'group relative flex items-center rounded-xl text-sm transition-all duration-150',
+        collapsed ? 'mx-auto h-10 w-10 justify-center' : 'gap-3 px-3.5 py-2.5',
         item.disabled
-          ? 'cursor-not-allowed text-muted-foreground/45'
+          ? 'cursor-not-allowed text-slate-300'
           : item.active
-            ? 'bg-primary/10 font-semibold text-foreground'
-            : 'text-foreground hover:bg-muted',
+            ? 'bg-[#D1FADF] text-[#027A48] border border-[#A7F3D0]/70 font-bold shadow-2xs'
+            : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 font-medium',
         className
       )}
     >
-      {item.active ? (
-        <span
-          aria-hidden
-          className="absolute start-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-primary"
-        />
-      ) : null}
-      <span className="flex shrink-0 items-center justify-center [&_svg]:size-[18px]">
+      <span className={cn("flex shrink-0 items-center justify-center [&_svg]:size-[18px]", item.active ? "text-[#027A48]" : "text-slate-400 group-hover:text-slate-600")}>
         {item.icon}
       </span>
       {!collapsed ? (
@@ -117,7 +111,7 @@ export function SidebarNavLink({
           <TooltipTrigger asChild>{link}</TooltipTrigger>
           <TooltipContent
             side="right"
-            className="border-border bg-foreground text-xs text-background"
+            className="border-slate-800 bg-slate-900 text-xs text-white px-2.5 py-1 shadow-md"
           >
             {item.label}
           </TooltipContent>

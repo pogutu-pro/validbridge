@@ -133,21 +133,23 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
   ]
 
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr] grid-cols-1 overflow-hidden">
-      <div className="ps-4 pe-4 sm:ps-10 sm:pe-10 tracking-tight bg-[#fcfbfc] z-10 nice-shadow flex-shrink-0 relative">
-        <div className="pt-6 pb-4">
+    <div className="h-screen w-full bg-[#F9FAFB] grid grid-rows-[auto_1fr] grid-cols-1 overflow-hidden">
+      <div className="px-6 sm:px-10 pt-5 pb-0 bg-white border-b border-gray-200/80 z-10 flex-shrink-0 relative">
+        <div className="pb-3">
           <Breadcrumbs items={[
             { label: t('common.users'), href: '/dash/users/settings/users', icon: <Users size={14} /> }
           ]} />
         </div>
-        <div className="my-2 py-3">
+        <div className="mb-4">
           <div className="w-full flex flex-col space-y-1 min-w-0">
-            <div className="pt-3 flex font-bold text-3xl sm:text-4xl tracking-tighter truncate">
+            <h1 className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 truncate">
               {H1Label}
-            </div>
-            <div className="flex font-medium text-gray-400 text-md truncate">
-              {H2Label}
-            </div>
+            </h1>
+            {H2Label && (
+              <p className="text-sm text-gray-500 font-normal truncate">
+                {H2Label}
+              </p>
+            )}
           </div>
         </div>
         <DashTabBar tabs={tabs} />
@@ -157,16 +159,16 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
-        className="min-w-0 overflow-y-auto overflow-x-hidden"
+        className="min-w-0 overflow-y-auto overflow-x-hidden p-6 sm:p-8"
       >
         {params.subpage == 'users' ? <OrgUsers /> : ''}
         {params.subpage == 'signups' ? <OrgAccess /> : ''}
         {params.subpage == 'add' ? <OrgUsersAdd /> : ''}
-        {params.subpage == 'usergroups' ? <><div className="h-6"></div><OrgUserGroups /></> : ''}
-        {params.subpage == 'roles' ? <><div className="h-6"></div><OrgRoles /></> : ''}
-        {params.subpage == 'audit-logs' ? <><div className="h-6"></div><OrgAuditLogs /></> : ''}
-        {params.subpage == 'sign-in' ? <><div className="h-6"></div><OrgSignInMethods /></> : ''}
-        {params.subpage == 'two-factor' ? <><div className="h-6"></div><OrgTwoFactorPolicy /></> : ''}
+        {params.subpage == 'usergroups' ? <OrgUserGroups /> : ''}
+        {params.subpage == 'roles' ? <OrgRoles /> : ''}
+        {params.subpage == 'audit-logs' ? <OrgAuditLogs /> : ''}
+        {params.subpage == 'sign-in' ? <OrgSignInMethods /> : ''}
+        {params.subpage == 'two-factor' ? <OrgTwoFactorPolicy /> : ''}
       </motion.div>
     </div>
   )

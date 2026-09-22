@@ -119,14 +119,14 @@ export default function OrgSidebar({ orgslug }: { orgslug: string }) {
     <aside
       aria-label={t('dashboard.nav.sidebar_navigation')}
       className={cn(
-        'sticky top-0 hidden h-screen shrink-0 flex-col border-e border-border bg-background transition-all duration-300 lg:flex',
+        'sticky top-0 hidden h-screen shrink-0 flex-col border-e border-slate-200 bg-white text-slate-800 transition-all duration-300 lg:flex shadow-sm',
         isCollapsed ? 'w-[72px]' : 'w-64'
       )}
     >
       {/* Brand */}
       <div
         className={cn(
-          'flex h-16 shrink-0 items-center border-b border-border px-4',
+          'flex h-16 shrink-0 items-center border-b border-slate-200 px-4 bg-white',
           isCollapsed ? 'justify-center' : 'justify-between'
         )}
       >
@@ -135,7 +135,7 @@ export default function OrgSidebar({ orgslug }: { orgslug: string }) {
           className={cn('flex min-w-0 items-center transition-opacity hover:opacity-80', !isCollapsed && 'gap-3')}
         >
           {org?.logo_image ? (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-card">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 border border-slate-200">
               <OrgSquareLogo org={org} alt="" wideInsetClassName="p-1" fallback={null} />
             </span>
           ) : (
@@ -143,8 +143,8 @@ export default function OrgSidebar({ orgslug }: { orgslug: string }) {
           )}
           {!isCollapsed && (
             <div className="flex min-w-0 flex-col">
-              <span className="truncate text-sm font-semibold text-foreground">{org?.name}</span>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              <span className="truncate text-sm font-semibold text-slate-900">{org?.name}</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
                 {t('common.learning_platform', { defaultValue: 'Learning platform' })}
               </span>
             </div>
@@ -155,7 +155,7 @@ export default function OrgSidebar({ orgslug }: { orgslug: string }) {
             type="button"
             aria-label={t('dashboard.nav.collapse_sidebar')}
             onClick={toggleCollapse}
-            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           >
             <SidebarSimple size={18} weight="fill" />
           </button>
@@ -168,13 +168,13 @@ export default function OrgSidebar({ orgslug }: { orgslug: string }) {
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 border-t border-border px-3 py-3">
+      <div className="shrink-0 border-t border-slate-200 px-3 py-3 bg-white">
         {isCollapsed ? (
           <button
             type="button"
             aria-label={t('dashboard.nav.expand_sidebar')}
             onClick={toggleCollapse}
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           >
             <SidebarSimple size={18} weight="fill" />
           </button>

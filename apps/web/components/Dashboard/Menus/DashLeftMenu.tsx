@@ -46,7 +46,6 @@ import {
   Lifebuoy,
 } from '@phosphor-icons/react'
 import { motion } from 'motion/react'
-import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import CommandPaletteTrigger from '@components/Dashboard/CommandPalette/CommandPaletteTrigger'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -1114,17 +1113,6 @@ function DashLeftMenu() {
                   >
                     <Globe size={16} weight="fill" />
                     <span>{t('common.help_menu.website')}</span>
-                  </a>
-                </HoverMenuItem>
-                <HoverMenuItem asChild>
-                  <a
-                    href="https://discord.gg/CMyZjjYZ6x"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-foreground hover:bg-black/[0.04] cursor-pointer transition-colors"
-                  >
-                    <DiscordIcon size={16} />
-                    <span>{t('common.help_menu.discord')}</span>
                   </a>
                 </HoverMenuItem>
                 <HoverMenuSeparator />

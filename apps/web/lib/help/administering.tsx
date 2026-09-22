@@ -87,7 +87,7 @@ export const administering: HelpSection = {
             rows={[
               [
                 <strong key="u">User</strong>,
-                'Learner. Browse and enrol, complete work, view their Trail and certificates, use the Copilot.',
+                'Learner. Browse and enrol, complete work, view their Trail and certificates, use the Genie.',
               ],
               [
                 <strong key="i">Instructor</strong>,
@@ -203,7 +203,7 @@ export const administering: HelpSection = {
           <H4>AI settings</H4>
           <P>
             The AI tab lets you enable or disable AI for the organization, cap requests
-            per user, and switch individual surfaces (such as the admin Copilot). The
+            per user, and switch individual surfaces (such as the admin Genie). The
             underlying Gemini API key is an instance-level setting configured once at
             deployment, not per organization.
           </P>

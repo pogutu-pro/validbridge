@@ -1,6 +1,6 @@
 # ValidBridge
 
-ValidBridge is an open-source learning platform for authoring and delivering educational content. Course building, assessment, communities, real-time collaboration, and AI-assisted learning are unified into a single, self-hostable system.
+ValidBridge is an learning platform for authoring and delivering educational content. Course building, assessment, communities, real-time collaboration, and AI-assisted learning are unified into a single, self-hostable system.
 
 ## Architecture
 

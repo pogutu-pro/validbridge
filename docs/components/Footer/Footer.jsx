@@ -5,7 +5,6 @@ import Link from 'next/link'
 const links = [
   { label: 'Documentation', href: '/' },
   { label: 'GitHub', href: 'https://github.com/pogutu-pro/validbridge' },
-  { label: 'Discord', href: 'https://discord.gg/CMyZjjYZ6x' },
   { label: 'Twitter', href: 'https://twitter.com/validbridgeapp' },
 ]
 

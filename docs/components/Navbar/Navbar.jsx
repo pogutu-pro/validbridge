@@ -4,7 +4,7 @@ import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Search } from 'nextra/components'
-import { GithubLogo, DiscordLogo, Code, ArrowUpRight, List, X, Plug, Globe, GraduationCap, BracketsCurly } from '@phosphor-icons/react/dist/ssr'
+import { GithubLogo, Code, ArrowUpRight, List, X, Plug, Globe, GraduationCap, BracketsCurly } from '@phosphor-icons/react/dist/ssr'
 
 function Navbar() {
   const { resolvedTheme } = useTheme()
@@ -107,15 +107,6 @@ function Navbar() {
               <GithubLogo size={16} weight="fill" />
               GitHub
             </a>
-            <a
-              href="https://discord.gg/CMyZjjYZ6x"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="lh-navbar-nav-item lh-hide-mobile"
-            >
-              <DiscordLogo size={16} weight="fill" />
-              Discord
-            </a>
 
             {/* Mobile hamburger */}
             <button
@@ -163,10 +154,6 @@ function Navbar() {
           <a href="https://github.com/pogutu-pro/validbridge" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
             <GithubLogo size={16} weight="fill" />
             GitHub
-          </a>
-          <a href="https://discord.gg/CMyZjjYZ6x" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
-            <DiscordLogo size={16} weight="fill" />
-            Discord
           </a>
         </div>
         <div className="lh-mobile-drawer-sidebar" id="mobile-sidebar-mount" />

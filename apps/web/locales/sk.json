@@ -2750,7 +2750,7 @@
           "save_success": "Nastavenia AI úspešne aktualizované",
           "save_error": "Nepodarilo sa aktualizovať nastavenia AI"
         },
-        "ai_copilot": "AI Copilot",
+        "ai_copilot": "AI Genie",
         "ai_copilot_description": "Umožnite študentom klásť otázky o obsahu kurzu. Používa indexovaný materiál na poskytovanie odpovedí s citáciami zdrojov.",
         "feature_editor_description": "AI asistencia pri úprave obsahu pre tvorcov kurzov.",
         "feature_activity_description": "AI asistent dostupný v rámci aktivít na pomoc študentom.",

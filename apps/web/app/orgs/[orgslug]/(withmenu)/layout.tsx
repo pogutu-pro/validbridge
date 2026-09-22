@@ -130,14 +130,24 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
           {!chromeless && <OrgMenu orgslug={orgslug} />}
           {/* Org-wide 2FA policy: renders nothing unless this user is non-compliant. */}
           {!chromeless && <OrgMFAPolicyGate />}
-          <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
-            {children}
+          {/* Integrated split-pane: the app content shares this row with the AI
+              Genie, which occupies real layout space on the end side instead of
+              floating over the app. The main column is flex-1, so it shrinks in
+              lockstep with the Genie's width transition when toggled. Hidden on
+              the copilot page — that route IS the full-screen Genie, so running
+              the drawer there too would double up the chat. */}
+          <div className="flex min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
+                {children}
+              </div>
+              {!isFullBleedPage && !chromeless && <OrgFooter />}
+              {!isFullBleedPage && !chromeless && <Watermark />}
+            </div>
+            {!chromeless && !isFullBleedPage && <AICopilotDrawer orgslug={orgslug} />}
           </div>
-          {!isFullBleedPage && !chromeless && <OrgFooter />}
-          {!isFullBleedPage && !chromeless && <Watermark />}
         </div>
       </div>
-      {!chromeless && <AICopilotDrawer orgslug={orgslug} />}
     </AICopilotProvider>
   )
 }

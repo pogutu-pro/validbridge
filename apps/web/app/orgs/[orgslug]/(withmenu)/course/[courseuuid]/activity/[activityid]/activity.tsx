@@ -259,7 +259,7 @@ function ActivityClient(props: ActivityClientProps) {
   const { track } = useVBAnalytics('learner')
   const activityStartTime = useRef(Date.now())
 
-  // Keep the AI Copilot drawer aware of the current activity so "Ask AI"
+  // Keep the AI Genie drawer aware of the current activity so "Ask AI"
   // resolves against this activity rather than requiring manual selection.
   useEffect(() => {
     if (activity?.activity_uuid && activity?.published) {

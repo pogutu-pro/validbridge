@@ -21,7 +21,7 @@ export const learning: HelpSection = {
   id: 'learning',
   title: 'Learning',
   icon: 'graduation',
-  tagline: 'Everything a learner does: courses, activities, assignments, the Copilot, and more.',
+  tagline: 'Everything a learner does: courses, activities, assignments, the Genie, and more.',
   subsections: [
     {
       id: 'browse-and-enrol',
@@ -120,7 +120,7 @@ export const learning: HelpSection = {
               going back to the list.
             </li>
             <li>
-              <strong>Ask AI</strong> — opens the Copilot with this activity already in
+              <strong>Ask AI</strong> — opens Genie with this activity already in
               context. See{' '}
               <a className="font-medium text-primary underline" href="#ai-copilot">
                 Ask AI
@@ -321,24 +321,24 @@ export const learning: HelpSection = {
     },
     {
       id: 'ai-copilot',
-      title: 'Ask AI (the Copilot)',
+      title: 'Ask AI (the Genie)',
       content: (orgslug) => (
         <div className="space-y-4">
           <P>
-            The <strong>AI Copilot</strong> is your on-demand tutor. It is powered by
+            The <strong>AI Genie</strong> is your on-demand tutor. It is powered by
             Google Gemini and, crucially, it reads the course material you are looking at
             — so its answers are grounded in your actual lessons rather than generic
             knowledge.
           </P>
-          <H4>Opening the Copilot</H4>
+          <H4>Opening Genie</H4>
           <Bullets>
             <li>
-              From an activity, click <UI>Ask AI</UI> in the activity view. The Copilot
+              From an activity, click <UI>Ask AI</UI> in the activity view. Genie
               opens in a drawer on the right with the activity in context.
             </li>
             <li>
-              From anywhere in the organization, open the full-page Copilot from the
-              sidebar or go to <ProseLink href={getUriWithOrg(orgslug, '/copilot')}>the Copilot page</ProseLink>.
+              From anywhere in the organization, open the full-page Genie from the
+              sidebar or go to <ProseLink href={getUriWithOrg(orgslug, '/copilot')}>the Genie page</ProseLink>.
               There it can reason over all of your courses.
             </li>
           </Bullets>
@@ -349,7 +349,7 @@ export const learning: HelpSection = {
               can explain, summarise, quiz you, and answer follow-ups about it.
             </Def>
             <Def term="Course-only mode">
-              opened from the full-page Copilot. It searches across your enrolled courses
+              opened from the full-page Genie. It searches across your enrolled courses
               to answer broader questions and build study plans.
             </Def>
           </Defs>
@@ -363,11 +363,11 @@ export const learning: HelpSection = {
           </Bullets>
           <H4>Sources and follow-ups</H4>
           <P>
-            When the Copilot uses your course material, it shows the sources it drew on.
+            When Genie uses your course material, it shows the sources it drew on.
             Click a source to jump to that activity. After each answer it also suggests
             follow-up questions you can tap.
           </P>
-          <Callout kind="info" title="If the Copilot is unavailable">
+          <Callout kind="info" title="If Genie is unavailable">
             AI features can be switched off for the whole organization, or the
             organization may have run out of AI credits. If you do not see{' '}
             <UI>Ask AI</UI>, that is why. An admin can enable it in organization

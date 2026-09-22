@@ -45,7 +45,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
   const session = useVBSession() as any
   const { userRoles, rights } = useAdminStatus()
   const org = useOrg() as any
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { track } = useVBAnalytics()
   const colors = getMenuColorClasses(primaryColor)
 
@@ -186,38 +186,37 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
               <DropdownMenuTrigger asChild>
                 <button className={`cursor-pointer flex items-center space-x-3 rounded-lg p-2 transition-colors ${colors.profileHover}`}>
                   <UserAvatar border="border-2" rounded="rounded-lg" width={30} shadow={primaryColor ? '' : undefined} />
-                  <div className="flex flex-col items-start space-y-0">
-                    <div className="flex items-center space-x-2">
-                      <p className={`text-sm font-semibold capitalize ${colors.profileName}`}>{session.data.user.username}</p>
-                      {userRoleInfo && userRoleInfo.name !== 'USER' && (
-                        <Tooltip 
-                          content={userRoleInfo.description}
-                          sideOffset={15}
-                          side="bottom"
-                        >
-                          <div className={`text-[6px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} px-1 py-0.5 font-medium rounded-full flex items-center gap-0.5 w-fit`}>
-                            {userRoleInfo.icon}
-                            {userRoleInfo.name}
-                          </div>
-                        </Tooltip>
-                      )}
-                      {/* Custom roles */}
-                      {customRoles.map((customRole, index) => (
-                        <Tooltip 
-                          key={index}
-                          content={customRole.description || `${t('roles.custom_role')}: ${customRole.name}`}
-                          sideOffset={15}
-                          side="bottom"
-                        >
-                          <div className="text-[6px] bg-gray-500 text-white px-1 py-0.5 font-medium rounded-full flex items-center gap-0.5 w-fit">
-                            <Shield size={12} weight="fill" />
-                            {customRole.name}
-                          </div>
-                        </Tooltip>
-                      ))}
+<div className="flex flex-col items-start space-y-0">
+                      <div className="flex items-center space-x-2">
+                        <p className={`text-sm font-semibold capitalize ${colors.profileName}`}>{session.data.user.username}</p>
+                        {userRoleInfo && userRoleInfo.name !== 'USER' && (
+                          <Tooltip 
+                            content={userRoleInfo.description}
+                            sideOffset={15}
+                            side="bottom"
+                          >
+                            <div className={`text-[6px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} px-1 py-0.5 font-medium rounded-full flex items-center gap-0.5 w-fit`}>
+                              {userRoleInfo.icon}
+                              {userRoleInfo.name}
+                            </div>
+                          </Tooltip>
+                        )}
+                        {/* Custom roles */}
+                        {customRoles.map((customRole, index) => (
+                          <Tooltip 
+                            key={index}
+                            content={customRole.description || `${t('roles.custom_role')}: ${customRole.name}`}
+                            sideOffset={15}
+                            side="bottom"
+                          >
+                            <div className="text-[6px] bg-gray-500 text-white px-1 py-0.5 font-medium rounded-full flex items-center gap-0.5 w-fit">
+                              <Shield size={12} weight="fill" />
+                              {customRole.name}
+                            </div>
+                          </Tooltip>
+                        ))}
+                      </div>
                     </div>
-                    <p className={`text-xs ${colors.profileMuted}`}>{session.data.user.email}</p>
-                  </div>
                   <CaretDown aria-hidden="true" size={16} weight="fill" className={colors.profileMuted} />
                 </button>
               </DropdownMenuTrigger>
@@ -227,7 +226,6 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                     <UserAvatar border="border-2" rounded="rounded-full" width={24} />
                     <div>
                       <p className="text-sm font-medium">{session.data.user.username}</p>
-                      <p className="text-xs text-gray-500 capitalize">{session.data.user.email}</p>
                     </div>
                   </div>
                 </DropdownMenuLabel>

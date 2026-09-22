@@ -27,8 +27,20 @@ export interface ResolvedTenant {
   source: 'custom-domain' | 'subdomain' | 'cookie' | 'default'
 }
 
-// Reserved subdomains that must never be treated as an org slug.
-const RESERVED_SUBDOMAINS = new Set(['auth', 'www', 'api', 'admin'])
+// Reserved subdomains that must never be treated as an org slug. These are
+// platform service hosts — auth, the API, admin, the marketing site, the docs
+// site and the other ValidBridge properties — so a host like
+// `docs.validbridge.co.ke` is never mistaken for the organization "docs".
+const RESERVED_SUBDOMAINS = new Set([
+  'auth',
+  'www',
+  'api',
+  'admin',
+  'docs',
+  'university',
+  'classroom',
+  'partners',
+])
 
 /**
  * Is `fullhost` a custom domain (not a subdomain of `domain`, not localhost,
@@ -67,7 +79,7 @@ export async function resolveCustomDomain(domain: string): Promise<{ slug: strin
 
 /**
  * Extract org slug from a Host given a parent domain. Skips reserved
- * subdomains (auth, www, api, admin).
+ * platform service subdomains (auth, www, api, admin, docs, …).
  */
 export function extractOrgSubdomain(fullhost: string | null | undefined, domain: string): string | null {
   if (!fullhost) return null
@@ -75,6 +87,16 @@ export function extractOrgSubdomain(fullhost: string | null | undefined, domain:
   if (!sub) return null
   if (RESERVED_SUBDOMAINS.has(sub)) return null
   return sub
+}
+
+/**
+ * Is `fullhost` a reserved (non-tenant) service subdomain of `domain`?
+ * e.g. isReservedSubdomain("docs.validbridge.co.ke", "validbridge.co.ke") -> true,
+ * but `acme.validbridge.co.ke` and the bare apex are false.
+ */
+export function isReservedSubdomain(fullhost: string | null | undefined, domain: string): boolean {
+  const sub = extractSubdomain(fullhost, domain)
+  return sub != null && RESERVED_SUBDOMAINS.has(sub)
 }
 
 /**
@@ -111,9 +133,17 @@ export async function resolveMultiTenant(args: {
     return { slug: sub, source: 'subdomain' }
   }
 
-  // 3. Cookie (only on non-base hosts; on the bare apex we want the default
-  // org picker rather than silently restoring the last-visited org)
-  if (cookieOrgslug && host && !isSameHost(host, baseDomain) && !isLocalhost(host)) {
+  // 3. Cookie (only on non-base, non-reserved hosts; on the bare apex we want
+  // the default org picker rather than silently restoring the last-visited org,
+  // and a reserved service subdomain such as docs.{domain} must not be turned
+  // back into the org "docs" by a stale VB_org cookie.)
+  if (
+    cookieOrgslug
+    && host
+    && !isSameHost(host, baseDomain)
+    && !isLocalhost(host)
+    && !isReservedSubdomain(host, baseDomain)
+  ) {
     return { slug: cookieOrgslug, source: 'cookie' }
   }
 

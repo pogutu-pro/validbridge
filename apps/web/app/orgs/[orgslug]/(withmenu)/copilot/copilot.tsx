@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -23,6 +23,7 @@ import { getOrgCourses } from '@services/courses/courses'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
+import { useAICopilot } from '@components/Contexts/AI/AICopilotContext'
 import {
   PaperPlaneRight,
   CaretDown,
@@ -95,19 +96,33 @@ export function CopilotChat({ orgslug }: CopilotProps) {
   const initialChatUuid = searchParams.get('chat')
   const { track } = useVBAnalytics('learner')
 
-  // All messages including the current streaming one (appended live)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  // The transcript is shared with the sidebar drawer (see AICopilotContext), so
+  // opening the full-screen page carries the ongoing chat straight over.
+  const {
+    messages,
+    aichatUuid,
+    followUps,
+    isStreaming,
+    isWaiting,
+    isLoadingFollowUps,
+    error,
+    conversationMode,
+    setMessages,
+    setAichatUuid,
+    setFollowUps,
+    setIsStreaming,
+    setIsWaiting,
+    setIsLoadingFollowUps,
+    setError,
+    setConversationMode,
+    resetConversation,
+  } = useAICopilot()
+
   const [input, setInput] = useState('')
-  const [isStreaming, setIsStreaming] = useState(false)
-  const [isWaiting, setIsWaiting] = useState(false)
-  const [aichatUuid, setAichatUuid] = useState<string | null>(null)
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
-  const [followUps, setFollowUps] = useState<string[]>([])
-  const [isLoadingFollowUps, setIsLoadingFollowUps] = useState(false)
   const [chatMode, setChatMode] = useState<'course_only' | 'general'>('course_only')
   const [courseDropdownOpen, setCourseDropdownOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const isMobileRef = useRef(false)
   const [isLoadingSession, setIsLoadingSession] = useState(false)
   const [currentSessionTitle, setCurrentSessionTitle] = useState<string | null>(null)
@@ -132,9 +147,11 @@ export function CopilotChat({ orgslug }: CopilotProps) {
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   })
-  const sessions: RAGChatSession[] = sessionsData || []
+  const sessions: RAGChatSession[] = useMemo(() => sessionsData || [], [sessionsData])
 
-  const mutateSessions = () => queryClient.invalidateQueries({ queryKey: queryKeys.ai.ragSessions(orgslug) })
+  const mutateSessions = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.ai.ragSessions(orgslug) })
+  }, [queryClient, orgslug])
 
   const { data: coursesData } = useQuery({
     queryKey: queryKeys.courses.list(org?.slug),
@@ -152,13 +169,12 @@ export function CopilotChat({ orgslug }: CopilotProps) {
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768
+      const wasMobile = isMobileRef.current
       isMobileRef.current = mobile
-      // Open sidebar by default on desktop only (on first mount)
-      if (!mobile && !isMobileRef.current) setSidebarOpen(true)
+      // Open the session sidebar automatically when switching to desktop
+      if (!mobile && wasMobile) setSidebarOpen(true)
     }
     checkMobile()
-    // Open sidebar on desktop on mount
-    if (window.innerWidth >= 768) setSidebarOpen(true)
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
@@ -180,28 +196,35 @@ export function CopilotChat({ orgslug }: CopilotProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Adopt a conversation carried over from the sidebar drawer. Activity chats
+  // belong on the activity view, not this page, so start fresh in that case.
+  const adoptionDoneRef = useRef(false)
+  useEffect(() => {
+    if (adoptionDoneRef.current) return
+    adoptionDoneRef.current = true
+    if (conversationMode === 'activity') {
+      resetConversation()
+    } else if (aichatUuid && messages.length > 0) {
+      isNewChatRef.current = false
+    }
+    setConversationMode('course')
+  }, [conversationMode, aichatUuid, messages, resetConversation, setConversationMode])
+
   const handleNewChat = useCallback(() => {
-    setMessages([])
-    setAichatUuid(null)
-    setFollowUps([])
-    setError(null)
-    setIsLoadingFollowUps(false)
+    resetConversation()
     setCurrentSessionTitle(null)
     setCurrentSessionFavorite(false)
     setChatMode('course_only')
     isNewChatRef.current = true
     if (isMobileRef.current) setSidebarOpen(false)
     inputRef.current?.focus()
-  }, [])
+  }, [resetConversation])
 
   const handleLoadSession = useCallback(async (sessionMeta: RAGChatSession) => {
     if (!accessToken || sessionMeta.aichat_uuid === aichatUuid) return
 
     setIsLoadingSession(true)
-    setMessages([])
-    setError(null)
-    setFollowUps([])
-    setIsLoadingFollowUps(false)
+    resetConversation()
     setCurrentSessionTitle(sessionMeta.title)
     setCurrentSessionFavorite(sessionMeta.favorite || false)
 
@@ -217,6 +240,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
       }))
       setMessages(chatMessages)
       setAichatUuid(sessionMeta.aichat_uuid)
+      setConversationMode('course')
       setSelectedCourse(sessionMeta.course_uuid || null)
       setChatMode(sessionMeta.mode || 'course_only')
       isNewChatRef.current = false
@@ -225,7 +249,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
     } finally {
       setIsLoadingSession(false)
     }
-  }, [accessToken, aichatUuid])
+  }, [accessToken, aichatUuid, resetConversation, setConversationMode, setMessages, setAichatUuid, setError])
 
   // Auto-load session from ?chat= URL parameter
   const initialLoadDone = useRef(false)
@@ -234,7 +258,8 @@ export function CopilotChat({ orgslug }: CopilotProps) {
     const target = sessions.find((s) => s.aichat_uuid === initialChatUuid)
     if (target) {
       initialLoadDone.current = true
-      handleLoadSession(target)
+      const timer = setTimeout(() => handleLoadSession(target), 0)
+      return () => clearTimeout(timer)
     }
   }, [initialChatUuid, accessToken, sessions, handleLoadSession])
 
@@ -270,6 +295,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim() || !accessToken) return
 
+    setConversationMode('course')
     setError(null)
     setFollowUps([])
     setIsLoadingFollowUps(false)
@@ -362,7 +388,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
     } else {
       await startRAGChatStream(message, accessToken, callbacks, selectedCourse || undefined, chatMode, orgslug)
     }
-  }, [accessToken, aichatUuid, selectedCourse, chatMode, mutateSessions, orgslug, track])
+  }, [accessToken, aichatUuid, selectedCourse, chatMode, mutateSessions, orgslug, track, setConversationMode, setMessages, setAichatUuid, setError, setFollowUps, setIsLoadingFollowUps, setIsStreaming, setIsWaiting])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -455,6 +481,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             onRename={handleRenameSession}
             onToggleFavorite={handleToggleFavorite}
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            onNewChat={handleNewChat}
             showMenuButton
           />
         ) : (
@@ -482,11 +509,10 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           {messages.length === 0 && !isLoadingSession && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-6 pb-10">
               <div className="flex items-center justify-center p-3 rounded-xl border border-orange-300 dark:border-orange-500/40">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/validbridge-dash.svg" alt="ValidBridge" className="h-10 w-auto" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Course Copilot</h2>
+                <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Course Genie</h2>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-md leading-relaxed">
                   Ask questions about your courses and get answers grounded in course content, with references to the source material.
                 </p>
@@ -545,7 +571,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               )
             }
 
-            const isThisStreaming = i === streamingIndexRef.current && isStreaming
+            const isThisStreaming = i === messages.length - 1 && isStreaming
             const showWaiting = isThisStreaming && isWaiting && !msg.content
             const showContent = msg.content.length > 0
 
@@ -649,21 +675,23 @@ export function CopilotChat({ orgslug }: CopilotProps) {
   )
 }
 
-export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onToggleSidebar, showMenuButton }: {
+export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onToggleSidebar, onNewChat, showMenuButton }: {
   title: string
   isFavorite: boolean
   onRename: (_newTitle: string) => void
   onToggleFavorite: () => void
   onToggleSidebar?: () => void
+  onNewChat?: () => void
   showMenuButton?: boolean
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(title)
   const editInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
+  const handleStartEditing = () => {
     setEditValue(title)
-  }, [title])
+    setIsEditing(true)
+  }
 
   useEffect(() => {
     if (isEditing) editInputRef.current?.focus()
@@ -715,7 +743,7 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
             {title}
           </h3>
           <button
-            onClick={() => setIsEditing(true)}
+            onClick={handleStartEditing}
             className="flex-shrink-0 p-1 rounded-md text-neutral-300 dark:text-neutral-600 opacity-0 group-hover:opacity-100 hover:text-neutral-500 dark:hover:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
           >
             <PencilSimple size={13} />
@@ -723,6 +751,14 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
         </div>
       )}
 
+      <button
+        onClick={onNewChat}
+        title="Start a new chat"
+        className="flex-shrink-0 flex items-center gap-1.5 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+      >
+        <Plus size={16} />
+        <span className="hidden md:inline text-xs">New Chat</span>
+      </button>
       <button
         onClick={onToggleFavorite}
         className={`flex-shrink-0 p-1.5 rounded-lg transition-all ${

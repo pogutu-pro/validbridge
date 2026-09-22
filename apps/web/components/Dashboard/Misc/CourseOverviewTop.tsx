@@ -253,7 +253,7 @@ export function CourseOverviewTop({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs text-xs">
-                    <p>Indexes this course's content so the AI Copilot can search and reference it when answering questions. Content is automatically re-indexed when activities are updated.</p>
+                    <p>Indexes this course's content so the AI Genie can search and reference it when answering questions. Content is automatically re-indexed when activities are updated.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

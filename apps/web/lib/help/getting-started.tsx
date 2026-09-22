@@ -54,7 +54,7 @@ export const gettingStarted: HelpSection = {
           <Bullets>
             <li>
               <strong>Learn</strong> — browse and enrol in courses, work through
-              activities, submit assignments, and ask the AI Copilot for help.
+              activities, submit assignments, and ask the AI Genie for help.
             </li>
             <li>
               <strong>Teach</strong> — build courses in a block-based editor, create
@@ -91,7 +91,7 @@ export const gettingStarted: HelpSection = {
               [
                 <strong key="a">User</strong>,
                 'Learners',
-                'Browse and enrol in courses, complete activities and assignments, view their Trail and certificates, and chat with the AI Copilot.',
+                'Browse and enrol in courses, complete activities and assignments, view their Trail and certificates, and chat with the AI Genie.',
               ],
               [
                 <strong key="i">Instructor</strong>,
@@ -235,15 +235,12 @@ export const gettingStarted: HelpSection = {
               </ProseLink>{' '}
               — longer-form guides, self-hosting and developer references.
             </Def>
-            <Def term="AI Copilot">
+            <Def term="AI Genie">
               ask questions about a course or activity in plain language. See{' '}
               <a className="font-medium text-primary underline" href="#ai-copilot">
-                Ask AI (the Copilot)
+                Ask AI (the Genie)
               </a>
               .
-            </Def>
-            <Def term="Discord">
-              the community chat, for questions and discussion with other users.
             </Def>
             <Def term="Report feedback">
               the in-app form for bugs and feature requests. Open <UI>Help</UI> →{' '}
@@ -258,8 +255,8 @@ export const gettingStarted: HelpSection = {
             <li>Mention where you were (page name) and your role.</li>
             <li>Attach a screenshot if the problem is visual.</li>
           </Numbers>
-          <Callout kind="tip" title="Try the Copilot first">
-            For questions about course content or how something works, the AI Copilot is
+          <Callout kind="tip" title="Try Genie first">
+            For questions about course content or how something works, the AI Genie is
             usually the fastest answer — it can read the material you are looking at.
           </Callout>
         </div>

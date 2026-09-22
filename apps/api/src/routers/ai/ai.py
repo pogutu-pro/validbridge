@@ -15,7 +15,7 @@ from src.services.ai.editor import (
     editor_ai_start_chat_session_stream,
     editor_ai_send_message_stream,
 )
-from src.services.ai.base import ask_ai_stream, save_message_to_history, generate_follow_up_suggestions
+from src.services.ai.base import ask_ai_stream, save_message_to_history, generate_follow_up_suggestions, ai_error_message
 from src.services.ai.schemas.ai import (
     ActivityAIChatSessionResponse,
     SendActivityAIChatMessage,
@@ -138,10 +138,10 @@ async def activity_chat_event_generator(
         # (full_response empty), so a disconnect *after* a full response can't
         # be abused to get free AI. Re-raise so Starlette observes the cancel.
         raise
-    except Exception:
+    except Exception as exc:
         stream_failed = True
         logger.exception("Error in activity_chat_event_generator")
-        yield f"data: {json.dumps({'type': 'error', 'message': 'An internal error occurred while processing the AI chat request.'})}\n\n"
+        yield f"data: {json.dumps({'type': 'error', 'message': ai_error_message(exc)})}\n\n"
     finally:
         # Refund credit if the model produced nothing useful.
         if org_id is not None and (stream_failed or not full_response):
@@ -413,10 +413,10 @@ async def editor_chat_event_generator(
         # empty), so a disconnect *after* a full response can't be abused to
         # get free AI. Re-raise so Starlette observes the cancel.
         raise
-    except Exception:
+    except Exception as exc:
         stream_failed = True
         logger.exception("Error in editor_chat_event_generator")
-        yield f"data: {json.dumps({'type': 'error', 'message': 'An internal error occurred while processing the AI request.'})}\n\n"
+        yield f"data: {json.dumps({'type': 'error', 'message': ai_error_message(exc)})}\n\n"
     finally:
         if org_id is not None and (stream_failed or not full_response):
             try:

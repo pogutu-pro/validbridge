@@ -169,13 +169,13 @@ function AICourseChat({
           <div className="space-y-4 pt-8">
             <div className="flex justify-center">
               <Image
-                className="outline outline-1 outline-neutral-200/20 rounded-lg"
+                className="rounded-lg ring-1 ring-inset ring-border"
                 width={28}
                 src={lrnaiIcon}
                 alt="AI"
               />
             </div>
-            <p className="text-sm text-white/50 text-center">
+            <p className="text-sm text-muted-foreground text-center">
               {t('courses.create.ai.chat_description')}
             </p>
             <div className="flex flex-wrap gap-2 justify-center">
@@ -183,7 +183,7 @@ function AICourseChat({
                 <button
                   key={chip.label}
                   onClick={() => handleSuggestionClick(chip.prompt)}
-                  className="px-4 py-1.5 text-xs font-semibold bg-white/5 text-white/40 rounded-xl hover:text-white/60 hover:bg-white/10 transition-all outline outline-1 outline-neutral-100/10 hover:outline-neutral-200/40 delay-75 ease-linear"
+                  className="px-4 py-1.5 text-xs font-semibold bg-secondary text-muted-foreground rounded-xl hover:text-foreground hover:bg-accent transition-all outline outline-1 outline-border hover:outline-border delay-75 ease-linear"
                 >
                   {chip.label}
                 </button>
@@ -202,18 +202,18 @@ function AICourseChat({
               className={cn(
                 "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm",
                 message.role === 'user'
-                  ? "bg-orange-600/80 text-white rounded-ee-md"
-                  : "bg-white/5 text-white/80 rounded-es-md ring-1 ring-inset ring-white/10"
+                  ? "bg-primary text-primary-foreground rounded-ee-md"
+                  : "bg-secondary text-foreground/90 rounded-es-md ring-1 ring-inset ring-border"
               )}
             >
               {message.role === 'user' ? (
                 <p className="whitespace-pre-wrap">{message.content}</p>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-xs text-white/50 font-medium">
+                  <p className="text-xs text-muted-foreground font-medium">
                     {t('courses.create.ai.plan_generated')}
                   </p>
-                  <p className="text-white/60 text-xs">
+                  <p className="text-muted-foreground/80 text-xs">
                     {t('courses.create.ai.plan_generated_hint')}
                   </p>
                 </div>
@@ -225,24 +225,24 @@ function AICourseChat({
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-white/5 rounded-2xl rounded-es-md px-4 py-3 ring-1 ring-inset ring-white/10 max-w-[85%]">
+            <div className="bg-secondary rounded-2xl rounded-es-md px-4 py-3 ring-1 ring-inset ring-border max-w-[85%]">
               <div className="flex items-center gap-3">
-                <Loader2 className="w-5 h-5 animate-spin text-orange-400" />
+                <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
                 <div className="flex flex-col gap-1">
-                  <span className="text-sm text-white/70 font-medium">
+                  <span className="text-sm text-foreground font-medium">
                     {currentHasVideo && loadingDuration < 10
                       ? t('courses.create.ai.processing_video')
                       : t('courses.create.ai.generating')}
                   </span>
                   {loadingDuration >= 5 && (
-                    <span className="text-xs text-white/40">
+                    <span className="text-xs text-muted-foreground">
                       {currentHasVideo
                         ? t('courses.create.ai.video_processing_hint')
                         : t('courses.create.ai.still_working')}
                     </span>
                   )}
                   {loadingDuration >= 15 && currentHasVideo && (
-                    <span className="text-xs text-amber-400/70">
+                    <span className="text-xs text-amber-600">
                       {t('courses.create.ai.video_takes_time')}
                     </span>
                   )}
@@ -250,13 +250,13 @@ function AICourseChat({
               </div>
               {loadingDuration >= 3 && (
                 <div className="mt-2 flex items-center gap-2">
-                  <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-1 flex-1 bg-muted rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-orange-500/50 rounded-full animate-pulse"
+                      className="h-full bg-orange-500 rounded-full animate-pulse"
                       style={{ width: `${Math.min(loadingDuration * 2, 95)}%`, transition: 'width 1s ease-out' }}
                     />
                   </div>
-                  <span className="text-xs text-white/30 tabular-nums">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     {loadingDuration}s
                   </span>
                 </div>
@@ -269,38 +269,38 @@ function AICourseChat({
       </div>
 
       {/* Input area */}
-      <div className="border-t border-white/5 p-4">
+      <div className="border-t border-border p-4">
         {isExhausted ? (
-          <div className="text-center text-sm text-white/50 py-2">
+          <div className="text-center text-sm text-muted-foreground py-2">
             {t('courses.create.ai.max_iterations_reached')}
           </div>
         ) : isCourseCreated ? (
-          <div className="text-center text-sm text-white/40 py-2">
+          <div className="text-center text-sm text-muted-foreground py-2">
             {t('courses.create.ai.content_step_info')}
           </div>
         ) : (
           <div className="space-y-3">
             {/* Attachments preview */}
             {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2 p-2 bg-white/5 rounded-xl ring-1 ring-inset ring-white/10">
+              <div className="flex flex-wrap gap-2 p-2 bg-secondary rounded-xl ring-1 ring-inset ring-border">
                 {attachments.map((attachment) => (
                   <div
                     key={attachment.id}
-                    className="relative group flex items-center gap-2 px-2.5 py-2 bg-white/5 rounded-lg ring-1 ring-inset ring-white/10 hover:ring-white/20 transition-all"
+                    className="relative group flex items-center gap-2 px-2.5 py-2 bg-secondary rounded-lg ring-1 ring-inset ring-border hover:ring-border transition-all"
                   >
                     {safeImageSrc(attachment.preview) ? (
-                      <div className="w-10 h-10 rounded-md overflow-hidden bg-black/20 ring-1 ring-inset ring-white/10">
+                      <div className="w-10 h-10 rounded-md overflow-hidden bg-muted ring-1 ring-inset ring-border">
                         <img src={safeImageSrc(attachment.preview)} alt={attachment.name} className="w-full h-full object-cover" />
                       </div>
                     ) : (
-                      <div className="w-10 h-10 rounded-md bg-white/5 flex items-center justify-center text-white/40 ring-1 ring-inset ring-white/10">
+                      <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center text-muted-foreground ring-1 ring-inset ring-border">
                         {getAttachmentIcon(attachment.type)}
                       </div>
                     )}
                     <div className="flex flex-col">
-                      <span className="text-xs text-white/70 font-medium max-w-[100px] truncate">{attachment.name}</span>
+                      <span className="text-xs text-foreground font-medium max-w-[100px] truncate">{attachment.name}</span>
                       {attachment.type === 'youtube' && (
-                        <span className="text-[10px] text-red-400/70 flex items-center gap-1">
+                        <span className="text-[10px] text-red-500 flex items-center gap-1">
                           <Video className="w-3 h-3" /> YouTube
                         </span>
                       )}
@@ -308,7 +308,7 @@ function AICourseChat({
                     <button
                       type="button"
                       onClick={() => removeAttachment(attachment.id)}
-                      className="p-1 rounded-full bg-white/10 hover:bg-red-500/30 text-white/60 hover:text-red-300 transition-colors ms-1"
+                      className="p-1 rounded-full bg-secondary hover:bg-red-500/10 text-muted-foreground hover:text-red-600 transition-colors ms-1"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -318,7 +318,7 @@ function AICourseChat({
             )}
 
             {/* Input container */}
-            <div className="relative bg-white/[0.03] rounded-2xl ring-1 ring-inset ring-white/10 focus-within:ring-orange-500/30 transition-all">
+            <div className="relative bg-muted/40 rounded-2xl ring-1 ring-inset ring-border focus-within:ring-orange-500/50 transition-all">
               <textarea
                 ref={inputRef}
                 value={inputValue}
@@ -333,7 +333,7 @@ function AICourseChat({
                 rows={3}
                 className={cn(
                   "w-full resize-none bg-transparent px-4 pt-4 pb-14",
-                  "text-sm text-white placeholder:text-white/30",
+                  "text-sm text-foreground placeholder:text-muted-foreground",
                   "focus:outline-none",
                   isLoading ? "opacity-30" : ""
                 )}
@@ -346,7 +346,7 @@ function AICourseChat({
               />
 
               {/* Bottom toolbar */}
-              <div className="absolute bottom-0 start-0 end-0 flex items-center justify-between p-3 border-t border-white/5">
+              <div className="absolute bottom-0 start-0 end-0 flex items-center justify-between p-3 border-t border-border">
                 {/* Attachment button with menu */}
                 <div className="relative" ref={attachMenuRef}>
                   <button
@@ -356,8 +356,8 @@ function AICourseChat({
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-xs font-medium",
                       !isLoading
-                        ? "bg-white/5 text-white/50 hover:text-white/70 hover:bg-white/10 ring-1 ring-inset ring-white/10"
-                        : "bg-white/5 text-white/20 cursor-not-allowed"
+                        ? "bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent ring-1 ring-inset ring-border"
+                        : "bg-secondary text-muted-foreground/40 cursor-not-allowed"
                     )}
                   >
                     <Paperclip className="w-4 h-4" />
@@ -366,7 +366,7 @@ function AICourseChat({
 
                   {/* Attachment menu */}
                   {showAttachMenu && (
-                    <div className="absolute bottom-full start-0 mb-2 w-52 bg-gray-900 rounded-xl ring-1 ring-white/10 shadow-2xl overflow-hidden z-50">
+                    <div className="absolute bottom-full start-0 mb-2 w-52 bg-popover rounded-xl ring-1 ring-border shadow-2xl overflow-hidden z-50">
                       {showYoutubeInput ? (
                         <div className="p-3 space-y-2">
                           <input
@@ -374,7 +374,7 @@ function AICourseChat({
                             value={youtubeUrl}
                             onChange={(e) => setYoutubeUrl(e.target.value)}
                             placeholder="Paste YouTube URL..."
-                            className="w-full px-3 py-2.5 text-sm bg-white/5 rounded-lg text-white placeholder:text-white/30 ring-1 ring-inset ring-white/10 focus:outline-none focus:ring-orange-500/30"
+                            className="w-full px-3 py-2.5 text-sm bg-muted/60 rounded-lg text-foreground placeholder:text-muted-foreground ring-1 ring-inset ring-border focus:outline-none focus:ring-orange-500/50"
                             autoFocus
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') { e.preventDefault(); handleYoutubeAdd() }
@@ -384,14 +384,14 @@ function AICourseChat({
                             <button
                               type="button"
                               onClick={() => setShowYoutubeInput(false)}
-                              className="flex-1 px-3 py-2 text-xs font-medium text-white/50 hover:text-white/70 bg-white/5 rounded-lg transition-colors"
+                              className="flex-1 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/60 rounded-lg transition-colors"
                             >
                               {t('common.cancel') || 'Cancel'}
                             </button>
                             <button
                               type="button"
                               onClick={handleYoutubeAdd}
-                              className="flex-1 px-3 py-2 text-xs font-medium text-white bg-orange-500/50 hover:bg-orange-500/70 rounded-lg transition-colors"
+                              className="flex-1 px-3 py-2 text-xs font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
                             >
                               {t('common.add') || 'Add'}
                             </button>
@@ -407,27 +407,27 @@ function AICourseChat({
                               input.onchange = (e) => handleFileSelect(e as any, 'image')
                               input.click()
                             }}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/70 hover:bg-white/5 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground/80 hover:bg-accent transition-colors"
                           >
                             <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                              <ImageIcon className="w-4 h-4 text-blue-400" />
+                              <ImageIcon className="w-4 h-4 text-blue-500" />
                             </div>
                             <div className="text-start">
                               <span className="block font-medium">{t('courses.create.ai.attach_image') || 'Photo'}</span>
-                              <span className="block text-xs text-white/40">PNG, JPG, GIF</span>
+                              <span className="block text-xs text-muted-foreground">PNG, JPG, GIF</span>
                             </div>
                           </button>
                           <button
                             type="button"
                             onClick={() => setShowYoutubeInput(true)}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/70 hover:bg-white/5 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground/80 hover:bg-accent transition-colors"
                           >
                             <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                              <Video className="w-4 h-4 text-red-400" />
+                              <Video className="w-4 h-4 text-red-500" />
                             </div>
                             <div className="text-start">
                               <span className="block font-medium">{t('courses.create.ai.attach_youtube') || 'YouTube Video'}</span>
-                              <span className="block text-xs text-white/40">AI will analyze the video</span>
+                              <span className="block text-xs text-muted-foreground">AI will analyze the video</span>
                             </div>
                           </button>
                           <button
@@ -438,14 +438,14 @@ function AICourseChat({
                               input.onchange = (e) => handleFileSelect(e as any, 'file')
                               input.click()
                             }}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/70 hover:bg-white/5 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground/80 hover:bg-accent transition-colors"
                           >
                             <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                              <FileText className="w-4 h-4 text-yellow-400" />
+                              <FileText className="w-4 h-4 text-yellow-600" />
                             </div>
                             <div className="text-start">
                               <span className="block font-medium">{t('courses.create.ai.attach_file') || 'Document'}</span>
-                              <span className="block text-xs text-white/40">PDF, DOC, TXT</span>
+                              <span className="block text-xs text-muted-foreground">PDF, DOC, TXT</span>
                             </div>
                           </button>
                         </div>
@@ -462,8 +462,8 @@ function AICourseChat({
                   className={cn(
                     "flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all text-xs font-medium",
                     canSendMessage
-                      ? "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 ring-1 ring-inset ring-orange-500/30"
-                      : "bg-white/5 text-white/30 cursor-not-allowed ring-1 ring-inset ring-white/10"
+                      ? "bg-orange-500/10 text-orange-700 hover:bg-orange-500/20 ring-1 ring-inset ring-orange-500/40"
+                      : "bg-secondary text-muted-foreground cursor-not-allowed ring-1 ring-inset ring-border"
                   )}
                 >
                   {isLoading ? (
@@ -482,7 +482,7 @@ function AICourseChat({
             </div>
 
             {attachments.some(a => a.type === 'youtube') && (
-              <p className="text-xs text-amber-400/60 text-center">
+              <p className="text-xs text-amber-600/80 text-center">
                 {t('courses.create.ai.video_hint') || 'Videos may take 1-2 minutes to process'}
               </p>
             )}

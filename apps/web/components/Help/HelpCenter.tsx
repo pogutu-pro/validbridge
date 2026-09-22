@@ -12,7 +12,6 @@ import {
   ArrowUp,
   List,
   ChatCircleDots,
-  DiscordLogo,
 } from '@phosphor-icons/react'
 import { HELP_SECTIONS, type HelpIcon } from '@lib/help'
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
@@ -134,15 +133,6 @@ function HelpCenter({ orgslug }: { orgslug: string }) {
             >
               <Book size={16} weight="fill" className="text-primary" />
               Documentation site
-            </a>
-            <a
-              href="https://discord.gg/CMyZjjYZ6x"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-            >
-              <DiscordLogo size={16} weight="fill" className="text-primary" />
-              Community Discord
             </a>
             <button
               type="button"
@@ -275,7 +265,7 @@ function HelpCenter({ orgslug }: { orgslug: string }) {
           <div className="mt-14 rounded-2xl border border-border bg-muted/40 p-6">
             <h3 className="text-base font-semibold text-foreground">Need more help?</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Ask the AI Copilot, browse the documentation, or send us feedback.
+              Ask the AI Genie, browse the documentation, or send us feedback.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link

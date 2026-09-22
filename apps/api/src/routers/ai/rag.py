@@ -32,6 +32,7 @@ from src.services.ai.base import (
     delete_chat_session,
     update_chat_session_meta,
     chat_session_belongs_to_user,
+    ai_error_message,
 )
 from src.services.ai.rag.embedding_service import embed_course_content
 from src.services.ai.rag.query_service import query_course_rag_stream
@@ -121,10 +122,10 @@ async def rag_chat_event_generator(
             update_chat_session_meta(aichat_uuid, user_id, title=title)
             yield f"data: {json.dumps({'type': 'session_title', 'title': title})}\n\n"
 
-    except Exception:
+    except Exception as exc:
         stream_failed = True
         logger.exception("Error in rag_chat_event_generator")
-        yield f"data: {json.dumps({'type': 'error', 'message': 'An internal error occurred while processing the AI chat request.'})}\n\n"
+        yield f"data: {json.dumps({'type': 'error', 'message': ai_error_message(exc)})}\n\n"
     finally:
         # Refund the 2 reserved credits if the stream produced nothing useful
         # (upstream error before any model output). Without this a flaky

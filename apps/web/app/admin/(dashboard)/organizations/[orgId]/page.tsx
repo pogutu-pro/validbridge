@@ -1234,7 +1234,7 @@ const DEFAULT_ADMIN_TOGGLES: AdminToggles = {
 }
 
 const FEATURE_ORDER: { key: keyof AdminToggles; label: string; description: string }[] = [
-  { key: 'ai', label: 'AI', description: 'AI assistant, copilot, generation tools' },
+  { key: 'ai', label: 'AI', description: 'AI assistant, genie, generation tools' },
   { key: 'analytics', label: 'Analytics', description: 'Dashboards and engagement metrics' },
   { key: 'api', label: 'API', description: 'API tokens and programmatic access' },
   { key: 'boards', label: 'Boards', description: 'Kanban-style learning boards' },
@@ -1414,7 +1414,7 @@ function FeaturesTab({
                 {key === 'ai' && enabled && (
                   <div className="mt-3 ps-3 border-s-2 border-white/[0.06] flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-white/70">AI Copilot</p>
+                      <p className="text-xs text-white/70">AI Genie</p>
                       <p className="text-[11px] text-white/40">Inline writing/coding suggestions</p>
                     </div>
                     <ToggleSwitch

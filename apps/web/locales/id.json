@@ -2481,7 +2481,7 @@
           "save_success": "Pengaturan AI berhasil diperbarui",
           "save_error": "Gagal memperbarui pengaturan AI"
         },
-        "ai_copilot": "AI Copilot",
+        "ai_copilot": "AI Genie",
         "ai_copilot_description": "Let learners ask questions about course content. Uses indexed material to provide grounded answers with source citations.",
         "feature_editor_description": "AI-powered content editing assistance for course creators.",
         "feature_activity_description": "AI assistant available within activities to help learners.",

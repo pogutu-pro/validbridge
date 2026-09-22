@@ -25,7 +25,6 @@ import {
   Code,
   Lifebuoy,
 } from '@phosphor-icons/react'
-import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useState } from 'react'
@@ -248,12 +247,6 @@ function DashMobileMenu() {
                 >
                   <Book size={15} weight="fill" />
                   <span className="text-sm font-medium">{t('common.help_menu.documentation')}</span>
-                </a>
-                <a href="https://discord.gg/CMyZjjYZ6x" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center w-full rounded-xl px-2.5 py-2 gap-2.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
-                >
-                  <DiscordIcon size={15} />
-                  <span className="text-sm font-medium">{t('common.help_menu.discord')}</span>
                 </a>
                 <button
                   onClick={() => { setFeedbackModalOpen(true); close() }}

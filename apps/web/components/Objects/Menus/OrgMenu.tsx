@@ -20,7 +20,6 @@ import {
   ChatCircleDots,
   Sparkle,
   SquaresFour,
-  ChalkboardSimple,
   Lifebuoy,
 } from '@phosphor-icons/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
@@ -76,13 +75,16 @@ export const OrgMenu = (props: any) => {
   })
 
   useEffect(() => {
-    // Only check focus mode if we're in an activity page
-    if (typeof window !== 'undefined' && pathname?.includes('/activity/')) {
-      const saved = localStorage.getItem('globalFocusMode');
-      setIsFocusMode(saved === 'true');
-    } else {
-      setIsFocusMode(false);
-    }
+    // Read the persisted focus-mode flag from localStorage and keep it in sync
+    // with the current route. Deferred so it runs outside the effect body.
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined' && pathname?.includes('/activity/')) {
+        const saved = localStorage.getItem('globalFocusMode');
+        setIsFocusMode(saved === 'true');
+      } else {
+        setIsFocusMode(false);
+      }
+    }, 0);
 
     // Add storage event listener for cross-window changes
     const handleStorageChange = (e: StorageEvent) => {
@@ -103,6 +105,7 @@ export const OrgMenu = (props: any) => {
 
     // Cleanup
     return () => {
+      clearTimeout(timer)
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
     };
@@ -151,31 +154,8 @@ export const OrgMenu = (props: any) => {
             <SearchBar orgslug={orgslug} className="w-full" primaryColor={primaryColor} />
           </div>
 
-          <div className="flex items-center space-x-2">
-            {/* Boards */}
-            {rf?.boards?.enabled && (
-              <AuthenticatedClientElement checkMethod="authentication">
-                <div className="hidden md:flex">
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link
-                          href={getUriWithOrg(orgslug, '/boards')}
-                          className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
-                          aria-label="Boards"
-                        >
-                          <ChalkboardSimple size={20} weight="fill" />
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs">
-                        Boards
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </AuthenticatedClientElement>
-            )}
-            {/* AI Copilot */}
+          <div className="flex items-center ms-auto space-x-2">
+            {/* AI Genie */}
             {rf?.ai?.enabled && config?.admin_toggles?.ai?.copilot_enabled !== false && (
               <AuthenticatedClientElement checkMethod="authentication">
                 <div className="hidden md:flex">
@@ -249,8 +229,8 @@ export const OrgMenu = (props: any) => {
               </div>
             )}
 
-            {/* Help Dropdown - Only visible to admins/maintainers/instructors */}
-            {session?.status === 'authenticated' && rights?.dashboard?.action_access && (
+            {/* Help Dropdown - available to all authenticated users */}
+            {session?.status === 'authenticated' && (
               <div className="hidden md:flex">
                 <DropdownMenu>
                   <TooltipProvider delayDuration={0}>
@@ -258,10 +238,11 @@ export const OrgMenu = (props: any) => {
                       <TooltipTrigger asChild>
                         <DropdownMenuTrigger asChild>
                           <button
-                            className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
+                            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors ${colors.text} ${colors.hoverBg}`}
                             aria-label={t('common.help')}
                           >
-                            <Question size={20} weight="fill" />
+                            <Question size={18} weight="fill" />
+                            <span>{t('common.help')}</span>
                           </button>
                         </DropdownMenuTrigger>
                       </TooltipTrigger>

@@ -140,7 +140,7 @@ export const troubleshooting: HelpSection = {
               plan can be upgraded for a larger allowance.
             </Def>
             <Def term="Answers seem off-topic">
-              make sure you opened the Copilot from the activity you are asking about, so
+              make sure you opened Genie from the activity you are asking about, so
               it has the right context. Follow-ups within the same conversation also keep
               context.
             </Def>
@@ -182,7 +182,7 @@ export const troubleshooting: HelpSection = {
           <P>If none of the above helps, here is how to get a real answer fast:</P>
           <Numbers>
             <li>
-              Ask the <strong>AI Copilot</strong> — for anything about course content it is
+              Ask <strong>AI Genie</strong> — for anything about course content it is
               usually immediate.
             </li>
             <li>
@@ -196,7 +196,6 @@ export const troubleshooting: HelpSection = {
               Open <UI>Help</UI> → <UI>Report Issue or Feedback</UI> and describe the
               problem, attaching a screenshot.
             </li>
-            <li>Ask in the community Discord for help from other users.</li>
           </Numbers>
           <Callout kind="tip" title="Include the details">
             Page name, your role, what you expected, and what happened — plus the exact

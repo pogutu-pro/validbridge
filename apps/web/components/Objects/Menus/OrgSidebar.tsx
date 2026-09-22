@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -42,6 +42,20 @@ export default function OrgSidebar({ orgslug }: { orgslug: string }) {
       return next
     })
   }
+
+  // Auto-minimise the sidebar when the route *enters* the full-screen AI Genie
+  // page so the chat gets as much width as possible. Only fires while navigating
+  // into /copilot — an expand done manually while on the page is respected.
+  const isGeniePage = pathname.split('/').includes('copilot')
+  const prevPathRef = useRef<string | null>(null)
+  useEffect(() => {
+    const prev = prevPathRef.current
+    prevPathRef.current = pathname
+    if (isGeniePage && prev !== null && !prev.split('/').includes('copilot')) {
+      setIsCollapsed(true)
+      localStorage.setItem('org-menu-collapsed', 'true')
+    }
+  }, [pathname, isGeniePage])
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/' || pathname === ''

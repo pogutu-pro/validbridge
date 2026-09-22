@@ -152,14 +152,14 @@ function AICoursePreview({
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Tab bar - always visible, full width */}
-      <div className="flex flex-shrink-0 border-b border-white/5">
+      <div className="flex flex-shrink-0 border-b border-border">
         <button
           onClick={() => setActiveTab('plan')}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-all",
             activeTab === 'plan'
-              ? "text-white/90 border-b-2 border-orange-500 bg-white/[0.03]"
-              : "text-white/40 hover:text-white/60 hover:bg-white/[0.02]"
+              ? "text-foreground border-b-2 border-orange-500 bg-muted"
+              : "text-muted-foreground hover:text-foreground hover:bg-accent"
           )}
         >
           <LayoutList className="w-3.5 h-3.5" />
@@ -171,8 +171,8 @@ function AICoursePreview({
             className={cn(
               "flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-all",
               activeTab === 'content'
-                ? "text-white/90 border-b-2 border-orange-500 bg-white/[0.03]"
-                : "text-white/40 hover:text-white/60 hover:bg-white/[0.02]"
+                ? "text-foreground border-b-2 border-orange-500 bg-muted"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent"
             )}
           >
             <Wand2 className="w-3.5 h-3.5" />
@@ -181,8 +181,8 @@ function AICoursePreview({
               <span className={cn(
                 "ms-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold",
                 generatedCount === totalActivities && totalActivities > 0
-                  ? "bg-green-500/20 text-green-300"
-                  : "bg-white/10 text-white/40"
+                  ? "bg-green-500/15 text-green-700"
+                  : "bg-secondary text-muted-foreground"
               )}>
                 {generatedCount}/{totalActivities}
               </span>
@@ -258,10 +258,10 @@ function PlanTabContent({
         >
           <Image src={lrnaiIcon} alt="AI" width={32} height={32} />
         </div>
-        <p className="text-white/50 mt-4 text-sm">{t('courses.create.ai.generating_plan')}</p>
+        <p className="text-muted-foreground mt-4 text-sm">{t('courses.create.ai.generating_plan')}</p>
         {streamingContent && (
           <div className="mt-4 max-w-2xl max-h-[300px] overflow-hidden">
-            <pre className="text-xs text-white/30 font-mono whitespace-pre-wrap break-words">
+            <pre className="text-xs text-muted-foreground font-mono whitespace-pre-wrap break-words">
               {streamingContent.slice(-500)}...
             </pre>
           </div>
@@ -280,8 +280,8 @@ function PlanTabContent({
         >
           <Image src={lrnaiIcon} alt="AI" width={32} height={32} />
         </div>
-        <h3 className="text-white/80 font-semibold mt-4">{t('courses.create.ai.describe_course')}</h3>
-        <p className="text-white/50 text-sm mt-2 text-center max-w-md">{t('courses.create.ai.describe_course_hint')}</p>
+        <h3 className="text-foreground font-semibold mt-4">{t('courses.create.ai.describe_course')}</h3>
+        <p className="text-muted-foreground text-sm mt-2 text-center max-w-md">{t('courses.create.ai.describe_course_hint')}</p>
       </div>
     )
   }
@@ -295,7 +295,7 @@ function PlanTabContent({
         {/* Chapters */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white/70">
+            <h3 className="text-sm font-semibold text-foreground">
               {t('courses.create.ai.chapters')} ({plan.chapters.length})
             </h3>
             <button
@@ -303,7 +303,7 @@ function PlanTabContent({
                 const newChapter: ChapterPlan = { name: `Chapter ${plan.chapters.length + 1}`, description: 'New chapter', activities: [] }
                 onUpdatePlan({ ...plan, chapters: [...plan.chapters, newChapter] })
               }}
-              className="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition-colors"
+              className="flex items-center gap-1 text-xs text-orange-500 hover:text-orange-600 transition-colors"
             >
               <Plus className="w-3 h-3" />
               {t('courses.create.ai.add_chapter')}
@@ -324,8 +324,8 @@ function PlanTabContent({
               className={cn(
                 "flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold transition-all",
                 (isCreatingCourse || isLoading)
-                  ? "bg-white/5 text-white/30 cursor-not-allowed"
-                  : "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 outline outline-1 outline-orange-500/30"
+                  ? "bg-secondary text-muted-foreground cursor-not-allowed"
+                  : "bg-orange-500/10 text-orange-700 hover:bg-orange-500/20 outline outline-1 outline-orange-500/40"
               )}
             >
               {isCreatingCourse ? (
@@ -337,7 +337,7 @@ function PlanTabContent({
           ) : (
             <button
               onClick={onOpenInEditor}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-green-500/20 text-green-300 hover:bg-green-500/30 outline outline-1 outline-green-500/30 transition-all"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-green-500/10 text-green-700 hover:bg-green-500/20 outline outline-1 outline-green-500/40 transition-all"
             >
               {t('courses.create.ai.open_in_editor')}
               <ArrowUpRight className="w-4 h-4" />
@@ -399,10 +399,10 @@ function ContentTabContent({
   if (!plan || chapters.length === 0) {
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center px-8">
-        <div className="p-4 rounded-full bg-white/5 mb-4">
-          <Wand2 className="w-7 h-7 text-white/30" />
+        <div className="p-4 rounded-full bg-secondary mb-4">
+          <Wand2 className="w-7 h-7 text-muted-foreground" />
         </div>
-        <p className="text-white/40 text-sm text-center max-w-sm">
+        <p className="text-muted-foreground text-sm text-center max-w-sm">
           {t('courses.create.ai.content_empty_hint')}
         </p>
       </div>
@@ -415,12 +415,12 @@ function ContentTabContent({
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-white">{t('courses.create.ai.generate_content')}</h3>
-            <p className="text-xs text-white/40 mt-1">{t('courses.create.ai.generate_content_description')}</p>
+            <h3 className="text-base font-semibold text-foreground">{t('courses.create.ai.generate_content')}</h3>
+            <p className="text-xs text-muted-foreground mt-1">{t('courses.create.ai.generate_content_description')}</p>
           </div>
           <div className="flex items-center gap-3">
             {isCourseCreated && (
-              <span className="text-xs text-white/40 tabular-nums">
+              <span className="text-xs text-muted-foreground tabular-nums">
                 {generatedCount}/{totalActivities} {t('courses.create.ai.generated')}
               </span>
             )}
@@ -430,8 +430,8 @@ function ContentTabContent({
               className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
                 (!isCourseCreated || isAnyGenerating || generatedCount === totalActivities)
-                  ? "bg-white/5 text-white/30 cursor-not-allowed"
-                  : "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 outline outline-1 outline-orange-500/30"
+                  ? "bg-secondary text-muted-foreground cursor-not-allowed"
+                  : "bg-orange-500/10 text-orange-700 hover:bg-orange-500/20 outline outline-1 outline-orange-500/40"
               )}
             >
               {isAnyGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
@@ -449,15 +449,15 @@ function ContentTabContent({
               : 0
 
             return (
-              <div key={ci} className="bg-white/5 rounded-xl ring-1 ring-inset ring-white/10 overflow-hidden">
+              <div key={ci} className="bg-secondary rounded-xl ring-1 ring-inset ring-border overflow-hidden">
                 <div
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-accent transition-colors"
                   onClick={() => toggleChapter(ci)}
                 >
-                  {expandedChapters.has(ci) ? <ChevronDown className="w-4 h-4 text-white/50" /> : <ChevronRight className="w-4 h-4 text-white/50" />}
-                  <BookOpen className="w-4 h-4 text-orange-400" />
-                  <span className="flex-1 text-sm font-medium text-white">{chapter.name}</span>
-                  <span className="text-xs text-white/40 tabular-nums">
+                  {expandedChapters.has(ci) ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                  <BookOpen className="w-4 h-4 text-orange-500" />
+                  <span className="flex-1 text-sm font-medium text-foreground">{chapter.name}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     {isCourseCreated && createdChapter
                       ? `${genInChapter}/${chapter.activities.length}`
                       : `${chapter.activities.length} ${t('courses.create.ai.activities')}`
@@ -481,39 +481,39 @@ function ContentTabContent({
                           className={cn(
                             "flex items-center gap-3 p-3 rounded-lg ring-1 ring-inset transition-all",
                             isGenerated
-                              ? "bg-green-500/10 ring-green-500/20"
+                              ? "bg-green-500/10 ring-green-500/30"
                               : isGenerating
-                              ? "bg-orange-500/10 ring-orange-500/20"
+                              ? "bg-orange-500/10 ring-orange-500/30"
                               : hasError
-                              ? "bg-red-500/10 ring-red-500/20"
-                              : "bg-white/5 ring-white/5"
+                              ? "bg-red-500/10 ring-red-500/30"
+                              : "bg-muted/40 ring-border"
                           )}
                         >
-                          <FileText className={cn("w-4 h-4 flex-shrink-0", isGenerated ? "text-green-400" : "text-white/40")} />
+                          <FileText className={cn("w-4 h-4 flex-shrink-0", isGenerated ? "text-green-600" : "text-muted-foreground")} />
                           <div className="flex-1 min-w-0">
-                            <span className="text-sm text-white/80 block truncate">{activity.name}</span>
-                            {activity.description && <p className="text-xs text-white/30 mt-0.5 line-clamp-1">{activity.description}</p>}
+                            <span className="text-sm text-foreground/80 block truncate">{activity.name}</span>
+                            {activity.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{activity.description}</p>}
                             {isGenerating && state?.streamContent && (
                               <div className="mt-2 max-h-16 overflow-hidden">
-                                <pre className="text-[10px] text-white/30 font-mono whitespace-pre-wrap break-words">
+                                <pre className="text-[10px] text-muted-foreground font-mono whitespace-pre-wrap break-words">
                                   {state.streamContent.slice(-150)}
                                 </pre>
                               </div>
                             )}
-                            {hasError && <span className="text-xs text-red-400 mt-1 block">{state?.error}</span>}
+                            {hasError && <span className="text-xs text-red-500 mt-1 block">{state?.error}</span>}
                           </div>
 
                           {isGenerated ? (
-                            <div className="flex items-center gap-1 text-green-400 flex-shrink-0">
+                            <div className="flex items-center gap-1 text-green-600 flex-shrink-0">
                               <Check className="w-3.5 h-3.5" />
                               <span className="text-xs">{t('courses.create.ai.done')}</span>
                             </div>
                           ) : isGenerating ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-400 flex-shrink-0" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-500 flex-shrink-0" />
                           ) : hasError ? (
                             <button
                               onClick={() => createdActivity && onGenerateContent(createdActivity.activity_uuid, activity.name, activity.description, chapter.name)}
-                              className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-red-300 hover:bg-red-500/20 transition-colors flex-shrink-0"
+                              className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-red-500 hover:bg-red-500/10 transition-colors flex-shrink-0"
                             >
                               <RotateCcw className="w-3 h-3" />
                               {t('courses.create.ai.retry')}
@@ -525,8 +525,8 @@ function ContentTabContent({
                               className={cn(
                                 "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-colors flex-shrink-0",
                                 canGenerate
-                                  ? "text-white/50 hover:text-orange-300 hover:bg-white/5"
-                                  : "text-white/20 cursor-not-allowed"
+                                  ? "text-muted-foreground hover:text-orange-500 hover:bg-accent"
+                                  : "text-muted-foreground/40 cursor-not-allowed"
                               )}
                             >
                               <Play className="w-3 h-3" />
@@ -545,16 +545,16 @@ function ContentTabContent({
 
         {/* All done */}
         {isCourseCreated && generatedCount === totalActivities && totalActivities > 0 && (
-          <div className="bg-green-500/10 rounded-xl p-4 ring-1 ring-inset ring-green-500/20">
+          <div className="bg-green-500/10 rounded-xl p-4 ring-1 ring-inset ring-green-500/30">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/20 rounded-full"><Check className="w-5 h-5 text-green-400" /></div>
+              <div className="p-2 bg-green-500/15 rounded-full"><Check className="w-5 h-5 text-green-600" /></div>
               <div className="flex-1">
-                <h4 className="text-sm font-semibold text-green-300">{t('courses.create.ai.all_content_generated')}</h4>
-                <p className="text-xs text-green-400/70 mt-1">{t('courses.create.ai.all_content_generated_hint')}</p>
+                <h4 className="text-sm font-semibold text-green-700">{t('courses.create.ai.all_content_generated')}</h4>
+                <p className="text-xs text-green-700/60 mt-1">{t('courses.create.ai.all_content_generated_hint')}</p>
               </div>
               <button
                 onClick={onOpenInEditor}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-green-500/20 text-green-300 hover:bg-green-500/30 outline outline-1 outline-green-500/30 transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-green-500/10 text-green-700 hover:bg-green-500/20 outline outline-1 outline-green-500/40 transition-all"
               >
                 {t('courses.create.ai.open_in_editor')}
                 <ArrowUpRight className="w-3.5 h-3.5" />
@@ -583,7 +583,7 @@ function CoursePlanHeader({ plan, onUpdatePlan }: { plan: CoursePlan; onUpdatePl
   const saveDesc = () => { onUpdatePlan({ ...plan, description: descValue.trim() }); setEditingDesc(false) }
 
   return (
-    <div className="bg-white/5 rounded-xl p-5 ring-1 ring-inset ring-white/10">
+    <div className="bg-secondary rounded-xl p-5 ring-1 ring-inset ring-border">
       <div className="flex items-start gap-4">
         <div
           style={{ background: 'linear-gradient(135deg, #ff8a4d 0%, #ff5a1f 50%, #e64900 100%)' }}
@@ -596,10 +596,10 @@ function CoursePlanHeader({ plan, onUpdatePlan }: { plan: CoursePlan; onUpdatePl
             <input
               type="text" value={nameValue} onChange={(e) => setNameValue(e.target.value)} onBlur={saveName}
               onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') { setNameValue(plan.name); setEditingName(false) } }}
-              className="w-full bg-white/10 rounded-lg px-3 py-2 text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" autoFocus
+              className="w-full bg-muted rounded-lg px-3 py-2 text-foreground text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" autoFocus
             />
           ) : (
-            <h2 onClick={() => setEditingName(true)} className="text-lg font-semibold text-white cursor-pointer hover:text-orange-300 transition-colors">
+            <h2 onClick={() => setEditingName(true)} className="text-lg font-semibold text-foreground cursor-pointer hover:text-orange-600 transition-colors">
               {plan.name}
             </h2>
           )}
@@ -608,10 +608,10 @@ function CoursePlanHeader({ plan, onUpdatePlan }: { plan: CoursePlan; onUpdatePl
             <textarea
               value={descValue} onChange={(e) => setDescValue(e.target.value)} onBlur={saveDesc}
               onKeyDown={(e) => { if (e.key === 'Escape') { setDescValue(plan.description); setEditingDesc(false) } }}
-              className="w-full mt-2 bg-white/10 rounded-lg px-3 py-2 text-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[60px] resize-none" autoFocus
+              className="w-full mt-2 bg-muted rounded-lg px-3 py-2 text-foreground/70 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[60px] resize-none" autoFocus
             />
           ) : (
-            <p onClick={() => setEditingDesc(true)} className="text-sm text-white/60 mt-1 cursor-pointer hover:text-white/80 transition-colors">
+            <p onClick={() => setEditingDesc(true)} className="text-sm text-muted-foreground mt-1 cursor-pointer hover:text-foreground transition-colors">
               {plan.description}
             </p>
           )}
@@ -619,7 +619,7 @@ function CoursePlanHeader({ plan, onUpdatePlan }: { plan: CoursePlan; onUpdatePl
           {plan.learnings && (
             <div className="flex flex-wrap gap-1.5 mt-3">
               {plan.learnings.split(',').map((l, i) => (
-                <span key={i} className="px-2 py-0.5 text-xs bg-orange-500/20 text-orange-300 rounded-full">{l.trim()}</span>
+                <span key={i} className="px-2 py-0.5 text-xs bg-orange-500/10 text-orange-700 rounded-full">{l.trim()}</span>
               ))}
             </div>
           )}
@@ -652,27 +652,27 @@ function PlanChapterCard({ chapter, chapterIndex, plan, onUpdatePlan }: {
   }
 
   return (
-    <div className="bg-white/5 rounded-xl ring-1 ring-inset ring-white/10 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpanded(!expanded)}>
-        {expanded ? <ChevronDown className="w-4 h-4 text-white/50" /> : <ChevronRight className="w-4 h-4 text-white/50" />}
-        <BookOpen className="w-4 h-4 text-orange-400" />
+    <div className="bg-secondary rounded-xl ring-1 ring-inset ring-border overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-accent transition-colors" onClick={() => setExpanded(!expanded)}>
+        {expanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+        <BookOpen className="w-4 h-4 text-orange-500" />
         <div className="flex-1 min-w-0">
           {editingName ? (
             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <input type="text" value={nameValue} onChange={(e) => setNameValue(e.target.value)} onBlur={saveName}
                 onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') { setNameValue(chapter.name); setEditingName(false) } }}
-                className="flex-1 bg-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" autoFocus />
+                className="flex-1 bg-muted rounded px-2 py-1 text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" autoFocus />
             </div>
           ) : (
-            <span onClick={(e) => { e.stopPropagation(); setEditingName(true) }} className="text-sm font-medium text-white hover:text-orange-300 cursor-pointer">
+            <span onClick={(e) => { e.stopPropagation(); setEditingName(true) }} className="text-sm font-medium text-foreground hover:text-orange-600 cursor-pointer">
               {chapter.name}
             </span>
           )}
         </div>
-        <span className="text-xs text-white/40">{chapter.activities.length} {t('courses.create.ai.activities')}</span>
+        <span className="text-xs text-muted-foreground">{chapter.activities.length} {t('courses.create.ai.activities')}</span>
         <button onClick={(e) => { e.stopPropagation(); onUpdatePlan({ ...plan, chapters: plan.chapters.filter((_, i) => i !== chapterIndex) }) }}
-          className="p-1 hover:bg-red-500/20 rounded transition-colors">
-          <Trash2 className="w-3 h-3 text-red-400" />
+          className="p-1 hover:bg-red-500/10 rounded transition-colors">
+          <Trash2 className="w-3 h-3 text-red-500" />
         </button>
       </div>
 
@@ -695,7 +695,7 @@ function PlanChapterCard({ chapter, chapterIndex, plan, onUpdatePlan }: {
               const c = [...plan.chapters]; c[chapterIndex] = { ...c[chapterIndex], activities: [...c[chapterIndex].activities, newAct] }
               onUpdatePlan({ ...plan, chapters: c })
             }}
-            className="flex items-center gap-1 w-full justify-center py-2 text-xs text-white/40 hover:text-orange-400 hover:bg-white/5 rounded-lg transition-colors"
+            className="flex items-center gap-1 w-full justify-center py-2 text-xs text-muted-foreground hover:text-orange-600 hover:bg-accent rounded-lg transition-colors"
           >
             <Plus className="w-3 h-3" />
             {t('courses.create.ai.add_activity')}
@@ -733,20 +733,20 @@ function PlanActivityItem({ activity, activityIndex, chapterIndex, plan, onUpdat
   }
 
   return (
-    <div className="flex items-start gap-3 p-3 bg-white/5 rounded-lg ring-1 ring-inset ring-white/5">
-      <FileText className="w-4 h-4 text-white/40 mt-0.5 flex-shrink-0" />
+    <div className="flex items-start gap-3 p-3 bg-muted/40 rounded-lg ring-1 ring-inset ring-border">
+      <FileText className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
       <div className="flex-1 min-w-0">
         {editing ? (
           <input type="text" value={val} onChange={(e) => setVal(e.target.value)} onBlur={save}
             onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setVal(activity.name); setEditing(false) } }}
-            className="w-full bg-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" autoFocus />
+            className="w-full bg-muted rounded px-2 py-1 text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-orange-500" autoFocus />
         ) : (
-          <span onClick={() => setEditing(true)} className="text-sm text-white/80 hover:text-orange-300 cursor-pointer">{activity.name}</span>
+          <span onClick={() => setEditing(true)} className="text-sm text-foreground/80 hover:text-orange-600 cursor-pointer">{activity.name}</span>
         )}
-        {activity.description && <p className="text-xs text-white/40 mt-0.5 line-clamp-1">{activity.description}</p>}
+        {activity.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{activity.description}</p>}
       </div>
-      <button onClick={remove} className="p-1 hover:bg-red-500/20 rounded transition-colors flex-shrink-0">
-        <Trash2 className="w-3 h-3 text-red-400" />
+      <button onClick={remove} className="p-1 hover:bg-red-500/10 rounded transition-colors flex-shrink-0">
+        <Trash2 className="w-3 h-3 text-red-500" />
       </button>
     </div>
   )

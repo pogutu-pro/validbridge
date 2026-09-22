@@ -7,10 +7,27 @@ import json
 
 from config.config import get_validbridge_config
 from src.services.ai.llm import generate, generate_stream, model_for_tier
+from src.services.ai.llm.provider import AINotConfiguredError
 
 logger = logging.getLogger(__name__)
 
 VB_CONFIG = get_validbridge_config()
+
+
+def ai_error_message(exc: Exception, max_len: int = 300) -> str:
+    """Build a user-facing SSE error message from a caught exception.
+
+    Surfaces the real cause instead of a generic catch-all so operators/owners
+    can act on it (expired key, quota, model unavailable, etc.). For
+    setup-level failures (no key configured) the exception's own message is
+    already actionable.
+    """
+    if isinstance(exc, AINotConfiguredError):
+        return str(exc) or "AI is not configured. Set the provider API key before using AI features."
+    if exc and str(exc).strip():
+        detail = str(exc).strip().replace("\n", " ")[:max_len]
+        return f"AI request failed: {type(exc).__name__}: {detail}"
+    return f"AI request failed: {type(exc).__name__} (no further details)"
 
 
 def _build_context_prompt(message_for_the_prompt: str, text_reference: str) -> str:

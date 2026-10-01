@@ -1,0 +1,162 @@
+{
+  "slug": "coding-practice",
+  "name": "Coding Practice with Python",
+  "description": "A hands-on introduction to Python for the inventory and data work at Riverbend.",
+  "about": "Everyone at Riverbend ends up peering at the same tall spreadsheet sooner or later. This course is the small amount of Python that makes that less painful: reading files, checking a value, printing an answer. It is deliberately short — a prospect is a few minutes of practice away from a working script, not a course in computer science.",
+  "learnings": "Run Python code in the browser; read and check inventory-style values; turn a business question into a short script; submit the final check-in for review.",
+  "tags": "python,data,automation,coding",
+  "thumbnail": "coding-practice.webp",
+  "section": "technical-skills",
+  "public": true,
+  "published": true,
+  "certification": false,
+  "updates": [
+    {
+      "title": "New course: Coding Practice with Python",
+      "content": "Added after the warehouse team asked for a short, practical way to try Python without installing anything. Every example uses real Riverbend data.",
+      "days_ago": 4
+    }
+  ],
+  "chapters": [
+    {
+      "slug": "py-start",
+      "name": "Getting started",
+      "description": "What Python is doing here, and why Riverbend reaches for it.",
+      "activities": [
+        {
+          "slug": "py-video-intro",
+          "name": "Python in five minutes",
+          "kind": "video",
+          "youtube_id": "rfscVS0vtbw"
+        },
+        {
+          "slug": "py-why-riverbend",
+          "name": "Why Riverbend uses Python",
+          "kind": "document",
+          "body": [
+            "h2:Scripts, not dashboards",
+            "p:A dashboard tells you what the numbers are. Python tells you what happens when you act on them: which order to prioritise, which SKU to reorder, which rows in a report are actually outliers. Most of that amounts to small scripts like the one below, run and thrown away.",
+            "p:You do not need to be a programmer. You need the same skill you already use on a spreadsheet — asking a question of data — with a print statement instead of a sum.",
+            "h2:Try it",
+            "p:The editor below runs real Python in the browser. Press run, read the output, then change the message and run it again. Nothing is installed on your machine.",
+            {"codePlayground": {
+              "slug": "py-message",
+              "language_id": 71,
+              "language_name": "Python 3",
+              "starter_code": "order = \"Order 4192 is ready to ship\"\nprint(order)",
+              "description": "Run this snippet, then change the message to your own team's name and run it again.",
+              "test_cases": [
+                {"label": "Prints the order line", "stdin": "", "expected": "Order 4192 is ready to ship"}
+              ],
+              "solution_code": "order = \"Order 4192 is ready to ship\"\nprint(order)",
+              "difficulty": "easy",
+              "time_limit_ms": 10000
+            }},
+            {"quiz": {
+              "q": "What is the main point of the Python here at Riverbend?",
+              "a": [
+                ["Acting on data with small scripts", true],
+                ["Replacing reports with code", false],
+                ["Automating the entire warehouse", false]
+              ]
+            }},
+            "info:Every code block in this course is marked by the editor on-screen — a learner can type in it, run it, and get feedback before moving on."
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "py-hands-on",
+      "name": "Hands on",
+      "description": "Your first scripts, on realistic Riverbend data.",
+      "activities": [
+        {
+          "slug": "py-video-parts",
+          "name": "The parts of a Python script",
+          "kind": "video",
+          "youtube_id": "XKHEtdqhLK8"
+        },
+        {
+          "slug": "py-first-script",
+          "name": "Your first script",
+          "kind": "document",
+          "body": [
+            "h2:Variables and print",
+            "p:Almost every script you write here does the same three things: read a value into a variable, decide something about it, and print the result. Run this one with the green button and watch the answer appear in the panel below the editor.",
+            "p:Then change the 21 to your own number and run it again — the output will follow it.",
+            {"codePlayground": {
+              "slug": "py-double",
+              "language_id": 71,
+              "language_name": "Python 3",
+              "starter_code": "def double(x):\n    return x * 2\n\n\nprint(double(21))",
+              "description": "A variable, a function and a print. Read the output, tweak the number, run again.",
+              "test_cases": [
+                {"label": "double(21) is 42", "stdin": "", "expected": "42"}
+              ],
+              "solution_code": "def double(x):\n    return x * 2\n\n\nprint(double(21))",
+              "difficulty": "easy",
+              "time_limit_ms": 10000
+            }},
+            "h2:Reading the output panel",
+            "p:Below the editor is the output panel. A green tick means your program printed what the test expected; red shows the difference. If the code hangs, the stop button cancels it.",
+            {"ul": [
+              "The editor runs server-side, so your script sees nothing on your machine.",
+              "Output is compared with expectations, but any output is shown to you either way.",
+              "Re-run as often as you like — there is no penalty for experimenting."
+            ]}
+          ]
+        },
+        {
+          "slug": "py-inventory-task",
+          "name": "A real inventory task",
+          "kind": "document",
+          "body": [
+            "h2:The problem",
+            "p:Every Monday the warehouse sends a list of SKUs with units on hand. A SKU is worth reordering when its stock has fallen below 40 units. Write a script that checks the two sample SKUs below and prints the name and stock for the one that needs reordering.",
+            {"codePlayground": {
+              "slug": "py-reorder",
+              "language_id": 71,
+              "language_name": "Python 3",
+              "starter_code": "stock = {\n    \"BL-1140\": 6,\n    \"CW-2271\": 94,\n}\n\n# print the SKU and stock for anything below 40 units\nfor sku, units in stock.items():\n    if units < 40:\n        print(sku, units)",
+              "description": "This one is the real thing: check which SKU needs reordering and print its name and stock.",
+              "test_cases": [
+                {"label": "Prints the SKU and stock", "stdin": "", "expected": "BL-1140 6"}
+              ],
+              "hints": [
+                "Iterate the dictionary and print only rows where units is below 40."
+              ],
+              "solution_code": "stock = {\n    \"BL-1140\": 6,\n    \"CW-2271\": 94,\n}\n\nfor sku, units in stock.items():\n    if units < 40:\n        print(sku, units)",
+              "difficulty": "medium",
+              "time_limit_ms": 15000
+            }},
+            "h2:Why this matters",
+            "p:That is the whole course in miniature: read the data, apply a rule, print the answer. Whatever else you automate at Riverbend, it will be this shape.",
+            {"quiz": {
+              "q": "Which SKU needs reordering?",
+              "a": [
+                ["BL-1140, because 6 is below 40", true],
+                ["CW-2271, because it has the most stock", false],
+                ["Neither — both are fine", false]
+              ]
+            }}
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "py-checkin",
+      "name": "Check-in",
+      "description": "A short submission that shows what the hands-on work covered.",
+      "activities": [
+        {
+          "slug": "py-check-in-assignment",
+          "name": "Python check-in",
+          "kind": "assignment",
+          "body": [
+            "p:Answer the questions below using what you practised in Getting started and Hands on. The first question is a quiz; the second is answered in your own words."
+          ]
+        }
+      ]
+    }
+  ]
+}

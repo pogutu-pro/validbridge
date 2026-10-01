@@ -1,0 +1,70 @@
+import { Callout } from 'nextra/components'
+
+# Analytics, Audit & Security
+
+This page covers the controls that keep an organization healthy and accountable: analytics to see what is happening, audit logs to see who did what, and the sign-in and two-factor settings that protect accounts.
+
+## Analytics
+
+### Organization analytics
+
+The dashboard's **Analytics** section gives a high-level view of the whole organization: learner activity, engagement and trends over time. Use it to answer questions like "are people coming back?", and "which courses attract attention?".
+
+### Course analytics
+
+Every course has an **Analytics** tab (on supported plans) showing enrolment, progress and completion. This is where you diagnose a specific course.
+
+### Assignment analytics
+
+Each assignment has its own analytics for completion and scores.
+
+### Per-user analytics
+
+Open a user under **Users** to see their personal learning activity — useful when supporting someone with a specific problem.
+
+## Audit logs
+
+**Audit logs** record important actions in the organization: who changed a setting, who was given a role, who published a course. When something unexpected happened, the audit log tells you what changed and who changed it.
+
+- Open **Users → Audit logs**.
+- Filter or scan by time and actor.
+- Use it during an incident to reconstruct events.
+
+<Callout type="info">
+Audit logs are append-only records. They are evidence, not a working area — do not expect to edit them.
+</Callout>
+
+## Sign-in methods
+
+The **Sign-in methods** tab controls how users may authenticate:
+
+- **Email and password** — the default.
+- **Google** — social sign-in, convenient for many users.
+- **SSO** — enterprise single sign-on, configured under [Developers](/using/administering/developers).
+
+Turning a method on or off affects everyone. If you remove a method people rely on, tell them first.
+
+## Two-factor authentication
+
+The **Two-factor** tab sets the organization's two-factor **policy**:
+
+- **Optional** — users may enable 2FA themselves.
+- **Required** — everyone must use 2FA to sign in.
+
+Requiring 2FA is one of the highest-value security changes an administrator can make. Do it deliberately, and give people notice and instructions for enrolling an authenticator app.
+
+## A practical security checklist
+
+- [ ] Require two-factor authentication.
+- [ ] Keep the number of administrators small.
+- [ ] Disable the sign-in methods you do not use.
+- [ ] Give people the least role they need.
+- [ ] Rotate API keys and revoke unused ones.
+- [ ] Review the audit log after any unusual event.
+- [ ] Remove access for people who have left.
+
+## Related
+
+- [Users, Roles & Groups](/using/administering/users-and-roles)
+- [Organization Settings](/using/administering/organization-settings)
+- [Developer & Platform Tools](/using/administering/developers)

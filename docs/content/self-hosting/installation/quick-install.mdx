@@ -1,0 +1,56 @@
+import { Callout } from 'nextra/components'
+
+# Quick Install
+
+Follow these steps to install and start a self-hosted ValidBridge instance using Docker Compose.
+
+## Step 1: Get the code and configure
+
+Clone the repository and create your environment file:
+
+```bash
+git clone https://github.com/pogutu-pro/validbridge.git
+cd validbridge
+cp .env.example .env
+```
+
+Edit `.env` to configure:
+
+- **Domain configuration** -- your domain name or localhost for local development
+- **Database settings** -- PostgreSQL credentials (defaults are provided)
+- **Admin credentials** -- email and password for the initial admin account
+- **Optional features** -- AI features, email delivery, and more
+
+The `docker-compose.yml` file runs PostgreSQL, Redis, the API, and the frontend. Sensible defaults are provided for most options.
+
+## Step 2: Start ValidBridge
+
+```bash
+docker compose up -d
+```
+
+This pulls the required Docker images (on first run), creates the containers, and starts all services. This typically takes one to two minutes on first launch.
+
+## Step 3: Access ValidBridge
+
+Once all services are running, access ValidBridge at:
+
+- **http://localhost:3000** (if using the default local configuration)
+
+Log in with the admin credentials you provided in `.env`.
+
+<Callout type="warning">
+Change the default admin password after your first login. The initial credentials are intended only for the first setup. Navigate to your account settings to update your password.
+</Callout>
+
+## Verifying the Installation
+
+Check the health endpoint directly:
+
+```bash
+curl http://localhost:8000/api/v1/health
+```
+
+## Next Steps
+
+- [Configuration](/self-hosting/configuration) -- Customize your instance with environment variables, AI, email, and more.

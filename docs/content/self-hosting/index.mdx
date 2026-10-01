@@ -1,0 +1,51 @@
+import { Callout } from 'nextra/components'
+
+# Self-Hosting ValidBridge
+
+<Callout type="warning">
+Self-hosting is available to organizations with an on-premises licence from [Stratnovo Systems](https://stratnovo.co.ke). Most organizations should use the managed ValidBridge Cloud.
+</Callout>
+
+Licensed customers can run ValidBridge on their own infrastructure using **Docker Compose**. The repository ships a `docker-compose.yml` that runs PostgreSQL, Redis, the API, and the frontend.
+
+## Quick Start
+
+Make sure you have **Docker Engine 20.10+** and **Docker Compose 2.0+** installed, then run:
+
+```bash
+git clone https://github.com/pogutu-pro/validbridge.git
+cd validbridge
+cp .env.example .env
+docker compose up -d
+```
+
+Edit `.env` to configure your domain, database settings, admin credentials, and optional features before starting. Once started, ValidBridge will be available at **http://localhost:3000** (or your configured domain). Log in with the admin credentials you provided.
+
+### Verify the installation
+
+```bash
+curl http://localhost:8000/api/v1/health
+```
+
+### Common management commands
+
+```bash
+docker compose stop             # Stop all services
+docker compose start            # Start all services
+docker compose logs -f          # Stream container logs
+docker compose up -d --build    # Rebuild after an update
+```
+
+## Documentation
+
+### [Installation](/self-hosting/installation)
+
+System requirements and quick install steps.
+
+### [Configuration](/self-hosting/configuration)
+
+Environment variables, AI features, email delivery, content storage, and SSL/domain setup.
+
+### [Maintenance](/self-hosting/maintenance)
+
+Updates, backups, monitoring, and troubleshooting guides.

@@ -1,0 +1,69 @@
+import { Callout } from 'nextra/components'
+
+# Quickstart
+
+There are two ways to run ValidBridge: the managed **ValidBridge Cloud** (recommended) or a **licensed on-premises** deployment arranged with [Stratnovo Systems](https://stratnovo.co.ke).
+
+---
+
+## Option A — ValidBridge Cloud
+
+The fastest way to get started. No infrastructure to manage.
+
+1. **Sign up** — Create an account at [validbridge.co.ke](https://validbridge.co.ke).
+2. **Create an organization** — After signing in, create your first organization. This is the top-level container for all of your courses, users, and settings.
+3. **Create your first course** — Inside the organization dashboard, click **New Course**, give it a title, and start adding chapters and activities.
+
+You are ready to go. ValidBridge Cloud handles hosting, updates, backups, and SSL for you.
+
+<Callout>
+Not sure whether Cloud or self-hosting is right for you? See the [Cloud vs Self Hosting](/getting-started/cloud-vs-self-hosting) comparison.
+</Callout>
+
+---
+
+## Option B — Licensed on-premises
+
+<Callout type="warning">
+On-premises deployment requires a ValidBridge licence and repository access from [Stratnovo Systems](https://stratnovo.co.ke). The steps below are for licensed customers.
+</Callout>
+
+Run ValidBridge on your own infrastructure using Docker. You'll need [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) installed.
+
+### 1. Configure your instance
+
+```bash
+git clone https://github.com/pogutu-pro/validbridge.git
+cd validbridge
+cp .env.example .env
+```
+
+Edit `.env` to set your domain, database credentials, admin account, and optional features (AI, email, storage, OAuth).
+
+### 2. Start ValidBridge
+
+```bash
+docker compose up -d
+```
+
+Your instance will be available at `http://localhost:3000` (or the domain you configured).
+
+### 3. Manage your instance
+
+```bash
+docker compose stop           # Stop all services
+docker compose logs -f        # Stream logs
+docker compose up -d --build  # Rebuild after an update
+```
+
+<Callout type="info">
+For detailed installation options, see the [Quick Install](/self-hosting/installation/quick-install) guide. For environment variables and configuration, see [Configuration](/self-hosting/configuration).
+</Callout>
+
+---
+
+## What to do next
+
+- Familiarize yourself with the [Key Concepts](/getting-started/key-concepts) — organizations, courses, activities, and more.
+- Explore the [Editor](/platform/editor) to see how content authoring works.
+- Set up [AI features](/self-hosting/configuration/ai-setup) if you want built-in AI assistance for students and teachers.

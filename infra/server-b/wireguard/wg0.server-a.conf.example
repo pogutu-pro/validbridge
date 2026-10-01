@@ -1,0 +1,22 @@
+# /etc/wireguard/wg0.conf on Server A (10.66.0.1)  (mode 600, owner root)
+#
+# ValidBridge private link: Server A (10.66.0.1) <-> Server B (10.66.0.2)
+# Later: add Server C as another [Peer] with AllowedIPs = 10.66.0.3/32.
+# The private key lives in /etc/wireguard/private.key (mode 600), loaded by PostUp.
+#
+#   umask 077; wg genkey | sudo tee /etc/wireguard/private.key | wg pubkey | sudo tee /etc/wireguard/public.key
+#   sudo systemctl enable --now wg-quick@wg0
+#
+[Interface]
+Address = 10.66.0.1/24
+ListenPort = 51820
+PostUp = wg set %i private-key /etc/wireguard/private.key
+
+[Peer]
+# Server B (brother's Oracle tenancy: Judge0/Piston, workers, staging, backups)
+PublicKey = <SERVER_B_PUBLIC_KEY>          # contents of /etc/wireguard/public.key on B
+# No Endpoint needed: B keeps the tunnel open (PersistentKeepalive) and A learns
+# B's address from the handshake. Add `Endpoint = <SERVER_B_PUBLIC_IP>:51820`
+# only if A must be able to initiate after both sides restart.
+AllowedIPs = 10.66.0.2/32
+PersistentKeepalive = 25

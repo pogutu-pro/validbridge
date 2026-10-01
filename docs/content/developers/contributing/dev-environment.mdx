@@ -1,0 +1,86 @@
+import { Callout } from 'nextra/components'
+
+# Development Environment Setup
+
+This guide walks you through running the ValidBridge development environment from source.
+
+## Prerequisites
+
+Make sure you have the following installed before proceeding:
+
+- **Docker** (with Docker Compose v2)
+- **[Bun](https://bun.sh/)** — used to install and run the web and collab workspaces
+- **[uv](https://docs.astral.sh/uv/)** — used to manage and run the Python API
+
+<Callout type="warning">
+Make sure Docker has at least **4GB of RAM** allocated. You can check and adjust this in Docker Desktop under Settings &gt; Resources.
+</Callout>
+
+## Setup Steps
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/pogutu-pro/validbridge.git
+cd validbridge
+```
+
+### 2. Start backing services
+
+PostgreSQL and Redis are launched via Docker Compose:
+
+```bash
+docker compose up -d db redis
+```
+
+### 3. Install dependencies
+
+```bash
+# Python API
+cd apps/api && uv sync && cd ../..
+
+# Web and collab workspaces
+cd apps/web && bun install && cd ../..
+cd apps/collab && bun install && cd ../..
+```
+
+### 4. Start the services
+
+Run each service in its own terminal:
+
+```bash
+# API — FastAPI backend with hot reload (port 1338)
+cd apps/api && uv run python app.py
+
+# Frontend — Next.js development server (port 3000)
+cd apps/web && bun run dev
+
+# Collaboration server — Hocuspocus (port 4000)
+cd apps/collab && bun run dev
+```
+
+## Accessing the Application
+
+| Service | URL |
+| --- | --- |
+| Frontend | [http://localhost:3000](http://localhost:3000) |
+| API | [http://localhost:1338](http://localhost:1338) |
+| API Documentation (Swagger) | [http://localhost:1338/docs](http://localhost:1338/docs) |
+
+<Callout type="info">
+The Swagger UI at `/docs` is only available in development mode. Production instances do not expose the interactive API documentation.
+</Callout>
+
+## Stopping the Environment
+
+Press `Ctrl+C` in each service terminal to stop it, then stop the backing services:
+
+```bash
+docker compose down
+```
+
+## Troubleshooting
+
+- **Port conflicts** -- Make sure ports 3000 (web), 1338 (API), 4000 (collab), 5432 (Postgres), and 6379 (Redis) are not in use by other applications.
+- **Docker not running** -- Ensure the Docker daemon is started before running `docker compose up`.
+- **Dependency issues** -- If you encounter issues, try deleting `node_modules` and `.venv` directories and reinstalling.

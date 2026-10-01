@@ -1,0 +1,29 @@
+# Enrollments & Checkout
+
+Enrollments track student access to paid content. When a student completes a purchase, an enrollment record grants them access to the offer's courses.
+
+## Checkout Flow
+
+1. A student selects an offer from the marketplace or a course page and clicks **Get access** or **Subscribe**.
+2. They are redirected to Paystack's hosted checkout and pay with any method the organization's Paystack account accepts.
+3. Paystack notifies ValidBridge through the webhook; ValidBridge verifies the signature, amount and currency and marks the enrollment paid.
+4. The student returns to ValidBridge with immediate access to the purchased courses.
+
+## Enrollment Statuses
+
+| Status | Description |
+|---|---|
+| Pending | Checkout started, payment not yet confirmed. |
+| Completed | One-time payment successful, access granted. |
+| Active | Subscription paid and current, access granted. |
+| Cancelled | Subscription cancelled, access revoked. |
+| Failed | A subscription payment failed, access suspended until a later payment succeeds. |
+| Refunded | Payment refunded in Paystack, access revoked. |
+
+## Managing subscriptions
+
+Students see their purchases under **Account → Purchases**, and active subscriptions, next payment dates and payment history under **Account → Billing**. Clicking **Cancel** stops billing in Paystack and ends access immediately.
+
+## Customers
+
+Administrators see every customer — the offer bought, amount, status and date — under **Payments → Overview**, and can open the Paystack Dashboard from the Payments area for charges, refunds and payouts.

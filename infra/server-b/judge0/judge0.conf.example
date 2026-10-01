@@ -1,0 +1,63 @@
+# Judge0 CE 1.13.1 settings for ValidBridge. Copy to judge0.conf ON THE SERVER
+# and fill the <...> values there. Never commit the filled file.
+# Generate secrets with:  openssl rand -hex 32
+# Anything left empty uses the Judge0 default.
+
+JUDGE0_TELEMETRY_ENABLE=false
+
+# --- Authentication: must match what apps/api sends (_judge0_headers) ---
+# The API sends X-Judge0-Client-Secret: $VALIDBRIDGE_JUDGE0_CLIENT_SECRET
+AUTHN_HEADER=X-Judge0-Client-Secret
+AUTHN_TOKEN=<JUDGE0_AUTH_TOKEN>
+# Only the API server (over WireGuard) may call it. Docker's DNAT normally keeps
+# the source IP; if every request gets 403, Docker's userland proxy is rewriting
+# it: leave ALLOW_IP empty and rely on the 10.66.0.x bind + token.
+ALLOW_IP=10.66.0.1
+
+# --- Features the API uses ---
+ENABLE_WAIT_RESULT=true          # POST /submissions?wait=true
+ENABLE_ADDITIONAL_FILES=true     # base64 zip (SQLite db, extra text files)
+ENABLE_BATCHED_SUBMISSIONS=true  # not used today; the API fans out single calls
+MAX_SUBMISSION_BATCH_SIZE=50
+ENABLE_CALLBACKS=false
+ENABLE_SUBMISSION_DELETE=false
+ENABLE_COMPILER_OPTIONS=false
+ENABLE_COMMAND_LINE_ARGUMENTS=false
+USE_DOCS_AS_HOMEPAGE=false
+
+# --- Sandbox limits ---
+ENABLE_NETWORK=false
+ALLOW_ENABLE_NETWORK=false
+CPU_TIME_LIMIT=3
+MAX_CPU_TIME_LIMIT=5
+CPU_EXTRA_TIME=0.5
+WALL_TIME_LIMIT=6
+MAX_WALL_TIME_LIMIT=10
+MEMORY_LIMIT=262144              # KB (256 MB)
+MAX_MEMORY_LIMIT=524288
+STACK_LIMIT=65536
+MAX_PROCESSES_AND_OR_THREADS=64
+MAX_MAX_PROCESSES_AND_OR_THREADS=128
+MAX_FILE_SIZE=4096               # KB
+MAX_MAX_FILE_SIZE=10240
+MAX_EXTRACT_SIZE=20480           # KB, additional_files zip
+NUMBER_OF_RUNS=1
+MAX_NUMBER_OF_RUNS=1
+ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT=false
+ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT=false
+ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT=false
+ALLOW_ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT=false
+
+# --- Workers: about one per core ---
+COUNT=2
+MAX_QUEUE_SIZE=200
+
+# --- Internal services ---
+REDIS_HOST=redis
+REDIS_PASSWORD=<REDIS_PASSWORD>
+POSTGRES_HOST=db
+POSTGRES_DB=judge0
+POSTGRES_USER=judge0
+POSTGRES_PASSWORD=<POSTGRES_PASSWORD>
+SECRET_KEY_BASE=<SECRET_KEY_BASE>
+RAILS_ENV=production

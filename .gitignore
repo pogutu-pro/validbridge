@@ -1,0 +1,85 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+# testing
+coverage
+
+# next.js
+.next/
+out/
+build
+
+# misc
+.DS_Store
+
+# keys and credentials (VM/SSH keys belong in a password manager, not here)
+*.pem
+*.key
+*.key.pub
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+sshkeys/
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files (every .env variant; only *.example templates are tracked)
+.env
+.env.*
+!.env.example
+!.env.*.example
+!**/.env.example
+
+# turbo
+.turbo
+
+# vercel
+.vercel
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# vscode
+.vscode/
+
+# Flyio
+.flyio/
+fly.toml
+
+# Generated runtime config
+apps/web/public/runtime-config.js
+apps/web/runtime-config.json
+
+# Tinybird CLI local state (contains tokens)
+.tinyb
+
+.ee-disabled
+
+# Enterprise Edition (private repo, overlaid at SaaS build time, symlinked locally)
+# No trailing slash — must also match a bare symlink at apps/api/ee, not just a directory.
+apps/api/ee
+
+# Claude Code
+.claude/
+
+# Git worktrees
+.worktrees/
+
+# Playwright MCP session artifacts
+.playwright-mcp/
+.demo-secrets
+
+# CI/CD deploy artifacts (kept outside the repo on the VM by default;
+# ignored defensively in case they are ever placed under the tree)
+validbridge-deployments/
+deploy.lock

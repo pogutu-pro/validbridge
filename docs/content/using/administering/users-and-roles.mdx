@@ -1,0 +1,99 @@
+import { Callout } from 'nextra/components'
+
+# Users, Roles & Groups
+
+People are the heart of an organization. This page explains how to bring them in, what roles and permissions mean, and how to organise users into groups.
+
+Everything here lives in the dashboard under **Users**.
+
+## The people pages
+
+The **Users** settings area has several tabs:
+
+| Tab | What it does |
+| --- | --- |
+| **Users** | Everyone in the organization — search, view, and manage their role. |
+| **User Groups** | Named groups of users, used for access and enrolment. |
+| **Roles** | The role definitions and their permissions. |
+| **Signups** | Pending signup requests awaiting approval. |
+| **Add** | Add a user directly. |
+| **Sign-in methods** | Which ways users may sign in (password, Google, SSO). |
+| **Two-factor** | The organization's two-factor authentication policy. |
+| **Audit logs** | A record of important actions taken in the organization. |
+
+## Adding users
+
+There are two ways people join:
+
+### Direct add
+
+Use the **Add** tab to create a user with a name, email and role. This is useful for onboarding people you already know.
+
+### Self signup
+
+If the organization allows open signup, people can request to join. Requests appear under **Signups**, where you approve or reject them. You can also switch signup off entirely, making the organization invite-only.
+
+<Callout type="tip">
+For a cohort, add everyone directly with the **User** role, then use a **user group** to control which courses they can reach.
+</Callout>
+
+## Roles and permissions
+
+A **role** is a named bundle of per-resource permissions. A user's role decides everything they can see and do. ValidBridge seeds four default roles:
+
+| Role | Intended for |
+| --- | --- |
+| **User** | Learners. |
+| **Instructor** | People who author and teach. |
+| **Maintainer** | People who manage content and users. |
+| **Admin** | Full control of the organization. |
+
+### The permission model
+
+Permissions are grouped by **resource**, and each resource has a set of **actions**. For example a course has actions for updating its details, updating its content, managing access, managing contributors, and creating certifications. A role either has an action or it does not.
+
+This means you are not limited to the four defaults — you can create a **custom role** that grants exactly the actions a person needs, and nothing more.
+
+### Creating a custom role
+
+1. Open **Users → Roles**.
+2. Create a new role and give it a clear name.
+3. Tick the permissions it should include, resource by resource.
+4. Save, then assign it to users.
+
+<Callout type="warning">
+Role changes take effect immediately. Before you change your own role, make sure at least one other person still has full admin access — otherwise you can lock everyone out of settings.
+</Callout>
+
+### The dashboard permission
+
+Seeing the dashboard at all requires the relevant permissions. If a user should build courses but not manage people, give them course content permissions without user-management permissions.
+
+## Assigning a role
+
+Open a user from **Users** and set their role. New users default to the least-privileged role unless you choose otherwise.
+
+## User groups
+
+A **user group** is a named collection of users. Groups are how you grant access at scale:
+
+- Restrict a course to a group, so only its members can enrol.
+- Attach a group to a **paid offer**, so buying the offer adds the buyer to the group.
+- Use groups to run cohorts, departments or classes.
+
+To use groups:
+
+1. Open **Users → User Groups** and create a group.
+2. Add members to it.
+3. Attach the group to a course's **Access** settings (or to an offer).
+
+## Per-user analytics
+
+From **Users → (a user)** you can open that person's learning analytics — their courses, progress and activity. Useful when someone reports a problem with their enrolment or progress.
+
+## Good practice
+
+- Give the fewest permissions a person needs, and add more only when required.
+- Keep the number of admins small.
+- Use groups rather than assigning access user by user.
+- Review roles and group membership periodically as people change teams.

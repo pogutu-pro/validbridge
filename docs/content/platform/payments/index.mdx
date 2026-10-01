@@ -1,0 +1,43 @@
+import { Callout } from 'nextra/components'
+
+# Payments
+
+ValidBridge lets an organization sell its courses using **Paystack**, with a **bring-your-own-key** model: each organization connects its *own* Paystack merchant account by pasting its API keys. Learners pay on Paystack's hosted checkout, and funds settle directly into the organization's Paystack account — ValidBridge never holds the money.
+
+<Callout>
+Payments must be enabled for your organization in [Organization Settings](/platform/organizations/settings) before the **Payments** area appears in the dashboard.
+</Callout>
+
+## How payments work
+
+1. An admin connects the organization's Paystack account under **Payments → Configuration**.
+2. You create **offers** — one-time purchases or subscriptions (monthly or yearly).
+3. Each offer unlocks courses directly and/or through a **payment group** (bundle).
+4. A learner clicks **Get access** or **Subscribe** and pays on Paystack's secure checkout.
+5. Paystack sends a signed webhook to ValidBridge, which verifies it and grants access immediately.
+
+## Connecting Paystack
+
+1. In the Paystack Dashboard, open **Settings → API Keys & Webhooks** and copy your **secret key** (`sk_live_…` or `sk_test_…`) and, optionally, your **public key** (`pk_…`).
+2. In ValidBridge, go to **Payments → Configuration**, click **Connect** on the Paystack card, paste the keys and click **Save & Activate**.
+3. In the same Paystack settings page, set the **Webhook URL** to your ValidBridge API address followed by `/api/v1/payments/paystack/webhook`.
+
+<Callout type="warning">
+Access is granted when Paystack's `charge.success` webhook arrives. If the webhook URL is missing or points at the wrong address, learners are charged but their courses stay locked.
+</Callout>
+
+- **Test first.** Use your `sk_test_` key with Paystack test cards, then click **Update keys** and switch to your live key.
+- **Security.** The secret key is encrypted before it is stored and is only used server-side. Paystack signs every webhook with HMAC-SHA512 using your secret key; ValidBridge rejects any notification it cannot verify, and ignores payments whose amount or currency does not match the offer.
+- **Removing** the connection disables payments for the organization.
+
+## Money, refunds and payouts
+
+- **Payouts** are made by Paystack to the bank or mobile-money account configured in your Paystack account, on Paystack's schedule and fees.
+- **Refunds** are issued from the Paystack Dashboard. When Paystack reports the refund, ValidBridge marks the enrollment **refunded** and removes the access it granted.
+- **Payment methods** are whatever your Paystack account supports in your country — typically cards, bank payments and mobile money such as M-Pesa.
+
+## Learn more
+
+- [Offers & Pricing](/platform/payments/offers) — Create and manage what you sell.
+- [Groups & Bundles](/platform/payments/groups) — Bundle courses together for package deals.
+- [Enrollments & Checkout](/platform/payments/enrollments) — How students purchase and gain access.

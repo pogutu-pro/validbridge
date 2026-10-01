@@ -1,0 +1,275 @@
+/*
+  Marketing site (validbridge.co.ke). Content and brand come from the design
+  handoff (Modernist re-themed with ValidBridge orange); the visual treatment
+  is a quieter, product-led refinement of it: generous whitespace, large tight
+  headlines, hairline dividers, rounded media and pill buttons.
+
+  Everything is scoped under .vb-site so none of it leaks into the product UI.
+  Tailwind utilities live in a cascade layer and lose to these unlayered rules,
+  so override a property set here with an important utility (`!mb-2`).
+*/
+
+.vb-site {
+  --s-bg: #ffffff;
+  --s-surface: #f5f5f3;
+  --s-surface-2: #ecebe8;
+  --s-text: #1d1c1b;
+  --s-muted: #5f5d5b;
+  --s-subtle: #86837f;
+  --s-divider: rgb(29 28 27 / 0.1);
+  --s-divider-strong: rgb(29 28 27 / 0.18);
+
+  --s-ink: #0c0b0b;
+  --s-ink-2: #171615;
+  --s-ink-rule: rgb(255 255 255 / 0.1);
+  --s-ink-text: #a8a5a1;
+
+  --s-accent: #FF5A1F;
+  --s-accent-100: #FFF3EC;
+  --s-accent-200: #FFE3D3;
+  --s-accent-300: #FFC7A8;
+  --s-accent-400: #FF9F66;
+  --s-accent-600: #DE4710;
+  --s-accent-700: #B23907;
+
+  --s-r-sm: 12px;
+  --s-r-md: 20px;
+  --s-r-lg: 28px;
+
+  --s-shadow-sm: 0 1px 2px rgb(29 28 27 / 0.06), 0 1px 1px rgb(29 28 27 / 0.04);
+  --s-shadow-md: 0 2px 6px rgb(29 28 27 / 0.05), 0 12px 32px -8px rgb(29 28 27 / 0.12);
+  --s-shadow-lg: 0 4px 12px rgb(29 28 27 / 0.05), 0 32px 64px -16px rgb(29 28 27 / 0.22);
+  --s-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--s-bg);
+  color: var(--s-text);
+  font-family: var(--font-site), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.vb-site h1,
+.vb-site h2,
+.vb-site h3,
+.vb-site h4 {
+  margin: 0;
+  font-family: var(--font-site), system-ui, sans-serif;
+  font-weight: 700;
+  color: inherit;
+  text-wrap: balance;
+}
+.vb-site h1 { font-size: clamp(42px, 7vw, 80px); line-height: 1.02; letter-spacing: -0.04em; }
+.vb-site h2 { font-size: clamp(32px, 4.4vw, 52px); line-height: 1.06; letter-spacing: -0.035em; }
+.vb-site h3 { font-size: 19px; line-height: 1.25; letter-spacing: -0.015em; }
+.vb-site p { text-wrap: pretty; }
+.vb-site a { text-decoration: none; }
+.vb-site :focus-visible { outline: 2px solid var(--s-accent); outline-offset: 3px; border-radius: 6px; }
+.vb-site ::selection { background: color-mix(in srgb, var(--s-accent) 25%, transparent); }
+
+/* — layout — */
+.vb-site .s-section { padding: 88px 20px; }
+.vb-site .s-container { max-width: 1160px; margin-inline: auto; }
+.vb-site .s-narrow { max-width: 760px; margin-inline: auto; }
+.vb-site .s-muted { color: var(--s-muted); }
+.vb-site .s-subtle { color: var(--s-subtle); }
+.vb-site .s-surface { background: var(--s-surface); }
+.vb-site .s-dark { background: var(--s-ink); color: var(--s-ink-text); }
+.vb-site .s-dark h2,
+.vb-site .s-dark h3 { color: #fff; }
+.vb-site .s-lead { font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; color: var(--s-muted); letter-spacing: -0.01em; }
+.vb-site .s-dark .s-lead { color: var(--s-ink-text); }
+@media (min-width: 768px) {
+  .vb-site .s-section { padding: 128px 32px; }
+}
+
+/* Eyebrow: small accent label above a headline. */
+.vb-site .s-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--s-accent-600);
+}
+.vb-site .s-dark .s-eyebrow { color: var(--s-accent-400); }
+
+/* Pill tag (hero badge, small labels). */
+.vb-site .s-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--s-accent-100);
+  color: var(--s-accent-700);
+}
+
+/* Bento: rounded tiles with a small gap. */
+.vb-site .s-bento { display: grid; gap: 16px; }
+.vb-site .s-tile {
+  border-radius: var(--s-r-lg);
+  background: var(--s-surface);
+  padding: 32px;
+}
+.vb-site .s-surface .s-tile { background: var(--s-bg); }
+.vb-site .s-dark .s-tile { background: var(--s-ink-2); }
+
+/* Hairline list: a line above each row and below the last. */
+.vb-site .s-rules > * { border-top: 1px solid var(--s-divider); }
+.vb-site .s-rules > *:last-child { border-bottom: 1px solid var(--s-divider); }
+.vb-site .s-dark .s-rules > * { border-color: var(--s-ink-rule); }
+
+/* Framed media: product screenshots. */
+.vb-site .s-frame {
+  overflow: hidden;
+  border-radius: var(--s-r-md);
+  background: var(--s-bg);
+  box-shadow: var(--s-shadow-lg), 0 0 0 1px var(--s-divider);
+}
+@media (min-width: 768px) {
+  .vb-site .s-frame { border-radius: var(--s-r-lg); }
+}
+.vb-site .s-chrome {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-inline: 16px;
+  background: var(--s-surface);
+  border-bottom: 1px solid var(--s-divider);
+}
+.vb-site .s-chrome-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--s-surface-2); }
+
+/* Soft brand glow behind hero media. */
+.vb-site .s-glow {
+  position: absolute;
+  inset: -10% -5% auto;
+  height: 80%;
+  background: radial-gradient(50% 50% at 50% 50%, rgb(255 90 31 / 0.18), transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+/* — buttons — */
+.vb-site .s-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--s-text);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s var(--s-ease), box-shadow 0.2s var(--s-ease), transform 0.2s var(--s-ease);
+}
+.vb-site .s-btn:active { transform: scale(0.98); }
+.vb-site .s-btn-lg { min-height: 52px; padding: 14px 28px; font-size: 17px; }
+.vb-site .s-btn-block { width: 100%; }
+.vb-site .s-btn-primary {
+  background: var(--s-accent);
+  color: #fff;
+  box-shadow: 0 1px 2px rgb(222 71 16 / 0.3), 0 8px 24px -8px rgb(255 90 31 / 0.55);
+}
+.vb-site .s-btn-primary:hover { background: var(--s-accent-600); }
+.vb-site .s-btn-secondary { background: var(--s-surface); }
+.vb-site .s-btn-secondary:hover { background: var(--s-surface-2); }
+.vb-site .s-btn-outline { box-shadow: inset 0 0 0 1px var(--s-divider-strong); }
+.vb-site .s-btn-outline:hover { background: var(--s-surface); }
+.vb-site .s-btn-on-dark { color: #fff; background: rgb(255 255 255 / 0.1); }
+.vb-site .s-btn-on-dark:hover { background: rgb(255 255 255 / 0.16); }
+
+/* Text link with a nudging arrow. */
+.vb-site .s-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: var(--s-accent-600);
+}
+.vb-site .s-dark .s-link { color: var(--s-accent-400); }
+.vb-site .s-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.vb-site .s-link .s-arrow { transition: transform 0.2s var(--s-ease); }
+.vb-site .s-link:hover .s-arrow,
+.vb-site .s-btn:hover .s-arrow { transform: translateX(2px); }
+[dir='rtl'] .vb-site .s-arrow { transform: scaleX(-1); }
+
+/* — nav — */
+.vb-site .s-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgb(255 255 255 / 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--s-divider);
+}
+.vb-site .s-nav-link { color: var(--s-muted); font-size: 14px; font-weight: 500; transition: color 0.2s; }
+.vb-site .s-nav-link:hover,
+.vb-site .s-nav-link[aria-current='page'] { color: var(--s-text); }
+
+/* — FAQ — */
+.vb-site .s-faq-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--s-surface);
+  color: var(--s-text);
+  transition: transform 0.25s var(--s-ease), background-color 0.2s;
+}
+.vb-site .s-faq-icon[data-open='true'] { transform: rotate(45deg); background: var(--s-accent-100); color: var(--s-accent-700); }
+.vb-site .s-faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s var(--s-ease);
+}
+.vb-site .s-faq-panel[data-open='true'] { grid-template-rows: 1fr; }
+
+/* — motion — */
+@keyframes s-rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes s-pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.vb-site .s-rise { animation: s-rise-in 0.8s var(--s-ease) backwards; }
+.vb-site .s-pulse { animation: s-pulse-dot 1.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vb-site *,
+  .vb-site *::before,
+  .vb-site *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* FAQ toggle on a tinted section. */
+.vb-site .s-surface .s-faq-icon:not([data-open='true']) { background: var(--s-bg); }
+
+/* Long-form text (legal pages): spacing between paragraphs and lists. */
+.vb-site .s-prose > * { margin: 0; }
+.vb-site .s-prose > * + * { margin-top: 1rem; }
+.vb-site .s-prose li + li { margin-top: 0.5rem; }

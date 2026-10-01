@@ -1,0 +1,37 @@
+import { Callout } from 'nextra/components'
+import ArchitectureDiagram from '../../../components/ArchitectureDiagram/ArchitectureDiagram'
+
+# Architecture Overview
+
+ValidBridge is a multi-directory project with multiple applications that work together to deliver the full platform experience. The system follows a clear separation of concerns between the frontend, backend, and supporting services.
+
+## Project Structure
+
+```
+validbridge/
+├── apps/
+│   ├── web/      # Next.js frontend
+│   ├── api/      # FastAPI backend
+│   └── collab/   # Hocuspocus collaboration server
+├── docs/         # Documentation site
+└── docker-compose.yml  # PostgreSQL, Redis, backend, and frontend
+```
+
+Self-hosted deployments use the checked-in `docker-compose.yml` to run PostgreSQL, Redis, the backend, and the frontend as containers. Configuration comes from a `.env` file (copy `.env.example`).
+
+## How It All Fits Together
+
+The platform consists of three applications backed by two core services:
+
+- **Web (Next.js)** -- The user-facing frontend that communicates with the backend API and the collaboration server.
+- **API (FastAPI)** -- The backend that handles authentication, course management, storage, uploads, AI features, and all business logic.
+- **Collab (Hocuspocus)** -- A WebSocket server that powers real-time collaborative editing with JWT authentication, Redis persistence, and per-board user limits.
+
+<ArchitectureDiagram />
+
+## Backing Services
+
+ValidBridge relies on two primary backing services:
+
+- **PostgreSQL 16 (pgvector)** -- The primary relational database for storing all application data including users, courses, organizations, and activity records. Uses the pgvector extension for AI embedding storage. Both dev and self-host production use the `pgvector/pgvector:pg16` image.
+- **Redis** -- Used for caching, session management, collaboration state persistence, and message brokering between services. Dev mode uses `redis:8.6.1-alpine`; the self-host production stack uses `redis:7.2.3-alpine`.

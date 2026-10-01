@@ -1,0 +1,94 @@
+'use client'
+import React from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { getAPIUrl } from '@services/config/config'
+import { apiFetch } from '@services/utils/ts/requests'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
+import PageLoading from '@components/Objects/Loaders/PageLoading'
+import { ChartBar } from '@phosphor-icons/react'
+import { queryKeys } from '@/lib/query/keys'
+
+export default function GlobalAnalytics({ days = 30 }: { days?: number }) {
+  const session = useVBSession() as any
+  const accessToken = session?.data?.tokens?.access_token
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [...queryKeys.superadmin.analytics(), days],
+    queryFn: () => apiFetch(`${getAPIUrl()}ee/superadmin/analytics/global?days=${days}`, accessToken),
+    enabled: !!accessToken,
+    staleTime: 60_000,
+  })
+
+  if (isLoading) return <PageLoading />
+
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-[#262626]/40">
+        <ChartBar size={48} weight="fill" />
+        <p className="mt-4 text-lg">
+          {error ? 'Failed to load analytics' : 'No analytics data available'}
+        </p>
+        <p className="text-sm text-[#262626]/25 mt-1">
+          Ensure Tinybird analytics is configured
+        </p>
+      </div>
+    )
+  }
+
+  const queryNames = Object.keys(data)
+
+  // Analytics is configured but returned no series (e.g. no events yet, or the
+  // backend degrades to an empty payload). Render the same explanatory state as
+  // the unconfigured case instead of an empty grid.
+  if (queryNames.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-[#262626]/40">
+        <ChartBar size={48} weight="fill" />
+        <p className="mt-4 text-lg">No analytics data available</p>
+        <p className="text-sm text-[#262626]/25 mt-1">
+          Data will appear once activity is recorded.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {queryNames.map((queryName) => {
+        const queryData = data[queryName]
+        const rows = queryData?.data || []
+        const firstRow = rows[0] || {}
+        const values = Object.entries(firstRow)
+
+        return (
+          <div
+            key={queryName}
+            className="bg-black/[0.03] border border-black/[0.08] rounded-xl p-5"
+          >
+            <h3 className="text-xs font-medium text-[#262626]/40 uppercase tracking-wider mb-3">
+              {queryName.replace(/_/g, ' ')}
+            </h3>
+            {values.length > 0 ? (
+              <div className="space-y-2">
+                {values.map(([key, val]) => (
+                  <div key={key} className="flex justify-between items-center">
+                    <span className="text-sm text-[#262626]/50">
+                      {key.replace(/_/g, ' ')}
+                    </span>
+                    <span className="text-sm font-medium text-[#262626]">
+                      {typeof val === 'number'
+                        ? val.toLocaleString()
+                        : String(val)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[#262626]/25">No data</p>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}

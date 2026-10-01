@@ -1,0 +1,78 @@
+# Code execution on Server B: Piston (arm64 build) + Judge0-compatible adapter.
+#
+#   cp piston.env.example piston.env           # not secret; limits and overrides
+#   ./build-arm64.sh <lang-ver> ...            # images + language packages
+#   sudo install -d -m 700 /etc/validbridge
+#   sudo sh -c 'umask 077; echo "JUDGE0_COMPAT_TOKEN=$(openssl rand -hex 32)" > /etc/validbridge/judge0-compat.env'
+#   sudo docker compose up -d --build          # sudo: the env file is root-only
+#
+# Network exposure:
+#   - piston: published only on 127.0.0.1:2000 (local checks). It has no
+#     authentication and must never be reachable from A directly.
+#   - judge0-compat: published only on the WireGuard IP 10.66.0.2:2358. Docker
+#     publishes bypass the INPUT chain, so the bind address IS the firewall:
+#     never use "2358:2358" (that would be 0.0.0.0).
+#   - ../systemd/docker-after-wireguard.conf makes Docker start after wg0.
+#
+# API (Server A) env:
+#   VALIDBRIDGE_JUDGE0_API_URL=http://10.66.0.2:2358
+#   VALIDBRIDGE_JUDGE0_CLIENT_SECRET=<JUDGE0_COMPAT_TOKEN from the env file on B>
+
+name: validbridge-code
+
+services:
+  piston:
+    image: piston-api:arm64
+    container_name: piston
+    restart: unless-stopped
+    # isolate creates cgroups (v2) and namespaces for every submission
+    privileged: true
+    env_file: piston.env
+    volumes:
+      - /srv/piston:/piston
+    tmpfs:
+      - /tmp:exec
+    ports:
+      - "127.0.0.1:2000:2000"
+    networks: [code]
+    # Ceiling for the whole sandbox host, on top of per-submission limits.
+    # Sized for 2 OCPU / 12 GB; raise with the 4 OCPU / 24 GB resize.
+    cpus: "1.8"
+    mem_limit: 6g
+    pids_limit: 4096
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  judge0-compat:
+    build: ../judge0-compat
+    image: validbridge/judge0-compat:latest
+    container_name: judge0-compat
+    restart: unless-stopped
+    env_file: /etc/validbridge/judge0-compat.env   # JUDGE0_COMPAT_TOKEN (root, 600)
+    environment:
+      PISTON_URL: http://piston:2000
+      MAX_INFLIGHT: "2"          # = PISTON_MAX_CONCURRENT_JOBS
+      MAX_QUEUE: "64"
+      REQUEST_DEADLINE_S: "27"   # the API gives up after 30 s
+      RUN_CPU_MS: "3000"
+      RUN_WALL_MS: "5000"
+      RUN_MEMORY_BYTES: "268435456"
+    ports:
+      - "10.66.0.2:2358:2358"
+    networks: [code]
+    depends_on: [piston]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    cpus: "0.5"
+    mem_limit: 256m
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+networks:
+  code:
+    driver: bridge

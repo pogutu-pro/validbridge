@@ -1,0 +1,23 @@
+import { Callout } from 'nextra/components'
+
+# Installation Overview
+
+ValidBridge is self-hosted using **Docker Compose**. The repository ships a `docker-compose.yml` that runs PostgreSQL, Redis, the API, and the frontend, plus a `.env.example` you can copy to configure your instance.
+
+## What Docker Compose runs
+
+- **PostgreSQL** — the application database
+- **Redis** — caching and session store
+- **API** — the FastAPI backend
+- **Frontend** — the Next.js application
+
+Environment variables (from `.env`) configure the domain, admin account, database credentials, and optional features such as AI, email, and storage.
+
+<Callout type="info">
+You do not need to install Node.js, Python, or any other runtime on the host — the containers bundle their own runtimes.
+</Callout>
+
+## Next Steps
+
+- [Requirements](/self-hosting/installation/requirements) -- Verify your server meets the minimum system requirements.
+- [Quick Install](/self-hosting/installation/quick-install) -- Set up ValidBridge in minutes.

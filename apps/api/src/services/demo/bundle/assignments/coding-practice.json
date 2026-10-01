@@ -1,0 +1,78 @@
+{
+  "activity_key": "py-check-in-assignment",
+  "title": "Python check-in",
+  "description": "A quick check that the hands-on material landed: one quiz question and one honest, in-your-own-words answer.",
+  "grading_type": "PERCENTAGE",
+  "pass_threshold_percentage": 50,
+  "due_in_days": 5,
+  "published": true,
+  "auto_grading": true,
+  "show_correct_answers": true,
+  "allow_retries": true,
+  "max_retries": 1,
+  "tasks": [
+    {
+      "slug": "py-t1-reorder-rule",
+      "title": "The reorder rule",
+      "description": "Which value decides that a SKU needs reordering?",
+      "hint": "'A real inventory task' prints rows where units are below 40.",
+      "type": "QUIZ",
+      "max_grade_value": 60,
+      "contents": {
+        "questions": [
+          {
+            "questionUUID": "question_py_t1_q1",
+            "questionText": "A SKU is worth reordering when its units on hand drop below…",
+            "options": [
+              { "optionUUID": "option_py_t1_q1_a", "text": "40", "type": "text", "fileID": "", "assigned_right_answer": true },
+              { "optionUUID": "option_py_t1_q1_b", "text": "100", "type": "text", "fileID": "", "assigned_right_answer": false },
+              { "optionUUID": "option_py_t1_q1_c", "text": "10", "type": "text", "fileID": "", "assigned_right_answer": false }
+            ]
+          }
+        ]
+      },
+      "submissions": {
+        "correct": {
+          "submissions": [
+            { "questionUUID": "question_py_t1_q1", "optionUUID": "option_py_t1_q1_a", "answer": true }
+          ]
+        },
+        "partial": {
+          "submissions": [
+            { "questionUUID": "question_py_t1_q1", "optionUUID": "option_py_t1_q1_c", "answer": true }
+          ]
+        },
+        "incorrect": {
+          "submissions": [
+            { "questionUUID": "question_py_t1_q1", "optionUUID": "option_py_t1_q1_b", "answer": true }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "py-t2-what-you-practice",
+      "title": "What would you script next?",
+      "description": "Name one small task you would like to script at Riverbend. Answer in your own words.",
+      "hint": "There is no wrong answer — it is marked for being answered honestly.",
+      "type": "SHORT_ANSWER",
+      "max_grade_value": 40,
+      "contents": {
+        "correct_answers": [
+          "reordering",
+          "inventory",
+          "stock",
+          "monthly report",
+          "spreadsheet",
+          "data",
+          "export"
+        ],
+        "match_mode": "contains"
+      },
+      "submissions": {
+        "correct": { "answer": "I'd script the weekly reorder list myself — exactly the 'A real inventory task' pattern, but for all SKUs." },
+        "partial": { "answer": "Something with the inventory export, probably." },
+        "incorrect": { "answer": "Not sure yet." }
+      }
+    }
+  ]
+}

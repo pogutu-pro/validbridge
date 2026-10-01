@@ -1,0 +1,57 @@
+# Official Judge0 CE 1.13.1. NOT runnable on Server B as it is today:
+#   - judge0/judge0 images are linux/amd64 only (B is arm64: "exec format error")
+#   - isolate 1.8.1 inside the image needs cgroup v1, B runs cgroup v2 and its
+#     kernel is built without CONFIG_MEMCG_V1
+# Use this on an x86 host (option (c) in ../README.md) prepared with cgroup v1
+# (see README "Judge0 host prerequisites").
+#
+#   cp judge0.conf.example judge0.conf   # fill in the three secrets on the server
+#   docker compose up -d db redis && sleep 10 && docker compose up -d
+#
+# Bind to the WireGuard IP of whichever host runs it. 10.66.0.2 is Server B;
+# an x86 box would get its own tunnel IP (e.g. 10.66.0.4).
+
+name: judge0
+
+x-logging: &default-logging
+  logging:
+    driver: json-file
+    options: { max-size: "20m", max-file: "3" }
+
+services:
+  server:
+    image: judge0/judge0:1.13.1
+    volumes:
+      - ./judge0.conf:/judge0.conf:ro
+    ports:
+      - "10.66.0.2:2358:2358"          # WireGuard IP only, never 0.0.0.0
+    privileged: true
+    <<: *default-logging
+    restart: unless-stopped
+
+  worker:
+    image: judge0/judge0:1.13.1
+    command: ["./scripts/workers"]
+    volumes:
+      - ./judge0.conf:/judge0.conf:ro
+    privileged: true
+    <<: *default-logging
+    restart: unless-stopped
+
+  db:
+    image: postgres:16.2
+    env_file: judge0.conf
+    volumes:
+      - data:/var/lib/postgresql/data/
+    <<: *default-logging
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2.4
+    command: ["bash", "-c", 'docker-entrypoint.sh --appendonly no --requirepass "$$REDIS_PASSWORD"']
+    env_file: judge0.conf
+    <<: *default-logging
+    restart: unless-stopped
+
+volumes:
+  data:

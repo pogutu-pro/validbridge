@@ -1,0 +1,72 @@
+# ValidBridge Documentation
+
+> Official documentation for ValidBridge, the learning management system (LMS).
+
+ValidBridge is a platform for creating and delivering modern educational content. It features a Notion-like WYSIWYG editor, built-in AI assistants, multi-organizational support, real-time collaboration, progress tracking, and can be self-hosted or used via ValidBridge Cloud.
+
+## Docs
+
+- [Getting Started](https://docs.validbridge.co.ke/getting-started): Set up your first organization and course
+  - [Quickstart](https://docs.validbridge.co.ke/getting-started/quickstart): Get up and running in minutes
+  - [Key Concepts](https://docs.validbridge.co.ke/getting-started/key-concepts): Organizations, courses, chapters, activities, and trails
+  - [Cloud vs Self Hosting](https://docs.validbridge.co.ke/getting-started/cloud-vs-self-hosting): Choose the right deployment model
+
+- [Platform](https://docs.validbridge.co.ke/platform): Complete guide to ValidBridge features
+  - [Courses](https://docs.validbridge.co.ke/platform/courses): Creating and managing courses
+    - [Chapters & Activities](https://docs.validbridge.co.ke/platform/courses/chapters-and-activities): Structuring course content
+    - [Collections](https://docs.validbridge.co.ke/platform/courses/collections): Grouping courses together
+    - [Trails](https://docs.validbridge.co.ke/platform/courses/trails): Student progression tracking
+  - [Editor](https://docs.validbridge.co.ke/platform/editor): Block-based WYSIWYG content editor
+    - [Blocks](https://docs.validbridge.co.ke/platform/editor/blocks): Available editor block types
+  - [AI Features](https://docs.validbridge.co.ke/platform/ai): Built-in AI assistant
+    - [For Students](https://docs.validbridge.co.ke/platform/ai/for-students): AI chat, explanations, quizzes
+    - [For Teachers](https://docs.validbridge.co.ke/platform/ai/for-teachers): AI content generation tools
+  - [Users](https://docs.validbridge.co.ke/platform/users): User management
+    - [Roles & Permissions](https://docs.validbridge.co.ke/platform/users/roles-and-permissions): Admin, teacher, student roles
+    - [Authentication](https://docs.validbridge.co.ke/platform/users/authentication): Login methods and OAuth
+  - [Organizations](https://docs.validbridge.co.ke/platform/organizations): Multi-org management
+    - [Settings](https://docs.validbridge.co.ke/platform/organizations/settings): Organization configuration
+    - [Multi-Tenancy](https://docs.validbridge.co.ke/platform/organizations/multi-tenancy): Running multiple orgs
+  - [Discussions](https://docs.validbridge.co.ke/platform/discussions): Discussion forums
+    - [Comments](https://docs.validbridge.co.ke/platform/discussions/comments): Comment system
+  - [Assignments](https://docs.validbridge.co.ke/platform/assignments): Student assignments
+    - [Grading](https://docs.validbridge.co.ke/platform/assignments/grading): Grading system
+  - [Playgrounds](https://docs.validbridge.co.ke/platform/playgrounds): Interactive code playgrounds
+  - [Boards](https://docs.validbridge.co.ke/platform/boards): Kanban-style boards
+  - [Analytics](https://docs.validbridge.co.ke/platform/analytics): Usage analytics
+  - [Certifications](https://docs.validbridge.co.ke/platform/certifications): Course certifications
+  - [Search](https://docs.validbridge.co.ke/platform/search): Full-text search
+  - [Podcasts](https://docs.validbridge.co.ke/platform/podcasts): Podcast support
+  - [Code Execution](https://docs.validbridge.co.ke/platform/code-execution): Sandboxed code execution
+
+- [Self Hosting](https://docs.validbridge.co.ke/self-hosting): Deploy on your own infrastructure
+  - [Installation](https://docs.validbridge.co.ke/self-hosting/installation): Install with Docker Compose
+    - [Requirements](https://docs.validbridge.co.ke/self-hosting/installation/requirements): System requirements
+    - [Quick Install](https://docs.validbridge.co.ke/self-hosting/installation/quick-install): Step-by-step install guide
+  - [Configuration](https://docs.validbridge.co.ke/self-hosting/configuration): Configure your instance
+    - [Environment Variables](https://docs.validbridge.co.ke/self-hosting/configuration/environment-variables): All env vars
+    - [SSL](https://docs.validbridge.co.ke/self-hosting/configuration/ssl): HTTPS and SSL setup
+    - [AI Setup](https://docs.validbridge.co.ke/self-hosting/configuration/ai-setup): Configure AI providers
+    - [Email](https://docs.validbridge.co.ke/self-hosting/configuration/email): Email delivery setup
+    - [Storage](https://docs.validbridge.co.ke/self-hosting/configuration/storage): S3 and filesystem storage
+  - [Maintenance](https://docs.validbridge.co.ke/self-hosting/maintenance): Keep your instance healthy
+    - [Backups](https://docs.validbridge.co.ke/self-hosting/maintenance/backups): Database backups
+    - [Updates](https://docs.validbridge.co.ke/self-hosting/maintenance/updates): Updating ValidBridge
+    - [Monitoring](https://docs.validbridge.co.ke/self-hosting/maintenance/monitoring): Health checks and monitoring
+    - [Troubleshooting](https://docs.validbridge.co.ke/self-hosting/maintenance/troubleshooting): Common issues
+
+- [Developers](https://docs.validbridge.co.ke/developers): Architecture, API, and contributing
+  - [Architecture](https://docs.validbridge.co.ke/developers/architecture): System architecture
+    - [Backend](https://docs.validbridge.co.ke/developers/architecture/backend): FastAPI backend
+    - [Frontend](https://docs.validbridge.co.ke/developers/architecture/frontend): Next.js frontend
+    - [Services](https://docs.validbridge.co.ke/developers/architecture/services): Supporting services
+  - [API](https://docs.validbridge.co.ke/developers/api): REST API reference
+    - [Authentication](https://docs.validbridge.co.ke/developers/api/authentication): JWT and API tokens
+    - [Endpoints](https://docs.validbridge.co.ke/developers/api/endpoints): API endpoint reference
+  - [Contributing](https://docs.validbridge.co.ke/developers/contributing): How to contribute
+    - [Dev Environment](https://docs.validbridge.co.ke/developers/contributing/dev-environment): Development setup
+    - [Guidelines](https://docs.validbridge.co.ke/developers/contributing/guidelines): Contribution guidelines
+
+## Optional
+
+- [Full documentation content](https://docs.validbridge.co.ke/llms-full.txt): Complete text of all documentation pages

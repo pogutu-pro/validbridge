@@ -1,0 +1,20 @@
+# /etc/wireguard/wg0.conf on Server B (10.66.0.2)  (mode 600, owner root)
+#
+# ValidBridge private link: Server B (10.66.0.2) <-> Server A (10.66.0.1)
+# The private key is NOT in this file: it lives in /etc/wireguard/private.key
+# (mode 600) and is loaded by PostUp, so wg0.conf never contains a secret.
+#
+#   umask 077; wg genkey | sudo tee /etc/wireguard/private.key | wg pubkey | sudo tee /etc/wireguard/public.key
+#   sudo systemctl enable --now wg-quick@wg0
+#
+[Interface]
+Address = 10.66.0.2/24
+ListenPort = 51820
+PostUp = wg set %i private-key /etc/wireguard/private.key
+
+[Peer]
+# Server A (validbridge production)
+PublicKey = <SERVER_A_PUBLIC_KEY>          # contents of /etc/wireguard/public.key on A
+Endpoint = <SERVER_A_PUBLIC_IP>:51820
+AllowedIPs = 10.66.0.1/32
+PersistentKeepalive = 25

@@ -1,0 +1,181 @@
+name: Deploy Production
+
+# Runs ONLY when the CI workflow completes successfully for a push to main, so
+# code that failed any CI check can never reach production. Also allows a
+# manual re-deploy of a specific ref for recovery scenarios.
+#
+# The workflow_run event is generated after the CI workflow finishes; its
+# head_sha is the exact commit CI validated, so the same SHA is deployed.
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: >-
+          Commit SHA (or branch/tag name) to deploy. The commit does not have
+          to be the current main tip, but it should be one that passed CI.
+        default: main
+        required: false
+
+permissions:
+  contents: read
+
+# Only one production deployment at a time. Later runs wait (they are NOT
+# cancelled) so two deploys can never modify production simultaneously.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Oracle VM
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # Deploy only when:
+    #   - triggered from a completed CI run that SUCCEEDED on main, or
+    #   - manually requested via workflow_dispatch.
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (github.event.workflow_run.conclusion == 'success'
+          && github.event.workflow_run.head_branch == 'main')
+
+    steps:
+      - name: Checkout at deploy commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.event.inputs.ref || 'main' }}
+          fetch-depth: 0
+
+      - name: Resolve exact commit to deploy
+        id: resolve
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            SHA="${WORKFLOW_RUN_HEAD_SHA}"
+          else
+            SHA="$(git rev-parse HEAD)"
+          fi
+          if [ -z "$SHA" ] || ! echo "$SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::Could not resolve a full commit SHA to deploy."
+            exit 1
+          fi
+          echo "target-sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Deploying commit: $SHA"
+        env:
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Fail fast if production configuration is missing
+        env:
+          SERVER_HOST: ${{ secrets.ORACLE_VPS_HOST }}
+          SSH_PRIVATE_KEY_PRESENT: ${{ secrets.ORACLE_VPS_SSH_KEY != '' }}
+          GIT_REMOTE_TOKEN_PRESENT: ${{ secrets.ORACLE_VPS_GIT_TOKEN != '' }}
+        run: |
+          if [ -z "$SERVER_HOST" ]; then
+            echo "::error::secrets.ORACLE_VPS_HOST is not set. Configure it (see DEPLOYMENT.md)."
+            exit 1
+          fi
+          if [ "$SSH_PRIVATE_KEY_PRESENT" = "false" ]; then
+            echo "::error::secrets.ORACLE_VPS_SSH_KEY is not set. Configure the deploy SSH key (see DEPLOYMENT.md)."
+            exit 1
+          fi
+          if [ "$GIT_REMOTE_TOKEN_PRESENT" = "false" ]; then
+            echo "::error::secrets.ORACLE_VPS_GIT_TOKEN is not set. The repository is private, so the server needs a read-only PAT to fetch it (see DEPLOYMENT.md)."
+            exit 1
+          fi
+
+      - name: Install deploy SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ORACLE_VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          # LibreSSL/OpenSSL PEM parsing chokes on CRLF line endings and on a
+          # leading blank line, both typical when a key is copied from Windows
+          # or from a rich-text view. Normalise before writing.
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+
+      - name: Validate deploy key
+        run: |
+          if ! ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null 2>&1; then
+            echo "::error::ORACLE_VPS_SSH_KEY does not parse as a private key (OpenSSH: error in libcrypto)."
+            echo "::error::It is usually an encrypted key (needs a passphrase) or pasted with wrong formatting/line endings."
+            echo "::error::Fix: generate a keypair with: ssh-keygen -t ed25519 -N '' -f /tmp/id_deploy"
+            echo "::error::Then store the WHOLE 'cat /tmp/id_deploy' output (LF endings, no extra text) as the ORACLE_VPS_SSH_KEY secret."
+            echo "::error::And add /tmp/id_deploy.pub to ~/.ssh/authorized_keys on the server."
+            exit 1
+          fi
+          echo "Deploy key parses and is unencrypted."
+
+      - name: Pin server host key
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SERVER_HOST: ${{ secrets.ORACLE_VPS_HOST }}
+          SERVER_PORT: ${{ vars.ORACLE_VPS_PORT || '22' }}
+        run: |
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$SERVER_PORT" -H "$SERVER_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy (scripts/deploy.sh)
+        id: deploy
+        env:
+          SERVER_HOST: ${{ secrets.ORACLE_VPS_HOST }}
+          SERVER_USER: ${{ secrets.ORACLE_VPS_USER || 'ubuntu' }}
+          SERVER_PORT: ${{ vars.ORACLE_VPS_PORT || '22' }}
+          SERVER_WORKDIR: ${{ secrets.SERVER_WORKDIR }}
+          GIT_REMOTE_URL: ${{ vars.GIT_REMOTE_URL || 'https://github.com/pogutu-pro/validbridge.git' }}
+          GIT_REMOTE_TOKEN: ${{ secrets.ORACLE_VPS_GIT_TOKEN }}
+          DEPLOY_MAINTENANCE_DIR: validbridge-deployments
+          TARGET_SHA: ${{ steps.resolve.outputs.target-sha }}
+        run: |
+          set -euo pipefail
+          home="${HOME}"
+          key="${home}/.ssh/id_deploy"
+
+          echo "::group::Copy deploy script to server"
+          scp -i "$key" \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=20 \
+            -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa \
+            -P "$SERVER_PORT" \
+            scripts/deploy.sh \
+            "${SERVER_USER}@${SERVER_HOST}:/tmp/validbridge-deploy.sh"
+          echo "::endgroup::"
+
+          echo "::group::Remote deploy run"
+          ssh -i "$key" \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            -o ConnectTimeout=20 \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=90 \
+            -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa \
+            -p "$SERVER_PORT" \
+            "${SERVER_USER}@${SERVER_HOST}" \
+            "env SERVER_WORKDIR='${SERVER_WORKDIR}' GIT_REMOTE_URL='${GIT_REMOTE_URL}' GIT_REMOTE_TOKEN='${GIT_REMOTE_TOKEN:-}' DEPLOY_MAINTENANCE_DIR='${DEPLOY_MAINTENANCE_DIR}' bash /tmp/validbridge-deploy.sh '${TARGET_SHA}'"
+          echo "::endgroup::"
+
+      - name: Report deployment to GitHub
+        if: always() && steps.deploy.outcome != 'skipped'
+        run: |
+          {
+            echo "## Deployment — commit \`${{ steps.resolve.outputs.target-sha }}\`"
+            echo ""
+            echo "| Key | Value |"
+            echo "|---|---|"
+            echo "| Commit | \`${{ steps.resolve.outputs.target-sha }}\` |"
+            echo "| Server | \`${{ secrets.ORACLE_VPS_HOST }}\` |"
+            echo "| Target | \`${{ secrets.ORACLE_VPS_USER || 'ubuntu' }}@${{ secrets.ORACLE_VPS_HOST }}\` |"
+            echo "| Result | ${{ steps.deploy.outcome }} |"
+            echo ""
+            echo "Deployed by: ${{ github.triggering_actor }} — see DEPLOYMENT.md for details."
+          } >> "$GITHUB_STEP_SUMMARY"

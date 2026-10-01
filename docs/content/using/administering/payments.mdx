@@ -1,0 +1,66 @@
+import { Callout } from 'nextra/components'
+
+# Payments & Monetization
+
+ValidBridge can sell access to your courses through **Paystack**, using your organization's **own Paystack account** (bring your own keys). Learners pay on Paystack's secure checkout and the money settles directly into your Paystack account.
+
+Everything lives in the dashboard under **Payments**, which has four tabs: **Overview**, **Offers**, **Payment Groups** and **Configuration**.
+
+## The model in one paragraph
+
+You connect Paystack, create an **offer** that unlocks one or more courses, and set a price. When someone buys, Paystack confirms the payment to ValidBridge, the buyer appears in **Overview** as a customer, and the courses unlock straight away. That is the whole loop.
+
+## Configuration — connect Paystack
+
+1. In the Paystack Dashboard, open **Settings → API Keys & Webhooks** and copy your **secret key** (and, optionally, your public key).
+2. Open **Payments → Configuration**, click **Connect** on the Paystack card, paste the keys and click **Save & Activate**.
+3. Back in Paystack, set the **Webhook URL** to your ValidBridge API address followed by `/api/v1/payments/paystack/webhook` (the path is shown on the Configuration page).
+
+<Callout type="warning">
+Do not skip the webhook. ValidBridge unlocks a course when Paystack reports the payment; without the webhook, learners are charged but stay locked out.
+</Callout>
+
+Use your `sk_test_` key and Paystack's test cards to try the full flow first, then **Update keys** with your live key. **Remove** disconnects Paystack and switches payments off.
+
+## Offers
+
+An **offer** is something learners can buy. To create one:
+
+1. Open **Payments → Offers** and create a new offer.
+2. Give it a name, description and optional benefits.
+3. Choose **one-time** or **subscription** (monthly or yearly).
+4. Choose a **fixed price** or **customer's choice** (pay what you want, with a minimum).
+5. Set the amount and currency (KES by default — use a currency your Paystack account supports).
+6. Under **Access**, add courses directly and/or link a payment group.
+
+Subscription offers automatically create the matching plan in your Paystack account, so connect Paystack first.
+
+<Callout type="tip">
+Name offers by outcome, not by content — "Data Analytics Certificate Programme" sells better than "Courses 1, 2 and 3".
+</Callout>
+
+## Payment groups (bundles)
+
+A **payment group** is a bundle of courses. Link offers to it and buyers get every course in the group — including courses you add later. Click **Sync** on a group to mirror it into a [user group](/using/administering/users-and-roles): buyers become members while their purchase is active and are removed if it is cancelled or refunded.
+
+## Overview — your customers
+
+**Overview** lists everyone who has bought from you: the offer, type, amount, status and date. Statuses are *pending*, *completed*, *active*, *cancelled*, *failed* and *refunded*.
+
+## Checkout for learners
+
+A learner clicks **Get access** (one-time) or **Subscribe** on the course or offer page and pays on Paystack. They find their purchases under **Account → Purchases** and subscriptions and payment history under **Account → Billing**, where they can cancel (access ends immediately).
+
+If a learner says they paid but cannot get in, check **Overview**: a *pending* status almost always means the webhook is not reaching ValidBridge, or the test/live key mode does not match.
+
+## Refunds and payouts
+
+- **Refunds** are issued in the Paystack Dashboard; ValidBridge then marks the purchase *refunded* and removes access.
+- **Payouts** go from Paystack to the bank or mobile-money account in your Paystack settings. ValidBridge does not hold or take a cut of these payments.
+
+## Good practice
+
+- Connect Paystack and set up the webhook before you advertise anything.
+- Test the full purchase flow in Paystack test mode.
+- Keep offer descriptions accurate — a mismatch leads to disputes.
+- Review **Overview** after a launch to catch anyone stuck at *pending*.

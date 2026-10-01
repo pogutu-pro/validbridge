@@ -1,0 +1,126 @@
+site_name: ValidBridge
+site_description: ValidBridge is a platform tailored for learning experiences.
+contact_email: hello@validbridge.co.ke
+
+# This config is optimized for local development. You can change the values according to your needs.
+
+general:
+  # SECURITY: default to production-safe; enable with VALIDBRIDGE_DEVELOPMENT_MODE=true for local dev.
+  development_mode: false
+
+security:
+  # SECURITY: Set via VALIDBRIDGE_AUTH_JWT_SECRET_KEY env var (required, min 32 chars).
+  # Generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
+  auth_jwt_secret_key: ""
+
+hosting_config:
+  # tenancy: "single" (default) serves the default org on any host (localhost
+  # or self-hosted VPS). "multi" enables slug.{domain} subdomain detection and
+  # requires the EE folder. Override with VALIDBRIDGE_TENANCY.
+  tenancy: single
+  domain: localhost:3000
+  frontend_domain: localhost:3000
+  ssl: false
+  port: 1338
+  allowed_origins:
+    - http://localhost:3000
+    - http://localhost:3001
+  cookies_config:
+    domain: ".localhost"
+  # This one value is read by three consumers: CORS (core/middleware/cors.py),
+  # CSRF (security/csrf.py) and the base URL of emailed login / verification
+  # links (services/email/utils.py). The default below is a catch-all, which
+  # means CORS and CSRF are effectively open unless you scope it — set
+  # VALIDBRIDGE_ALLOWED_REGEXP to your own domain in any real deployment, e.g.
+  # '^https://(?:[a-z0-9-]+\.)*example\.com$'.
+  #
+  # Narrowing this default is deliberately NOT done here: it would CORS-block
+  # and CSRF-403 every deployment that relies on it. Email links do not depend
+  # on it being scoped — services/email/utils.py ignores a catch-all pattern
+  # and validates the Origin against the configured domain, its subdomains and
+  # the verified custom domains instead.
+  allowed_regexp: '\b((?:https?://)[^\s/$.?#].[^\s]*)\b'
+  content_delivery:
+    type: "filesystem" # "filesystem" or "s3api"
+    s3api:
+      bucket_name: ""
+      endpoint_url: ""
+
+mailing_config:
+  email_provider: "resend" # "resend" or "smtp"
+  system_email_address: ""
+  resend_api_key: ""
+  smtp_host: ""
+  smtp_port: 587
+  smtp_username: ""
+  smtp_password: ""
+  smtp_use_tls: true
+
+database_config:
+  sql_connection_string: postgresql://validbridge:validbridge@localhost:5432/validbridge
+
+redis_config:
+  redis_connection_string: redis://localhost:6379/validbridge
+
+payments_config:
+  # Payment provider configuration. Organizations bring their own Paystack
+  # merchant account (per-org credentials are stored on the org's
+  # PaymentsConfig row, not here). These are the PLATFORM-LEVEL fallbacks used
+  # only when an org's own config has no credentials configured.
+  paystack:
+    secret_key: ""       # sk_live_... / sk_test_...  (VALIDBRIDGE_PAYSTACK_SECRET_KEY)
+    public_key: ""       # pk_live_... / pk_test_...  (VALIDBRIDGE_PAYSTACK_PUBLIC_KEY)
+
+sso:
+  # Single sign-on (SSO) provider credentials. SECRETS LIVE HERE ONLY — the
+  # per-org SSOConfig row stores only non-secret values (public endpoints,
+  # issuer, display overrides). A provider is "available" only when its
+  # required values below are non-empty.
+  enabled: true          # VALIDBRIDGE_SSO_ENABLED
+  workos:
+    client_id: ""        # VALIDBRIDGE_WORKOS_CLIENT_ID
+    client_secret: ""    # VALIDBRIDGE_WORKOS_CLIENT_SECRET
+    redirect_uri: ""     # VALIDBRIDGE_WORKOS_REDIRECT_URI
+  oidc:
+    client_id: ""        # VALIDBRIDGE_OIDC_CLIENT_ID
+    client_secret: ""    # VALIDBRIDGE_OIDC_CLIENT_SECRET
+    issuer: ""           # discovery base URL (https only) — VALIDBRIDGE_OIDC_ISSUER
+    authorization_endpoint: ""  # VALIDBRIDGE_OIDC_AUTHORIZATION_ENDPOINT
+    token_endpoint: ""          # VALIDBRIDGE_OIDC_TOKEN_ENDPOINT
+    userinfo_endpoint: ""       # VALIDBRIDGE_OIDC_USERINFO_ENDPOINT
+    redirect_uri: ""            # VALIDBRIDGE_OIDC_REDIRECT_URI
+
+ai_config:
+  is_ai_enabled: false
+  # Provider-agnostic generation (Pydantic AI). Set provider + api_key to use any
+  # supported provider: google | openai | anthropic | deepseek | moonshot | mistral | openrouter | bedrock | ollama.
+  # base_url is optional (OpenAI-compatible / local endpoints, e.g. Ollama).
+  # For "openrouter": leave base_url blank (auto-set) and use OpenRouter model slugs like
+  # "anthropic/claude-sonnet-4-5" or "openai/gpt-4o-mini" in the model_* fields below.
+  # For "bedrock": use standard AWS credentials (env/role/profile) + AWS_REGION; api_key optional.
+  provider: "google"
+  api_key: ""
+  base_url: ""
+  # Three model tiers. Leave blank to use the built-in Gemini 3 defaults.
+  model_fast: ""        # titles, follow-ups, migration                 (default: gemini-3.1-flash-lite)
+  model_standard: ""    # chat, RAG, course planning / blocks (std plan) (default: gemini-3.5-flash)
+  model_pro: ""         # course planning / blocks (Pro+ plan)          (default: gemini-3.1-pro-preview)
+  # RAG embeddings follow the chosen provider (Google / OpenAI family incl. Ollama). Override
+  # any of these; embedding_dimensions defaults to 768 to match the pgvector column (changing
+  # it requires a DB migration + re-index). Providers without embeddings (Anthropic, DeepSeek, Moonshot,
+  # Mistral, OpenRouter, Bedrock) fall back to Google when gemini_api_key is set.
+  embedding_provider: ""    # default: same as `provider`
+  embedding_model: ""       # default per provider (e.g. gemini-embedding-001, text-embedding-3-small)
+  embedding_dimensions: ""  # default: 768
+  # Google/Gemini key. Also the embeddings fallback for providers that lack an embeddings API.
+  gemini_api_key: ""
+  # Media generation (Google-only, uses the Google GenAI SDK regardless of `provider`,
+  # resolving its key from `api_key` when provider=google, else `gemini_api_key`).
+  image_model: ""       # AI image generation           (default: gemini-2.5-flash-image)
+  tts_model: ""         # AI audio / podcast generation  (default: gemini-2.5-flash-preview-tts)
+
+tinybird_config:
+  # Set api_url to enable analytics automatically
+  api_url: ""
+  ingest_token: ""
+  read_token: ""

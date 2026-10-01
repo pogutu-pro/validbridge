@@ -1,0 +1,284 @@
+name: CI
+
+# Validation gate for the whole platform. Every job in this workflow must pass
+# before a push to main is allowed to trigger production deployment (see
+# deploy-production.yml, which consumes this workflow's completion event).
+#
+# Design notes:
+# - No path filters: every push to main is validated in full so the deploy
+#   gate is unconditional. The reliability guarantee ("never deploy code that
+#   failed CI") is worth the extra minutes on documentation-only PRs.
+# - The ruff version is pinned to 0.15.9 on purpose. The project's lint
+#   configuration lives at the top level of `[tool.ruff]` in
+#   apps/api/pyproject.toml, which newer ruff majors no longer honour — an
+#   unpinned run floods the tree with thousands of unrelated findings.
+# - The web ESLint gate is report-only for the whole project (existing lint
+#   debt) and strict for files changed in a PR, so new debt is blocked while
+#   the legacy backlog is worked through.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+# One live run per PR (new commits cancel the in-flight one); push runs on main
+# always complete — their result is the one the deploy gate waits on.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # ── Lockfiles ────────────────────────────────────────────────────────────
+  # Manifests are the source of truth; frozen installs (Docker builds, CI)
+  # fail if the lockfiles drift. scripts/lockfiles.sh knows every workspace.
+  lockfiles:
+    name: Lockfiles in sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          version: latest
+          enable-cache: true
+          cache-dependency-glob: "apps/api/uv.lock"
+      - name: Cache bun install cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: bun-lockfiles-${{ runner.os }}-${{ hashFiles('**/bun.lock') }}
+          restore-keys: bun-lockfiles-${{ runner.os }}-
+      - name: Check lockfiles
+        run: scripts/lockfiles.sh --check
+
+  # ── API lint (ruff) ──────────────────────────────────────────────────────
+  api-lint:
+    name: API lint (ruff)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          version: latest
+          enable-cache: true
+          cache-dependency-glob: "apps/api/uv.lock"
+      - name: Ruff check (pinned 0.15.9)
+        run: uvx ruff@0.15.9 check .
+        working-directory: apps/api
+
+  # ── API tests ────────────────────────────────────────────────────────────
+  api-tests:
+    name: API tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # A handful of router tests (SSO callback) validate one-time OAuth state in
+    # Redis against the localhost connection string the app uses under TESTING.
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          version: latest
+          enable-cache: true
+          cache-dependency-glob: "apps/api/uv.lock"
+      - name: Install ffmpeg
+        # Required by the video faststart / HLS transcode tests (they skip
+        # without it, which would silently leave that code uncovered).
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Install dependencies
+        run: uv sync
+        working-directory: apps/api
+      - name: Run tests with coverage
+        run: uv run pytest src/tests/ -v --tb=short --cov=src --cov-report=html --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=25
+        working-directory: apps/api
+        env:
+          TESTING: "true"
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: api-coverage-report
+          path: apps/api/htmlcov/
+          retention-days: 30
+
+  # ── Web lint ─────────────────────────────────────────────────────────────
+  web-lint:
+    name: Web lint (ESLint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - name: Cache bun install cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: bun-web-${{ runner.os }}-${{ hashFiles('apps/web/bun.lock') }}
+          restore-keys: bun-web-${{ runner.os }}-
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        working-directory: ./apps/web
+      # Full-project lint stays report-only while the existing lint backlog is
+      # being worked off. It must still *run*, so a broken ESLint setup fails
+      # here instead of being masked by the package.json `|| true`.
+      - name: Lint (full project, report-only)
+        run: |
+          bunx eslint . || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" -eq 2 ]; then
+            echo "ESLint crashed (exit 2) — failing the workflow."
+            exit 2
+          fi
+          echo "ESLint ran to completion (exit ${EXIT_CODE:-0}); lint debt is reported above but not enforced yet."
+        working-directory: ./apps/web
+      # Strict gate: files changed in a PR must be lint-clean.
+      - name: Strict lint on changed files (PRs)
+        if: github.event_name == 'pull_request'
+        working-directory: ./apps/web
+        run: |
+          CHANGED=$(git diff --name-only --diff-filter=ACMR "origin/${GITHUB_BASE_REF}...HEAD" -- \
+            '**/*.ts' '**/*.tsx' '**/*.js' '**/*.jsx' '**/*.mjs' \
+            | sed 's|^apps/web/||')
+          if [ -z "$CHANGED" ]; then
+            echo "No changed lintable files under apps/web."
+            exit 0
+          fi
+          echo "Strict-linting changed files:"
+          echo "$CHANGED"
+          echo "$CHANGED" | xargs bun run lint:strict --no-error-on-unmatched-pattern
+
+  # ── Web typecheck ────────────────────────────────────────────────────────
+  # next build type-checks as a side effect, but only inside a cached Docker
+  # layer; a compiler/tsconfig upgrade can sit broken for months and be noticed
+  # only when something invalidates that cache. Run the same checks fresh.
+  web-typecheck:
+    name: Web typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - name: Cache bun install cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: bun-web-${{ runner.os }}-${{ hashFiles('apps/web/bun.lock') }}
+          restore-keys: bun-web-${{ runner.os }}-
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        working-directory: ./apps/web
+      # tsconfig includes next-env.d.ts and .next/types, both generated.
+      - name: Generate Next.js route types
+        run: bunx next typegen
+        working-directory: ./apps/web
+      - name: Type check
+        run: bunx tsc --noEmit
+        working-directory: ./apps/web
+
+  # ── Web unit tests ───────────────────────────────────────────────────────
+  web-tests:
+    name: Web tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - name: Cache bun install cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.bun/install/cache
+          key: bun-web-${{ runner.os }}-${{ hashFiles('apps/web/bun.lock') }}
+          restore-keys: bun-web-${{ runner.os }}-
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        working-directory: ./apps/web
+      # --isolate: run each test file in its own process so module mocks (bun
+      # mock.module, process-global in a shared process) can never cross files.
+      - name: Run tests
+        run: bun test --isolate tests
+        working-directory: ./apps/web
+
+  # ── Docker configuration + image build validation ─────────────────────────
+  # Validates that the exact production build works (same Dockerfiles the VM
+  # builds). Images are built, never pushed — publishing stays with deployment.
+  # The collab service is built for parity even though it is not part of the
+  # current docker-compose.yml (it ships in the per-service image set).
+  docker-validation:
+    name: Docker validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      # docker-compose.yml declares `env_file: .env`; CI has none, so create an
+      # empty one. Every ${VAR} in compose has a default, so an empty file is
+      # enough for `docker compose config` (and the Dockerfiles never COPY .env).
+      - name: Prepare minimal .env for compose validation
+        run: touch .env
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Validate docker compose configuration
+        run: docker compose config --quiet
+
+      - name: Build backend image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./apps/api
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha,scope=service-api
+          cache-to: type=gha,mode=max,scope=service-api
+
+      - name: Build web image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./apps/web
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha,scope=service-web
+          cache-to: type=gha,mode=max,scope=service-web
+
+      - name: Build collab image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./apps/collab
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha,scope=service-collab
+          cache-to: type=gha,mode=max,scope=service-collab
+
+  # ── Security / dependency review (PRs only) ───────────────────────────────
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high

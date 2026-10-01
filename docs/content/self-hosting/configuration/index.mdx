@@ -1,0 +1,38 @@
+import { Callout } from 'nextra/components'
+
+# Configuration Overview
+
+ValidBridge uses environment variables as its primary configuration method. Copy `.env.example` to `.env` and edit it with all the necessary variables for your environment.
+
+## Configuration Methods
+
+ValidBridge supports two configuration methods:
+
+1. **Environment variables** (via `.env` file) -- the primary and recommended method
+2. **Configuration file** (`config.yaml`) -- an alternative for advanced users
+
+<Callout type="info">
+If both are present, environment variables always take precedence over values defined in `config.yaml`.
+</Callout>
+
+## Editing Configuration
+
+You can modify your configuration at any time using the CLI:
+
+```bash
+validbridge config --edit
+```
+
+Alternatively, edit the `.env` file directly and restart services:
+
+```bash
+validbridge restart
+```
+
+## Configuration Sections
+
+- [Environment Variables](/self-hosting/configuration/environment-variables) -- Complete reference of all available environment variables.
+- [AI Setup](/self-hosting/configuration/ai-setup) -- Enable and configure AI-powered features.
+- [Email](/self-hosting/configuration/email) -- Set up email delivery for invitations, password resets, and notifications.
+- [Content Storage](/self-hosting/configuration/storage) -- Configure filesystem or S3-compatible storage for uploaded content.
+- [SSL and Domain](/self-hosting/configuration/ssl) -- Set up your domain name and SSL certificates.

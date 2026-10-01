@@ -1,0 +1,57 @@
+import { Callout } from 'nextra/components'
+
+# Developer & Platform Tools
+
+The **Developers** area gathers the tools for integrating ValidBridge with other systems and customising how it is reached. Each has its own tab, and some require specific plans.
+
+| Tab | Plan | Purpose |
+| --- | --- | --- |
+| **API Access** | Pro | Programmatic access to the platform. |
+| **Automations** | Pro | Trigger actions automatically on events. |
+| **Domains** | Pro | Serve the organization on your own domain. |
+| **SEO** | Standard | Control how pages appear to search engines. |
+| **SSO** | Enterprise | Single sign-on with your identity provider. |
+
+## API Access
+
+The **API Access** tab issues API keys and shows how to authenticate. Use the API to:
+
+- Create and update courses, chapters and activities.
+- Manage users and enrolments.
+- Pull analytics into your own dashboards.
+
+Treat an API key as a password. Store it in a secret manager, never in client-side code or a public repository, and rotate it if it may have leaked. Revoke keys you no longer use.
+
+<Callout type="warning">
+An API key carries the permissions of the account it belongs to. Grant the smallest scope that does the job, and use a dedicated account for integrations rather than a person's own login.
+</Callout>
+
+## Automations
+
+**Automations** run an action when something happens — for example, enrol a user in a course when they join a group, or send a notification when someone completes a course. Each automation is a **trigger** plus an **action**.
+
+1. Open **Developers → Automations**.
+2. Choose a trigger event.
+3. Choose the action to run.
+4. Save and enable it.
+
+Check the automation's history if it does not seem to fire — most problems are a trigger condition that was never actually met.
+
+## Domains
+
+**Domains** lets your organization answer on its own web address instead of the shared ValidBridge one. You add the domain, then set the DNS records shown in the dashboard at your domain registrar. Once DNS has propagated, the organization is reachable on your custom domain.
+
+Custom domains are often the difference between "a course platform" and "our learning site".
+
+## SEO
+
+The **SEO** tab controls the default search-engine metadata for your organization's pages: title patterns, description and sharing images. Course-level SEO can be set per course on its own **SEO** tab. Good SEO metadata makes shared links look professional and helps people find you.
+
+## SSO
+
+**Single sign-on** lets your users sign in with your existing identity provider (for example a corporate account) instead of a separate ValidBridge password. It is an enterprise feature and needs configuration on both sides — your IT team and the SSO settings here. For the sign-in options available to everyone, see [Analytics, Audit & Security](/using/administering/analytics).
+
+## Related
+
+- [Organization Settings](/using/administering/organization-settings)
+- [Payments & Monetization](/using/administering/payments)

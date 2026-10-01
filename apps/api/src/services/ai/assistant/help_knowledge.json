@@ -1,0 +1,1198 @@
+[
+  {
+    "id": "getting-started/welcome",
+    "title": "Welcome to ValidBridge",
+    "summary": "ValidBridge is a learning platform for building, teaching and selling courses — including live classes. Start here for the key ideas.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "introduction",
+      "overview",
+      "what is",
+      "basics",
+      "stratnovo"
+    ],
+    "text": "ValidBridge is a cloud learning platform for building courses, teaching them — on demand or live — and selling them. It is built and operated by Stratnovo Systems. Everything you create lives inside an organization: a workspace with its own courses, people, branding and settings. You may belong to one organization or several.\nFour ideas you will see everywhere\nCourse — a program of study. Each course is made of chapters.\nChapter — a module or unit inside a course, containing activities.\nActivity — a single piece of learning — a rich page, a video, a document, an assignment, or the recording of a live lesson.\nTrail — your personal progress record across every course you have started.\nWhere to go next\nIf you want to…Start with\nLearn — take courses and join live classesFinding & enrolling in courses\nTeach — build a courseCreating a course\nTeach live — run a class in LiveBridgeLiveBridge live classes\nSell coursesHow payments work\nRun the organizationOrganization settings\n\nHelp is always one click away\nOpen this Help Center from Help in the top bar or the dashboard sidebar. Use the search box at the top of any help page to jump straight to an answer."
+  },
+  {
+    "id": "getting-started/accounts-and-roles",
+    "title": "Accounts, roles & permissions",
+    "summary": "How you sign in, the four default roles (User, Instructor, Maintainer, Admin) and what each one can do.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "role",
+      "permission",
+      "access",
+      "learner",
+      "instructor",
+      "admin",
+      "maintainer",
+      "student",
+      "lecturer"
+    ],
+    "text": "You sign in with your email and password, or with another method your organization has enabled (Google, an emailed sign-in link, or single sign-on). Once you are signed in, what you can see and do is decided by your role.\nThe four default roles\nRoleBest forCan do\nUserLearnersBrowse and enrol in courses, join live lessons, complete activities and assignments, view their Trail and certificates, and chat with the AI Copilot.\nInstructorTeachersEverything a User can do, plus create and edit their own courses, run live lessons, grade assignments, and use the AI authoring tools.\nMaintainerTeam leadsManage courses, collections and published content, manage users, and moderate communities and boards.\nAdminOwnersFull control of the organization: users and roles, branding, AI, payments, developer settings and every feature.\n\nA role is a bundle of per-resource permissions. Admins can create custom roles, so a title like “Instructor” may be set up differently in your organization. In a live classroom, instructors appear as Lecturer and learners as Student.\nFinding your role\nOpen your account menu (your avatar) and choose Account settings.\nIf you think you are missing access, ask an admin — they can change your role under Users in the dashboard.\nNo Dashboard link?\nThe dashboard is gated by a dashboard access permission. If you do not see a Dashboard link, your role does not include it.\n\nAdmins: roles & custom permissions"
+  },
+  {
+    "id": "getting-started/finding-your-way",
+    "title": "Finding your way around",
+    "summary": "The learning area, the dashboard, the command palette (Ctrl/⌘ + K) and the onboarding checklist.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "navigation",
+      "sidebar",
+      "menu",
+      "dashboard",
+      "command palette",
+      "shortcut",
+      "ctrl k"
+    ],
+    "text": "ValidBridge has two areas: the learning area that everyone uses, and the dashboard where instructors, maintainers and admins build and manage.\nThe learning area\nLeft sidebar — your main destinations: courses, your learning (Trail), live lessons, and any links your organization has added. The logo returns to the organization home.\nTop bar — search, help, notifications and your profile. On phones the sidebar folds into a menu.\nThe dashboard\nOpen it from the Dashboard link (if your role allows it). Its sidebar groups everything by purpose:\nGroupWhat lives there\nLearningCourses (including each course’s LiveBridge tab) and assignments\nContentLibrary, communities, podcasts, boards, playgrounds\nPeopleUsers, user groups, roles, signups, sign-in methods, two-factor policy, audit logs\nMonetizationPayments — overview, offers, payment groups, configuration\nAdministrationOrganization settings and developer tools\nInsightsAnalytics\n\nThe command palette\nPress Ctrl K (⌘ K on a Mac) to jump to any page, course, assignment or setting by typing its name.\nOpen the palette with Ctrl/⌘ + K.\nType a few letters — results are grouped by type.\nUse the arrow keys and Enter to open a result, or Esc to close.\nOnboarding checklist\nNew organizations see a short setup checklist in the dashboard (create a course, invite people, brand the workspace…). It disappears once you finish or dismiss it."
+  },
+  {
+    "id": "getting-started/search-learner",
+    "title": "Searching your organization",
+    "summary": "Find courses, collections and people across your organization.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "find",
+      "lookup",
+      "search bar"
+    ],
+    "text": "Search finds courses, collections and people in your organization. It only ever shows your own organization's content.\nClick the search box in the top bar, or open search.\nType a few words from the title or description.\nResults are grouped by type; open one to go straight to it.\nLooking for help instead?\nTo search these help articles, use the search box at the top of the Help Center."
+  },
+  {
+    "id": "courses/create-course",
+    "title": "Create a course",
+    "summary": "Create a course from the dashboard, add chapters and activities, and publish it when it is ready.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "new course",
+      "build",
+      "author",
+      "contributors",
+      "migrate",
+      "import"
+    ],
+    "text": "Open the dashboard and go to Courses.\nClick New Course. Give it a name, and optionally a description, thumbnail and tags.\nThe course opens on its General tab. Use Content Structure to add chapters and activities.\nWhen it is ready, publish it from Access & Pricing so learners can see it, and optionally set up SEO and certificates.\nNothing is public by accident\nA new course is a draft. Only you and its contributors can see it until you publish it.\n\nWorking with others\nAdd co-authors from the Contributors tab. The editor is real-time, so you can work on the same page at once. To bring in material from another platform, use Course Migration under Courses in the dashboard.\nWant to teach it live as well? See Schedule a live lesson."
+  },
+  {
+    "id": "courses/course-settings",
+    "title": "Course settings tabs",
+    "summary": "What each tab of a course controls: general details, structure, access and pricing, contributors, SEO, certificates, LiveBridge and analytics.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "settings",
+      "tabs",
+      "access",
+      "publish",
+      "private",
+      "draft",
+      "seo",
+      "certificate"
+    ],
+    "text": "TabWhat it controls\nGeneralName, description, thumbnail, tags and other basics.\nContent StructureChapters and their activities — where you build the course.\nAccess & PricingWhether the course is published, and who can open it (everyone, or specific user groups).\nContributorsOther people who can edit the course.\nSEOTitle, description and social preview for search engines and shared links.\nCertificatesWhether completing the course issues a certificate, and its design.\nLiveBridgeLive lessons for this course, their recordings and attendance reports.\nAnalyticsEngagement and completion data for this course.\n\nVisibility\nPublic — listed in the catalogue for everyone in the organization.\nRestricted to user groups — visible only to members of chosen groups — for cohorts, internal training or paid bundles.\nDraft — not listed; only authors can open it.\nTo charge for a course, create an offer for it — see Create an offer.\nMissing a tab?\nTabs only appear if your role has the matching permission. Ask the course owner or an admin."
+  },
+  {
+    "id": "courses/chapters-and-activities",
+    "title": "Chapters & activities",
+    "summary": "Structure a course into chapters, add activities of different types, and reorder them by dragging.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "chapter",
+      "module",
+      "activity",
+      "lesson",
+      "reorder",
+      "drag",
+      "scorm",
+      "pdf"
+    ],
+    "text": "Courses are organized as course → chapters → activities.\nOpen the course's Content Structure tab.\nClick Add chapter, name it and add an optional description.\nInside a chapter, click Add activity and choose its type.\nDrag chapters and activities by their handles to reorder them.\nClick an activity to open it and add content.\nChoosing an activity type\nDynamic page — written, interactive content built in the block editor.\nVideo — upload a file or embed from YouTube.\nDocument — a PDF in the built-in viewer.\nAssignment — gradable work. See Create and grade assignments.\nSCORM — an uploaded SCORM package, where enabled for your organization.\nLive lesson recordings land here too\nRecordings of LiveBridge lessons are added to the course as video activities automatically."
+  },
+  {
+    "id": "courses/editor",
+    "title": "The content editor",
+    "summary": "Build pages from blocks: type “/” to insert text, media, quizzes, code playgrounds, callouts and more.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "editor",
+      "block",
+      "slash command",
+      "format",
+      "collaboration",
+      "real-time",
+      "notion"
+    ],
+    "text": "Dynamic pages are written in a block editor: each piece of content is a block you can move, duplicate or delete.\nInsert a block\nClick an empty line, or press Enter for a new one.\nType / to open the block menu.\nKeep typing to filter, then choose a block and press Enter.\nBlock families\nText — paragraph, headings, bulleted and numbered lists, code block.\nMedia — image, video, audio, PDF, web embed, link preview.\nInteractive — quiz, code playground, magic (AI) block, math equation, flip card, scenarios, H5P.\nLayout — info and warning callouts, badge, table, divider.\nArrange and format\nHover a block to reveal its handle; drag the handle to move it.\nThe block menu offers duplicate, delete and block-specific options.\nSelect text for bold, italic, links and inline code.\nWrite together in real time\nWhen co-authors open the same page you see each other's cursors, and changes merge automatically.\nThe editor also has an AI panel for drafting and improving content — see AI tools for teaching.\nWait for the save indicator\nContent saves as you edit. Wait for the save indicator before closing the tab."
+  },
+  {
+    "id": "courses/video-and-captions",
+    "title": "Video & AI captions",
+    "summary": "Upload or embed video, and generate captions — and translations — for hosted videos with AI.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "video",
+      "captions",
+      "subtitles",
+      "transcription",
+      "translate",
+      "accessibility",
+      "youtube"
+    ],
+    "text": "Video activities host a file you upload or embed a YouTube video. For hosted videos, ValidBridge can generate captions with AI and translate them.\nIn the new-video dialog, or when editing a hosted video, find AI Closed Captions.\nTurn on Generate with AI.\nPick the spoken language, or leave it on Auto-detect.\nChoose the caption languages (including custom codes such as sw for Swahili).\nClick Generate captions. Each language moves through queued → processing → ready, then appears in the player's CC menu.\nGeneration runs in the background, and long videos work just like short ones.\nUses AI credits\nCost scales with video length and number of languages. If AI is off or credits have run out, you are told before anything is charged.\n\nReview important captions\nAI transcription can get names and technical terms wrong."
+  },
+  {
+    "id": "courses/course-player",
+    "title": "Working through a course",
+    "summary": "The activity view, marking activities complete, resuming where you left off, and leaving a course.",
+    "audience": [
+      "learners"
+    ],
+    "keywords": [
+      "learn",
+      "progress",
+      "complete",
+      "next",
+      "resume",
+      "continue",
+      "quit"
+    ],
+    "text": "A course shows its chapters and activities alongside the activity you are on. Follow the order or jump around.\nChapter list — completed activities are marked so you can see what is left.\nContent area — the page, video, PDF or assignment itself.\nNext / Previous — move through the course in order.\nAsk AI — opens the Copilot with this activity in context (see Ask AI).\nLive lessons — upcoming and live classes for this course, and recordings of past ones.\nCompleting activities\nMost activities complete when you finish them and use the completion control. Assignments complete when you submit them. A course is complete when every required activity is done.\nPick up where you left off\nOpen the course from My learning to jump back to where you were.\n\nLeaving a course\nFrom My learning you can remove a course from your Trail. This clears your progress for it."
+  },
+  {
+    "id": "courses/activity-types",
+    "title": "Activity types explained",
+    "summary": "Dynamic pages, video, documents, assignments and SCORM — what each looks like and how it completes.",
+    "audience": [
+      "learners",
+      "instructors"
+    ],
+    "keywords": [
+      "activity",
+      "page",
+      "video",
+      "pdf",
+      "document",
+      "scorm",
+      "flip card",
+      "scenario"
+    ],
+    "text": "TypeWhat you seeHow it completes\nDynamic pageRich content: text, images, code, quizzes, callouts and embeds.Read to the end and confirm.\nVideoA hosted or YouTube video, sometimes with AI captions. Live lesson recordings are videos too.Watch and confirm.\nDocumentA PDF in a built-in viewer.Read and confirm.\nAssignmentGradable tasks — file upload, quiz, short answer, number, code, form or custom.Submit your work.\nSCORMAn embedded SCORM 1.2 / 2004 package.Tracked by the package.\n\nInteractive pages\nQuizzes and flip cards give instant feedback.\nA Code Playground lets you write and run code — see Code exercises.\nScenarios let you choose a path and see the outcome."
+  },
+  {
+    "id": "livebridge/live-overview",
+    "title": "What is LiveBridge?",
+    "summary": "LiveBridge is the live classroom built into every course. Lecturers and students meet in the browser — no separate meeting app or link-sharing needed.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "live class",
+      "video call",
+      "webinar",
+      "virtual classroom",
+      "zoom",
+      "meet",
+      "online lesson"
+    ],
+    "text": "LiveBridge is ValidBridge's live classroom. A live lesson belongs to a course: the lecturer schedules it from the course, students join it from the same course, and everything that happens — attendance, questions, poll and quiz answers, the recording — stays with that course. Nobody has to leave ValidBridge or install anything; it runs in the browser on desktop, tablet and phone.\nWhat you can do in a live lesson\nTalk on camera and microphone, and share your screen (lecturers).\nChat with the class, and ask the lecturer questions in a dedicated Q&A.\nRun quick polls and live quizzes built from the course's own quizzes.\nRaise a hand and send reactions (students).\nRecord the lesson — the recording is added to the course as a video lesson.\nReview attendance and participation for every student afterwards.\nWho can do what\nIn the classroomWhoCan\nLecturerAnyone who can edit the course (owner, contributors, instructors, admins)Schedule and start lessons, share screen, record, launch polls and quizzes, moderate participants, end the lesson, see attendance.\nStudentLearners with access to the courseJoin, chat, ask questions, vote, answer quizzes, raise a hand, react, and use mic and camera unless the lecturer turns them off.\n\nWhere to start\nLecturers: Schedule a live lesson, then start and teach it.\nStudents: Join a live lesson."
+  },
+  {
+    "id": "livebridge/schedule-live-lesson",
+    "title": "Schedule a live lesson",
+    "summary": "Create a live lesson from a course, choose its time, and decide whether it is recorded and whether recordings go straight to students.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "schedule",
+      "plan",
+      "calendar",
+      "new live lesson",
+      "create session"
+    ],
+    "text": "Live lessons are scheduled per course. You need permission to edit the course.\nOpen the course and find the Live lessons panel, then click Schedule. (Or in the dashboard, open the course, go to its LiveBridge tab and click Schedule a live lesson.)\nEnter a Lesson title, the Starts at date and time, and an optional description.\nChoose the recording options (see below), then click Schedule lesson.\nStudents enrolled in the course see the lesson in the course's Live lessons panel and under Live lessons in their sidebar, and can join as soon as you go live.\nRecording options\nRecord automatically — recording starts as soon as the lesson goes live. You can also start and stop recording by hand during the lesson.\nPublish recordings to students — when on, the finished recording is published to the course straight away. When off, it is added as a draft lesson for you to review and publish yourself.\nRecording availability\nRecording controls only appear when recording is enabled for your ValidBridge workspace. If you do not see them, contact support.\n\nNext: invite students or start the lesson."
+  },
+  {
+    "id": "livebridge/invite-to-live-lesson",
+    "title": "Invite students to a live lesson",
+    "summary": "Share the lesson link, email every enrolled student or specific addresses, or add the lesson to Google Calendar.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "invite",
+      "invitation",
+      "email",
+      "link",
+      "share",
+      "google calendar"
+    ],
+    "text": "Every live lesson has its own link. Click Invite next to a lesson — in the course's Live lessons panel or in the LiveBridge tab — to share it.\nShare link\nCopy lesson link or Copy joining info (title, time and link) to paste into a message.\nAdd to Google Calendar creates a calendar event with the link.\nEmail\nSwitch to the Email tab.\nTick All enrolled students, and/or paste other email addresses (separated by commas, spaces or new lines — up to 100 per send).\nAdd an optional personal note, then click Send invitations.\nOnly people with course access can join\nAnyone opening the link must sign in. People who can see the course but have not enrolled get an Enroll & join button. For paid courses they need to buy access first."
+  },
+  {
+    "id": "livebridge/run-live-lesson",
+    "title": "Start and teach a live lesson",
+    "summary": "Check your devices, start the lesson, share your screen, choose what students see and record the class.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "start",
+      "go live",
+      "screen share",
+      "present",
+      "camera",
+      "microphone",
+      "record",
+      "recording"
+    ],
+    "text": "Start the lesson\nOpen the lesson — click Open in the course's Live lessons panel, or Open classroom in the LiveBridge tab.\nOn the device check screen, test your microphone and camera. Lecturers start with both on; use Settings to pick a different microphone, camera or speaker.\nClick Start lesson. The lesson goes live and students can join immediately. (Once it has started, the button reads Enter classroom.)\nThe control bar\nControlWhat it does\nMicrophone / CameraTurn your audio and video on or off.\nShare screenPresent a screen, window or browser tab. Click Stop sharing to finish.\nStart / Stop recordingRecord the lesson (shown when recording is available). A REC badge tells everyone the lesson is being recorded.\nSettingsChoose microphone, camera and speaker.\nPanelsOpen Chat, Q&A, Polls, Quiz, People, Info and Attendance.\nLeaveLeave the lesson (it keeps running) or end it for everyone.\n\nChoose what students see\nWhile you share your screen, a What students see switch appears on the stage. Choose Presentation to put your shared screen in focus, or Camera to put your video first.\nUse headphones\nHeadphones prevent echo when several people have their microphones on. If the connection weakens, LiveBridge lowers video quality automatically and the lesson keeps going."
+  },
+  {
+    "id": "livebridge/live-engagement",
+    "title": "Chat, Q&A, polls and live quizzes",
+    "summary": "Keep students involved: answer questions, launch quick polls, and run a quiz from the course’s existing quiz questions.",
+    "audience": [
+      "instructors",
+      "learners"
+    ],
+    "keywords": [
+      "poll",
+      "quiz",
+      "question",
+      "q&a",
+      "chat",
+      "raise hand",
+      "reaction",
+      "vote",
+      "engagement"
+    ],
+    "text": "Chat\nMessages in Chat are visible to everyone in the lesson.\nQ&A\nStudents ask the lecturer questions in the Q&A panel; questions are shared with the class. Lecturers can Reply with an answer for everyone, mark a question Answered, Dismiss it, or Reopen it. Filter by Open, Answered or All.\nPolls\nOpen Polls and choose Launch a poll.\nType the question and at least two options (Add option for more).\nOptionally set a Time limit, then click Launch poll.\nStudents vote from a prompt on their screen and see results after voting. Click Close poll when done.\nLive quizzes\nLive quizzes reuse the questions you already wrote: any quiz task in an assignment or quiz block in a lesson of this course can be run live.\nOpen the Quiz panel and Choose a quiz (assignment quiz or lesson quiz).\nSet the Time per question and click Start quiz.\nStudents answer each question on their own screen. When the time runs out, everyone sees the correct answer and how the class did. Click Next question to continue.\nAfter the last question, click Show results for the class summary. You can stop early at any time with End quiz.\nScores count\nLive quiz answers and poll votes are saved and appear in the lesson report and in each student's engagement figures.\n\nFor students: hands and reactions\nUse Raise hand to get the lecturer's attention (they see a Hands raised list) and React to send a quick emoji."
+  },
+  {
+    "id": "livebridge/live-moderation",
+    "title": "Manage participants",
+    "summary": "Mute students, turn off their microphone and camera access, lower hands, or remove someone from the lesson.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "mute",
+      "remove",
+      "kick",
+      "moderate",
+      "participants",
+      "people"
+    ],
+    "text": "Open the People panel to see lecturers, students and anyone with a raised hand. Search by name, then open a participant's actions:\nLower hand — clear a raised hand.\nMute microphone / Stop camera — switch off their audio or video once; they can turn it back on.\nTurn off mic & camera access — stops them using microphone and camera for the rest of the lesson, until you choose Allow mic & camera.\nRemove from lesson — disconnects them; they cannot rejoin this lesson.\nRemoval is final for that lesson\nA removed student cannot come back into the same live lesson. Use mute or media access for everyday classroom management."
+  },
+  {
+    "id": "livebridge/end-live-lesson",
+    "title": "End a lesson and find the recording",
+    "summary": "End the lesson for everyone, then find the recording as a video lesson inside the course.",
+    "audience": [
+      "instructors",
+      "learners"
+    ],
+    "keywords": [
+      "end",
+      "finish",
+      "stop",
+      "recording",
+      "replay",
+      "watch later",
+      "draft"
+    ],
+    "text": "Ending the lesson\nClick Leave in the control bar.\nChoose End lesson for everyone and confirm. Everyone is disconnected and the lesson is marked finished. (Leave lesson instead lets the lesson continue without you.)\nWhere the recording goes\nAfter a recorded lesson, the recording is processed and then added to the course as a video activity — next to the lesson's linked activity, otherwise in the course's last chapter, or in a Live lesson recordings chapter. Its status moves from Processing to Ready.\nIf Publish recordings to students was on, students can watch it right away.\nOtherwise it is a Draft: open the lesson report and click Review draft, check it, then publish it like any other activity.\nStudents find recordings under Recorded lessons in the course's Live lessons panel (Watch) and under Catch up on recordings on their Live lessons page."
+  },
+  {
+    "id": "livebridge/live-attendance-reports",
+    "title": "Attendance and live lesson reports",
+    "summary": "See who attended, who was late or left early, how students took part, and poll and quiz results — per lesson and per student.",
+    "audience": [
+      "instructors",
+      "admins"
+    ],
+    "keywords": [
+      "attendance",
+      "report",
+      "analytics",
+      "present",
+      "absent",
+      "late",
+      "participation",
+      "register"
+    ],
+    "text": "During the lesson\nLecturers have an Attendance panel showing who is here now, who has attended and the average attendance so far.\nAfter the lesson\nIn the dashboard, open the course and its LiveBridge tab (or click Live lesson reports on the course page).\nLessons — every live lesson with its status, attendees, time attended, questions, quiz average and recording. Click View report for one lesson.\nLesson report — attendees and attendance rate, time attended, late and early leavers, participation (messages, questions, poll votes, quiz answers, raised hands), each poll and live quiz, recordings, and a row per student.\nLearner engagement — every enrolled student's course progress, assignments and quizzes next to their live attendance and participation.\nAttendance statuses\nStatusMeaning\nPresentAttended the lesson on time.\nLateJoined after the start.\nLeft earlyLeft before the lesson ended.\nPartialAttended only part of the lesson.\nAbsentEnrolled but did not join.\n\nAdmins can also see a student's live lessons in their individual analytics — see Analytics for a single learner."
+  },
+  {
+    "id": "livebridge/join-live-lesson",
+    "title": "Join a live lesson (students)",
+    "summary": "Join from the course or your Live lessons page. You join with microphone and camera off and can turn them on any time.",
+    "audience": [
+      "learners"
+    ],
+    "keywords": [
+      "join",
+      "attend",
+      "enter",
+      "live now",
+      "class link"
+    ],
+    "text": "Find the lesson: a Live now banner appears while one of your lessons is live, the Live lessons item in your sidebar shows a Live badge, and each course lists its lessons in a Live lessons panel. You can also open a link your lecturer sent.\nClick Join now (or Enter classroom).\nOn the device check screen, optionally turn on your microphone or camera, then click Join lesson.\nEarly?\nIf the lecturer has not started yet you will see The lesson hasn't started yet. Keep the page open — it updates automatically when the lesson goes live.\n\nAccess rules\nYou must be signed in and have access to the course.\nIf you can see the course but are not enrolled, use Enroll & join.\nFor a paid course, get access from the course page first — see Paying for a course.\nAll your upcoming lessons and past recordings are on your Live lessons page."
+  },
+  {
+    "id": "livebridge/live-troubleshooting",
+    "title": "LiveBridge troubleshooting",
+    "summary": "Microphone or camera blocked, “Reconnecting…”, joined from another tab, removed from a lesson and other common live-class issues.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "camera not working",
+      "microphone blocked",
+      "no audio",
+      "reconnecting",
+      "connection lost",
+      "echo"
+    ],
+    "text": "My microphone or camera is blocked\nYour browser has denied access. Allow the microphone and camera in the browser's site settings (the lock or camera icon in the address bar), then try again. If the device is “in use by another app”, close that app.\n\nThe microphone or camera button is disabled\nThe lecturer has turned off microphone and camera for you in this lesson. They can allow it again from the People panel.\n\nI see “Reconnecting…”\nYour connection dropped briefly. Wait — the lesson resumes automatically. If you see Connection lost, check your internet and click Rejoin lesson.\n\n“You joined from somewhere else”\nThe lesson was opened in another tab or device, so this one disconnected. Click Use this tab instead to continue here.\n\n“Enrollment required” or “part of a paid course”\nEnrol in the course (or buy access for a paid course) from the course page, then join again.\n\nI can’t share my screen\nScreen sharing is for lecturers, and some phone browsers do not support it. On a computer, allow screen capture when the browser asks.\n\nOthers hear an echo\nUse headphones, or mute when you are not speaking."
+  },
+  {
+    "id": "students/browse-and-enrol",
+    "title": "Finding & enrolling in courses",
+    "summary": "Where courses are listed, how to enrol in a free course, and what happens with paid courses.",
+    "audience": [
+      "learners"
+    ],
+    "keywords": [
+      "enroll",
+      "enrol",
+      "join course",
+      "catalogue",
+      "catalog",
+      "collections",
+      "marketplace",
+      "shop"
+    ],
+    "text": "Organization home — the landing page — the course catalogue, or a custom page your organization designed.\nCourses — the full catalogue, from Courses in the sidebar.\nCollections — named groups of courses, such as a learning path.\nMarketplace — paid offers, with prices, when your organization sells courses.\nEnrol in a course\nFind the course in the catalogue, a collection, search or the marketplace.\nOpen it to see its description, chapters and live lessons.\nClick Enrol (or Start learning). Free courses open instantly; paid courses take you to checkout — see Paying for a course.\nThe course is added to My learning and the first activity opens.\nCan’t find a course?\nIt may still be a draft, or restricted to a user group you are not in. Ask your instructor or an admin."
+  },
+  {
+    "id": "students/trail-and-certificates",
+    "title": "Your Trail, progress & certificates",
+    "summary": "Track every course you have started, your results, and the certificates you have earned.",
+    "audience": [
+      "learners"
+    ],
+    "keywords": [
+      "trail",
+      "progress",
+      "certificate",
+      "my learning",
+      "completion",
+      "verify"
+    ],
+    "text": "Your Trail is created the first time you start a course and updates as you work.\nEvery course you have started, with a completion bar.\nCompleted activities, and your assignment and quiz results.\nYour live lessons, and certificates you have earned.\nOpen it from My learning in the sidebar or go to your Trail.\nCertificates\nIf a course issues certificates, one is generated when you complete every required activity. Each has a unique identifier so others can verify it, and you can view or share it from your Trail."
+  },
+  {
+    "id": "students/managing-users",
+    "title": "Add and manage users",
+    "summary": "Add people, change their role, review signups and deactivate accounts from the Users area.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "users",
+      "members",
+      "invite",
+      "add member",
+      "deactivate",
+      "students",
+      "staff"
+    ],
+    "text": "Add people\nIn the dashboard, go to Users → Add Member.\nEnter the person's email (and name if you have it).\nChoose their role.\nIf signup is open, people can also join themselves — see Signups & user groups.\nThe Users area\nTabWhat it does\nUsersEveryone in the organization. Search, open a profile, change roles, deactivate.\nUser GroupsGroups used to give access to restricted courses and resources.\nRolesThe permission matrix.\nSignupsPeople waiting for approval to join.\nAdd MemberCreate an account directly.\nSign-in MethodsWhich sign-in options are allowed, including Google and SSO.\nTwo-Factor PolicyRequire two-factor authentication for members.\nAudit LogsA record of security and admin actions.\n\nDeactivating a user\nOpen a user's profile to change their role or deactivate them. Deactivated users cannot sign in, but their submissions and progress are kept.\nGood to know\nTo give a student access to a course, enrol them or add them to a user group the course is restricted to.\nTo invite enrolled students to a live class, use the lesson's Invite button."
+  },
+  {
+    "id": "students/signups",
+    "title": "Signups & user groups",
+    "summary": "Choose how people join (open or invite-only), add signup fields, and use user groups to control access.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "signup",
+      "register",
+      "invite only",
+      "approval",
+      "user group",
+      "cohort",
+      "class"
+    ],
+    "text": "How people join\nOpen signup — anyone can create an account and join.\nInvite-only — only people you invite can join.\nWith open signup you can add custom signup fields and require approval of new accounts from the Signups tab.\nUser groups\nA user group is a named set of people — a cohort, a class, a department. Restrict a course to a group and only its members can see it. When someone buys an offer linked to a payment group, they can be added to a matching user group automatically (see Payment groups).\nGo to Users → User Groups and create a group.\nAdd members.\nOn a course's Access & Pricing tab, restrict it to the group."
+  },
+  {
+    "id": "assessments/assignments-learner",
+    "title": "Complete and submit an assignment",
+    "summary": "Task types you may meet, how autosave and submission work, deadlines, retries and formative assignments.",
+    "audience": [
+      "learners"
+    ],
+    "keywords": [
+      "submit",
+      "homework",
+      "deadline",
+      "late",
+      "grade",
+      "retry",
+      "model answer",
+      "formative"
+    ],
+    "text": "An assignment is a gradable activity made of one or more tasks.\nFile upload — attach a document, image or archive.\nQuiz — multiple-choice questions, scored automatically.\nShort answer — a text answer, sometimes auto-graded against an answer key.\nNumber answer — a numeric value checked against an expected answer.\nCode — code run against test cases.\nForm — a structured form defined by your instructor.\nSubmit\nOpen the assignment from the course.\nComplete each task. Your work autosaves, so you can come back later.\nClick Submit. If retries are allowed you can resubmit before the deadline.\nOnce graded, open the assignment to see your score and feedback per task.\nDeadlines\nIf a due date is set, the assignment closes when it passes — you are warned before saving stops. Late submissions are flagged to the instructor.\nFormative assignments\nFormative assignments have no score. Handing in your work unlocks a model answer so you can compare and self-assess.\nSubmission statuses\nNot submitted → Pending (saved, not handed in) → Submitted → Late (if past the deadline) → Graded."
+  },
+  {
+    "id": "assessments/assignments-teaching",
+    "title": "Create and grade assignments",
+    "summary": "Build an assignment from tasks, set deadlines and retries, choose a grading scale, and review submissions.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "assignment",
+      "grading",
+      "rubric",
+      "submissions",
+      "grade",
+      "marks",
+      "scale",
+      "formative"
+    ],
+    "text": "Create an assignment\nAdd an Assignment activity to a chapter, or open Assignments in the dashboard.\nGive it a title, description and optional due date.\nAdd tasks in the Task Editor; each can have its own instructions and points.\nSet the grading scale, whether retries are allowed, and graded or formative mode.\nPublish it with the course.\nTask types\nTaskLearner doesGrading\nFile uploadAttaches files.Manual\nQuizAnswers multiple-choice questions.Automatic\nShort answerTypes a text answer.Automatic against an answer key, or manual\nNumber answerEnters a number.Automatic, with a tolerance\nCodeWrites code run against test cases.Automatic\nFormFills in a form you define.Manual or automatic\n\nGrading scales\nNumeric — a raw score, such as 87 / 100.\nPercentage — a score out of 100%.\nAlphabet — letter grades, A–F.\nReview submissions\nOpen the assignment and go to Submissions.\nFilter by student or task; each row shows its status.\nOpen a submission. Automatic tasks are already scored; grade manual ones.\nFinalise the grade — it is recorded in the learner's Trail.\nFormative (ungraded) assignments\nTurn on Formative — no grading. Instead of a grade you write a model answer (optionally with a document) and choose when it unlocks: Never, On hand-in or After grading.\nReuse quiz questions live\nQuiz tasks can also be run as a live quiz during a LiveBridge lesson — see Live quizzes."
+  },
+  {
+    "id": "assessments/quizzes",
+    "title": "Quiz blocks, quiz tasks and live quizzes",
+    "summary": "The three kinds of quiz in ValidBridge and when to use each one.",
+    "audience": [
+      "instructors",
+      "learners"
+    ],
+    "keywords": [
+      "quiz",
+      "test",
+      "knowledge check",
+      "multiple choice",
+      "mcq",
+      "live quiz"
+    ],
+    "text": "KindWhere it livesGraded?\nQuiz blockInside a dynamic page (insert it from the editor’s / menu).No — a quick knowledge check with instant feedback.\nQuiz taskInside an assignment.Yes — scored automatically and saved as a submission.\nLive quizRun during a LiveBridge lesson from a quiz block or quiz task.Scored per question; results appear in the lesson report.\n\nWrite your questions once: any quiz block or quiz task in a course can be run live in that course's lessons. See Chat, Q&A, polls and live quizzes.\nLive quizzes need auto-scorable questions\nA live quiz only uses questions that can be scored automatically. If a quiz has none, LiveBridge tells you it cannot be run."
+  },
+  {
+    "id": "assessments/code-exercises",
+    "title": "Code exercises",
+    "summary": "Write and run code in the browser against your instructor’s test cases, in 30 languages.",
+    "audience": [
+      "learners",
+      "instructors"
+    ],
+    "keywords": [
+      "code",
+      "programming",
+      "playground",
+      "judge0",
+      "python",
+      "javascript",
+      "test cases"
+    ],
+    "text": "A Code Playground block gives you an in-browser editor. Write a solution, then run it against the test cases your instructor defined.\nChoose the language (the exercise usually preselects it).\nWrite your solution.\nClick Run. Each test case reports pass or fail, with time and memory used.\nFix and re-run until every test passes. Your submission is saved.\nCode runs in an isolated sandbox. Thirty languages are supported, including Python, JavaScript, TypeScript, Java, C, C++, Rust, Go, C#, Ruby, PHP, SQL and Bash.\nA Code Playground block in a page is practice.\nA Code task in an assignment counts towards that assignment's grade."
+  },
+  {
+    "id": "payments/payments-overview",
+    "title": "How payments work",
+    "summary": "ValidBridge uses Paystack with bring-your-own keys: your organization connects its own Paystack account and learners' payments go straight to it.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "payments",
+      "sell",
+      "monetize",
+      "byok",
+      "bring your own key",
+      "merchant",
+      "paystack",
+      "mpesa",
+      "m-pesa"
+    ],
+    "text": "Payments in ValidBridge run on Paystack using a bring-your-own-key model. Each organization connects its own Paystack merchant account by pasting its API keys. Learners pay on Paystack's secure checkout page and the money settles directly into your Paystack account — ValidBridge never holds your funds.\nThe flow at a glance\nAn admin connects Paystack under Payments → Configuration.\nYou create offers — a price (one-time or subscription) linked to courses or a payment group.\nA learner clicks Get access or Subscribe and pays on Paystack.\nPaystack notifies ValidBridge, which unlocks the courses for that learner immediately.\nWhat learners can pay with\nWhatever your Paystack account accepts — typically cards, bank payments and mobile money such as M-Pesa, depending on your country and Paystack settings.\nPayments tabWhat it is for\nOverviewEvery customer, the offer they bought, amount, status and since when.\nOffersThe things you sell: price, type and the courses they unlock.\nPayment GroupsBundles of courses sold together, optionally mirrored into a user group.\nConfigurationConnect, update or remove your Paystack keys.\n\nTurn the feature on first\nPayments must be enabled for your organization. If you do not see Payments in the dashboard, check the features in Organization settings or contact support."
+  },
+  {
+    "id": "payments/connect-paystack",
+    "title": "Connect your Paystack account",
+    "summary": "Paste your Paystack secret key (and optional public key), activate it, and point Paystack's webhook at ValidBridge.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "connect",
+      "api key",
+      "secret key",
+      "public key",
+      "webhook",
+      "configuration",
+      "setup",
+      "test mode",
+      "live mode"
+    ],
+    "text": "Before you start\nA Paystack business account (create one at dashboard.paystack.com), activated for live payments when you are ready to charge real money.\nThe Admin role in your ValidBridge organization.\n1. Copy your keys from Paystack\nIn the Paystack Dashboard, open Settings → API Keys & Webhooks. Copy the secret key (starts with sk_live_ or sk_test_) and, optionally, the public key (pk_live_ / pk_test_).\n2. Paste them into ValidBridge\nIn the dashboard, go to Payments → Configuration.\nOn the Paystack card, click Connect.\nPaste the Secret key and, if you like, the Public key.\nClick Save & Activate. The card shows Connected.\n3. Set the webhook URL in Paystack\nThis step is essential: ValidBridge unlocks a course when Paystack tells it a payment succeeded. In the same Paystack settings page, set the Webhook URL to your ValidBridge API address followed by /api/v1/payments/paystack/webhook — the Configuration page shows the path. Paystack signs each notification with your secret key and ValidBridge rejects anything it cannot verify.\nNo webhook, no access\nIf the webhook is missing or wrong, learners are charged but their course stays locked. If you are not sure of your API address, contact support before going live.\n\nTest first\nUse your sk_test_ key to try the whole flow with Paystack's test cards, then click Update keys and switch to your live key (and the live webhook URL) when you are ready.\nUpdating or removing keys\nUpdate keys replaces the stored keys, for example after rotating them in Paystack.\nRemove disconnects Paystack and disables payments for the organization.\nYour keys are protected\nThe secret key is encrypted before it is stored, is only used by the ValidBridge server to talk to Paystack, and is never shown to learners."
+  },
+  {
+    "id": "payments/create-offer",
+    "title": "Create an offer",
+    "summary": "Set a one-time or subscription price (fixed or pay-what-you-want), choose the currency, and link the courses it unlocks.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "offer",
+      "price",
+      "pricing",
+      "product",
+      "subscription",
+      "one-time",
+      "currency",
+      "kes",
+      "pay what you want",
+      "storefront"
+    ],
+    "text": "An offer is something learners can buy.\nOpen Payments → Offers and create a new offer.\nEnter an Offer Name, description and optional benefits (comma-separated).\nChoose the Offer Type: one-time or subscription. For subscriptions, pick a Billing Interval — monthly or yearly.\nChoose the Price Type: a fixed price, or customer's choice (pay what you want, with your amount as the minimum).\nSet the amount and Currency (KES by default). Use a currency your Paystack account supports.\nUnder Access, add courses directly and/or link a payment group.\nSave. Public offers appear in your marketplace.\nSubscriptions create a Paystack plan\nWhen you save a subscription offer, ValidBridge creates (or updates) the matching plan in your Paystack account automatically. Connect Paystack before creating subscription offers.\n\nUse Preview Shop at the top of the Payments pages to see your marketplace as learners do."
+  },
+  {
+    "id": "payments/payment-groups",
+    "title": "Payment groups (bundles)",
+    "summary": "Sell several courses together, and mirror buyers into a user group so they get access everywhere.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "bundle",
+      "group",
+      "package",
+      "program",
+      "sync",
+      "user group"
+    ],
+    "text": "A payment group is a bundle of courses. Link an offer to a group and buying the offer unlocks every course in it — add a course to the group later and existing buyers get it too.\nOpen Payments → Payment Groups and create a group with a name and description.\nAdd the courses it contains.\nLink one or more offers to the group (in each offer's Access section).\nOptionally click Sync to mirror the group into a user group: buyers become members while their purchase is active and are removed if it is cancelled or refunded.\nWhy sync?\nA synced user group lets paying learners reach everything the user group unlocks — course listings, communities and certificates — not just the paywalled pages."
+  },
+  {
+    "id": "payments/paying-for-a-course",
+    "title": "Paying for a course (learners)",
+    "summary": "Buy a course or subscribe on Paystack's secure checkout, then find your purchases and payment history in your account.",
+    "audience": [
+      "learners"
+    ],
+    "keywords": [
+      "buy",
+      "purchase",
+      "checkout",
+      "pay",
+      "card",
+      "mpesa",
+      "m-pesa",
+      "receipt",
+      "invoice",
+      "price"
+    ],
+    "text": "Open the course, or the offer in the marketplace.\nClick Get access (one-time) or Subscribe. For pay-what-you-want offers, enter an amount at or above the minimum. Sign in if asked.\nYou are taken to Paystack's secure checkout. Pay with any method it offers you.\nYou return to ValidBridge and the course unlocks as soon as Paystack confirms the payment — usually within seconds.\nYour purchases and receipts\nAccount → Purchases — the courses and subscriptions you have bought.\nAccount → Billing — active subscriptions with the next payment date, and your payment history.\nWho you are paying\nYou pay the organization that runs the course, through its own Paystack account. For refunds or questions about a charge, contact that organization."
+  },
+  {
+    "id": "payments/subscriptions-and-refunds",
+    "title": "Subscriptions, cancellations & refunds",
+    "summary": "How subscriptions renew, what happens when a learner cancels or a payment fails, and how refunds work.",
+    "audience": [
+      "admins",
+      "learners"
+    ],
+    "keywords": [
+      "cancel",
+      "refund",
+      "renewal",
+      "failed payment",
+      "unsubscribe",
+      "chargeback",
+      "payout",
+      "settlement"
+    ],
+    "text": "Renewals\nSubscriptions are billed by Paystack every month or year. Each successful renewal keeps access active; a failed renewal suspends access until a later payment succeeds.\nCancelling\nLearners cancel from Account → Billing (click Cancel next to the subscription). Billing stops in Paystack and access ends immediately — there is no grace period.\nRefunds\nRefunds are issued from your Paystack Dashboard (use the Paystack Dashboard button on the Payments pages). When Paystack reports the refund, ValidBridge marks the purchase refunded and removes the access it granted.\nPayouts\nMoney is settled by Paystack to the bank or mobile-money account set up in your Paystack account, on Paystack's schedule and fees. ValidBridge does not take a cut of or hold these payments.\nPurchase statuses\nStatusMeaning\nPendingCheckout started but not yet paid.\nCompletedOne-time purchase paid — access granted.\nActiveSubscription paid and current — access granted.\nCancelledSubscription cancelled — access ended.\nFailedA subscription payment failed — access suspended.\nRefundedPayment refunded — access removed."
+  },
+  {
+    "id": "payments/payments-faq",
+    "title": "Payments troubleshooting",
+    "summary": "Checkout unavailable, paid but still locked, subscription offer errors and other payment questions.",
+    "audience": [
+      "admins",
+      "learners"
+    ],
+    "keywords": [
+      "not working",
+      "locked",
+      "error",
+      "checkout",
+      "webhook",
+      "problem"
+    ],
+    "text": "Learners see no checkout button\nPayments may be switched off for the organization, Paystack may not be connected, or the offer is not public. Check Payments → Configuration and the offer settings.\n\nA learner paid but the course is still locked\nValidBridge unlocks the course when Paystack's webhook arrives. Check the webhook URL in your Paystack settings (see Connect Paystack) and that the key mode (test or live) matches. The purchase shows as Pending in Payments → Overview until it is confirmed.\n\n“Cannot create a subscription without credentials configured”\nSubscription offers need a Paystack plan, so connect Paystack before saving the offer.\n\n“Amount must be at least …”\nOn a pay-what-you-want offer the amount entered is below the minimum price."
+  },
+  {
+    "id": "analytics/analytics-admin",
+    "title": "Organization analytics",
+    "summary": "Engagement, course and growth metrics for the whole organization over 7, 30 or 90 days.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "analytics",
+      "reports",
+      "dashboard",
+      "metrics",
+      "usage",
+      "insights",
+      "kpi"
+    ],
+    "text": "Open Analytics in the dashboard (under Insights) to see how the whole organization is used. Switch between 7, 30 and 90 day windows.\nUser engagement — activity views, time spent and interaction patterns.\nCourses — the most popular courses and how learners progress through them.\nOrganization — overall usage and growth.\nThe Overview tab covers the essentials; Advanced adds deeper reporting.\nRecent activity can lag\nAnalytics data is cached for speed, so the last few minutes of activity may take a little while to appear."
+  },
+  {
+    "id": "analytics/course-analytics",
+    "title": "Course analytics",
+    "summary": "Views, completion, drop-off points and assessment results for a single course.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "course report",
+      "completion rate",
+      "drop off",
+      "engagement"
+    ],
+    "text": "Each course has an Analytics tab in the dashboard showing:\nActivity views and completion over time.\nWhere learners stop or drop off.\nAssignment and quiz performance.\nUse it to find activities that need a clearer explanation. For live classes, the course's LiveBridge tab has attendance and participation — see Attendance and live lesson reports."
+  },
+  {
+    "id": "analytics/learner-analytics",
+    "title": "Analytics for a single learner",
+    "summary": "Open one student’s full record — courses, assignments, code, community, certificates, live lessons and behaviour — or compare and export several.",
+    "audience": [
+      "admins",
+      "instructors"
+    ],
+    "keywords": [
+      "student report",
+      "dossier",
+      "individual",
+      "export",
+      "compare students",
+      "progress report"
+    ],
+    "text": "In the dashboard, go to Users.\nClick Analytics on a student's row to open their record, or open the full analytics page.\nBrowse the tabs: connections, courses, assignments, code, community, certificates, LiveBridge (live lessons attended, attendance, live quiz scores and interactions) and behaviour.\nCompare and export\nSelect several students in the list to Compare analytics side by side, or Export their analytics for reporting."
+  },
+  {
+    "id": "organization/org-settings",
+    "title": "Organization settings",
+    "summary": "Name, features, branding, menu, landing page, AI, usage and the danger zone — what each settings tab controls.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "settings",
+      "features",
+      "toggle",
+      "enable",
+      "disable",
+      "ai settings",
+      "delete organization"
+    ],
+    "text": "Open Organization in the dashboard sidebar.\nTabWhat it controls\nGeneralName, slug, description, and which features are enabled.\nBrandingLogo, favicon, colours and font.\nMenuLinks in the learner sidebar and top navigation.\nLandingA custom landing page for the organization home.\nAITurn AI on or off, cap requests per user, and toggle AI surfaces.\nUsagePlan usage and limits.\nOtherAdditional options such as signup and integrations.\nDanger zoneIrreversible actions such as deleting the organization.\n\nFeature toggles\nCommunities, podcasts, boards, playgrounds, payments, the library, analytics and other features are enabled per organization. A feature that is off disappears from the sidebar for everyone.\nThe danger zone is permanent\nDeleting an organization removes its courses, users and data. Export what you need first."
+  },
+  {
+    "id": "organization/branding-and-landing",
+    "title": "Branding & the landing page",
+    "summary": "Make the workspace your own: logo, colour and font, the learner menu, and a custom landing page.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "brand",
+      "logo",
+      "colour",
+      "color",
+      "font",
+      "theme",
+      "white label",
+      "landing page",
+      "homepage",
+      "menu"
+    ],
+    "text": "Branding\nUpload a logo and favicon, pick a primary colour and choose a font. The colour and font apply across your organization.\nMenu\nFrom Menu, reorder, rename or add links (including external URLs) in the learner sidebar and top navigation.\nLanding page\nBy default the organization home is a course catalogue. From Landing you can build a custom page with sections and calls to action instead.\nStart with three changes\nA logo, a primary colour and a font make the platform feel like yours."
+  },
+  {
+    "id": "organization/roles-and-permissions",
+    "title": "Roles & permissions",
+    "summary": "The permission matrix behind each role, and how to create custom roles.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "roles",
+      "permissions",
+      "custom role",
+      "rbac",
+      "access control",
+      "least privilege"
+    ],
+    "text": "A role is a per-resource permission matrix covering courses, users, user groups, collections, the organization, chapters, activities, roles, the dashboard, communities, discussions, podcasts, boards and playgrounds. The four default roles are described in Accounts, roles & permissions.\nCreate a custom role\nGo to Users → Roles.\nCreate a role and name it.\nToggle permissions per resource — e.g. allow editing course content but not managing access.\nAssign the role to people from the Users tab.\nLeast privilege\nGive people the narrowest role that lets them do their job. A content writer does not need payments or user management.\n\nCourse editors run live lessons\nAnyone who can edit a course can schedule and run its LiveBridge lessons and see their reports."
+  },
+  {
+    "id": "organization/developers",
+    "title": "The Developers area at a glance",
+    "summary": "What each Developers page does — API access, automations, domains, SEO and SSO — which plan it needs, and where the full guides are.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "developers",
+      "developer tools",
+      "integrations"
+    ],
+    "text": "The Developers entry in the dashboard sidebar connects ValidBridge to your school's other systems. Each page has its own step-by-step guide:\nPageWhat it is forPlan\nAPI AccessTokens for your own software to sync students, enrolments and progress.Pro and above\nAutomationsSend events to your systems, Zapier, Make or n8n.Pro and above\nDomainsServe your organization on your own address.Pro and above\nSEOHow you appear in search results and when shared.Standard and above\nSSOSign in with the school’s identity provider.Enterprise\n\nEverything is in the Integrations & developer tools topic."
+  },
+  {
+    "id": "integrations/api-access",
+    "title": "API access & tokens",
+    "summary": "Create, scope and revoke API tokens, authenticate requests, and use the API to sync students, enrolments and progress with your own systems.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "api",
+      "token",
+      "api key",
+      "bearer",
+      "authorization",
+      "rest",
+      "integration",
+      "sis",
+      "student information system",
+      "provision",
+      "enrol",
+      "enroll",
+      "rate limit",
+      "revoke",
+      "regenerate",
+      "playground"
+    ],
+    "text": "API tokens let your own software — a student information system, an admissions portal, a reporting script — work with your ValidBridge organization without a person signing in. Each token belongs to one organization.\nWho can use it\nAPI access is available on the Pro plan and above. Creating and managing tokens needs the Admin role.\n\nCreate a token\nIn the dashboard, open Developers → API Access (open API Access).\nOn the API Tokens tab, click Create Token.\nGive it a Token Name that says what uses it (for example “SIS nightly sync”) and, optionally, a description.\nOptionally set an Expiration Date. Leave it empty for a token that never expires.\nChoose its Permissions (see below) and create it.\nCopy the token straight away and store it in your password manager or secrets store. It is shown only once. Tokens start with vb_.\nPermissions\nRead Only — the token can read but not change anything. The safe default.\nFull Access — create, read, update and delete on every resource.\nCustom — tick create, read, update or delete per resource: courses, activities, assignments, chapters, folders, media, certifications, user groups and payments, plus search.\nGive each integration its own token with the narrowest permissions it needs, so you can revoke one without breaking the others.\nAuthenticate requests\nSend the token in the Authorization header of every request, as a bearer token:\nAuthorization: Bearer vb_your_token_here\n\nRequests and responses are JSON. The Documentation & Playground tab on the same page lists every endpoint with its full address, parameters and example responses, lets you try calls with your token, and gives you a ready-to-copy curl command.\nWhat you can do with it\nThe school-administration part of the API is built for syncing with your own systems. All of it is scoped to your organization's slug (the name in your ValidBridge address). The most useful calls:\nTaskRequest\nCreate (provision) a student or staff accountPOST /admin/{org_slug}/users\nFind a user by emailGET /admin/{org_slug}/users/by-email/{email}\nEnrol a user in a coursePOST /admin/{org_slug}/enrollments/{user_id}/{course_uuid}\nEnrol many users at oncePOST /admin/{org_slug}/enrollments/bulk\nRead a user’s progress in all coursesGET /admin/{org_slug}/progress/{user_id}\nList a user’s certificatesGET /admin/{org_slug}/certifications/{user_id}\nAdd a user to a user group (class, stream)POST /admin/{org_slug}/usergroups/{usergroup_uuid}/members/{user_id}\nSend a user a one-click sign-in link from your portalPOST /admin/{org_slug}/auth/magic-link\n\nPaths are relative to the API address shown in the playground. The playground is the reference: it is always up to date with what your plan allows.\nAdmin and staff accounts are protected\nA token cannot sign in as, or issue sign-in links for, an organization Admin or Maintainer.\n\nLimits\nCreating or regenerating tokens: 10 per hour.\nProvisioning users: 30 per minute per token.\nLooking users up by email: 60 per minute per token.\nOver a limit, the API answers 429 Too Many Requests. Wait and retry, and spread large imports out or use the bulk enrolment call.\nRevoke or regenerate a token\nThe token list shows each token's prefix, status, when it was last used and when it expires. From a token's actions:\nRegenerate issues a new secret for the same token and settings. The old secret stops working immediately, so update your integration at once.\nRevoke switches the token off for good. Use it when an integration is retired or a token may have leaked.\nTreat tokens like passwords\nNever put a token in a web page, a mobile app, a shared spreadsheet or an email. Keep it on a server you control. A token that never expires is convenient but riskier — set an expiry and rotate it on a schedule if you can."
+  },
+  {
+    "id": "integrations/webhooks",
+    "title": "Automations & webhooks",
+    "summary": "Send events such as enrolments, completions and grades to your systems, Zapier, Make or n8n, and verify each delivery with its signing secret.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "webhook",
+      "webhooks",
+      "automation",
+      "automations",
+      "zapier",
+      "make",
+      "make.com",
+      "n8n",
+      "events",
+      "signature",
+      "hmac",
+      "signing secret",
+      "integration",
+      "notify",
+      "retry"
+    ],
+    "text": "A webhook sends a message to an address you choose the moment something happens in your organization — a learner enrols, completes a course, submits an assignment or earns a certificate. Use it to update your own records or to start a workflow in Zapier, Make or n8n.\nWho can use it\nAutomations are available on the Pro plan and above, for admins.\n\nAdd an endpoint\nGo to Developers → Automations (open Automations) and add an endpoint.\nPaste the Endpoint URL that should receive events. It must be a public https:// address.\nAdd a description so others know what it is for.\nTick the events you want. Each event shows an example of the data it sends.\nClick Create Endpoint and copy the Signing Secret. It is shown only once.\nUse Send test event to send a ping and check it arrives.\nConnect Zapier, Make or n8n\nIn your automation tool, start a workflow with its “catch webhook” trigger (in Zapier: Webhooks by Zapier → Catch Hook). Copy the address it gives you into the Endpoint URL above, send a test event, and build the rest of the workflow from the sample data.\nEvents you can subscribe to\nGroupEvents\nLearning progressCourse enrolled, activity completed, course completed, assignment submitted, assignment graded, certificate claimed, certificate revoked\nUsers & accessUser signed up, email verified, role changed, invited, removed from the organization\nCourses & contentCourse created, published or unpublished, deleted, announcement posted; contributors added or removed; folders and podcast episodes\nCommunity & collaborationDiscussions and comments, pins, locks and votes; new boards and playgrounds\nGroups & subscriptionsUser groups created or deleted, members or courses added; subscription packs activated or cancelled\nOrganizationSign-up method, AI settings or payment settings changed\n\nThe endpoint page shows the exact event names and sample data for each one.\nWhat a delivery looks like\nEach event is an HTTP POST with a JSON body:\nExample body\n{\n \"event\": \"course_enrolled\",\n \"delivery_id\": \"dlv_3f9c1a7e5b2d4c80\",\n \"timestamp\": \"2026-09-24T08:15:02Z\",\n \"org_id\": 42,\n \"data\": {\n \"user\": { \"user_uuid\": \"user_…\", \"email\": \"amina@school.ac.ke\", \"username\": \"amina\" },\n \"course\": { \"course_uuid\": \"course_…\", \"name\": \"Form 3 Chemistry\" }\n }\n}\n\nX-Webhook-Event — the event name.\nX-Webhook-Delivery — a unique delivery id. Store it and ignore repeats, so a retried delivery is only processed once.\nX-Webhook-Signature — sha256= followed by an HMAC-SHA256 of the raw request body, made with your signing secret.\nVerify the signature\nBefore trusting a delivery, recompute the signature from the raw body (before any JSON parsing) and compare it with the header. Reject anything that does not match.\nPython\nimport hmac, hashlib\n\ndef is_from_validbridge(raw_body: bytes, signature_header: str, secret: str) -> bool:\n expected = \"sha256=\" + hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()\n return hmac.compare_digest(expected, signature_header or \"\")\n\nNode.js\nconst crypto = require('crypto')\n\nfunction isFromValidBridge(rawBody, signatureHeader, secret) {\n const expected = 'sha256=' + crypto.createHmac('sha256', secret).update(rawBody).digest('hex')\n const a = Buffer.from(expected)\n const b = Buffer.from(signatureHeader || '')\n return a.length === b.length && crypto.timingSafeEqual(a, b)\n}\n\nRetries and delivery logs\nAnswer with any 2xx status within 10 seconds to confirm receipt.\nOtherwise the delivery is retried, up to 3 attempts in total, a few seconds apart. Redirects are not followed.\nView delivery logs shows each attempt with its status code and the start of your response — the first place to look when something is missing. The most recent 200 attempts per endpoint are kept.\nManage endpoints\nEdit the URL, description or events at any time.\nDisable an endpoint to pause deliveries without losing its settings.\nRegenerate the secret if it may have leaked. The old secret stops working immediately; update your receiver first.\nDelete an endpoint you no longer need."
+  },
+  {
+    "id": "integrations/custom-domains",
+    "title": "Use your own domain",
+    "summary": "Serve your school’s ValidBridge site on an address like learn.school.ac.ke: add the domain, create two DNS records, verify, and HTTPS is set up automatically.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "custom domain",
+      "domain",
+      "subdomain",
+      "dns",
+      "cname",
+      "txt",
+      "verify",
+      "verification",
+      "ssl",
+      "https",
+      "certificate",
+      "white label",
+      "registrar",
+      "kenic"
+    ],
+    "text": "By default your organization lives at its ValidBridge address. With a custom domain, learners visit your own address instead — for example learn.school.ac.ke — with a secure HTTPS certificate issued for you.\nWho can use it\nCustom domains are available on the Pro plan and above. You need the Admin role in ValidBridge and access to your domain's DNS settings (often held by your IT team or web host).\n\nPick the right address\nUse a subdomain such as learn.school.ac.ke or portal.academy.co.ke. Your main website (school.ac.ke) usually cannot take the CNAME record this needs, and pointing it at ValidBridge would replace your existing site.\n1. Add the domain\nGo to Developers → Domains (open Domains) and click Add Domain.\nType the full address, e.g. learn.school.ac.ke, and add it.\nThe domain appears as Pending, and ValidBridge shows the two DNS records to create.\n2. Create the DNS records\nAt your domain registrar or DNS host (KENIC reseller, Cloudflare, GoDaddy, Namecheap…), create both records exactly as shown on the page:\nTypeName / hostValuePurpose\nTXT_validbridge-verification.learnvalidbridge-verify=… (your code)Proves you own the domain\nCNAMElearnThe target shown on the pageSends visitors to ValidBridge\n\nThe example is for learn.school.ac.ke. The TXT record must end up at _validbridge-verification.learn.school.ac.ke. Most DNS hosts add your domain to the name automatically, so you type only the part before it (_validbridge-verification.learn and learn). If the page shows a longer name than your DNS host expects, keep only the part before your own domain.\nCopy, don’t retype\nUse the copy buttons on the Domains page. A single wrong character in the code or the CNAME target stops verification.\n\n3. Verify\nWait for the records to take effect — often minutes, occasionally up to 48 hours.\nClick Verify next to the domain, then Verify DNS.\nWhen the TXT record is found, the domain changes to Verified.\n4. HTTPS is set up for you\nOnce the domain is verified and the CNAME is in place, a certificate is issued automatically, usually within a few minutes. The SSL column updates on its own; you can also open the domain and click Check.\nSSL badgeMeaning\nSSL ActiveThe certificate is live. Learners can use the address.\nProvisioningThe certificate is being issued. Give it a few minutes.\nInvalidThe certificate could not be issued — almost always because the CNAME is missing or points somewhere else. Fix it, then verify again.\nUnknownThe status could not be read right now. Check again shortly.\n\nRemoving a domain\nClick the delete (bin) icon next to the domain and confirm. The address stops serving your organization and its certificate is released. Then delete the TXT and CNAME records at your DNS host. Your ValidBridge address keeps working throughout.\nTroubleshooting\n“TXT record not found”\nThe record is missing, has not spread yet, or sits at the wrong name (often the domain was added twice, e.g. …learn.school.ac.ke.school.ac.ke). Check the name and wait a little before verifying again.\n\n“TXT record found but value doesn’t match”\nThe value was mistyped or is from an earlier attempt. Copy it again from the Domains page.\n\nVerified, but the certificate stays in Provisioning\nCheck that the CNAME exists and points to the exact target shown. If your DNS is on Cloudflare, set the record to DNS only (grey cloud) while the certificate is issued. Still stuck after an hour? Email support@validbridge.co.ke with the domain name."
+  },
+  {
+    "id": "integrations/single-sign-on",
+    "title": "Single sign-on (SSO)",
+    "summary": "Set up SSO so staff and students sign in with the school’s identity provider — Microsoft Entra ID, Google Workspace, Okta and others — through SAML or OpenID Connect.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "sso",
+      "single sign-on",
+      "saml",
+      "oidc",
+      "openid connect",
+      "workos",
+      "azure ad",
+      "entra",
+      "microsoft",
+      "google workspace",
+      "okta",
+      "keycloak",
+      "auth0",
+      "identity provider",
+      "idp",
+      "redirect uri",
+      "callback"
+    ],
+    "text": "With SSO, people sign in to ValidBridge with the account they already use at school, managed by your identity provider (IdP). There are two ways to connect:\nSAML and managed connections (WorkOS) — the simplest route for Microsoft Entra ID (Azure AD), Google Workspace, Okta, Keycloak, Auth0 or any SAML provider. Your IT team completes a guided setup portal.\nCustom OIDC — connect directly to any OpenID Connect provider using a client ID and secret from your IdP.\nWho can use it\nSSO is an Enterprise plan feature and is set up by an organization admin under Developers → SSO (open SSO).\n\nOption A — SAML via WorkOS\nIn SSO Provider, choose WorkOS.\nEnter your WorkOS Organization ID (it starts with org_). If you do not have one, email support@validbridge.co.ke and we will set it up for your school.\nClick Save Configuration.\nClick Configure Identity Provider. The setup portal opens and walks your IT team through connecting your IdP step by step — it shows the values to paste into Entra ID, Google or Okta.\nFinish the options below and switch on Enable SSO.\nOption B — Custom OIDC\nFirst, register ValidBridge as an application (web app) in your IdP:\nSet the redirect URI (also called callback URL). It ends in /api/v1/auth/sso/callback; email support@validbridge.co.ke to confirm the exact address for your organization, especially if you use your own domain.\nAllow the openid, email and profile scopes.\nCopy the application's client ID and create a client secret.\nThen, in ValidBridge:\nIn SSO Provider, choose Custom OIDC.\nIssuer URL: your IdP's issuer, e.g. https://login.microsoftonline.com/<tenant-id>/v2.0 or https://accounts.google.com. Sign-in endpoints are discovered from it automatically.\nPaste the Client ID and Client Secret.\nLeave Scopes as openid email profile unless your IdP needs more (space-separated).\nFinish the options below and click Save Configuration.\nOptions for both\nAllowed Email Domains — a comma-separated list such as school.ac.ke, students.school.ac.ke. Only these addresses can sign in with SSO. Leave it empty to allow any.\nAuto-provision Users — create an account automatically the first time someone signs in with SSO. When it is off, only people who already have an account (matched by email) can use SSO.\nEnable SSO — shows the SSO button on your sign-in page.\nSSO must also be allowed under Users → Sign-in Methods — see Add and manage users.\nWhat people see\nOn your organization's sign-in page they click Sign in with SSO.\nThey sign in at your identity provider as usual.\nThey come back to ValidBridge, see Authenticating…, and land signed in. Existing accounts are matched by email address.\nIf your organization requires two-factor authentication, it still applies after SSO.\nTroubleshooting\nThe SSO button does not appear\nCheck that Enable SSO is on, the configuration is saved, and SSO is allowed under Sign-in Methods.\n\n“Your email domain is not allowed for this organization”\nThe person's address is not in Allowed Email Domains. Add the domain or have them use their school address.\n\nSign-in fails for someone new\nAuto-provision Users is off and they have no account yet. Invite them first, or turn auto-provisioning on.\n\n“Failed to authenticate with the identity provider”\nUsually a wrong client secret, an expired secret, or a redirect URI that does not match. Check them in your IdP and in ValidBridge.\n\nKeep a way back in\nBefore relying on SSO alone, make sure at least one admin can still sign in another way, in case the identity provider is unavailable. Treat the client secret like a password."
+  },
+  {
+    "id": "integrations/seo",
+    "title": "SEO for your school site",
+    "summary": "Control how your organization appears in Google and when shared: page titles, descriptions, sharing image, Search Console verification and indexing.",
+    "audience": [
+      "admins"
+    ],
+    "keywords": [
+      "seo",
+      "search engine",
+      "google",
+      "search console",
+      "sitemap",
+      "robots",
+      "meta",
+      "description",
+      "open graph",
+      "og image",
+      "social sharing",
+      "twitter",
+      "index",
+      "noindex"
+    ],
+    "text": "Go to Developers → SEO (open SEO). SEO settings are available on the Standard plan and above.\nSettingWhat it does\nTitle SuffixAdded to every page title, e.g. “ | Riverside Academy”.\nDefault DescriptionUsed in search results for pages that have no description of their own.\nDefault OG ImageThe picture shown when a link is shared on WhatsApp, Facebook or X. Use 1200 × 630 pixels.\nTwitter HandleYour account, shown on X (Twitter) link cards.\nGoogle Search ConsolePaste the verification code from Search Console to prove you own the site.\nHide ConnectKeep community pages out of search results.\n\nUnder Quick Links you will find your sitemap and robots.txt addresses. Submit the sitemap in Google Search Console so new courses are found faster.\nCourses have their own SEO\nEach course has an SEO tab for its own title, description and image — see Course settings.\n\nUsing your own address? Set it up first (Use your own domain) so search engines index the address you want people to remember."
+  },
+  {
+    "id": "account/account-settings",
+    "title": "Your account settings",
+    "summary": "Where to change your details, profile, security settings, and see your purchases and billing.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "profile",
+      "account",
+      "settings",
+      "name",
+      "avatar",
+      "photo",
+      "email",
+      "purchases",
+      "billing"
+    ],
+    "text": "Open your avatar menu and choose Account settings, or go to your account.\nTabWhat you can do\nGeneralYour name, email and basic account details.\nProfileYour public profile, such as your photo and bio.\nSecurityChange your password, set up two-factor authentication, see your current session, or delete your account.\nPurchasesCourses and subscriptions you have bought.\nBillingActive subscriptions, next payment dates and payment history.\n\nQuestions about a purchase? See Paying for a course."
+  },
+  {
+    "id": "account/sign-in-options",
+    "title": "Signing in",
+    "summary": "Email and password, Google, emailed sign-in links and single sign-on — plus resetting a forgotten password.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "login",
+      "log in",
+      "sign in",
+      "forgot password",
+      "reset password",
+      "magic link",
+      "google",
+      "sso"
+    ],
+    "text": "Depending on what your organization allows, the sign-in page offers:\nEmail and password — the default.\nGoogle — sign in with your Google account.\nSign in with a link — we email you a secure one-time link. It expires shortly, so use it soon.\nSingle sign-on (SSO) — sign in through your organization's identity provider.\nForgot your password?\nOn the sign-in page, click Forgot password?.\nEnter your email and click Send Reset Link.\nOpen the email and choose a new password.\nVerify your email\nNew accounts may need to confirm their email address before signing in. Check your inbox and spam folder for the verification message."
+  },
+  {
+    "id": "account/two-factor",
+    "title": "Two-factor authentication",
+    "summary": "Protect your account with a one-time code from an authenticator app, and keep backup codes safe.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "2fa",
+      "mfa",
+      "two factor",
+      "authenticator",
+      "otp",
+      "backup codes",
+      "security"
+    ],
+    "text": "Turn it on\nGo to Account settings → Security and click Enable under Two-factor authentication.\nConfirm your password (skipped if you sign in only with Google or SSO).\nScan the QR code with an authenticator app (1Password, Google Authenticator, Authy…), or enter the setup key by hand.\nEnter the 6-digit code from the app and click Verify and enable.\nSave your backup codes — copy or download them. They are shown only once, and each works once if you lose your phone.\nRunning low on backup codes?\nGenerate a new set from the Security tab so you do not get locked out.\nRequired by your organization?\nAdmins can require two-factor for everyone (Users → Two-Factor Policy). If so, you will be asked to set it up before continuing."
+  },
+  {
+    "id": "account/password-and-account",
+    "title": "Change your password or delete your account",
+    "summary": "Update your password, sign out of your session, or permanently delete your account.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "change password",
+      "sign out",
+      "log out",
+      "delete account",
+      "close account",
+      "remove account"
+    ],
+    "text": "Change your password\nIn Account settings → Security, enter your current password and a new one of at least 8 characters.\nSign out\nUse Sign out in your avatar menu, or next to This device in the Security tab.\nDelete your account\nAt the bottom of the Security tab, click Delete account and type your username to confirm.\nThis cannot be undone\nDeleting your account removes it permanently. Cancel any active subscriptions first."
+  },
+  {
+    "id": "ai/ai-copilot",
+    "title": "Ask AI (the Copilot)",
+    "summary": "An on-demand tutor that reads the course material you are looking at, cites its sources and suggests follow-ups.",
+    "audience": [
+      "learners"
+    ],
+    "keywords": [
+      "ai",
+      "copilot",
+      "chatbot",
+      "tutor",
+      "genie",
+      "assistant",
+      "explain",
+      "summarise",
+      "flashcards"
+    ],
+    "text": "The AI Copilot answers questions using the course material you are studying, so its answers are grounded in your actual lessons.\nOpen it\nFrom an activity, click Ask AI — it opens in a side drawer with that activity in context.\nFrom anywhere, open the full-page Copilot to ask about all of your courses.\nThings to ask\n“Explain this activity in simpler terms.”\n“Summarise this lesson in five bullet points.”\n“Make flashcards from this material.”\n“Quiz me on what I have learned so far.”\n“Build me a study plan for this course.”\nAnswers show the sources they used — click one to jump to that activity — and suggest follow-up questions.\nDon’t see Ask AI?\nAI may be switched off for your organization, or its AI credits may have run out. An admin can check under Organization → AI.\n\nCheck important answers\nAI can be confidently wrong. Use it as a study aid, not a source of truth."
+  },
+  {
+    "id": "ai/ai-teaching-tools",
+    "title": "AI tools for teaching",
+    "summary": "Draft and improve lessons, generate quizzes, images and narrated audio, and build interactive playgrounds.",
+    "audience": [
+      "instructors"
+    ],
+    "keywords": [
+      "generate",
+      "ai writer",
+      "text to speech",
+      "podcast",
+      "narration",
+      "image generation",
+      "magic block",
+      "credits"
+    ],
+    "text": "In the editor\nDraft content — write or expand a section from a prompt or outline.\nImprove content — clarity, tone and completeness edits you can accept or reject.\nGenerate quizzes from the material.\nMagic block — insert an AI-generated interactive element.\nAudio and images\nGenerate images for activities, and create audio from the Audio block's Generate tab:\nText to speech — narrate text you write.\nPodcast (2 voices) — the AI writes a two-host discussion you can edit before generating.\nSpeak — the AI writes and narrates a single-speaker talk.\nPlaygrounds\nGenerate interactive web experiences — simulations, visualisations, widgets — from a prompt, refine them, and choose who can open them.\nAI credits\nAI features use your organization's AI credits. When credits run low the app lets you know.\n\nReview before publishing\nAlways check AI-generated content for accuracy and tone before learners see it."
+  },
+  {
+    "id": "community/discussions",
+    "title": "Discussions & communities",
+    "summary": "Post, reply, upvote and react in your organization’s communities; pin, lock and moderate threads.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "forum",
+      "discussion",
+      "community",
+      "thread",
+      "comment",
+      "moderate",
+      "pin",
+      "lock",
+      "labels"
+    ],
+    "text": "Communities are spaces for conversation, questions and announcements, separate from course content.\nOpen Communities in the sidebar (or the communities page).\nPick a community, then open a discussion or start one.\nReply, upvote helpful posts, or add an emoji reaction.\nLabels categorise discussions so you can filter them.\nPinned discussions stay at the top.\nLocked discussions are read-only.\nModerating\nInstructors and admins can pin, lock and delete threads, and manage labels, from the Communities area of the dashboard."
+  },
+  {
+    "id": "community/boards",
+    "title": "Boards",
+    "summary": "Infinite collaborative whiteboards for group work and workshops, with Owner, Editor and Viewer access.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "whiteboard",
+      "canvas",
+      "sticky notes",
+      "brainstorm",
+      "miro",
+      "collaborate"
+    ],
+    "text": "A board is an infinite canvas several people can edit at once. Changes appear live for everyone.\nDraw freehand and add shapes, sticky notes and to-do cards.\nGroup content in frames.\nDrop in cards for web pages, YouTube videos, podcasts, course activities and playgrounds.\nCreate a board (instructors)\nGo to Boards in the dashboard and create a board.\nName it, set a thumbnail, and build the canvas.\nAdd members as Owner, Editor or Viewer.\nStuck on “connecting”?\nLive sync is briefly unavailable. Wait a moment and reload."
+  },
+  {
+    "id": "community/podcasts",
+    "title": "Podcasts",
+    "summary": "Publish audio series with episodes; learners listen with a mini-player or any podcast app via RSS.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "audio",
+      "episode",
+      "rss",
+      "listen",
+      "spotify",
+      "apple podcasts"
+    ],
+    "text": "Listening\nBrowse Podcasts, open one and press play. A mini-player keeps playing while you move around. Each podcast also has an RSS feed for your favourite podcast app.\nPublishing (instructors)\nGo to Podcasts in the dashboard and create a podcast with a name, description and cover.\nAdd episodes and upload their audio.\nReorder episodes to set the listening order.\nYou can submit the RSS feed to directories such as Apple Podcasts or Spotify yourself; ValidBridge does not publish there for you."
+  },
+  {
+    "id": "community/playgrounds",
+    "title": "Playgrounds (Labs)",
+    "summary": "Interactive AI-generated simulations and widgets that support a lesson.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "labs",
+      "simulation",
+      "interactive",
+      "widget",
+      "html"
+    ],
+    "text": "Playgrounds are interactive web experiences — simulations, visualisations and widgets — that instructors generate with AI. Find them under Playgrounds (or Labs) and react to give the author feedback.\nNot the Code Playground\nThe Code Playground is the code editor block inside a lesson."
+  },
+  {
+    "id": "community/content-areas",
+    "title": "The Library and other content areas",
+    "summary": "Where reusable resources live, and how content areas are switched on per organization.",
+    "audience": [
+      "instructors",
+      "admins"
+    ],
+    "keywords": [
+      "library",
+      "files",
+      "resources",
+      "assets",
+      "folders"
+    ],
+    "text": "Library — folders of reusable files and resources you can reference from courses.\nCommunities — discussion spaces.\nPodcasts — audio series.\nBoards — collaborative canvases.\nPlaygrounds — AI-generated interactive experiences.\nEach area is enabled per organization in Organization settings and appears in the sidebar when on.\nReuse, don’t duplicate\nKeep shared handouts and diagrams in the Library instead of uploading them to every course."
+  },
+  {
+    "id": "troubleshooting/sign-in",
+    "title": "Signing in & accounts",
+    "summary": "“You appear to be offline”, locked out after failed attempts, Google or SSO sign-in problems, unverified email.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "cannot log in",
+      "locked out",
+      "offline",
+      "password wrong",
+      "sso error",
+      "verification"
+    ],
+    "text": "“You appear to be offline”\nThe app cannot reach ValidBridge. Check your connection and reload. If it keeps happening, contact support.\n\nLocked out after several attempts\nSign-in is rate-limited after repeated failures. Wait a few minutes, or reset your password with Forgot password?.\n\nGoogle sign-in or sign-in links are missing\nYour organization has not enabled that method. Use email and password, or ask an admin (Users → Sign-in Methods).\n\nSSO fails or loops\nSign in from your organization's own sign-in page and check that your email domain is allowed. Your admin manages SSO settings.\n\nI never got the verification email\nCheck spam and promotions folders, then try again. See Signing in."
+  },
+  {
+    "id": "troubleshooting/content",
+    "title": "Courses, content & media",
+    "summary": "A course is not visible, uploads fail, captions never finish, or an embed is blank.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "course missing",
+      "upload failed",
+      "file too large",
+      "captions stuck",
+      "embed blank",
+      "video not playing"
+    ],
+    "text": "A course is not visible\nIt may be a draft, or restricted to a user group you are not in. Ask its owner to publish it or add you to the group.\n\nAn image or video will not upload\nCheck the format and size limits shown in the upload dialog — images are usually PNG, JPG or WebP; hosted video is MP4 or WebM.\n\nCaptions never finish\nCaption generation needs AI enabled and AI credits available. Check the status in the captions panel; if it stays stuck, contact support.\n\nA video embed is blank\nThe source may block embedding, or the video may be private.\n\nCo-editing or a board is stuck on “connecting”\nLive sync is temporarily unavailable. Your normal saves still work — only simultaneous editing pauses. Reload in a moment."
+  },
+  {
+    "id": "troubleshooting/assignments",
+    "title": "Assignments & grading",
+    "summary": "Cannot submit, work not saving near a deadline, no score on a formative assignment, a grade looks wrong.",
+    "audience": [
+      "learners"
+    ],
+    "keywords": [
+      "cannot submit",
+      "deadline passed",
+      "no grade",
+      "wrong grade"
+    ],
+    "text": "I can’t submit\nThe deadline may have passed or you may have used all attempts. Contact your instructor.\n\nMy work stopped saving\nNear the deadline you are warned before saving stops. Submit before the cut-off.\n\nNo score on my assignment\nFormative assignments are ungraded by design — they unlock a model answer instead.\n\nMy grade looks wrong\nAsk your instructor to review the submission."
+  },
+  {
+    "id": "troubleshooting/ai",
+    "title": "AI & credits",
+    "summary": "No Ask AI button, “out of credits”, or answers that seem off-topic.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "ai not working",
+      "credits",
+      "copilot missing"
+    ],
+    "text": "There is no Ask AI button\nAI is switched off for your organization. An admin can turn it on under Organization → AI.\n\n“Out of credits”\nYour organization's AI credits are used up. They renew with your plan, or an admin can add more.\n\nAnswers seem off-topic\nOpen the Copilot from the activity you are asking about so it has the right context."
+  },
+  {
+    "id": "troubleshooting/getting-help",
+    "title": "Contact support",
+    "summary": "Who to ask, how to report a problem, and how to write a support request that gets a fast answer.",
+    "audience": [
+      "everyone"
+    ],
+    "keywords": [
+      "support",
+      "contact",
+      "help desk",
+      "email",
+      "bug",
+      "report",
+      "feedback",
+      "ticket",
+      "stratnovo"
+    ],
+    "text": "Who to ask\nYour organization — for access to a course, grades, roles or a payment you made — your instructor or your organization's admins can fix these directly.\nValidBridge support — for bugs, outages, account problems and anything about how the platform works. Email support@validbridge.co.ke or use Help → Report Issue or Feedback in the app.\nAI Copilot — questions about course content — see Ask AI.\nWrite a request that gets solved quickly\nWhat you were trying to do, and what you expected.\nWhat happened instead — include the exact error text.\nThe page you were on, your role, and your organization.\nA screenshot if the problem is visual.\nValidBridge is built and supported by Stratnovo Systems.\nTry search first\nThe search box at the top of the Help Center searches every article, including these FAQs."
+  }
+]

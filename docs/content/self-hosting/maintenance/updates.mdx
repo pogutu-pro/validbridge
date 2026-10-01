@@ -1,0 +1,79 @@
+import { Callout } from 'nextra/components'
+
+# Updates
+
+Keeping ValidBridge up to date ensures you have the latest features, bug fixes, and security patches.
+
+## Updating ValidBridge
+
+Pull the latest changes and rebuild the stack with Docker Compose:
+
+```bash
+# 1. Back up your database (see Backups)
+# 2. Pull the latest code
+git pull
+
+# 3. Rebuild and restart
+docker compose up -d --build
+
+# 4. Apply database migrations
+docker compose exec backend sh -c "cd /app/api && uv run alembic upgrade head"
+```
+
+## Recommended Update Procedure
+
+```bash
+# 1. Review the release notes
+# https://github.com/pogutu-pro/validbridge/releases
+
+# 2. Back up your database (see Backups)
+
+# 3. Pull and rebuild
+git pull
+docker compose up -d --build
+
+# 4. Run database migrations
+docker compose exec backend sh -c "cd /app/api && uv run alembic upgrade head"
+
+# 5. Verify all services are healthy
+curl http://localhost:8000/api/v1/health
+
+# 6. Check logs for any errors
+docker compose logs -f
+```
+
+## Database Migrations
+
+ValidBridge uses [Alembic](https://alembic.sqlalchemy.org/) to evolve the database schema between versions. After pulling a new version, apply migrations with:
+
+```bash
+docker compose exec backend sh -c "cd /app/api && uv run alembic upgrade head"
+```
+
+<Callout type="warning">
+If you skip migrations, the new version of the app may error until they are applied.
+</Callout>
+
+## Rolling Back
+
+If an update causes issues, restore from your pre-upgrade backup and revert to the previous commit:
+
+```bash
+# Restore the database from a backup (see Backups)
+# Revert the code to the previous version
+git checkout <previous-version>
+
+# Restart the stack
+docker compose up -d --build
+```
+
+<Callout type="warning">
+Uploaded files stored on the filesystem (in the `content_data` Docker volume) are **not** included in the database backup. To back up uploaded files, use `docker volume export` or a volume-level snapshot provided by your hosting platform.
+</Callout>
+
+Review the [ValidBridge release notes](https://github.com/pogutu-pro/validbridge/releases) before updating to understand what has changed. Some updates may include:
+
+- New features or UI changes
+- Database migrations
+- Configuration changes that may require updating your `.env` file
+- Breaking changes (rare, documented in release notes with a migration guide)

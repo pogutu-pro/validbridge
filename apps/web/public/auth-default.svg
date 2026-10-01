@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 960" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#232323"/>
+      <stop offset="0.55" stop-color="#141414"/>
+      <stop offset="1" stop-color="#050505"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1440" height="960" fill="url(#bg)"/>
+
+  <!-- blueprint grid -->
+  <g stroke="#ffffff" stroke-opacity="0.035">
+    <path d="M0 120H1440M0 240H1440M0 360H1440M0 480H1440M0 600H1440M0 720H1440M0 840H1440"/>
+    <path d="M120 0V960M240 0V960M360 0V960M480 0V960M600 0V960M720 0V960M840 0V960M960 0V960M1080 0V960M1200 0V960M1320 0V960"/>
+  </g>
+
+  <!-- dotted grid -->
+  <g fill="#ffffff" fill-opacity="0.05">
+    <circle cx="120" cy="120" r="2"/><circle cx="360" cy="120" r="2"/><circle cx="600" cy="120" r="2"/><circle cx="840" cy="120" r="2"/><circle cx="1080" cy="120" r="2"/><circle cx="1320" cy="120" r="2"/>
+    <circle cx="240" cy="360" r="2"/><circle cx="480" cy="360" r="2"/><circle cx="720" cy="360" r="2"/><circle cx="960" cy="360" r="2"/><circle cx="1200" cy="360" r="2"/>
+    <circle cx="120" cy="600" r="2"/><circle cx="360" cy="600" r="2"/><circle cx="600" cy="600" r="2"/><circle cx="840" cy="600" r="2"/><circle cx="1080" cy="600" r="2"/><circle cx="1320" cy="600" r="2"/>
+    <circle cx="240" cy="840" r="2"/><circle cx="480" cy="840" r="2"/><circle cx="720" cy="840" r="2"/><circle cx="960" cy="840" r="2"/><circle cx="1200" cy="840" r="2"/>
+  </g>
+
+  <!-- bridge arches motif -->
+  <g fill="none" stroke="#FF5A1F" stroke-linecap="round">
+    <path d="M240 960 V900 A120 120 0 0 1 480 900 V960" stroke-opacity="0.30" stroke-width="3"/>
+    <path d="M330 960 V900 A120 120 0 0 1 570 900 V960" stroke-opacity="0.18" stroke-width="3"/>
+    <path d="M820 960 V820 A210 210 0 0 1 1240 820 V960" stroke-opacity="0.34" stroke-width="4"/>
+    <path d="M940 960 V820 A210 210 0 0 1 1360 820 V960" stroke-opacity="0.16" stroke-width="4"/>
+    <path d="M60 960 V880 A90 90 0 0 1 240 880 V960" stroke-opacity="0.16" stroke-width="3"/>
+  </g>
+
+  <!-- deck + pillar lines for the main bridge -->
+  <g stroke="#FF5A1F" stroke-linecap="round">
+    <line x1="820" y1="820" x2="1240" y2="820" stroke-opacity="0.28" stroke-width="4"/>
+    <line x1="900" y1="820" x2="900" y2="960" stroke-opacity="0.22" stroke-width="3"/>
+    <line x1="1160" y1="820" x2="1160" y2="960" stroke-opacity="0.22" stroke-width="3"/>
+    <line x1="820" y1="950" x2="1240" y2="950" stroke-opacity="0.14" stroke-width="3"/>
+  </g>
+
+  <!-- central bridge watermark -->
+  <g transform="translate(720 470)" fill="none" stroke="#FF5A1F" stroke-linecap="round" opacity="0.55">
+    <line x1="-88" y1="-8" x2="88" y2="-8" stroke-width="4"/>
+    <path d="M-64 -8 V-30 A64 64 0 0 1 64 -30 V-8" stroke-width="4"/>
+    <line x1="-48" y1="-8" x2="-48" y2="52" stroke-width="4"/>
+    <line x1="48" y1="-8" x2="48" y2="52" stroke-width="4"/>
+    <line x1="-88" y1="88" x2="88" y2="88" stroke-width="3" opacity="0.45"/>
+  </g>
+</svg>

@@ -1,0 +1,97 @@
+import {
+  Users,
+  UsersThree,
+  ShieldCheck,
+  UserPlus,
+  ClipboardText,
+} from '@phosphor-icons/react'
+import type { SearchMeta } from '@/lib/dashboard-search/types'
+
+export const searchMetas: SearchMeta[] = [
+  {
+    id: 'dash.users.list',
+    titleKey: 'dashboard.users.settings.tabs.users',
+    descriptionKey: 'dashboard.search.entries.users.description',
+    keywordsKey: 'dashboard.search.entries.users.keywords',
+    icon: Users,
+    href: '/dash/users/settings/users',
+    group: 'users',
+    aiSummary: 'User management: invite, edit and manage every user in the organization.',
+    aiHints: [
+      'How do I invite a user?',
+      'How do I change someone\'s role?',
+      'How do I deactivate a user?',
+    ],
+  },
+  {
+    id: 'dash.users.add',
+    titleKey: 'dashboard.users.settings.tabs.add',
+    descriptionKey: 'dashboard.search.entries.users_add.description',
+    keywordsKey: 'dashboard.search.entries.users_add.keywords',
+    icon: UserPlus,
+    href: '/dash/users/settings/add',
+    group: 'users',
+    aiSummary: 'Add users: invite by email, bulk import and set initial roles.',
+    aiHints: [
+      'How do I bulk import users?',
+      'How do I invite by email?',
+    ],
+  },
+  {
+    id: 'dash.users.usergroups',
+    titleKey: 'dashboard.users.settings.tabs.usergroups',
+    descriptionKey: 'dashboard.search.entries.usergroups.description',
+    keywordsKey: 'dashboard.search.entries.usergroups.keywords',
+    icon: UsersThree,
+    href: '/dash/users/settings/usergroups',
+    group: 'users',
+    aiSummary: 'User groups: organize users into groups for bulk actions and access control.',
+    aiHints: [
+      'How do I create a user group?',
+      'How do I add users to a group?',
+    ],
+  },
+  {
+    id: 'dash.users.roles',
+    titleKey: 'dashboard.users.settings.tabs.roles',
+    descriptionKey: 'dashboard.search.entries.roles.description',
+    keywordsKey: 'dashboard.search.entries.roles.keywords',
+    icon: ShieldCheck,
+    href: '/dash/users/settings/roles',
+    group: 'users',
+    aiSummary: 'Roles and permissions: the permission matrix and custom role creation.',
+    aiHints: [
+      'How do I create a custom role?',
+      'What permissions does each role have?',
+      'How do I edit a role?',
+    ],
+  },
+  {
+    id: 'dash.users.signups',
+    titleKey: 'dashboard.users.settings.tabs.signups',
+    descriptionKey: 'dashboard.search.entries.signups.description',
+    keywordsKey: 'dashboard.search.entries.signups.keywords',
+    icon: UserPlus,
+    href: '/dash/users/settings/signups',
+    group: 'users',
+    aiSummary: 'Sign-up settings: open registration, invite-only and approval flows.',
+    aiHints: [
+      'How do I enable open signup?',
+      'How do I make signup invite-only?',
+    ],
+  },
+  {
+    id: 'dash.users.audit_logs',
+    titleKey: 'dashboard.users.settings.tabs.audit_logs',
+    descriptionKey: 'dashboard.search.entries.users_audit_logs.description',
+    keywordsKey: 'dashboard.search.entries.users_audit_logs.keywords',
+    icon: ClipboardText,
+    href: '/dash/users/settings/audit-logs',
+    group: 'users',
+    aiSummary: 'Audit logs: a record of administrative actions across the organization.',
+    aiHints: [
+      'How do I view the audit log?',
+      'How do I export audit logs?',
+    ],
+  },
+]

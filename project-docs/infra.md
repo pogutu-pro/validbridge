@@ -437,7 +437,7 @@ A second Oracle VM in a **separate tenancy** (the owner's brother's account):
 A1.Flex **arm64**, Ubuntu 24.04, cgroup v2. No public ports except SSH; linked
 to Server A by **WireGuard** (A `10.66.0.1` ↔ B `10.66.0.2`, UDP 51820).
 Full setup, the Judge0-vs-Piston decision and templates:
-**[`infra/server-b/README.md`](infra/server-b/README.md)**.
+**[`infra/server-b/README.md`](../infra/server-b/README.md)**.
 
 - [x] Docker Engine + compose, `wireguard-tools`, unattended security upgrades (2026-09-25)
 - [x] WireGuard tunnel A ↔ B live (`wg-quick@wg0` on both)

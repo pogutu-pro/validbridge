@@ -227,7 +227,7 @@ swapping containers, health-checks the running stack, and rolls back the
 application automatically on failure. The production `.env` is never touched by
 deploys.
 
-**See [`DEPLOYMENT.md`](DEPLOYMENT.md)** for the full setup guide, operator
+**See [`DEPLOYMENT.md`](project-docs/DEPLOYMENT.md)** for the full setup guide, operator
 procedures, and rollback instructions.
 
 ## Project structure

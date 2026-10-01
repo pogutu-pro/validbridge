@@ -57,7 +57,7 @@ function Arrow() {
 
 function Hero() {
   return (
-    <section className="px-5 pb-20 pt-16 sm:px-8 md:pb-28 md:pt-24">
+    <section className="s-hero-bg px-5 pb-20 pt-16 sm:px-8 md:pb-28 md:pt-24">
       <div className="s-narrow text-center">
         <div className="s-tag s-rise mb-7">
           <span className="s-pulse inline-block h-1.5 w-1.5 rounded-full bg-[var(--s-accent)]" aria-hidden />
@@ -83,38 +83,19 @@ function Hero() {
       </div>
 
       <div
-        className="s-rise relative mx-auto mt-16 max-w-[1080px] md:mt-20"
+        className="s-rise relative mx-auto mt-16 max-w-[1280px] md:mt-20"
         style={{ animationDelay: '300ms', animationDuration: '1s' }}
       >
-        <div className="s-glow" aria-hidden />
-        <div className="s-frame relative">
-          <div className="s-chrome" aria-hidden>
-            <div className="s-chrome-dot" />
-            <div className="s-chrome-dot" />
-            <div className="s-chrome-dot" />
-          </div>
-          <Image
-            src="/site-screen-courses.png"
-            alt="A ValidBridge organization's course catalogue"
-            width={1810}
-            height={969}
-            priority
-            sizes="(min-width: 1120px) 1080px, 100vw"
-            className="block aspect-[1810/969] w-full object-cover object-top"
-          />
-        </div>
-        <div className="absolute -bottom-8 end-3 w-[150px] rounded-[18px] bg-white p-2.5 shadow-[var(--s-shadow-lg)] ring-1 ring-[var(--s-divider)] sm:end-[-20px] sm:w-[240px] sm:p-3">
-          <div className="mb-2 flex items-center gap-1.5 px-1 text-[11px] font-semibold text-[var(--s-muted)]">
-            <span className="s-pulse inline-block h-1.5 w-1.5 rounded-full bg-[var(--s-accent)]" aria-hidden />
-            Live classroom
-          </div>
-          <Image
-            src="/site-screen-live-lessons-crop.png"
-            alt="A live lesson in progress"
-            width={500}
-            height={260}
-            sizes="240px"
-            className="block aspect-[500/260] w-full rounded-[10px] object-cover object-top"
+        <div className="s-hero-frame relative">
+          <video
+            className="block aspect-video w-full object-cover"
+            src="/hero.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-label="ValidBridge in action"
           />
         </div>
       </div>
@@ -150,15 +131,9 @@ function LiveBridge() {
     [ChatsCircle, 'Keep everyone involved', "Chat, Q&A, polls and live quizzes built from your course's own content."],
     [UsersThree, 'Attendance done for you', 'Present, late, left early, partial or absent, recorded per student.'],
   ]
-  const tiles = [
-    ['WN', 'Ms. Wanjiru', 'Presenting'],
-    ['BO', 'Brian O.', ''],
-    ['AK', 'Amina K.', ''],
-    ['JM', 'John M.', ''],
-  ]
   return (
     <section id="livebridge" className="s-section s-surface scroll-mt-16">
-      <div className="s-container grid items-center gap-16 lg:grid-cols-[1fr_1.1fr]">
+      <div className="s-container grid !max-w-[1360px] items-center gap-12 lg:grid-cols-[520px_1fr] lg:gap-16">
         <Reveal>
           <div className="s-eyebrow">LiveBridge</div>
           <h2 className="!mb-6">Live classes, without leaving your course.</h2>
@@ -177,67 +152,18 @@ function LiveBridge() {
           </div>
         </Reveal>
 
-        <Reveal delay={0.1} className="pb-8">
-          <div className="s-frame relative" aria-hidden>
-            <div className="s-chrome !justify-between">
-              <span className="flex items-center gap-2 text-[13px] font-semibold text-[var(--s-text)]">
-                <span className="s-pulse inline-block h-2 w-2 rounded-full bg-[var(--s-accent)]" />
-                Live · Biology, Form 3
-              </span>
-              <span className="text-xs font-medium text-[var(--s-subtle)]">28 joined</span>
-            </div>
-            <div className="grid gap-4 p-4 sm:grid-cols-[1fr_210px] sm:p-5">
-              <div className="grid grid-cols-2 gap-3">
-                {tiles.map(([initials, name, tag], i) => (
-                  <div
-                    key={name}
-                    className={`relative flex aspect-[4/3] items-center justify-center rounded-2xl bg-[var(--s-surface)] ${
-                      i === 0 ? 'ring-2 ring-[var(--s-accent)]' : ''
-                    }`}
-                  >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-sm font-bold text-[var(--s-text)] shadow-[var(--s-shadow-sm)]">
-                      {initials}
-                    </span>
-                    <span className="absolute bottom-2 start-2 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-[var(--s-text)]">
-                      {name}
-                    </span>
-                    {tag && (
-                      <span className="absolute end-2 top-2 rounded-full bg-[var(--s-accent)] px-2 py-0.5 text-[10px] font-semibold text-white">
-                        {tag}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="rounded-2xl bg-[var(--s-surface)] p-4">
-                  <div className="mb-3 text-xs font-semibold text-[var(--s-text)]">Poll: which topic next?</div>
-                  {[
-                    ['Photosynthesis', 60],
-                    ['Respiration', 28],
-                    ['Cell division', 12],
-                  ].map(([label, pct]) => (
-                    <div key={label as string} className="mb-2 last:mb-0">
-                      <div className="mb-1 flex justify-between text-[11px] text-[var(--s-muted)]">
-                        <span>{label}</span>
-                        <span className="tabular-nums">{pct}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-[var(--s-surface-2)]">
-                        <div className="h-1.5 rounded-full bg-[var(--s-accent)]" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="rounded-2xl bg-[var(--s-surface)] p-4">
-                  <div className="mb-2 text-xs font-semibold text-[var(--s-text)]">Attendance</div>
-                  <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold">
-                    <span className="rounded-full bg-[var(--s-accent-100)] px-2 py-0.5 text-[var(--s-accent-700)]">24 present</span>
-                    <span className="rounded-full bg-white px-2 py-0.5 text-[var(--s-muted)]">3 late</span>
-                    <span className="rounded-full bg-white px-2 py-0.5 text-[var(--s-muted)]">1 left early</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <Reveal delay={0.1}>
+          <div className="s-hero-frame">
+            <video
+              className="block aspect-video w-full object-cover"
+              src="/livebridge.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="A live class running in LiveBridge"
+            />
           </div>
         </Reveal>
       </div>
@@ -248,7 +174,7 @@ function LiveBridge() {
 function Editor() {
   return (
     <section className="s-section">
-      <div className="s-container grid items-center gap-16 lg:grid-cols-[1fr_1.1fr]">
+      <div className="s-container grid !max-w-[1360px] items-center gap-12 lg:grid-cols-[520px_1fr] lg:gap-16">
         <Reveal>
           <div className="s-eyebrow">Course builder</div>
           <h2 className="!mb-6">Build a complete course in an afternoon.</h2>
@@ -273,42 +199,17 @@ function Editor() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="s-frame" aria-hidden>
-            <div className="s-chrome">
-              <span className="text-[13px] font-semibold text-[var(--s-muted)]">Lesson 4 · Photosynthesis</span>
-            </div>
-            <div className="p-6 sm:p-8">
-              <div className="mb-3 h-3 w-[60%] rounded-full bg-[var(--s-surface-2)]" />
-              <div className="mb-3 h-3 w-[85%] rounded-full bg-[var(--s-surface-2)]" />
-              <div className="relative mb-6 h-3 w-[40%] rounded-full bg-[var(--s-surface-2)]">
-                <span className="absolute -end-1 -top-5 rounded-md bg-[var(--s-accent)] px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                  Maya
-                </span>
-              </div>
-              <div className="mb-5 inline-flex items-center gap-2 rounded-xl bg-[var(--s-text)] px-3.5 py-2 text-[13px] font-semibold text-white">
-                / <span className="text-[var(--s-accent-400)]">Quiz</span>
-              </div>
-              <div className="mb-5 rounded-2xl bg-[var(--s-surface)] p-4">
-                <div className="mb-3 text-xs font-semibold text-[var(--s-subtle)]">What do plants release?</div>
-                <div className="flex flex-col gap-2 text-[13px]">
-                  <div className="flex justify-between rounded-xl bg-[var(--s-accent-100)] px-3 py-2 font-semibold text-[var(--s-accent-700)]">
-                    Oxygen <span>✓</span>
-                  </div>
-                  <div className="rounded-xl bg-white px-3 py-2 text-[var(--s-muted)]">Nitrogen</div>
-                </div>
-              </div>
-              <div className="flex gap-4 rounded-2xl bg-[var(--s-surface)] p-4">
-                {[
-                  ['EN', '95%'],
-                  ['SW', '80%'],
-                ].map(([lang, w]) => (
-                  <div key={lang} className="flex-1">
-                    <div className="mb-1.5 text-[11px] font-semibold text-[var(--s-accent-700)]">{lang}</div>
-                    <div className="h-2 rounded-full bg-[var(--s-surface-2)]" style={{ width: w }} />
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="s-hero-frame">
+            <video
+              className="block aspect-video w-full object-cover"
+              src="/validbridge_screen_only_autograded_showcase.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Building a course in the ValidBridge course builder"
+            />
           </div>
         </Reveal>
       </div>
@@ -398,17 +299,15 @@ function Payments() {
           </ul>
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="rounded-[var(--s-r-lg)] bg-[var(--s-surface)] p-6 sm:p-12">
-            <div className="s-frame mx-auto max-w-[440px] !rounded-[var(--s-r-md)]">
-              <Image
-                src="/site-screen-mpesa-checkout.png"
-                alt="Course checkout with M-Pesa and card options"
-                width={487}
-                height={471}
-                sizes="(min-width: 1024px) 440px, 90vw"
-                className="block w-full"
-              />
-            </div>
+          <div className="s-hero-frame">
+            <Image
+              src="/payment.png"
+              alt="A ValidBridge course checkout with M-Pesa, Airtel Money and card options"
+              width={1024}
+              height={577}
+              sizes="(min-width: 1024px) 560px, 100vw"
+              className="block aspect-[1024/577] w-full object-cover"
+            />
           </div>
         </Reveal>
       </div>

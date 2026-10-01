@@ -150,6 +150,51 @@
 }
 .vb-site .s-chrome-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--s-surface-2); }
 
+/* Hero background: a fine, even dot grid in warm neutral with sparse brand-orange
+   accents, plus two hairline guides running up from the video frame's edges.
+   The dots run evenly across the whole hero, behind the text too, and fade only at the top and bottom.
+   Desktop only. */
+.vb-site .s-hero-bg { position: relative; isolation: isolate; }
+@media (min-width: 1024px) {
+  .vb-site .s-hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(rgb(255 90 31 / 0.55) 0.9px, transparent 1.3px) 0 0 / 96px 96px,
+      radial-gradient(rgb(60 50 45 / 0.2) 0.8px, transparent 1.2px) 0 0 / 16px 16px,
+      radial-gradient(ellipse 75% 85% at 50% 38%, transparent 45%, rgb(20 20 20 / 0.035) 100%);
+    -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+  }
+}
+@media (min-width: 1320px) {
+  .vb-site .s-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(rgb(20 20 20 / 0.12), rgb(20 20 20 / 0.12)) calc(50% - 640px) 0 / 1px 100% no-repeat,
+      linear-gradient(rgb(20 20 20 / 0.12), rgb(20 20 20 / 0.12)) calc(50% + 639px) 0 / 1px 100% no-repeat;
+    -webkit-mask-image: linear-gradient(transparent 5%, #000 40%, #000 80%, transparent 100%);
+    mask-image: linear-gradient(transparent 5%, #000 40%, #000 80%, transparent 100%);
+  }
+}
+
+/* Hero video frame: sharp, neutral hairline border that blends with the page. */
+.vb-site .s-hero-frame {
+  padding: 0;
+  border-radius: 0;
+  background: var(--s-bg);
+  border: 1px solid var(--s-divider-strong);
+  box-shadow: 0 24px 60px -32px rgb(0 0 0 / 0.18);
+}
+.vb-site .s-hero-frame video { display: block; border-radius: 0; background: var(--s-surface); }
+
 /* Soft brand glow behind hero media. */
 .vb-site .s-glow {
   position: absolute;

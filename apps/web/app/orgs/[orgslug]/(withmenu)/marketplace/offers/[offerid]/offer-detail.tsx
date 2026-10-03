@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatCurrency } from '@/lib/format'
 import Link from 'next/link'
@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { getUriWithOrg } from '@services/config/config'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { getOfferCheckoutSession } from '@services/payments/offers'
+import { getOfferCheckoutSession, verifyOfferCheckout } from '@services/payments/offers'
 import {
   ArrowLeft, RefreshCcw, SquareCheck, Sparkles, BookOpen,
   Mic, Puzzle, AlertCircle, Loader2, ShoppingBag
@@ -40,6 +40,25 @@ function resourceIcon(type: string, size = 14) {
     case 'podcast': return <Mic size={size} className="text-pink-400" />
     default: return <Puzzle size={size} className="text-gray-400" />
   }
+}
+
+type CheckoutMethod = {
+  method: 'mobile_money' | 'card'
+  label: string
+  fee_percent: number
+  fee: number
+  total: number
+}
+
+// Same rounding as the server (whole currency units, never short of the
+// price after Paystack's fee), in integer basis points so no float drift.
+// Display only: the server computes the amount actually charged.
+function totalWithFee(base: number, feePercent: number): number {
+  const baseMinor = Math.round(base * 100)
+  const bps = Math.round(feePercent * 100)
+  if (bps <= 0 || baseMinor <= 0) return base
+  const grossMinor = Math.ceil((baseMinor * 10000) / (10000 - bps))
+  return Math.ceil(grossMinor / 100)
 }
 
 function stripTypePrefix(uuid: string): string {
@@ -103,9 +122,36 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
   const session = useVBSession() as any
   const token = session?.data?.tokens?.access_token ?? access_token
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<false | 'default' | 'mobile_money' | 'card'>(false)
   const [customAmount, setCustomAmount] = useState<string>('')
   const { track } = useVBAnalytics('learner')
+  const verifiedRef = useRef(false)
+
+  // Back from Paystack (?reference=…): confirm the payment right away so the
+  // buyer gets access now, not whenever the webhook lands.
+  useEffect(() => {
+    if (verifiedRef.current || !token || typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const reference = params.get('reference') || params.get('trxref')
+    if (!reference) return
+    verifiedRef.current = true
+    track(AnalyticsEvent.CheckoutReturned, { offer_uuid: offerUuid })
+    const clean = () => window.history.replaceState(null, '', window.location.pathname)
+    verifyOfferCheckout(orgId, reference, token)
+      .then((res) => {
+        const status = res?.data?.status
+        if (status === 'paid') {
+          toast.success('Payment received — you now have access.')
+          router.refresh()
+        } else if (status === 'pending') {
+          toast('Payment is processing. Access will unlock in a moment.')
+        } else if (status) {
+          toast.error('The payment did not go through. You have not been charged for access.')
+        }
+      })
+      .catch(() => {})
+      .finally(clean)
+  }, [token, orgId, offerUuid, router, track])
 
   useTrackView(
     AnalyticsEvent.OfferViewed,
@@ -138,7 +184,11 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
     : []
   const resources: Resource[] = offer.included_resources ?? []
 
-  const handleCheckout = async () => {
+  const checkoutMethods: CheckoutMethod[] | null = Array.isArray(offer?.checkout_methods) && offer.checkout_methods.length
+    ? offer.checkout_methods
+    : null
+
+  const handleCheckout = async (method?: CheckoutMethod['method']) => {
     if (!token) {
       track(AnalyticsEvent.CheckoutLoginRedirected, { redirect_target: `/marketplace/offers/${offerUuid}` })
       router.push(getUriWithOrg(orgslug, `/login?redirect=/marketplace/offers/${offerUuid}`))
@@ -159,14 +209,14 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
       amount: chosenAmount ?? offer.amount,
       currency: offer.currency,
     })
-    setLoading(true)
+    setLoading(method ?? 'default')
     try {
-      const redirectUri = window.location.href
-      const result = await getOfferCheckoutSession(orgId, offerUuid, redirectUri, token, chosenAmount)
+      const redirectUri = window.location.origin + window.location.pathname
+      const result = await getOfferCheckoutSession(orgId, offerUuid, redirectUri, token, chosenAmount, method)
       const url = result?.data?.checkout_url
       if (url) {
         track(AnalyticsEvent.CheckoutSessionCreated, { offer_type: offer.offer_type, amount: chosenAmount ?? offer.amount })
-        window.location.href = url
+        window.location.assign(url)
       } else {
         track(AnalyticsEvent.CheckoutSessionFailed, { failure_reason: 'no_checkout_url' })
         toast.error('Could not start checkout. Please try again.')
@@ -269,22 +319,66 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
                 )}
               </div>
 
-              {/* Checkout */}
-              <button
-                onClick={handleCheckout}
-                disabled={loading}
-                className={`w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
-                  isSubscription
-                    ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                    : 'bg-gray-900 hover:bg-gray-800 text-white'
-                }`}
-              >
-                {loading ? (
-                  <><Loader2 size={15} className="animate-spin" /> Processing…</>
-                ) : (
-                  <>{isSubscription ? 'Subscribe' : 'Get access'}</>
-                )}
-              </button>
+              {/* Checkout — one button per payment method when the learner
+                  pays the processing fee, so each shows its exact total. */}
+              {checkoutMethods ? (
+                <div className="space-y-2.5">
+                  {checkoutMethods.map((m) => {
+                    const base = offer.price_type === 'customer_choice'
+                      ? Math.max(Number(customAmount || offer.amount) || offer.amount, offer.amount)
+                      : offer.amount
+                    const total = offer.price_type === 'customer_choice' ? totalWithFee(base, m.fee_percent) : m.total
+                    const fee = Math.max(total - base, 0)
+                    const primary = m.method === 'mobile_money' || checkoutMethods.length === 1
+                    return (
+                      <div key={m.method}>
+                        <button
+                          onClick={() => handleCheckout(m.method)}
+                          disabled={!!loading}
+                          className={`w-full flex items-center justify-between gap-2 py-3 px-4 rounded-xl font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            primary
+                              ? isSubscription ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-gray-900 hover:bg-gray-800 text-white'
+                              : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-900'
+                          }`}
+                        >
+                          {loading === m.method ? (
+                            <span className="flex items-center gap-2 mx-auto"><Loader2 size={15} className="animate-spin" /> Processing…</span>
+                          ) : (
+                            <>
+                              <span>
+                                {isSubscription ? 'Subscribe with ' : 'Pay with '}
+                                {m.method === 'mobile_money' ? 'M-PESA' : 'card'}
+                              </span>
+                              <span>{formatCurrency(total, offer.currency, i18n.language)}</span>
+                            </>
+                          )}
+                        </button>
+                        {fee > 0 && (
+                          <p className="text-[11px] text-gray-400 mt-1 text-center">
+                            Includes {formatCurrency(fee, offer.currency, i18n.language)} payment processing fee
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleCheckout()}
+                  disabled={!!loading}
+                  className={`w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                    isSubscription
+                      ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                      : 'bg-gray-900 hover:bg-gray-800 text-white'
+                  }`}
+                >
+                  {loading ? (
+                    <><Loader2 size={15} className="animate-spin" /> Processing…</>
+                  ) : (
+                    <>{isSubscription ? 'Subscribe' : 'Get access'}</>
+                  )}
+                </button>
+              )}
 
               {isSubscription && (
                 <p className="text-xs text-center text-gray-400 mt-3">

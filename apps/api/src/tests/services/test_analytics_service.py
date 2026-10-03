@@ -160,10 +160,12 @@ class TestAnalyticsSendEvent:
 
 class TestAnalyticsIngestClient:
     def test_get_ingest_client_missing_config_returns_none(self):
+        # Start from no cached client, as the singleton test does: a client
+        # built earlier in the run would be returned without reading config.
         with patch(
             "src.services.analytics.analytics.get_validbridge_config",
             return_value=_make_config(),
-        ):
+        ), patch.object(analytics_module, "_ingest_client", None):
             assert _get_ingest_client() is None
 
     def test_get_ingest_client_builds_and_reuses_singleton(self):

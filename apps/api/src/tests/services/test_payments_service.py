@@ -105,6 +105,10 @@ def _patch_provider(monkeypatch, *, verify=True, credentials=None):
         AsyncMock(return_value=creds),
     )
     monkeypatch.setattr(
+        "src.services.payments.service.paystack.webhook_secret_keys",
+        AsyncMock(return_value=[creds.secret_key]),
+    )
+    monkeypatch.setattr(
         "src.services.payments.service.paystack.verify_webhook_signature",
         lambda sk, body, sig: verify,
     )
@@ -520,6 +524,7 @@ async def test_billing_overview_enriches_active_subscription(monkeypatch):
                     "status": "success",
                     "created_at": "2026-01-01T00:00:00.000Z",
                     "metadata": {"offer_id": 5},
+                    "customer": {"id": 1, "email": "buyer@example.com"},
                 }
             ]
         ),

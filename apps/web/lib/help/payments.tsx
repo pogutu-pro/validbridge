@@ -23,23 +23,31 @@ export const payments: HelpCategory = {
   id: 'payments',
   title: `Payments (${PROVIDER})`,
   icon: 'card',
-  description: `Sell courses with your own ${PROVIDER} account: connect your keys, create offers and bundles, and see who has paid.`,
+  description: `Sell courses and get paid to your bank — no ${PROVIDER} account needed — or connect your own. Create offers and bundles, and see who has paid.`,
   articles: [
     {
       id: 'payments-overview',
       title: 'How payments work',
-      summary: `ValidBridge uses ${PROVIDER} with bring-your-own keys: your organization connects its own ${PROVIDER} account and learners' payments go straight to it.`,
+      summary: `Learners pay through ${PROVIDER}. Get paid straight to your bank with just your bank details, or connect your own ${PROVIDER} account.`,
       audience: ['admins'],
-      keywords: ['payments', 'sell', 'monetize', 'byok', 'bring your own key', 'merchant', 'paystack', 'mpesa', 'm-pesa'],
+      keywords: ['payments', 'sell', 'monetize', 'byok', 'bring your own key', 'merchant', 'paystack', 'mpesa', 'm-pesa', 'bank', 'payout'],
       content: (ctx) => (
         <div className="space-y-4">
           <P>
-            Payments in ValidBridge run on <strong>{PROVIDER}</strong> using a{' '}
-            <strong>bring-your-own-key</strong> model. Each organization connects its{' '}
-            <em>own</em> {PROVIDER} merchant account by pasting its API keys. Learners pay on{' '}
-            {PROVIDER}&apos;s secure checkout page and the money settles directly into your{' '}
-            {PROVIDER} account — ValidBridge never holds your funds.
+            Payments in ValidBridge run on <strong>{PROVIDER}</strong>. Learners pay on{' '}
+            {PROVIDER}&apos;s secure checkout page. You choose how you get paid:
           </P>
+          <Bullets>
+            <li>
+              <strong>Get paid to M-PESA or your bank</strong> (recommended) — no {PROVIDER}{' '}
+              account needed. Enter your M-PESA, till, Airtel Money or bank details once and{' '}
+              {PROVIDER} pays each sale straight to you.
+            </li>
+            <li>
+              <strong>Use your own {PROVIDER} account</strong> — if you already have one,
+              connect it with your API keys and the money settles into it.
+            </li>
+          </Bullets>
           <H4>The flow at a glance</H4>
           <Steps>
             <Step>
@@ -77,7 +85,7 @@ export const payments: HelpCategory = {
               ['Overview', 'Every customer, the offer they bought, amount, status and since when.'],
               ['Offers', 'The things you sell: price, type and the courses they unlock.'],
               ['Payment Groups', 'Bundles of courses sold together, optionally mirrored into a user group.'],
-              ['Configuration', `Connect, update or remove your ${PROVIDER} keys.`],
+              ['Configuration', `Choose how you get paid: your bank details, or your own ${PROVIDER} keys.`],
             ]}
           />
           <Callout kind="info" title="Turn the feature on first">
@@ -90,65 +98,87 @@ export const payments: HelpCategory = {
     },
     {
       id: 'connect-paystack',
-      title: `Connect your ${PROVIDER} account`,
-      summary: `Paste your ${PROVIDER} secret key (and optional public key), activate it, and point ${PROVIDER}'s webhook at ValidBridge.`,
+      title: 'Set up how you get paid',
+      summary: `Get paid to M-PESA, a till, Airtel Money or a bank (no ${PROVIDER} account needed), or connect your own ${PROVIDER} account.`,
       audience: ['admins'],
-      keywords: ['connect', 'api key', 'secret key', 'public key', 'webhook', 'configuration', 'setup', 'test mode', 'live mode'],
+      keywords: ['connect', 'bank', 'bank details', 'payout', 'account number', 'mpesa', 'm-pesa', 'till', 'airtel', 'verify', 'verification', 'api key', 'secret key', 'public key', 'webhook', 'configuration', 'setup', 'test mode', 'live mode'],
       content: () => (
         <div className="space-y-4">
-          <H4>Before you start</H4>
-          <Bullets>
-            <li>
-              A {PROVIDER} business account (create one at{' '}
+          <P>
+            Go to <UI>Payments</UI> → <UI>Configuration</UI> (you need the Admin role) and
+            pick one of the two options.
+          </P>
+          <H4>Option A: Get paid to M-PESA or your bank</H4>
+          <P>The quickest way. You do not need a {PROVIDER} account.</P>
+          <Steps>
+            <Step>Click <UI>Get paid to M-PESA or your bank</UI>.</Step>
+            <Step>
+              Choose how you are paid: <UI>M-PESA</UI> (a phone number), <UI>M-PESA Till</UI>{' '}
+              (a Buy Goods till number), <UI>Bank account</UI> or <UI>Airtel Money</UI>.
+            </Step>
+            <Step>Enter the number and the name on the account, then click <UI>Continue</UI>.</Step>
+            <Step>
+              Check the summary carefully and click <UI>Yes, start accepting payments</UI>.
+            </Step>
+          </Steps>
+          <Callout kind="warn" title="Double-check the number">
+            In Kenya, {PROVIDER} cannot look up the account holder&apos;s name, so a mistyped number
+            would send your money to someone else. The summary step is there to catch this.
+          </Callout>
+          <H4>Verification before the first payout</H4>
+          <P>
+            You can start selling as soon as you save. Before the first payout, ValidBridge confirms
+            your payout details; until then the page shows <UI>Verifying your payout details</UI> and
+            your earnings are held safely. Once verified, each sale is paid out automatically,
+            usually within one or two business days. If you change your payout details, they are
+            verified again.
+          </P>
+          <P>
+            ValidBridge takes 0% of your sales. {PROVIDER}&apos;s processing fee is added on top
+            for the learner — they choose <UI>Pay with M-PESA</UI> or <UI>Pay with card</UI> and
+            see the exact total — so you receive your full price. Subscriptions are paid by card.
+            M-PESA Paybill numbers are not supported yet — use a till, phone or bank account.
+          </P>
+          <H4>Option B: Use your own {PROVIDER} account</H4>
+          <Steps>
+            <Step>
+              In the {PROVIDER} Dashboard (
               <ProseLink href={PAYMENT_PROVIDER.dashboardUrl} external>
                 dashboard.paystack.com
               </ProseLink>
-              ), activated for live payments when you are ready to charge real money.
-            </li>
-            <li>The Admin role in your ValidBridge organization.</li>
-          </Bullets>
-          <H4>1. Copy your keys from {PROVIDER}</H4>
-          <P>
-            In the {PROVIDER} Dashboard, open <UI>{PAYMENT_PROVIDER.keysLocation}</UI>. Copy
-            the <strong>secret key</strong> (starts with <code>sk_live_</code> or{' '}
-            <code>sk_test_</code>) and, optionally, the <strong>public key</strong> (
-            <code>pk_live_</code> / <code>pk_test_</code>).
-          </P>
-          <H4>2. Paste them into ValidBridge</H4>
-          <Steps>
-            <Step>In the dashboard, go to <UI>Payments</UI> → <UI>Configuration</UI>.</Step>
-            <Step>On the {PROVIDER} card, click <UI>Connect</UI>.</Step>
-            <Step>Paste the <UI>Secret key</UI> and, if you like, the <UI>Public key</UI>.</Step>
-            <Step>Click <UI>Save &amp; Activate</UI>. The card shows <UI>Connected</UI>.</Step>
+              ), open <UI>{PAYMENT_PROVIDER.keysLocation}</UI> and copy your{' '}
+              <strong>secret key</strong> (<code>sk_live_</code> or <code>sk_test_</code>)
+              and, optionally, your <strong>public key</strong>.
+            </Step>
+            <Step>
+              In ValidBridge, click <UI>I already have a {PROVIDER} account</UI>, paste the
+              keys and click <UI>Connect</UI>. ValidBridge checks them with {PROVIDER}{' '}
+              before saving, and tells you if a key is wrong or if you mixed test and live
+              keys.
+            </Step>
+            <Step>
+              In the same {PROVIDER} settings page, set the <strong>Webhook URL</strong> to
+              your ValidBridge API address followed by{' '}
+              <code>{PAYMENT_PROVIDER.webhookPath}</code>. ValidBridge uses it to hear about
+              renewals, cancellations and refunds.
+            </Step>
           </Steps>
-          <H4>3. Set the webhook URL in {PROVIDER}</H4>
           <P>
-            This step is essential: ValidBridge unlocks a course when {PROVIDER} tells it a
-            payment succeeded. In the same {PROVIDER} settings page, set the{' '}
-            <strong>Webhook URL</strong> to your ValidBridge API address followed by{' '}
-            <code>{PAYMENT_PROVIDER.webhookPath}</code> — the Configuration page shows the
-            path. {PROVIDER} signs each notification with your secret key and ValidBridge
-            rejects anything it cannot verify.
+            Test with your <code>sk_test_</code> key and {PROVIDER}&apos;s test cards first,
+            then click <UI>Update keys</UI> and switch to your live key (and the live webhook
+            URL).
           </P>
-          <Callout kind="warn" title="No webhook, no access">
-            If the webhook is missing or wrong, learners are charged but their course stays
-            locked. If you are not sure of your API address, contact support before going
-            live.
-          </Callout>
-          <H4>Test first</H4>
-          <P>
-            Use your <code>sk_test_</code> key to try the whole flow with {PROVIDER}&apos;s
-            test cards, then click <UI>Update keys</UI> and switch to your live key (and
-            the live webhook URL) when you are ready.
-          </P>
-          <H4>Updating or removing keys</H4>
+          <H4>Switching or turning off</H4>
           <Bullets>
-            <li><UI>Update keys</UI> replaces the stored keys, for example after rotating them in {PROVIDER}.</li>
-            <li><UI>Remove</UI> disconnects {PROVIDER} and disables payments for the organization.</li>
+            <li>You can switch between the two options at any time from the same page.</li>
+            <li>
+              <UI>Turn off</UI> stops new sales. Learners who already paid keep their access.
+            </li>
           </Bullets>
-          <Callout kind="info" title="Your keys are protected">
-            The secret key is encrypted before it is stored, is only used by the ValidBridge
-            server to talk to {PROVIDER}, and is never shown to learners.
+          <Callout kind="info" title="Your details are protected">
+            Secret keys are encrypted before they are stored and are only used by the
+            ValidBridge server. Only the last four digits of your bank account are kept on
+            ValidBridge.
           </Callout>
         </div>
       ),
@@ -243,13 +273,14 @@ export const payments: HelpCategory = {
               <ProseLink href={appHref(ctx, '/marketplace')}>marketplace</ProseLink>.
             </Step>
             <Step>
-              Click <UI>Get access</UI> (one-time) or <UI>Subscribe</UI>. For
-              pay-what-you-want offers, enter an amount at or above the minimum. Sign in if
+              Click the button for how you want to pay — for example <UI>Pay with M-PESA</UI>{' '}
+              or <UI>Pay with card</UI> (subscriptions are paid by card). Each button shows the
+              exact total, including the small payment processing fee for that method. For
+              pay-what-you-want offers, enter an amount at or above the minimum first. Sign in if
               asked.
             </Step>
             <Step>
-              You are taken to {PROVIDER}&apos;s secure checkout. Pay with any method it
-              offers you.
+              You are taken to {PROVIDER}&apos;s secure checkout to complete the payment.
             </Step>
             <Step>
               You return to ValidBridge and the course unlocks as soon as {PROVIDER}{' '}
@@ -264,8 +295,8 @@ export const payments: HelpCategory = {
             </Def>
           </Defs>
           <Callout kind="info" title="Who you are paying">
-            You pay the organization that runs the course, through its own {PROVIDER}{' '}
-            account. For refunds or questions about a charge, contact that organization.
+            You pay the organization that runs the course, through {PROVIDER}. For refunds
+            or questions about a charge, contact that organization.
           </Callout>
         </div>
       ),
@@ -292,16 +323,19 @@ export const payments: HelpCategory = {
           </P>
           <H4>Refunds</H4>
           <P>
-            Refunds are issued from your {PROVIDER} Dashboard (use the{' '}
-            <UI>{PROVIDER} Dashboard</UI> button on the Payments pages). When {PROVIDER}{' '}
-            reports the refund, ValidBridge marks the purchase <strong>refunded</strong> and
-            removes the access it granted.
+            If you use your own {PROVIDER} account, issue refunds from your {PROVIDER}{' '}
+            Dashboard (use the <UI>{PROVIDER} Dashboard</UI> button on the Payments pages). If
+            you get paid through ValidBridge, contact ValidBridge support to refund a sale.
+            When {PROVIDER} reports the refund, ValidBridge marks the purchase{' '}
+            <strong>refunded</strong> and removes the access it granted.
           </P>
           <H4>Payouts</H4>
           <P>
-            Money is settled by {PROVIDER} to the bank or mobile-money account set up in
-            your {PROVIDER} account, on {PROVIDER}&apos;s schedule and fees. ValidBridge does
-            not take a cut of or hold these payments.
+            If you get paid through ValidBridge (M-PESA, till, Airtel Money or bank), {PROVIDER}{' '}
+            pays each sale into the account you entered — your full price, because learners pay
+            the processing fee on top — once your payout details are verified. If you use your own{' '}
+            {PROVIDER} account, the money settles into it on {PROVIDER}&apos;s schedule and
+            fees.
           </P>
           <H4>Purchase statuses</H4>
           <Table
@@ -332,9 +366,11 @@ export const payments: HelpCategory = {
             <UI>Configuration</UI> and the offer settings.
           </Faq>
           <Faq q="A learner paid but the course is still locked">
-            ValidBridge unlocks the course when {PROVIDER}&apos;s webhook arrives. Check the
-            webhook URL in your {PROVIDER} settings (see{' '}
-            <HelpLink ctx={ctx} to="payments/connect-paystack">Connect {PROVIDER}</HelpLink>
+            ValidBridge checks the payment with {PROVIDER} as soon as the learner returns
+            from checkout, and again when {PROVIDER}&apos;s webhook arrives. If the learner
+            closed the page early and you use your own {PROVIDER} account, check the webhook
+            URL in your {PROVIDER} settings (see{' '}
+            <HelpLink ctx={ctx} to="payments/connect-paystack">Set up how you get paid</HelpLink>
             ) and that the key mode (test or live) matches. The purchase shows as{' '}
             <em>Pending</em> in <UI>Payments</UI> → <UI>Overview</UI> until it is confirmed.
           </Faq>

@@ -1,5 +1,5 @@
 'use client'
-import FormLayout, { FormField } from '@components/Objects/StyledElements/Form/Form'
+import FormLayout from '@components/Objects/StyledElements/Form/Form'
 import { useFormik } from 'formik'
 import { AlertTriangle, Info, Lock } from 'lucide-react'
 import React, { useEffect, useRef } from 'react'
@@ -36,10 +36,7 @@ const DEFAULT_VALUES: ProgressionValues = {
  * safe. `never_block` is presented as the escape hatch rather than a preference,
  * for the same reason.
  */
-export default function EditCourseProgression({
-  orgslug,
-  course_uuid,
-}: EditCourseProgressionProps) {
+export default function EditCourseProgression(_props: EditCourseProgressionProps) {
   const { t } = useTranslation()
   const { syncChanges } = useCourseFieldSync('EditCourseProgression')
   const previousValuesRef = useRef<ProgressionValues>(DEFAULT_VALUES)

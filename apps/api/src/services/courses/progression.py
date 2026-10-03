@@ -244,14 +244,35 @@ async def evaluate_course_progression(
     blocking detail, so callers can use the result unconditionally.
     """
     from src.db.courses.chapters import Chapter
+    from src.db.courses.course_chapters import CourseChapter
 
     resolved = resolve_progression_policy(policy)
 
-    chapters = list((await db_session.execute(
-        select(Chapter)
+    # Chapter N must mean the Nth chapter the learner SEES, i.e. the order the
+    # instructor arranged in the editor (CourseChapter.order) — not creation
+    # order. Ordering by Chapter.id made a reordered course gate the chapter
+    # shown first behind one shown later, trapping learners. A chapter with no
+    # CourseChapter row (never placed) sorts after the placed ones, by id, so
+    # nothing is dropped and unplaced data keeps its old relative order.
+    rows = (await db_session.execute(
+        select(Chapter, CourseChapter.order)
+        .outerjoin(
+            CourseChapter,
+            (CourseChapter.chapter_id == Chapter.id)
+            & (CourseChapter.course_id == course_id),
+        )
         .where(Chapter.course_id == course_id)
-        .order_by(Chapter.id)
-    )).scalars().all())
+    )).all()
+    first_position: dict[int, tuple[int, int, int]] = {}
+    chapter_by_id: dict[int, Any] = {}
+    for chapter, position in rows:
+        if chapter.id is None:
+            continue
+        key = (0 if position is not None else 1, position if position is not None else 0, chapter.id)
+        if chapter.id not in first_position or key < first_position[chapter.id]:
+            first_position[chapter.id] = key
+        chapter_by_id[chapter.id] = chapter
+    chapters = [chapter_by_id[cid] for cid in sorted(first_position, key=first_position.get)]
 
     gates: dict[int, ChapterGate] = {
         c.id: ChapterGate(chapter_id=c.id) for c in chapters if c.id is not None

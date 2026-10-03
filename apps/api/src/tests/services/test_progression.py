@@ -445,3 +445,65 @@ class TestIsChapterUnlocked:
         assert await is_chapter_unlocked(
             course.id, c2.id, regular_user.id, db, policy=ON
         ) is False
+
+
+class TestChapterOrder:
+    """Gating follows the order the learner sees, not creation order."""
+
+    @staticmethod
+    async def _place(db, org, course, chapter, order):
+        from src.db.courses.course_chapters import CourseChapter
+
+        db.add(CourseChapter(
+            course_id=course.id, chapter_id=chapter.id, org_id=org.id, order=order,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+
+    @pytest.mark.asyncio
+    async def test_reordered_course_never_locks_the_first_visible_chapter(
+        self, db, org, course, regular_user
+    ):
+        # "Intro" was created first, then moved to the end by the instructor.
+        h = ProgressionHarness(db, org, course, regular_user)
+        intro = await h.add_chapter("Intro")
+        basics = await h.add_chapter("Basics")
+        await self._place(db, org, course, basics, order=1)   # shown first
+        await self._place(db, org, course, intro, order=2)    # shown second
+        await h.add_assessment(intro, grade=None)             # unsubmitted
+
+        gates = await h.gates(ON)
+        # Creation order would have gated Basics behind Intro's assessment.
+        assert gates[basics.id].locked is False
+        assert gates[intro.id].locked is False
+
+    @pytest.mark.asyncio
+    async def test_reordered_course_gates_the_later_visible_chapter(
+        self, db, org, course, regular_user
+    ):
+        h = ProgressionHarness(db, org, course, regular_user)
+        intro = await h.add_chapter("Intro")
+        basics = await h.add_chapter("Basics")
+        await self._place(db, org, course, basics, order=1)
+        await self._place(db, org, course, intro, order=2)
+        await h.add_assessment(basics, grade=None)            # first visible chapter's CAT
+
+        gates = await h.gates(ON)
+        assert gates[basics.id].locked is False
+        assert gates[intro.id].locked is True
+        assert gates[intro.id].blocking[0]["chapter_id"] == basics.id
+
+    @pytest.mark.asyncio
+    async def test_unplaced_chapter_sorts_after_placed_ones_and_is_kept(
+        self, db, org, course, regular_user
+    ):
+        h = ProgressionHarness(db, org, course, regular_user)
+        loose = await h.add_chapter("Loose")      # created first, never placed
+        first = await h.add_chapter("First")
+        await self._place(db, org, course, first, order=1)
+        await h.add_assessment(first, grade=None)
+
+        gates = await h.gates(ON)
+        assert set(gates) == {loose.id, first.id}
+        assert gates[first.id].locked is False
+        assert gates[loose.id].locked is True

@@ -40,8 +40,9 @@ class AssessmentKindEnum(str, Enum):
                 it covers.
     EXAM        covers the whole course. Conventionally placed last.
 
-    These are conventions, not rules. Nothing here validates or enforces
-    placement — see ``get_assessment_placement_advice`` for advisory warnings.
+    These are conventions, not rules. Nothing validates or enforces placement,
+    and no advisory placement warnings exist yet; what gates learners is chapter
+    position (``services.courses.progression``), not the tier.
     An author who puts an EXAM in chapter 2 has authored a course with an exam
     in chapter 2, and the platform's job is to say so, not to refuse.
 

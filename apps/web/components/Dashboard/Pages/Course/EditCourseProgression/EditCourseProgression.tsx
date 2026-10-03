@@ -41,7 +41,7 @@ export default function EditCourseProgression({
   course_uuid,
 }: EditCourseProgressionProps) {
   const { t } = useTranslation()
-  const syncChanges = useCourseFieldSync('EditCourseProgression')
+  const { syncChanges } = useCourseFieldSync('EditCourseProgression')
   const previousValuesRef = useRef<ProgressionValues>(DEFAULT_VALUES)
 
   const formik = useFormik({
@@ -91,12 +91,7 @@ export default function EditCourseProgression({
   }, [formik.values, syncChanges])
 
   return (
-    <FormLayout
-      orgslug={orgslug}
-      course_uuid={course_uuid}
-      formik={formik}
-      layout='card'
-    >
+    <FormLayout onSubmit={(e: any) => e.preventDefault()} className='flex flex-col'>
       <div className='space-y-6'>
         <div>
           <h1 className='text-gray-800 text-lg sm:text-xl'>

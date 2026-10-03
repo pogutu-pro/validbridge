@@ -1217,6 +1217,51 @@ async def award_chapter_milestone(
     }
 
 
+async def award_milestone_for_activity_completion(
+    request: Request,
+    user_id: int,
+    course_id: int,
+    activity_id: int,
+    db_session: AsyncSession,
+) -> dict | None:
+    """
+    Award the milestone for whichever chapter contains ``activity_id``.
+
+    This is the shape the completion callers actually have: they know the
+    activity they just finished, not the chapter. Resolving the chapter here
+    keeps every call site to one line and stops them from having to remember
+    which chapter an activity belongs to.
+
+    An activity placed in two chapters awards both. That is the same shape the
+    completion denominators already tolerate, and awarding only one of them
+    would be arbitrary.
+
+    Never raises. A milestone is a nice-to-have on top of a submission that has
+    already been saved, so a failure here must not roll back or 500 the flow
+    that triggered it — the next completion attempt retries it anyway, because
+    the whole path is idempotent.
+    """
+    chapter_ids = (await db_session.execute(
+        select(func.distinct(ChapterActivity.chapter_id))
+        .where(
+            ChapterActivity.course_id == course_id,
+            ChapterActivity.activity_id == activity_id,
+        )
+    )).scalars().all()
+
+    awarded = None
+    for chapter_id in chapter_ids:
+        try:
+            result = await award_chapter_milestone(
+                request, user_id, course_id, chapter_id, db_session
+            )
+        except Exception:
+            continue
+        if result and awarded is None:
+            awarded = result
+    return awarded
+
+
 async def check_course_completion_and_create_certificate(
     request: Request,
     user_id: int,

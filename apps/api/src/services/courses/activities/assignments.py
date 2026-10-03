@@ -73,6 +73,7 @@ from src.services.courses.activities.quiz_modes import (
 )
 from src.services.trail.trail import check_trail_presence
 from src.services.courses.certifications import (
+    award_milestone_for_activity_completion,
     check_course_completion_and_create_certificate,
     is_course_fully_completed,
     revoke_user_certificate,
@@ -3267,6 +3268,14 @@ async def create_assignment_submission(
             await check_course_completion_and_create_certificate(
                 request, user.id, course.id, db_session, is_complete=course_complete
             )
+            # Chapter milestone for the chapter this assessment belongs to. This
+            # is where a CAT or exam first earns a credential, and where a retry
+            # escalates a PARTICIPATED one to PASSED once the grade lands. The
+            # helper resolves the chapter from the activity and no-ops unless
+            # the chapter is actually finished.
+            await award_milestone_for_activity_completion(
+                request, user.id, course.id, assignment.activity_id, db_session
+            )
         except Exception:  # pragma: no cover - defensive: cert errors never fail submit
             logger.exception(
                 "Certificate check failed after assignment submission "
@@ -4120,6 +4129,14 @@ async def grade_assignment_submission(
             await check_course_completion_and_create_certificate(
                 request, user_id, course.id, db_session
             )
+            # A teacher grading a chapter CAT is the moment a milestone can go
+            # from PARTICIPATED to PASSED: the learner's own submission had
+            # already earned the weaker credential, and the grade is what
+            # decides the stronger one.
+            if assignment.activity_id:
+                await award_milestone_for_activity_completion(
+                    request, user_id, course.id, assignment.activity_id, db_session
+                )
             # Conversely, a regrade DOWN below the pass threshold must pull a
             # previously issued certificate — the create path only ever adds one,
             # so without this a learner keeps a valid certificate after failing a
@@ -4314,6 +4331,12 @@ async def mark_activity_as_done_for_user(
         await check_course_completion_and_create_certificate(
             request, user_id, course.id, db_session
         )
+        # An instructor marking an activity done by hand is also a legitimate
+        # route to finishing a chapter, so the milestone follows it too.
+        if activity.id:
+            await award_milestone_for_activity_completion(
+                request, user_id, course.id, activity.id, db_session
+            )
 
     # return OK
     return {"message": "Activity marked as done for user"}

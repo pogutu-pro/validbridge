@@ -12,6 +12,7 @@ from src.db.trail_steps import TrailStep
 from src.db.trails import Trail, TrailCreate, TrailRead
 from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.certifications import (
+    award_milestone_for_activity_completion,
     check_course_completion_and_create_certificate,
     is_course_fully_completed,
     sync_trailrun_status,
@@ -343,6 +344,20 @@ async def add_activity_to_trail(
     course_was_completed = False
     if is_new_completion and course and course.id:
         course_was_completed = await is_course_fully_completed(user.id, course.id, db_session)
+
+    # A chapter milestone is a per-chapter event, so it must be evaluated on
+    # EVERY new completion — not only on the one that finishes the course.
+    # Gating it on course_was_completed would withhold every milestone except
+    # the last, which is the opposite of what milestones are for.
+    # Best-effort for the same reason the certificate check is: the activity is
+    # already marked done, so nothing here may fail the request.
+    if is_new_completion and course and course.id:
+        try:
+            await award_milestone_for_activity_completion(
+                request, user.id, course.id, activity.id, db_session
+            )
+        except Exception:
+            pass
 
     # Always run the certificate side effect when the course is complete,
     # regardless of whether a cert is configured (the function no-ops if none).

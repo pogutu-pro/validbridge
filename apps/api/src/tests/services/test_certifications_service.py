@@ -2524,7 +2524,8 @@ class TestAwardChapterMilestone:
         await db.refresh(cert)
         return cert
 
-    async def _completed_step(self, db, org, course, user, activity_id):
+    @staticmethod
+    async def _completed_step(db, org, course, user, activity_id):
         db.add(TrailStep(
             complete=True, teacher_verified=False, grade="", data={},
             trailrun_id=1, trail_id=1, activity_id=activity_id,
@@ -2940,3 +2941,117 @@ class TestChapterMilestoneEscalation:
         assert len(issued) == 1
         assert issued[0].award_kind == AwardKind.PASSED.value
         assert issued[0].award_detail["percentage"] == 95.0
+
+
+class TestAwardMilestoneForActivityCompletion:
+    """The resolver the completion callers use.
+
+    They know the activity they just finished, not the chapter, so the chapter
+    is looked up here — one line at each call site instead of every caller
+    re-deriving chapter membership (and getting the multi-chapter case wrong).
+    """
+
+    async def _chapter_cert(self, db, course):
+        cert = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid=f"cert-res-{course.id}",
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(cert)
+        await db.commit()
+        await db.refresh(cert)
+        return cert
+
+    @pytest.mark.asyncio
+    async def test_resolves_chapter_and_awards(
+        self, db, org, course, chapter, regular_user
+    ):
+        from src.services.courses.certifications import (
+            award_milestone_for_activity_completion,
+        )
+
+        await self._chapter_cert(db, course)
+        activity, link = TestAwardChapterMilestone._published_activity(
+            org, course, id_=4501, uuid_="activity_resolve", chapter_id=chapter.id
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(link)
+        await db.commit()
+        await TestAwardChapterMilestone._completed_step(
+            db, org, course, regular_user, activity.id
+        )
+
+        result = await award_milestone_for_activity_completion(
+            MagicMock(), regular_user.id, course.id, activity.id, db
+        )
+
+        assert result is not None
+        assert result["certification"].scope_id == chapter.id
+
+    @pytest.mark.asyncio
+    async def test_activity_outside_the_course_awards_nothing(
+        self, db, org, course, chapter, regular_user
+    ):
+        from src.services.courses.certifications import (
+            award_milestone_for_activity_completion,
+        )
+
+        await self._chapter_cert(db, course)
+        result = await award_milestone_for_activity_completion(
+            MagicMock(), regular_user.id, course.id, 999999, db
+        )
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_activity_in_two_chapters_awards_both(
+        self, db, org, course, chapter, regular_user
+    ):
+        """Awarding only one would be arbitrary, and the completion denominators
+        already tolerate the shared-activity shape."""
+        from src.db.courses.chapters import Chapter
+        from src.services.courses.certifications import (
+            award_milestone_for_activity_completion,
+            get_chapter_certification,
+        )
+
+        await self._chapter_cert(db, course)
+        sibling = Chapter(
+            id=8890, name="Sibling", published=True,
+            org_id=org.id, course_id=course.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        )
+        db.add(sibling)
+        await db.commit()
+
+        activity, link_a = TestAwardChapterMilestone._published_activity(
+            org, course, id_=4502, uuid_="activity_shared", chapter_id=chapter.id
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(link_a)
+        from src.db.courses.chapter_activities import ChapterActivity
+        db.add(ChapterActivity(
+            activity_id=activity.id, course_id=course.id,
+            chapter_id=sibling.id, org_id=org.id, order=0,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+        await TestAwardChapterMilestone._completed_step(
+            db, org, course, regular_user, activity.id
+        )
+
+        result = await award_milestone_for_activity_completion(
+            MagicMock(), regular_user.id, course.id, activity.id, db
+        )
+
+        assert result is not None
+        issued = (await db.execute(
+            select(CertificateUser).where(CertificateUser.user_id == regular_user.id)
+        )).scalars().all()
+        assert len(issued) == 2
+        assert await get_chapter_certification(course.id, chapter.id, db) is not None
+        assert await get_chapter_certification(course.id, sibling.id, db) is not None

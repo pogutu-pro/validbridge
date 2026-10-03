@@ -1,6 +1,7 @@
 // Pure onboarding helpers for /new (no React), shared with tests.
 
-export type OnboardingRole = 'admin' | 'teacher' | 'creator' | 'company' | 'student'
+export const ONBOARDING_ROLES = ['admin', 'teacher', 'creator', 'company', 'student'] as const
+export type OnboardingRole = (typeof ONBOARDING_ROLES)[number]
 /** Values accepted by the API (OrganizationCreate.onboarding.institution_type). */
 export type InstitutionType =
   | 'public_school'

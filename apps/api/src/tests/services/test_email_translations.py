@@ -96,6 +96,7 @@ class TestWhiteLabelTranslations:
         "password_reset.footer_org",
         "account_creation.subject_org",
         "account_creation.body_in_org",
+        "account_creation.org_",
     )
 
     def test_org_scoped_keys_never_name_validbridge(self):

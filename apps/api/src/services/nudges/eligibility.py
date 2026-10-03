@@ -34,7 +34,7 @@ from src.db.user_activity import UserActivityDay
 from src.db.user_organizations import UserOrganization
 from src.db.users import User
 from src.security.features_utils.usage import _plan_from_config_dict
-from src.security.rbac.constants import ADMIN_ROLE_ID
+from src.security.rbac.constants import ADMIN_ROLE_ID, MAINTAINER_ROLE_ID
 from src.services.nudges.snapshot import AdminRow, OrgSnapshot, parse_ts
 from src.services.orgs.orgs import get_org_default_language, resolve_org_sender_name
 from src.services.email.branding import resolve_org_brand_color, resolve_org_powered_by
@@ -111,12 +111,66 @@ async def _membership_facts(db_session: AsyncSession, org_ids: Sequence[int]) ->
                 func.max(
                     case((non_admin, UserOrganization.creation_date), else_=None)
                 ).label("last_member"),
+                # Last, so the existing positional reads ([1]..[4]) are unchanged.
+                func.sum(
+                    case((UserOrganization.role_id == MAINTAINER_ROLE_ID, 1), else_=0)
+                ).label("maintainer_count"),
             )
             .where(UserOrganization.org_id.in_(org_ids))
             .group_by(UserOrganization.org_id)
         )
     ).all()
     return _rows_by_org(rows)
+
+
+async def _setup_facts(db_session: AsyncSession, org_ids: Sequence[int]) -> dict:
+    """Payouts, sellable offers and user groups — the setup steps that live
+    outside courses. Three small grouped queries."""
+    from src.db.payments.payments import PaymentsConfig
+    from src.db.payments.payments_offers import PaymentsOffer
+    from src.db.usergroups import UserGroup
+
+    payouts = {
+        row[0]
+        for row in (
+            await db_session.execute(
+                select(PaymentsConfig.org_id).where(
+                    PaymentsConfig.org_id.in_(org_ids),
+                    PaymentsConfig.active.is_(True),
+                    PaymentsConfig.enabled.is_(True),
+                )
+            )
+        ).all()
+    }
+    offers = _rows_by_org(
+        (
+            await db_session.execute(
+                select(PaymentsOffer.org_id, func.count().label("n"))
+                .where(
+                    PaymentsOffer.org_id.in_(org_ids),
+                    PaymentsOffer.is_publicly_listed.is_(True),
+                    PaymentsOffer.is_archived.is_(False),
+                )
+                .group_by(PaymentsOffer.org_id)
+            )
+        ).all()
+    )
+    groups = _rows_by_org(
+        (
+            await db_session.execute(
+                select(UserGroup.org_id, func.count().label("n"))
+                .where(UserGroup.org_id.in_(org_ids))
+                .group_by(UserGroup.org_id)
+            )
+        ).all()
+    )
+    return {"payouts": payouts, "offers": offers, "groups": groups}
+
+
+def _onboarding_role(config: Optional[OrganizationConfig]) -> Optional[str]:
+    onboarding = ((config.config if config else None) or {}).get("onboarding") or {}
+    role = onboarding.get("role")
+    return role if isinstance(role, str) else None
 
 
 async def _admin_rows(db_session: AsyncSession, org_ids: Sequence[int]) -> dict:
@@ -407,6 +461,7 @@ async def build_snapshots(
     admin_logins = await _admin_login_facts(db_session, org_ids)
     first_nudges = await _first_nudge_facts(db_session, org_ids)
     ai_usage = await _ai_credit_usage(org_ids)
+    setup = await _setup_facts(db_session, org_ids)
 
     snapshots: list[OrgSnapshot] = []
     for org in orgs:
@@ -477,6 +532,21 @@ async def build_snapshots(
                     int(submission_agg[1] or 0) if submission_agg else 0
                 ),
                 ai_credits_used=ai_usage.get(oid, 0),
+                onboarding_role=_onboarding_role(config),
+                # Teachers: maintainers, plus any admin beyond the creator.
+                staff_count=(
+                    int((member_agg[5] if len(member_agg) > 5 else 0) or 0)
+                    + max(int(member_agg[1] or 0) - 1, 0)
+                    if member_agg
+                    else 0
+                ),
+                payouts_ready=oid in setup["payouts"],
+                public_offer_count=(
+                    int(setup["offers"][oid][1]) if oid in setup["offers"] else 0
+                ),
+                usergroup_count=(
+                    int(setup["groups"][oid][1]) if oid in setup["groups"] else 0
+                ),
                 last_admin_login_at=parse_ts(login_agg[1]) if login_agg else None,
                 last_activity_day=parse_ts(day_agg[1]) if day_agg else None,
                 first_nudged_at=(

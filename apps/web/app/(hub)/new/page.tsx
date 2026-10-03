@@ -28,6 +28,7 @@ import { createNewOrganization, submitPublicEdApplication } from '@services/orga
 import { StepRole, StepInstitution, StudentJoin } from './_components/RoleSteps'
 import {
   EMPTY_PUBLIC_ED,
+  ONBOARDING_ROLES,
   canApplyPublicEd,
   publicEdReady,
   type InstitutionType,
@@ -438,6 +439,19 @@ export default function CreateNewOrgPage() {
   const [createdSlug, setCreatedSlug] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+
+  // The welcome email's "What brings you here?" links open setup at the step
+  // after the role question (/new?role=teacher). Read once on mount, like the
+  // plan intent below; useSearchParams would need a Suspense boundary here.
+  useEffect(() => {
+    const preset = new URLSearchParams(window.location.search).get('role')
+    if (preset && (ONBOARDING_ROLES as readonly string[]).includes(preset)) {
+      // The URL is only readable after hydration; one-time sync from it.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRole(preset as OnboardingRole)
+      setStep('usage')
+    }
+  }, [])
 
   // Redirect unauthenticated users (same effect as app/home/home.tsx).
   useEffect(() => {

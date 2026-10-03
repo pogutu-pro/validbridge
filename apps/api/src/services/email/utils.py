@@ -1,4 +1,5 @@
 import logging
+from html.parser import HTMLParser
 import os
 import re
 import smtplib
@@ -513,6 +514,78 @@ def _is_recipient_rejected(exc: BaseException) -> bool:
     return "`to`" in message or "to field" in message
 
 
+class _TextExtractor(HTMLParser):
+    """HTML email -> readable plain text.
+
+    Keeps paragraph breaks and every link's target ("Join (https://…)"), and
+    drops <head>/<style> and the hidden preheader so the text part does not
+    open with an invisible spacer.
+    """
+
+    _BLOCK = {"p", "div", "br", "h1", "h2", "h3", "h4", "tr", "li", "hr", "table"}
+    _SKIP = {"head", "style", "script", "title"}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self._skip = 0
+        self._hidden = 0
+        self._href: list[str | None] = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag in self._SKIP:
+            self._skip += 1
+        style = (attrs.get("style") or "").replace(" ", "").lower()
+        if tag == "div" and "display:none" in style:
+            self._hidden += 1
+        if tag in self._BLOCK:
+            self.parts.append("\n")
+        if tag == "a":
+            self._href.append(attrs.get("href"))
+
+    def handle_endtag(self, tag):
+        if tag in self._SKIP and self._skip:
+            self._skip -= 1
+        if tag == "div" and self._hidden:
+            self._hidden -= 1
+        if tag == "a" and self._href:
+            href = self._href.pop()
+            if href and not href.startswith("mailto:") and href not in self.parts[-1:]:
+                self.parts.append(f" ({href})")
+        if tag in self._BLOCK:
+            self.parts.append("\n")
+
+    def handle_data(self, data):
+        if not self._skip and not self._hidden:
+            self.parts.append(data)
+
+
+_INVISIBLE = dict.fromkeys(map(ord, "\u034f\u200c\u200b\u00a0"), " ")
+
+
+def html_to_text(body: str) -> str:
+    """Plain-text alternative for an HTML email.
+
+    Sending HTML with no text part is a classic spam signal: Gmail filed
+    invitations in Spam while plain mail from the same domain reached the
+    inbox. Every message now carries both.
+    """
+    parser = _TextExtractor()
+    try:
+        parser.feed(body or "")
+        parser.close()
+    except Exception:
+        return ""
+    text = "".join(parser.parts).translate(_INVISIBLE)
+    lines = [" ".join(line.split()) for line in text.splitlines()]
+    out: list[str] = []
+    for line in lines:
+        if line or (out and out[-1]):
+            out.append(line)
+    return "\n".join(out).strip()
+
+
 def _send_email_resend(
     sender: str,
     to: str,
@@ -529,6 +602,9 @@ def _send_email_resend(
         "subject": subject,
         "html": body,
     }
+    text = html_to_text(body)
+    if text:
+        payload["text"] = text
     if headers:
         payload["headers"] = dict(headers)
     for attempt in range(_RESEND_RETRIES + 1):
@@ -592,6 +668,10 @@ def _send_email_smtp(
     msg["Subject"] = subject
     for header_name, header_value in (headers or {}).items():
         msg[header_name] = header_value
+    # Plain text first, HTML last: clients show the last part they support.
+    text = html_to_text(body)
+    if text:
+        msg.attach(MIMEText(text, "plain"))
     msg.attach(MIMEText(body, "html"))
 
     server = None

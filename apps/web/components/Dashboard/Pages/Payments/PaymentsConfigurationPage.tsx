@@ -529,6 +529,39 @@ const BankPicker: React.FC<{ banks: Destination[]; value: string; onChange: (_co
     const q = query.trim().toLowerCase();
     return q ? banks.filter((b) => b.name.toLowerCase().includes(q)) : banks;
   }, [banks, query]);
+// Paystack lists banks by registered name ("Kenya Commercial Bank (Kenya)
+// Ltd"); people search by the name they use ("KCB"). Common short and former
+// names, keyed by Paystack's bank code.
+const BANK_ALIASES: Record<string, string> = {
+  '01': 'kcb',
+  '03': 'barclays',
+  '07': 'cba nic',
+  '11': 'coop co-op',
+  '31': 'cfc stanbic',
+  '63': 'dtb',
+  '68': 'equity',
+};
+
+const squash = (text: string) => text.toLowerCase().replace(/[^a-z0-9&]/g, '');
+// "Kenya Commercial Bank (Kenya) Ltd" -> "kcbkl", so "KCB" or "DTB" match.
+const initials = (name: string) =>
+  name.toLowerCase().split(/[^a-z0-9&]+/).filter(Boolean).map((w) => w[0]).join('');
+
+function bankMatches(bank: Destination, query: string): boolean {
+  const q = squash(query);
+  if (!q) return true;
+  const alias = BANK_ALIASES[bank.code] ?? '';
+  return (
+    squash(bank.name).includes(q) ||
+    initials(bank.name).startsWith(q) ||
+    alias.split(' ').some((a) => squash(a).startsWith(q))
+  );
+}
+
+const BankPicker: React.FC<{ banks: Destination[]; value: string; onChange: (_code: string) => void }> = ({ banks, value, onChange }) => {
+  const [query, setQuery] = useState('');
+  const selected = banks.find((b) => b.code === value);
+  const filtered = useMemo(() => banks.filter((b) => bankMatches(b, query)), [banks, query]);
 
   if (selected && !query) {
     return (

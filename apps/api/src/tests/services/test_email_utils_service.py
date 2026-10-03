@@ -304,6 +304,8 @@ class TestEmailUtilsService:
             "to": ["to@test.com"],
             "subject": "Hello",
             "html": "<p>Body</p>",
+            # Plain-text alternative: HTML-only mail is a spam signal.
+            "text": "Body",
         }
 
         smtp_client = Mock()
@@ -899,3 +901,21 @@ class TestSendEmailSenderName:
             mock_resend_send.call_args.args[0]["from"]
             == "ValidBridge <system@test.com>"
         )
+
+
+def test_html_to_text_keeps_links_and_drops_hidden_preheader():
+    from src.services.email.utils import html_to_text
+
+    html = (
+        "<html><head><style>p{color:red}</style><title>x</title></head><body>"
+        '<div style="display:none;max-height:0">Preview text&#847;&zwnj;&nbsp;</div>'
+        "<h1>You're invited</h1><p>Join <b>Acme</b> today.</p>"
+        '<a href="https://acme.test/signup?inviteCode=ABC">Join Acme</a>'
+        '<a href="mailto:hi@acme.test">Email us</a>'
+        "</body></html>"
+    )
+    text = html_to_text(html)
+    assert "Preview text" not in text and "color:red" not in text
+    assert "You're invited" in text and "Join Acme today." in text
+    assert "Join Acme (https://acme.test/signup?inviteCode=ABC)" in text
+    assert "mailto:" not in text

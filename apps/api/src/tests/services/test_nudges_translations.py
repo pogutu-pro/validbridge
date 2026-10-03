@@ -30,6 +30,13 @@ class TestCoverage:
     def test_every_supported_locale_has_a_bundle(self):
         assert set(NUDGE_TRANSLATIONS) == set(SUPPORTED_LANGUAGES)
 
+    def test_every_orgless_nudge_has_its_copy(self):
+        from src.services.nudges.orgless import ORGLESS_CATALOG
+
+        for nudge in ORGLESS_CATALOG:
+            for part in ("subject", "heading", "body", "cta"):
+                assert f"nudge.{nudge.id}.{part}" in ENGLISH, nudge.id
+
     def test_every_nudge_has_the_keys_it_needs(self):
         for spec in NUDGE_CATALOG:
             for part in ("subject", "heading", "body"):
@@ -40,7 +47,9 @@ class TestCoverage:
     def test_no_orphaned_copy(self):
         """Copy for a nudge that no longer exists is dead weight and a
         misleading signal that the nudge still ships."""
-        known = {spec.id for spec in NUDGE_CATALOG}
+        from src.services.nudges.orgless import ORGLESS_CATALOG
+
+        known = {spec.id for spec in NUDGE_CATALOG} | {n.id for n in ORGLESS_CATALOG}
         for key in ENGLISH:
             # `common` and `stat` are shared across the catalog rather than
             # belonging to any one nudge.
@@ -73,7 +82,10 @@ class TestPlaceholders:
     def test_only_known_placeholders_are_used(self):
         allowed = {"org_name", "course_name", "plan_name", "next_plan"}
         for key, template in ENGLISH.items():
-            assert _placeholders(template) <= allowed, key
+            # The org-less sequence greets by name; the org runner never
+            # renders those keys, so ``name`` is allowed there alone.
+            extra = {"name"} if key.startswith("nudge.orgless.") else set()
+            assert _placeholders(template) <= allowed | extra, key
 
     @pytest.mark.parametrize("locale", sorted(NUDGE_TRANSLATIONS))
     def test_every_string_renders(self, locale):
@@ -82,6 +94,7 @@ class TestPlaceholders:
             course_name="Intro to Welding",
             plan_name="starter",
             next_plan="starter",
+            name="Amina",
         )
         for key in ENGLISH:
             rendered = t(locale, key, **values)

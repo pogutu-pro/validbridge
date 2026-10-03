@@ -6627,7 +6627,7 @@
       "title": "Invite students",
       "description": "Share the lesson link or email it. Only people with access to this course can join.",
       "tab_link": "Share link",
-      "tab_email": "Email",
+      "tab_email": "Invite by email",
       "copy": "Copy",
       "copied": "Copied",
       "copy_link": "Copy lesson link",
@@ -6656,7 +6656,12 @@
       "enroll_description": "You've been invited to a live lesson in this course. Enroll to take part.",
       "enroll_and_join": "Enroll & join",
       "enrolling": "Enrolling…",
-      "enroll_failed": "We couldn't enroll you. Open the course to see how to join."
+      "enroll_failed": "We couldn't enroll you. Open the course to see how to join.",
+      "share_via": "Share via",
+      "whatsapp": "WhatsApp",
+      "email_app": "Email",
+      "share_message": "{{org}}: you're invited to the live lesson \"{{title}}\"{{course}}.\nWhen: {{when}}\nJoin here: {{link}}",
+      "email_subject": "Live lesson: {{title}} ({{org}})"
     }
   }
 }

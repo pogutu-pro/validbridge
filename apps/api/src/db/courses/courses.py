@@ -37,6 +37,45 @@ class ThumbnailType(str, Enum):
     BOTH = "both"
 
 
+class ProgressionPolicy(str, Enum):
+    """Whether a course gates chapters behind each other's assessments.
+
+    OFF is the default and the only state a course is in unless an instructor
+    explicitly turns gating on. Nothing here is inferred from the presence of
+    assessments: a course full of exams that nobody asked to sequence stays open.
+    """
+
+    OFF = "off"
+    SEQUENTIAL = "sequential"
+
+
+class UnlockRequirement(str, Enum):
+    """What a learner must achieve on chapter N's assessments to open chapter N+1.
+
+    SUBMITTED  handing the work in is enough.
+    PASSED     hand in AND clear the assessment's own pass threshold.
+
+    Both are legitimate, which is why the instructor picks rather than the product
+    imposing one: some cohorts need to finish the material before moving on,
+    others need to demonstrate it.
+    """
+
+    SUBMITTED = "submitted"
+    PASSED = "passed"
+
+
+class LockoutPolicy(str, Enum):
+    """What happens to a learner who fails an assessment that blocks them.
+
+    BLOCK_WITH_OVERRIDE is the safe default: they stop, and an instructor can
+    release them. NEVER_BLOCK downgrades a block to a warning, for courses where
+    trapping a learner is worse than letting them continue unscored.
+    """
+
+    BLOCK_WITH_OVERRIDE = "block_with_override"
+    NEVER_BLOCK = "never_block"
+
+
 class AuthorWithRole(SQLModel):
     user: UserRead
     authorship: ResourceAuthorshipEnum
@@ -77,6 +116,10 @@ class Course(CourseBase, table=True):
     update_date: str = ""
     seo: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
     extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
+    # Sequential chapter gating. NULL means "not configured" and therefore OFF:
+    # an absent policy must never be able to block a learner. See
+    # ProgressionPolicy / UnlockRequirement / LockoutPolicy.
+    progression_config: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
 
 
 class CourseCreate(CourseBase):
@@ -102,6 +145,9 @@ class CourseUpdate(SQLModel):
     open_to_contributors: Optional[bool] = None
     seo: Optional[dict] = None
     extra_metadata: Optional[dict] = None
+    # Setting this to None switches gating off again, which is the intended way
+    # to turn the feature off without a separate delete endpoint.
+    progression_config: Optional[dict] = None
 
 
 class CourseRead(CourseBase):

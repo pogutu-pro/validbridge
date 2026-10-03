@@ -126,6 +126,36 @@ async def get_chapter(
     # RBAC check
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
 
+    # Sequential progression gate. Runs after RBAC so an unauthorized caller gets
+    # the same 403 either way, and only for a real signed-in learner.
+    #
+    # Anonymous callers and course authors pass through untouched: gating a
+    # learner's progression must not change what a public preview can fetch, and
+    # an author previewing their own course must never be locked out of it.
+    from src.services.courses.progression import evaluate_course_progression
+
+    actor_id = resolve_acting_user_id(current_user)
+    if actor_id:
+        gates = await evaluate_course_progression(
+            course.id,
+            actor_id,
+            db_session,
+            policy=course.progression_config,
+        )
+        gate = gates.get(chapter_id)
+        if gate is not None and gate.locked:
+            # 403 carries a machine-readable reason so the UI can pick the right
+            # icon and message instead of showing a generic failure.
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "message": gate.message,
+                    "reason": gate.reason,
+                    "chapter_id": gate.chapter_id,
+                    "blocking": gate.blocking,
+                },
+            )
+
     # Get activities for this chapter
     statement = (
         select(Activity)

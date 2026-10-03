@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from src.core.events.database import get_db_session
 from src.db.courses.chapters import (
     ChapterCreate,
@@ -259,3 +259,53 @@ async def api_remove_chapter_usergroup(
     return await remove_usergroup_from_chapter(
         request, chapter_uuid, usergroup_uuid, current_user, db_session
     )
+
+
+@router.get(
+    "/course/{course_id}/progression",
+    summary="Chapter progression state for the current learner",
+    description=(
+        "Which chapters are open to this learner, and what is standing between "
+        "them and the locked ones. Returns every chapter unlocked when the "
+        "course has no sequential policy configured, so the UI can call this "
+        "unconditionally instead of first checking whether the feature is on."
+    ),
+)
+async def api_get_course_progression(
+    request: Request,
+    course_id: int,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> dict:
+    from sqlmodel import select
+
+    from src.db.courses.courses import Course
+    from src.security.rbac import AccessAction, check_resource_access
+    from src.security.auth import resolve_acting_user_id
+    from src.services.courses.progression import (
+        evaluate_course_progression,
+        resolve_progression_policy,
+    )
+
+    course = (await db_session.execute(
+        select(Course).where(Course.id == course_id)
+    )).scalars().first()
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course does not exist")
+
+    await check_resource_access(
+        request, db_session, current_user, course.course_uuid, AccessAction.READ
+    )
+
+    policy = resolve_progression_policy(course.progression_config)
+    actor_id = resolve_acting_user_id(current_user)
+    gates = await evaluate_course_progression(
+        course.id, actor_id, db_session, policy=course.progression_config
+    )
+    return {
+        "course_id": course.id,
+        "enabled": policy.enabled,
+        "require_pass": policy.require_pass,
+        "never_block": policy.never_block,
+        "chapters": [gates[cid].as_dict() for cid in sorted(gates)],
+    }

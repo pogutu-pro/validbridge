@@ -522,13 +522,6 @@ const Row: React.FC<{ label: string; value: string; mono?: boolean }> = ({ label
   </div>
 );
 
-const BankPicker: React.FC<{ banks: Destination[]; value: string; onChange: (_code: string) => void }> = ({ banks, value, onChange }) => {
-  const [query, setQuery] = useState('');
-  const selected = banks.find((b) => b.code === value);
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return q ? banks.filter((b) => b.name.toLowerCase().includes(q)) : banks;
-  }, [banks, query]);
 // Paystack lists banks by registered name ("Kenya Commercial Bank (Kenya)
 // Ltd"); people search by the name they use ("KCB"). Common short and former
 // names, keyed by Paystack's bank code.

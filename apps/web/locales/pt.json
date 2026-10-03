@@ -2242,6 +2242,13 @@
           "twitter_description_max_length": "Descrição Twitter deve ter 200 caracteres ou menos",
           "twitter_title_max_length": "Título Twitter deve ter 70 caracteres ou menos"
         }
+      },
+      "progression": {
+        "form": {
+          "never_block_label": "",
+          "never_block_hint": "",
+          "combination_warning": ""
+        }
       }
     },
     "organization": {

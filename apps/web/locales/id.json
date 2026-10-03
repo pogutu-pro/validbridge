@@ -2264,6 +2264,13 @@
           "twitter_description_max_length": "Deskripsi Twitter harus 200 karakter atau kurang",
           "twitter_title_max_length": "Judul Twitter harus 70 karakter atau kurang"
         }
+      },
+      "progression": {
+        "form": {
+          "never_block_label": "",
+          "never_block_hint": "",
+          "combination_warning": ""
+        }
       }
     },
     "organization": {

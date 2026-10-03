@@ -2242,6 +2242,13 @@
           "twitter_description_max_length": "Twitter-beschrijving mag maximaal 200 tekens zijn",
           "twitter_title_max_length": "Twitter-titel mag maximaal 70 tekens zijn"
         }
+      },
+      "progression": {
+        "form": {
+          "never_block_label": "",
+          "never_block_hint": "",
+          "combination_warning": ""
+        }
       }
     },
     "organization": {

@@ -2264,6 +2264,13 @@
           "twitter_description_max_length": "Twitter açıklaması 200 karakter veya daha az olmalıdır",
           "twitter_title_max_length": "Twitter başlığı 70 karakter veya daha az olmalıdır"
         }
+      },
+      "progression": {
+        "form": {
+          "never_block_label": "",
+          "never_block_hint": "",
+          "combination_warning": ""
+        }
       }
     },
     "organization": {

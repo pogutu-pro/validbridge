@@ -2398,7 +2398,14 @@
           "twitter_title_max_length": "يجب أن يكون عنوان تويتر 70 حرفاً أو أقل"
         }
       },
-      "limit_reached": "تم الوصول إلى حد الدورات ({{limit}})"
+      "limit_reached": "تم الوصول إلى حد الدورات ({{limit}})",
+      "progression": {
+        "form": {
+          "never_block_label": "حجب لا نهائي",
+          "never_block_hint": "تخطي التقدم في الفصول",
+          "combination_warning": "تحديد خاطئ"
+        }
+      }
     },
     "organization": {
       "settings": {

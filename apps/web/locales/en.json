@@ -2859,9 +2859,9 @@
           "enabled_hint": "When off, learners can open every chapter freely. This is the default and existing courses are unaffected.",
           "require_pass_label": "Learners must pass, not just submit",
           "require_pass_hint": "Off: handing in the work opens the next chapter. On: the assessment must also reach its pass mark.",
-          "never_block_label": "Warn instead of blocking",
-          "never_block_hint": "Recommended if failing an assessment should never stop someone. Learners see a reminder but can always continue.",
-          "combination_warning": "Learners will be blocked until they submit, but a failed assessment will not hold them back. That is a valid choice, but usually you want one or the other."
+          "never_block_label": "Never block",
+          "never_block_hint": "Do not block progression on failed assessments",
+          "combination_warning": "Invalid combination"
         }
       }
     },

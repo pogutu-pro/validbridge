@@ -2264,6 +2264,13 @@
           "twitter_description_max_length": "Twitter विवरण 200 अक्षर या उससे कम होना चाहिए",
           "twitter_title_max_length": "Twitter शीर्षक 70 अक्षर या उससे कम होना चाहिए"
         }
+      },
+      "progression": {
+        "form": {
+          "never_block_label": "",
+          "never_block_hint": "",
+          "combination_warning": ""
+        }
       }
     },
     "organization": {

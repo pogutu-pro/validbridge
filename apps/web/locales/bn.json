@@ -2264,6 +2264,13 @@
           "twitter_description_max_length": "Twitter ডেসক্রিপশন ২০০ অক্ষর বা তার কম হতে হবে",
           "twitter_title_max_length": "Twitter শিরোনাম ৭০ অক্ষর বা তার কম হতে হবে"
         }
+      },
+      "progression": {
+        "form": {
+          "never_block_label": "",
+          "never_block_hint": "",
+          "combination_warning": ""
+        }
       }
     },
     "organization": {

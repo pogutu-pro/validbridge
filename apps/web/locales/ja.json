@@ -2252,6 +2252,13 @@
           "twitter_description_max_length": "Twitter説明は200文字以下にしてください",
           "twitter_title_max_length": "Twitterタイトルは70文字以下にしてください"
         }
+      },
+      "progression": {
+        "form": {
+          "never_block_label": "",
+          "never_block_hint": "",
+          "combination_warning": ""
+        }
       }
     },
     "organization": {

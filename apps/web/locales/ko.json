@@ -2252,6 +2252,13 @@
           "twitter_description_max_length": "Twitter 설명은 200자 이하여야 합니다",
           "twitter_title_max_length": "Twitter 제목은 70자 이하여야 합니다"
         }
+      },
+      "progression": {
+        "form": {
+          "never_block_label": "",
+          "never_block_hint": "",
+          "combination_warning": ""
+        }
       }
     },
     "organization": {

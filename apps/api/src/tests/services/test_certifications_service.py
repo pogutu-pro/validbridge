@@ -8,12 +8,14 @@ from fastapi import HTTPException
 from sqlmodel import select
 
 from src.db.courses.certifications import (
+    AwardKind,
     CertificateUser,
     CertificateUserRead,
     CertificationCreate,
     CertificationRead,
     CertificationUpdate,
     Certifications,
+    CredentialScopeKind,
 )
 from src.db.courses.courses import Course
 from src.db.trail_runs import StatusEnum, TrailRun
@@ -1901,3 +1903,217 @@ class TestCompletionResultIsComputedOnce:
         ) as recount:
             await sync_trailrun_status(regular_user.id, course.id, db, is_complete=True)
         recount.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# Credential scope + award kind
+#
+# Chapter milestones are an ordinary Certifications row with
+# scope_kind=CHAPTER, and an issued credential records what was actually
+# awarded. These lock in the two things that must not silently drift:
+# the NULL-means-legacy defaults, and the fact that a chapter-scoped row is
+# distinguishable from the course-scoped one that shares its course.
+# ---------------------------------------------------------------------------
+
+
+class TestCredentialScope:
+    @pytest.mark.asyncio
+    async def test_course_scoped_row_defaults_to_course(self, db, course):
+        """A legacy row with scope_kind NULL must keep behaving as COURSE.
+
+        Every pre-existing row is NULL, so this default is what stops the
+        generalization from reinterpreting the certificates already issued.
+        """
+        row = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-legacy-null-scope",
+            scope_kind=None,
+            scope_id=None,
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(row)
+        await db.commit()
+        await db.refresh(row)
+        assert row.resolved_scope_kind == CredentialScopeKind.COURSE
+
+    @pytest.mark.asyncio
+    async def test_model_default_is_course(self, db, course):
+        row = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-default-scope",
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(row)
+        await db.commit()
+        await db.refresh(row)
+        assert row.scope_kind == CredentialScopeKind.COURSE.value
+        assert row.resolved_scope_kind == CredentialScopeKind.COURSE
+
+    @pytest.mark.asyncio
+    async def test_chapter_scope_round_trips(self, db, course):
+        row = Certifications(
+            course_id=course.id,
+            config={"label": "Chapter 1 milestone"},
+            certification_uuid="cert-chapter-scoped",
+            scope_kind=CredentialScopeKind.CHAPTER.value,
+            scope_id=7,
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(row)
+        await db.commit()
+        await db.refresh(row)
+        assert row.resolved_scope_kind == CredentialScopeKind.CHAPTER
+        assert row.scope_id == 7
+
+    @pytest.mark.asyncio
+    async def test_unrecognised_scope_falls_back_to_course(
+        self, db, course
+    ):
+        """Never raise on a bad value — a milestone read must not 500 because
+        of a stale enum name; degrade to the course meaning instead."""
+        row = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-bogus-scope",
+            scope_kind="SECTION",
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(row)
+        await db.commit()
+        await db.refresh(row)
+        assert row.resolved_scope_kind == CredentialScopeKind.COURSE
+
+
+class TestAwardKind:
+    @pytest.mark.asyncio
+    async def test_null_award_kind_means_completed(self, db, course, regular_user):
+        """A course certificate's whole claim is possession, so a NULL
+        award_kind has to read as COMPLETED, not as a failure."""
+        cert = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-award-null",
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(cert)
+        await db.commit()
+        await db.refresh(cert)
+        issued = CertificateUser(
+            user_id=regular_user.id,
+            certification_id=cert.id,
+            user_certification_uuid="ucert-award-null",
+            award_kind=None,
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(issued)
+        await db.commit()
+        await db.refresh(issued)
+        assert issued.resolved_award_kind == AwardKind.COMPLETED
+
+    @pytest.mark.asyncio
+    async def test_participated_and_passed_are_distinct(
+        self, db, course, regular_user
+    ):
+        """A "participated" card and a "passed" card claim different things,
+        so a failed CAT followed by a pass is an escalation, not a relabel."""
+        cert = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-award-escalation",
+            scope_kind=CredentialScopeKind.CHAPTER.value,
+            scope_id=3,
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(cert)
+        await db.commit()
+        await db.refresh(cert)
+        issued = CertificateUser(
+            user_id=regular_user.id,
+            certification_id=cert.id,
+            user_certification_uuid="ucert-award-escalation",
+            award_kind=AwardKind.PARTICIPATED.value,
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(issued)
+        await db.commit()
+        await db.refresh(issued)
+        assert issued.resolved_award_kind == AwardKind.PARTICIPATED
+        assert issued.resolved_award_kind != AwardKind.PASSED
+
+    @pytest.mark.asyncio
+    async def test_award_detail_defaults_to_empty_dict(
+        self, db, course, regular_user
+    ):
+        """Pre-existing rows and any writer that omits the snapshot must not
+        get NULL — the read path treats award_detail as a dict."""
+        cert = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-award-detail-default",
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(cert)
+        await db.commit()
+        await db.refresh(cert)
+        issued = CertificateUser(
+            user_id=regular_user.id,
+            certification_id=cert.id,
+            user_certification_uuid="ucert-award-detail-default",
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(issued)
+        await db.commit()
+        await db.refresh(issued)
+        assert issued.award_detail == {}
+
+    @pytest.mark.asyncio
+    async def test_award_detail_persists_snapshot(
+        self, db, course, regular_user
+    ):
+        """The snapshot is the point: it must survive a round trip verbatim,
+        because a shared verification link is read long after the chapter was
+        renamed or re-graded."""
+        cert = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-award-detail-snapshot",
+            scope_kind=CredentialScopeKind.CHAPTER.value,
+            scope_id=4,
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(cert)
+        await db.commit()
+        await db.refresh(cert)
+        snapshot = {
+            "score": 42.0,
+            "percentage": 84.0,
+            "skills": ["Chapter 2 milestone", "Requirements analysis"],
+            "chapter_position": {"index": 2, "total": 6},
+        }
+        issued = CertificateUser(
+            user_id=regular_user.id,
+            certification_id=cert.id,
+            user_certification_uuid="ucert-award-detail-snapshot",
+            award_kind=AwardKind.PASSED.value,
+            award_detail=snapshot,
+            creation_date="2026-01-01",
+            update_date="2026-01-01",
+        )
+        db.add(issued)
+        await db.commit()
+        await db.refresh(issued)
+        assert issued.award_kind == AwardKind.PASSED.value
+        assert issued.award_detail == snapshot

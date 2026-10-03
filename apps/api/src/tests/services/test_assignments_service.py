@@ -23,6 +23,9 @@ import pytest
 from fastapi import HTTPException
 from sqlmodel import select
 
+from src.db.courses.activities import (
+    Activity, ActivityTypeEnum, ActivitySubTypeEnum,
+)
 from src.db.courses.assignments import (
     Assignment,
     AssignmentCreate,
@@ -2003,6 +2006,24 @@ class TestUpdateAssignmentSubmissionProtectedFields:
     ):
         original_assignment_id = user_submission.assignment_id  # 10
         # A second assignment the attacker tries to move their submission onto.
+        # It needs its own activity: one activity is one assessment
+        # (uq_assignment_activity_id), so reusing `activity` would be the very
+        # state the constraint exists to prevent.
+        other_activity = Activity(
+            id=101,
+            name="Other Activity",
+            activity_type=ActivityTypeEnum.TYPE_DYNAMIC,
+            activity_sub_type=ActivitySubTypeEnum.SUBTYPE_DYNAMIC_PAGE,
+            content={"type": "doc", "content": []},
+            published=True,
+            org_id=org.id,
+            course_id=course.id,
+            activity_uuid="activity_test_other",
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db.add(other_activity)
+        await db.commit()
         other = Assignment(
             id=11,
             title="Other Assignment",
@@ -2014,7 +2035,7 @@ class TestUpdateAssignmentSubmissionProtectedFields:
             org_id=org.id,
             course_id=course.id,
             chapter_id=chapter.id,
-            activity_id=activity.id,
+            activity_id=other_activity.id,
             assignment_uuid="assignment_other",
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),
@@ -2046,7 +2067,23 @@ class TestUpdateAssignmentSubmissionProtectedFields:
         # SECURITY: the row's assignment_id is fixed by the URL/lookup keys.
         # Even an instructor must NOT be able to reparent a submission onto a
         # different assignment via the request body (assignment ids are global
-        # integers — this would be a cross-tenant write).
+        # integers — this would be a cross-tenant write). Its own activity, per
+        # uq_assignment_activity_id.
+        other_activity = Activity(
+            id=102,
+            name="Other Activity 2",
+            activity_type=ActivityTypeEnum.TYPE_DYNAMIC,
+            activity_sub_type=ActivitySubTypeEnum.SUBTYPE_DYNAMIC_PAGE,
+            content={"type": "doc", "content": []},
+            published=True,
+            org_id=org.id,
+            course_id=course.id,
+            activity_uuid="activity_test_other2",
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db.add(other_activity)
+        await db.commit()
         other = Assignment(
             id=12,
             title="Other Assignment 2",
@@ -2058,7 +2095,7 @@ class TestUpdateAssignmentSubmissionProtectedFields:
             org_id=org.id,
             course_id=course.id,
             chapter_id=chapter.id,
-            activity_id=activity.id,
+            activity_id=other_activity.id,
             assignment_uuid="assignment_other2",
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),

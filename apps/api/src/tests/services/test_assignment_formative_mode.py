@@ -32,6 +32,9 @@ from src.core.events.database import get_db_session
 from src.routers.courses.assignments import router as assignments_router
 from src.security.auth import get_current_user
 
+from src.db.courses.activities import (
+    Activity, ActivityTypeEnum, ActivitySubTypeEnum,
+)
 from src.db.courses.assignments import (
     Assignment,
     AssignmentCreate,
@@ -379,12 +382,29 @@ class TestSolutionVisibilityOnRead:
         handed_in = await _make_formative(
             db, org, course, chapter, activity, uuid="assignment_formative_a"
         )
+        # Distinct activity: one activity is one assessment
+        # (uq_assignment_activity_id), so a second assignment needs its own.
+        second_activity = Activity(
+            id=902,
+            name="Second Activity",
+            activity_type=ActivityTypeEnum.TYPE_DYNAMIC,
+            activity_sub_type=ActivitySubTypeEnum.SUBTYPE_DYNAMIC_PAGE,
+            content={"type": "doc", "content": []},
+            published=True,
+            org_id=org.id,
+            course_id=course.id,
+            activity_uuid="activity_formative_second",
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db.add(second_activity)
+        await db.commit()
         locked = await _make_formative(
             db,
             org,
             course,
             chapter,
-            activity,
+            second_activity,
             uuid="assignment_formative_b",
             solution_file="solution_b.pdf",
         )

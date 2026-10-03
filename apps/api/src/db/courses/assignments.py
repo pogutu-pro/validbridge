@@ -1,5 +1,5 @@
 from typing import Optional, Dict
-from sqlalchemy import JSON, Column, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import JSON, CheckConstraint, Column, ForeignKey, Index, UniqueConstraint
 from sqlmodel import Field, SQLModel
 from enum import Enum
 
@@ -157,6 +157,14 @@ class Assignment(AssignmentBase, table=True):
     __table_args__ = (
         Index("ix_assignment_course_id", "course_id"),
         Index("ix_assignment_org_id", "org_id"),
+        # One activity is one assessment. The read, submit and certificate-gate
+        # paths each resolve an assignment from its activity and assume a single
+        # row. Declared here as well as in migration z1a2b3c4d5e6 because a
+        # database bootstrapped with create_all (every fresh dev/demo install)
+        # never runs migrations.
+        UniqueConstraint(
+            "activity_id", name="uq_assignment_activity_id"
+        ),
     )
 
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -248,6 +256,19 @@ class AssignmentTaskUpdate(SQLModel):
 
 class AssignmentTask(AssignmentTaskBase, table=True):
     """Represents a task within an assignment with various attributes and foreign keys."""
+
+    # `ge=0` on max_grade_value above is a Pydantic constraint: it validates
+    # writes that go through these schemas and silently does nothing for a
+    # direct SQL write or another code path. The grading maths divides by
+    # max_grade_value, so a negative value makes a task's grade meaningless.
+    # Enforced in the database too, and declared here as well as in migration
+    # z1a2b3c4d5e6 because create_all-built databases never run migrations.
+    __table_args__ = (
+        CheckConstraint(
+            "max_grade_value IS NULL OR max_grade_value >= 0",
+            name="ck_assignmenttask_max_grade_non_negative",
+        ),
+    )
 
     id: Optional[int] = Field(default=None, primary_key=True)
 

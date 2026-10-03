@@ -698,7 +698,22 @@
       "info_description": "Filter courses by user group to see only courses assigned to a specific group. Useful for families or teams sharing the same organization."
     },
     "sign_in_to_see_courses": "Log in to see your courses",
-    "sign_in_to_see_courses_description": "Courses in this academy may only be visible once you are signed in."
+    "sign_in_to_see_courses_description": "Courses in this academy may only be visible once you are signed in.",
+    "progression": {
+      "locked": "Locked",
+      "locked_title": "Finish the earlier assessments to unlock this chapter",
+      "warning": "Finish soon",
+      "warning_title": "You can continue, but you have assessments to finish",
+      "open": "Open",
+      "notice": {
+        "locked_heading": "This chapter is not unlocked yet",
+        "warning_heading": "You have unfinished assessments",
+        "fallback": "Finish the earlier assessments to unlock this chapter.",
+        "outstanding": "Not submitted yet",
+        "not_passed": "Not passed yet",
+        "retry": "Go to the assessment"
+      }
+    }
   },
   "communities": {
     "title": "Connect",
@@ -2831,6 +2846,22 @@
           "descriptions": {
             "scorm": "SCORM-compliant learning package"
           }
+        }
+      },
+      "progression": {
+        "sections": {
+          "title": "Chapter Order",
+          "subtitle": "Decide whether learners must finish each chapter before moving on.",
+          "explainer": "Only assessments you have placed in a published chapter can hold a learner back. A chapter with nothing placed in it never blocks anyone, so it is safe to leave a chapter empty while you are still building it."
+        },
+        "form": {
+          "enabled_label": "Require chapters to be completed in order",
+          "enabled_hint": "When off, learners can open every chapter freely. This is the default and existing courses are unaffected.",
+          "require_pass_label": "Learners must pass, not just submit",
+          "require_pass_hint": "Off: handing in the work opens the next chapter. On: the assessment must also reach its pass mark.",
+          "never_block_label": "Warn instead of blocking",
+          "never_block_hint": "Recommended if failing an assessment should never stop someone. Learners see a reminder but can always continue.",
+          "combination_warning": "Learners will be blocked until they submit, but a failed assessment will not hold them back. That is a valid choice, but usually you want one or the other."
         }
       }
     },

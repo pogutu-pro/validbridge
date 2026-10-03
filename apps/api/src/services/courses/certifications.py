@@ -4,11 +4,14 @@ from typing import List
 from uuid import uuid4
 from datetime import datetime
 from sqlmodel import select, func
+from sqlalchemy import and_, or_
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Request
 from src.db.courses.certifications import (
+    AwardKind,
     Certifications,
+    CredentialScopeKind,
     CertificationCreate,
     CertificationRead,
     CertificationUpdate,
@@ -426,9 +429,7 @@ async def revoke_user_certificate(
     """
     from src.db.users import User
 
-    certification = (await db_session.execute(
-        select(Certifications).where(Certifications.course_id == course_id)
-    )).scalars().first()
+    certification = await get_course_certification(course_id, db_session)
     if not certification or not certification.id:
         return False
 
@@ -600,6 +601,59 @@ async def is_course_fully_completed(
     )).scalar_one()
 
     return completed_activities >= total_activities
+
+
+def _course_scope_filter():
+    """
+    Predicate matching only the course-level certificate for a course.
+
+    Every ``.first()`` lookup that means "the certificate for this course" must
+    go through this. Chapter milestones are rows in the same table, so a plain
+    ``where(course_id == X)`` can return a milestone and the caller will then
+    issue, revoke or gate on a chapter credential by mistake.
+
+    NULL scope_kind is treated as COURSE because that is what every row written
+    before scope existed has.
+    """
+    return and_(
+        or_(
+            Certifications.scope_kind.is_(None),
+            Certifications.scope_kind == CredentialScopeKind.COURSE.value,
+        ),
+        Certifications.scope_id.is_(None),
+    )
+
+
+async def get_course_certification(
+    course_id: int,
+    db_session: AsyncSession,
+) -> Certifications | None:
+    """The single course-level Certifications row for a course, or None."""
+    return (await db_session.execute(
+        select(Certifications)
+        .where(Certifications.course_id == course_id)
+        .where(_course_scope_filter())
+        .order_by(Certifications.id)
+    )).scalars().first()
+
+
+async def get_chapter_certification(
+    course_id: int,
+    chapter_id: int,
+    db_session: AsyncSession,
+) -> Certifications | None:
+    """The milestone Certifications row for one chapter of a course, or None.
+
+    Created on demand by the award path, so an author never has to remember to
+    add one per chapter.
+    """
+    return (await db_session.execute(
+        select(Certifications)
+        .where(Certifications.course_id == course_id)
+        .where(Certifications.scope_kind == CredentialScopeKind.CHAPTER.value)
+        .where(Certifications.scope_id == chapter_id)
+        .order_by(Certifications.id)
+    )).scalars().first()
 
 
 async def is_chapter_fully_completed(
@@ -855,6 +909,314 @@ async def are_course_assignments_passed(
     return True
 
 
+_AWARD_RANK = {
+    AwardKind.COMPLETED.value: 0,
+    AwardKind.PARTICIPATED.value: 1,
+    AwardKind.PASSED.value: 2,
+}
+
+
+def _is_stronger_award(new_kind: str, existing_kind: str | None) -> bool:
+    """Whether ``new_kind`` may replace ``existing_kind`` on an issued milestone.
+
+    Escalation only, never downgrade. A learner who failed a CAT holds
+    PARTICIPATED; passing later upgrades the same credential to PASSED. But a
+    re-grade that lowers a score, or a re-run that finds no graded assessment,
+    must not silently retract a "passed" claim from a link the learner has
+    already shared — that would make an already-published credential change
+    meaning without warning, which is exactly what the award snapshot exists to
+    prevent.
+    """
+    if not existing_kind:
+        return True
+    return _AWARD_RANK.get(new_kind, 0) > _AWARD_RANK.get(existing_kind, 0)
+
+
+async def _resolve_chapter_award_kind(
+    user_id: int,
+    course_id: int,
+    chapter_id: int,
+    db_session: AsyncSession,
+) -> tuple[str, dict]:
+    """
+    Decide what a completed chapter actually earned, and build the snapshot.
+
+    PASSED     the chapter's graded assessment was passed.
+    PARTICIPATED the learner attempted it and did not pass.
+    COMPLETED  the chapter has nothing graded in it — the work is done, but no
+               skill has been demonstrated, so the credential must not imply one.
+
+    Reuses the same grader and the same per-assignment threshold as the course
+    certificate gate, so a milestone never disagrees with the score the learner
+    was shown.
+    """
+    from src.db.courses.assignments import (
+        Assignment,
+        AssignmentTask,
+        AssignmentUserSubmission,
+        AssignmentUserSubmissionStatus,
+    )
+    from src.services.courses.activities.assignments import (
+        _HANDED_IN_STATUSES,
+        compute_assignment_grade,
+    )
+
+    assignments = (await db_session.execute(
+        select(Assignment).where(
+            Assignment.course_id == course_id,
+            Assignment.activity_id.in_(
+                select(ChapterActivity.activity_id)
+                .join(Activity, Activity.id == ChapterActivity.activity_id)
+                .where(
+                    ChapterActivity.chapter_id == chapter_id,
+                    Activity.published == True,
+                )
+            ),
+        )
+    )).scalars().all()
+
+    if not assignments:
+        return AwardKind.COMPLETED.value, {}
+
+    assignment_ids = [a.id for a in assignments if a.id is not None]
+    max_rows = (await db_session.execute(
+        select(
+            AssignmentTask.assignment_id,
+            func.coalesce(func.sum(AssignmentTask.max_grade_value), 0),
+        )
+        .where(AssignmentTask.assignment_id.in_(assignment_ids))
+        .group_by(AssignmentTask.assignment_id)
+    )).all()
+    max_by_assignment = {aid: int(m or 0) for aid, m in max_rows}
+
+    subs = (await db_session.execute(
+        select(AssignmentUserSubmission).where(
+            AssignmentUserSubmission.user_id == user_id,
+            AssignmentUserSubmission.assignment_id.in_(assignment_ids),
+        )
+    )).scalars().all()
+    sub_by_assignment = {s.assignment_id: s for s in subs}
+
+    passed_any = False
+    attempted_any = False
+    best_percentage: float | None = None
+
+    for assignment in assignments:
+        max_grade = max_by_assignment.get(assignment.id, 0)
+        sub = sub_by_assignment.get(assignment.id)
+        if sub is None:
+            continue
+
+        # A formative assignment is never graded, so it can neither pass nor
+        # fail. Handing it in counts as attempting the chapter, nothing more.
+        if getattr(assignment, "ungraded", False):
+            if sub.submission_status in _HANDED_IN_STATUSES:
+                attempted_any = True
+            continue
+
+        # No gradable points: nothing to demonstrate.
+        if max_grade <= 0:
+            continue
+
+        if sub.submission_status not in _HANDED_IN_STATUSES:
+            continue
+        attempted_any = True
+
+        if sub.submission_status != AssignmentUserSubmissionStatus.GRADED:
+            continue
+
+        computed = compute_assignment_grade(
+            int(sub.grade or 0),
+            max_grade,
+            assignment.grading_type,
+            pass_threshold_percentage=assignment.pass_threshold_percentage,
+        )
+        percentage = computed.get("percentage")
+        if percentage is not None:
+            pct = float(percentage)
+            if best_percentage is None or pct > best_percentage:
+                best_percentage = pct
+        if computed.get("passed"):
+            passed_any = True
+
+    if passed_any:
+        kind = AwardKind.PASSED.value
+    elif attempted_any:
+        kind = AwardKind.PARTICIPATED.value
+    else:
+        kind = AwardKind.COMPLETED.value
+
+    snapshot: dict = {}
+    if best_percentage is not None:
+        snapshot["percentage"] = best_percentage
+    return kind, snapshot
+
+
+async def award_chapter_milestone(
+    request: Request,
+    user_id: int,
+    course_id: int,
+    chapter_id: int,
+    db_session: AsyncSession,
+    is_complete: bool | None = None,
+) -> dict | None:
+    """
+    Award (or escalate) the chapter milestone for one learner, if earned.
+
+    Returns a small result dict, or None when nothing was awarded and nothing
+    changed — so the caller can tell "not earned yet" from "already held".
+    Mirrors ``check_course_completion_and_create_certificate``: it returns a
+    value only when it actually wrote something.
+
+    Milestones ride along with certification: a course with no course-level
+    certification gets no milestones. That is the whole opt-in — an author
+    enables certification once and every chapter becomes creditable, instead of
+    toggling a flag per chapter and leaving some chapters silently uncredible.
+
+    The chapter's Certifications row is created on demand and inherits the
+    course certificate's ``config``, so branding, layout and the shared preview
+    component apply to every milestone without per-chapter authoring.
+
+    Idempotent and safe to call on every completion: re-running holds no second
+    credential, and only ever escalates the award kind.
+    """
+    if is_complete is None:
+        is_complete = await is_chapter_fully_completed(
+            user_id, chapter_id, db_session
+        )
+    if not is_complete:
+        return None
+
+    course_certification = await get_course_certification(course_id, db_session)
+    if not course_certification:
+        # Certification is the opt-in for milestones too.
+        return None
+
+    chapter_certification = await get_chapter_certification(
+        course_id, chapter_id, db_session
+    )
+    if not chapter_certification:
+        chapter_certification = Certifications(
+            course_id=course_id,
+            config=dict(course_certification.config or {}),
+            certification_uuid=f"milestone_{uuid4().hex[:16]}",
+            scope_kind=CredentialScopeKind.CHAPTER.value,
+            scope_id=chapter_id,
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db_session.add(chapter_certification)
+        try:
+            await db_session.commit()
+        except IntegrityError:
+            # Another completion for the same chapter created it first.
+            await db_session.rollback()
+            chapter_certification = await get_chapter_certification(
+                course_id, chapter_id, db_session
+            )
+            if not chapter_certification:
+                raise
+        else:
+            await db_session.refresh(chapter_certification)
+
+    if not chapter_certification or not chapter_certification.id:
+        return None
+
+    award_kind, snapshot = await _resolve_chapter_award_kind(
+        user_id, course_id, chapter_id, db_session
+    )
+
+    # Snapshot the chapter's position and title as awarded. Renaming a chapter
+    # later must not rewrite a credential that is already in someone's feed.
+    from src.db.courses.chapters import Chapter
+    chapter = (await db_session.execute(
+        select(Chapter).where(Chapter.id == chapter_id)
+    )).scalars().first()
+    if chapter is not None:
+        snapshot["chapter_name"] = chapter.name
+
+    total_chapters = (await db_session.execute(
+        select(func.count(func.distinct(Chapter.id)))
+        .join(ChapterActivity, ChapterActivity.chapter_id == Chapter.id)
+        .join(Activity, Activity.id == ChapterActivity.activity_id)
+        .where(ChapterActivity.course_id == course_id, Activity.published == True)
+    )).scalar_one()
+    sibling_orders = (await db_session.execute(
+        select(func.min(ChapterActivity.order))
+        .where(
+            ChapterActivity.chapter_id == chapter_id,
+            ChapterActivity.course_id == course_id,
+        )
+    )).scalar_one()
+    if sibling_orders is not None and total_chapters:
+        snapshot["chapter_position"] = {
+            "index": int(sibling_orders),
+            "total": int(total_chapters),
+        }
+
+    existing = (await db_session.execute(
+        select(CertificateUser).where(
+            CertificateUser.user_id == user_id,
+            CertificateUser.certification_id == chapter_certification.id,
+        )
+    )).scalars().first()
+
+    if existing:
+        if not _is_stronger_award(award_kind, existing.award_kind):
+            return None
+        existing.award_kind = award_kind
+        existing.award_detail = snapshot
+        existing.updated_at = str(datetime.now())
+        db_session.add(existing)
+        await db_session.commit()
+        await db_session.refresh(existing)
+        return {
+            "certificate_user": CertificateUserRead(**existing.model_dump()),
+            "certification": CertificationRead(**chapter_certification.model_dump()),
+            "escalated": True,
+        }
+
+    from src.db.users import User
+    user = (await db_session.execute(
+        select(User).where(User.id == user_id)
+    )).scalars().first()
+    if not user:
+        return None
+
+    now = datetime.now()
+    user_uuid_short = user.user_uuid[-4:] if user.user_uuid else "USER"
+    _alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    random_prefix = secrets.choice(_alpha) + secrets.choice(_alpha)
+    prefix = (
+        f"{random_prefix}-{now.year}{now.month:02d}{now.day:02d}"
+        f"-{user_uuid_short}-"
+    )
+
+    issued = CertificateUser(
+        user_id=user_id,
+        certification_id=chapter_certification.id,
+        user_certification_uuid=f"{prefix}{secrets.token_hex(4)}",
+        award_kind=award_kind,
+        award_detail=snapshot,
+        created_at=str(now),
+        updated_at=str(now),
+    )
+    db_session.add(issued)
+    try:
+        await db_session.commit()
+    except IntegrityError:
+        # Concurrent award won the race; treat as already held rather than 500.
+        await db_session.rollback()
+        return None
+    await db_session.refresh(issued)
+
+    return {
+        "certificate_user": CertificateUserRead(**issued.model_dump()),
+        "certification": CertificationRead(**chapter_certification.model_dump()),
+        "escalated": False,
+    }
+
+
 async def check_course_completion_and_create_certificate(
     request: Request,
     user_id: int,
@@ -898,9 +1260,11 @@ async def check_course_completion_and_create_certificate(
     await sync_trailrun_status(user_id, course_id, db_session, is_complete=is_complete)
 
     if is_complete:
-        # All activities completed, check if certification exists for this course
-        statement = select(Certifications).where(Certifications.course_id == course_id)
-        certification = (await db_session.execute(statement)).scalars().first()
+        # All activities completed, check if certification exists for this
+        # course. Course-scoped lookup on purpose: a chapter milestone lives in
+        # the same table, and picking one here would issue the chapter's
+        # credential a second time under the course-completion path.
+        certification = await get_course_certification(course_id, db_session)
         
         if certification and certification.id:
             # Certificate integrity: completion is necessary but not sufficient —

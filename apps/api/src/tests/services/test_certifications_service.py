@@ -17,6 +17,7 @@ from src.db.courses.certifications import (
     Certifications,
     CredentialScopeKind,
 )
+from src.db.courses.assignments import AssignmentUserSubmission
 from src.db.courses.courses import Course
 from src.db.trail_runs import StatusEnum, TrailRun
 from src.db.trail_steps import TrailStep
@@ -2377,3 +2378,565 @@ class TestIsChapterFullyCompleted:
         result = await get_chapter_activities_for_learner(chapter.id, db)
 
         assert result == [second.id, first.id]
+
+
+class TestCourseCertificationLookupIsScopeAware:
+    """Regression cover for the bug that generalising Certifications introduced.
+
+    A chapter milestone is a row in Certifications, so every "the certificate for
+    this course" lookup that did not filter on scope could return a milestone and
+    then issue, revoke or gate on it by mistake.
+    """
+
+    @pytest.mark.asyncio
+    async def test_get_course_certification_ignores_milestone(
+        self, db, course
+    ):
+        from src.services.courses.certifications import (
+            get_course_certification,
+        )
+
+        milestone = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-lookahead-milestone",
+            scope_kind=CredentialScopeKind.CHAPTER.value,
+            scope_id=1,
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(milestone)
+        await db.commit()
+
+        assert await get_course_certification(course.id, db) is None
+
+    @pytest.mark.asyncio
+    async def test_null_scope_still_matches_course_scope(self, db, course):
+        """Legacy rows have scope_kind NULL and must still be found."""
+        from src.services.courses.certifications import (
+            get_course_certification,
+        )
+
+        legacy = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-lookahead-legacy",
+            scope_kind=None,
+            scope_id=None,
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(legacy)
+        await db.commit()
+
+        found = await get_course_certification(course.id, db)
+        assert found is not None
+        assert found.certification_uuid == "cert-lookahead-legacy"
+
+    @pytest.mark.asyncio
+    async def test_explicit_course_scope_matches(self, db, course):
+        from src.services.courses.certifications import (
+            get_course_certification,
+        )
+
+        explicit = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid="cert-lookahead-explicit",
+            scope_kind=CredentialScopeKind.COURSE.value,
+            scope_id=None,
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(explicit)
+        await db.commit()
+
+        found = await get_course_certification(course.id, db)
+        assert found is not None
+        assert found.certification_uuid == "cert-lookahead-explicit"
+
+
+class TestAwardKindEscalation:
+    """Only ever escalate, never downgrade a published claim."""
+
+    @pytest.mark.asyncio
+    async def test_participated_escalates_to_passed(self):
+        from src.services.courses.certifications import _is_stronger_award
+
+        assert _is_stronger_award(
+            AwardKind.PASSED.value, AwardKind.PARTICIPATED.value
+        ) is True
+
+    @pytest.mark.asyncio
+    async def test_completed_escalates_to_participated(self):
+        from src.services.courses.certifications import _is_stronger_award
+
+        assert _is_stronger_award(
+            AwardKind.PARTICIPATED.value, AwardKind.COMPLETED.value
+        ) is True
+
+    @pytest.mark.asyncio
+    async def test_passed_never_downgrades_to_participated(self):
+        """A re-grade that lowers a score must not retract a claim the learner
+        has already shared."""
+        from src.services.courses.certifications import _is_stronger_award
+
+        assert _is_stronger_award(
+            AwardKind.PARTICIPATED.value, AwardKind.PASSED.value
+        ) is False
+        assert _is_stronger_award(
+            AwardKind.COMPLETED.value, AwardKind.PASSED.value
+        ) is False
+
+    @pytest.mark.asyncio
+    async def test_same_kind_is_not_an_escalation(self):
+        from src.services.courses.certifications import _is_stronger_award
+
+        assert _is_stronger_award(
+            AwardKind.PASSED.value, AwardKind.PASSED.value
+        ) is False
+
+    @pytest.mark.asyncio
+    async def test_missing_existing_kind_is_always_upgradable(self):
+        from src.services.courses.certifications import _is_stronger_award
+
+        assert _is_stronger_award(AwardKind.COMPLETED.value, None) is True
+
+
+class TestAwardChapterMilestone:
+    """End-to-end milestone awarding.
+
+    The behaviour that matters to a learner: certification is the single opt-in,
+    completing a chapter earns something, a retry improves it in place, and
+    nothing is ever issued twice or quietly retracted.
+    """
+
+    async def _course_cert(self, db, course, *, config=None):
+        cert = Certifications(
+            course_id=course.id,
+            config=config if config is not None else {},
+            certification_uuid=f"cert-award-{course.id}",
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(cert)
+        await db.commit()
+        await db.refresh(cert)
+        return cert
+
+    async def _completed_step(self, db, org, course, user, activity_id):
+        db.add(TrailStep(
+            complete=True, teacher_verified=False, grade="", data={},
+            trailrun_id=1, trail_id=1, activity_id=activity_id,
+            course_id=course.id, org_id=org.id, user_id=user.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+
+    @staticmethod
+    def _published_activity(org, course, *, id_, uuid_, chapter_id):
+        from src.db.courses.activities import (
+            Activity, ActivityTypeEnum, ActivitySubTypeEnum,
+        )
+        from src.db.courses.chapter_activities import ChapterActivity
+
+        activity = Activity(
+            id=id_, name=uuid_, activity_uuid=uuid_,
+            activity_type=ActivityTypeEnum.TYPE_DYNAMIC,
+            activity_sub_type=ActivitySubTypeEnum.SUBTYPE_DYNAMIC_PAGE,
+            published=True, org_id=org.id, course_id=course.id, content={},
+            creation_date="2024-01-01", update_date="2024-01-01",
+        )
+        return activity, ChapterActivity(
+            activity_id=id_, course_id=course.id, chapter_id=chapter_id,
+            org_id=org.id, order=0,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        )
+
+    @pytest.mark.asyncio
+    async def test_no_course_certification_awards_nothing(
+        self, db, org, course, chapter, regular_user
+    ):
+        """Certification is the single opt-in for milestones. Without it the
+        author has not asked for creditable chapters."""
+        from src.services.courses.certifications import award_chapter_milestone
+
+        activity, link = self._published_activity(
+            org, course, id_=4301, uuid_="activity_awd_none", chapter_id=chapter.id
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(link)
+        await db.commit()
+        await self._completed_step(db, org, course, regular_user, activity.id)
+
+        result = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+
+        assert result is None
+        rows = (await db.execute(
+            select(CertificateUser).where(CertificateUser.user_id == regular_user.id)
+        )).scalars().all()
+        assert rows == []
+
+    @pytest.mark.asyncio
+    async def test_incomplete_chapter_awards_nothing(
+        self, db, org, course, chapter, regular_user
+    ):
+        from src.services.courses.certifications import award_chapter_milestone
+
+        await self._course_cert(db, course)
+        activity, link = self._published_activity(
+            org, course, id_=4302, uuid_="activity_awd_partial", chapter_id=chapter.id
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(link)
+        await db.commit()
+        # No TrailStep: nothing completed.
+
+        assert await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        ) is None
+
+    @pytest.mark.asyncio
+    async def test_completed_chapter_with_nothing_graded_awards_completed(
+        self, db, org, course, chapter, regular_user
+    ):
+        """A chapter of reading with no graded assessment is done, but nothing
+        was demonstrated — the credential must not imply a skill."""
+        from src.services.courses.certifications import award_chapter_milestone
+
+        await self._course_cert(db, course)
+        activity, link = self._published_activity(
+            org, course, id_=4303, uuid_="activity_awd_done", chapter_id=chapter.id
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(link)
+        await db.commit()
+        await self._completed_step(db, org, course, regular_user, activity.id)
+
+        result = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+
+        assert result is not None
+        assert result["escalated"] is False
+        assert result["certificate_user"].award_kind == AwardKind.COMPLETED.value
+        assert result["certification"].scope_kind == CredentialScopeKind.CHAPTER.value
+        assert result["certification"].scope_id == chapter.id
+
+    @pytest.mark.asyncio
+    async def test_chapter_credential_inherits_course_config(
+        self, db, org, course, chapter, regular_user
+    ):
+        """Branding and layout come from the course certificate, so an author
+        never has to configure each chapter."""
+        from src.services.courses.certifications import award_chapter_milestone
+
+        await self._course_cert(db, course, config={"template": "midnight"})
+        activity, link = self._published_activity(
+            org, course, id_=4304, uuid_="activity_awd_cfg", chapter_id=chapter.id
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(link)
+        await db.commit()
+        await self._completed_step(db, org, course, regular_user, activity.id)
+
+        result = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+
+        assert result is not None
+        assert result["certification"].config == {"template": "midnight"}
+
+    @pytest.mark.asyncio
+    async def test_second_call_issues_nothing_new(
+        self, db, org, course, chapter, regular_user
+    ):
+        """Called on every completion, so re-running must be a no-op rather than
+        a second credential."""
+        from src.services.courses.certifications import award_chapter_milestone
+
+        await self._course_cert(db, course)
+        activity, link = self._published_activity(
+            org, course, id_=4305, uuid_="activity_awd_twice", chapter_id=chapter.id
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(link)
+        await db.commit()
+        await self._completed_step(db, org, course, regular_user, activity.id)
+
+        first = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+        second = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+
+        assert first is not None
+        assert second is None
+        issued = (await db.execute(
+            select(CertificateUser).where(CertificateUser.user_id == regular_user.id)
+        )).scalars().all()
+        assert len(issued) == 1
+        assert issued[0].user_certification_uuid == (
+            first["certificate_user"].user_certification_uuid
+        )
+
+    @pytest.mark.asyncio
+    async def test_snapshot_records_chapter_name_and_position(
+        self, db, org, course, chapter, regular_user
+    ):
+        """The snapshot is why a shared link keeps its meaning after the author
+        renames or reorders the course."""
+        from src.services.courses.certifications import award_chapter_milestone
+
+        await self._course_cert(db, course)
+        activity, link = self._published_activity(
+            org, course, id_=4306, uuid_="activity_awd_snap", chapter_id=chapter.id
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(link)
+        await db.commit()
+        await self._completed_step(db, org, course, regular_user, activity.id)
+
+        result = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+
+        assert result is not None
+        detail = result["certificate_user"].award_detail
+        assert detail["chapter_name"] == chapter.name
+        assert detail["chapter_position"]["index"] == 0
+        assert detail["chapter_position"]["total"] == 1
+
+
+class TestChapterMilestoneEscalation:
+    """A failed attempt earns participation; a later pass upgrades the SAME
+    credential rather than issuing a second one.
+
+    Sharing is the reason this matters: two credentials would leave a
+    "participated" card and a "passed" card both live and publicly linkable for
+    the same chapter.
+    """
+
+    async def _course_cert(self, db, course):
+        cert = Certifications(
+            course_id=course.id,
+            config={},
+            certification_uuid=f"cert-esc-{course.id}",
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(cert)
+        await db.commit()
+        await db.refresh(cert)
+        return cert
+
+    async def _setup_chapter_with_cat(
+        self, db, org, course, chapter, regular_user, *, activity_id, uuid_
+    ):
+        from src.db.courses.activities import (
+            Activity, ActivityTypeEnum, ActivitySubTypeEnum,
+        )
+        from src.db.courses.assignments import (
+            Assignment,
+            AssignmentTask,
+            AssignmentTaskTypeEnum,
+            GradingTypeEnum,
+        )
+        from src.db.courses.chapter_activities import ChapterActivity
+
+        activity = Activity(
+            id=activity_id, name=uuid_, activity_uuid=uuid_,
+            activity_type=ActivityTypeEnum.TYPE_ASSIGNMENT,
+            activity_sub_type=ActivitySubTypeEnum.SUBTYPE_DYNAMIC_PAGE,
+            published=True, org_id=org.id, course_id=course.id, content={},
+            creation_date="2024-01-01", update_date="2024-01-01",
+        )
+        db.add(activity)
+        await db.commit()
+        db.add(ChapterActivity(
+            activity_id=activity.id, course_id=course.id,
+            chapter_id=chapter.id, org_id=org.id, order=0,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        assignment = Assignment(
+            title="Chapter CAT",
+            description="Pass at 80%",
+            due_date="2030-01-01",
+            published=True,
+            grading_type=GradingTypeEnum.PERCENTAGE,
+            pass_threshold_percentage=80,
+            org_id=org.id,
+            course_id=course.id,
+            chapter_id=chapter.id,
+            activity_id=activity.id,
+            assignment_uuid=f"assignment_esc_{activity_id}",
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(assignment)
+        await db.commit()
+        await db.refresh(assignment)
+        db.add(AssignmentTask(
+            title="Q1",
+            description="",
+            hint="",
+            assignment_type=AssignmentTaskTypeEnum.QUIZ,
+            contents={},
+            max_grade_value=100,
+            assignment_id=assignment.id,
+            org_id=org.id,
+            course_id=course.id,
+            chapter_id=chapter.id,
+            activity_id=activity.id,
+            assignment_task_uuid=f"task_esc_{activity_id}",
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        ))
+        db.add(TrailStep(
+            complete=True, teacher_verified=False, grade="", data={},
+            trailrun_id=1, trail_id=1, activity_id=activity.id,
+            course_id=course.id, org_id=org.id, user_id=regular_user.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+        return assignment
+
+    async def _grade(self, db, assignment, user, *, grade):
+        from src.db.courses.assignments import (
+            AssignmentUserSubmission,
+            AssignmentUserSubmissionStatus,
+        )
+
+        sub = AssignmentUserSubmission(
+            submission_status=AssignmentUserSubmissionStatus.GRADED,
+            grade=grade,
+            user_id=user.id,
+            assignment_id=assignment.id,
+            assignmentusersubmission_uuid=f"aus_esc_{assignment.id}",
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(sub)
+        await db.commit()
+        return sub
+
+    @pytest.mark.asyncio
+    async def test_failed_attempt_earns_participated(
+        self, db, org, course, chapter, regular_user
+    ):
+        from src.services.courses.certifications import award_chapter_milestone
+
+        await self._course_cert(db, course)
+        assignment = await self._setup_chapter_with_cat(
+            db, org, course, chapter, regular_user,
+            activity_id=4401, uuid_="activity_esc_fail",
+        )
+        await self._grade(db, assignment, regular_user, grade=40)
+
+        result = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+
+        assert result is not None
+        assert result["certificate_user"].award_kind == (
+            AwardKind.PARTICIPATED.value
+        )
+        assert result["certificate_user"].award_detail["percentage"] == 40.0
+
+    @pytest.mark.asyncio
+    async def test_later_pass_upgrades_same_credential_in_place(
+        self, db, org, course, chapter, regular_user
+    ):
+        from src.services.courses.certifications import award_chapter_milestone
+
+        await self._course_cert(db, course)
+        assignment = await self._setup_chapter_with_cat(
+            db, org, course, chapter, regular_user,
+            activity_id=4402, uuid_="activity_esc_pass",
+        )
+        await self._grade(db, assignment, regular_user, grade=40)
+
+        first = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+        assert first["certificate_user"].award_kind == (
+            AwardKind.PARTICIPATED.value
+        )
+
+        # Learner retries and now clears the threshold.
+        sub = (await db.execute(
+            select(AssignmentUserSubmission).where(
+                AssignmentUserSubmission.assignment_id == assignment.id
+            )
+        )).scalars().first()
+        sub.grade = 92
+        db.add(sub)
+        await db.commit()
+
+        second = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+
+        assert second is not None
+        assert second["escalated"] is True
+        assert second["certificate_user"].award_kind == AwardKind.PASSED.value
+        assert second["certificate_user"].award_detail["percentage"] == 92.0
+        # Same row and same public UUID: the already-shared link upgrades
+        # rather than leaving a stale "participated" card behind.
+        assert second["certificate_user"].user_certification_uuid == (
+            first["certificate_user"].user_certification_uuid
+        )
+        issued = (await db.execute(
+            select(CertificateUser).where(CertificateUser.user_id == regular_user.id)
+        )).scalars().all()
+        assert len(issued) == 1
+
+    @pytest.mark.asyncio
+    async def test_passed_is_not_retracted_by_a_later_lower_grade(
+        self, db, org, course, chapter, regular_user
+    ):
+        """A re-grade downward must not silently change what an already-shared
+        credential claims."""
+        from src.services.courses.certifications import award_chapter_milestone
+
+        await self._course_cert(db, course)
+        assignment = await self._setup_chapter_with_cat(
+            db, org, course, chapter, regular_user,
+            activity_id=4403, uuid_="activity_esc_keep",
+        )
+        await self._grade(db, assignment, regular_user, grade=95)
+
+        first = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+        assert first["certificate_user"].award_kind == AwardKind.PASSED.value
+
+        sub = (await db.execute(
+            select(AssignmentUserSubmission).where(
+                AssignmentUserSubmission.assignment_id == assignment.id
+            )
+        )).scalars().first()
+        sub.grade = 10
+        db.add(sub)
+        await db.commit()
+
+        second = await award_chapter_milestone(
+            MagicMock(), regular_user.id, course.id, chapter.id, db
+        )
+
+        assert second is None
+        issued = (await db.execute(
+            select(CertificateUser).where(CertificateUser.user_id == regular_user.id)
+        )).scalars().all()
+        assert len(issued) == 1
+        assert issued[0].award_kind == AwardKind.PASSED.value
+        assert issued[0].award_detail["percentage"] == 95.0

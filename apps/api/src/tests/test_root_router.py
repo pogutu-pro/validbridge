@@ -1,12 +1,22 @@
 """Tests for the root API router composition."""
 
+import ast
 import importlib
 import sys
+from pathlib import Path
 from types import ModuleType
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import APIRouter
+
+
+# Attribute names src/router.py uses to reach a router off a stubbed module.
+# Which one a given module uses is not uniform (`users_router_module.router`,
+# `nudges_router_module.public_router`, `live_router_module.webhook_router`), so
+# every stub exposes all of them; each is named after <module>.<attribute> so the
+# include_router spy can tell them apart.
+_ROUTER_ATTRS = ("router", "public_router", "internal_router", "webhook_router")
 
 
 def _module(name: str, **attrs):
@@ -42,6 +52,40 @@ def _plan_factory(factory_name: str):
     return factory
 
 
+def _router_imports_from_root_router() -> set[str]:
+    """
+    Every ``src.routers.*`` module that ``src/router.py`` imports.
+
+    Derived from the source rather than hand-listed, because the stub packages
+    below set ``__path__ = []``. That deliberately blocks Python from falling
+    back to the real files on disk, which is what keeps this test fast — but it
+    also means any router added to ``src/router.py`` without a matching stub
+    fails with an ``ImportError: cannot import name 'x' from 'src.routers'
+    (unknown location)``. That happened for real: twelve routers (audit,
+    audit_logs, billing, demo, live, mfa, nudges, payments, sso, superadmin,
+    superadmin_billing, superadmin_orgs) were added over time and this list was
+    never updated, so the test only reported the alphabetically-first casualty.
+
+    Reading the list from the source means adding a router can never break this
+    test by omission again.
+    """
+    # src/router.py, i.e. alongside the src package this test lives in.
+    source = Path(__file__).resolve().parents[1] / "router.py"
+    tree = ast.parse(source.read_text())
+
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        module = node.module or ""
+        if module != "src.routers" and not module.startswith("src.routers."):
+            continue
+        prefix = "" if module == "src.routers" else module[len("src.routers."):]
+        for alias in node.names:
+            names.add(f"{prefix}.{alias.name}" if prefix else alias.name)
+    return names
+
+
 def _install_stub_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     def install(name: str, **attrs):
         monkeypatch.setitem(sys.modules, name, _module(name, **attrs))
@@ -54,6 +98,19 @@ def _install_stub_modules(monkeypatch: pytest.MonkeyPatch) -> None:
         module.__path__ = []  # type: ignore[attr-defined]
         monkeypatch.setitem(sys.modules, name, module)
         return module
+
+    def install_derived(dotted: str):
+        """Stub one module named in src/router.py, exposing every router
+        attribute src/router.py might read off it."""
+        full = f"src.routers.{dotted}"
+        attrs = {
+            attr: _named_router(
+                full if attr == "router" else f"{full}.{attr}"
+            )
+            for attr in _ROUTER_ATTRS
+        }
+        install(full, **attrs)
+        return sys.modules[full]
 
     install_package("src.routers")
     install_package("src.routers.ai")
@@ -73,28 +130,18 @@ def _install_stub_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     install_package("src.security.features_utils")
     install_package("src.core")
 
-    for name in [
-        "admin",
-        "analytics",
-        "code_execution",
-        "code_submissions",
-        "health",
-        "instance",
-        "monitoring",
-        "plans",
-        "usergroups",
-        "dev",
-        "trail",
-        "users",
-        "auth",
-        "orgs",
-        "roles",
-        "search",
-        "stream",
-        "api_tokens",
-        "webhooks",
-    ]:
-        install_router_module(f"src.routers.{name}", f"src.routers.{name}")
+    # Stub every router src/router.py pulls in. Derived from the source, so a
+    # newly added router is picked up automatically instead of turning into a
+    # confusing ImportError here.
+    for dotted in sorted(_router_imports_from_root_router()):
+        parts = dotted.split(".")
+        # Create each parent package on the way down so `from src.routers.x.y
+        # import z` can resolve.
+        for depth in range(1, len(parts)):
+            parent = "src.routers." + ".".join(parts[:depth])
+            if parent not in sys.modules:
+                install_package(parent)
+        install_derived(dotted)
 
     install_router_module("src.routers.utils", "src.routers.utils")
 

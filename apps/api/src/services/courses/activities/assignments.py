@@ -79,6 +79,7 @@ from src.services.courses.certifications import (
     revoke_user_certificate,
     sync_trailrun_status,
     are_course_assignments_passed,
+    get_course_pass_threshold,
 )
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
@@ -2125,7 +2126,16 @@ async def _reconcile_certificate_after_grade_change(
     if not course.id:
         return
     try:
-        passed = await are_course_assignments_passed(user_id, course.id, db_session)
+        # Read the course's own weighted threshold here too: a course that
+        # certifies by weighted aggregate must be re-evaluated against the same
+        # bar on regrade as it was on issue, or a regrade could revoke a
+        # certificate that was correctly granted.
+        passed = await are_course_assignments_passed(
+            user_id, course.id, db_session,
+            pass_threshold_percentage=await get_course_pass_threshold(
+                course.id, db_session
+            ),
+        )
         if not passed:
             await revoke_user_certificate(
                 user_id, course.id, db_session, reason="regraded_below_threshold"
@@ -4141,7 +4151,12 @@ async def grade_assignment_submission(
             # previously issued certificate — the create path only ever adds one,
             # so without this a learner keeps a valid certificate after failing a
             # gating assignment on re-grade. No-op when they still pass or hold none.
-            if not await are_course_assignments_passed(user_id, course.id, db_session):
+            if not await are_course_assignments_passed(
+                user_id, course.id, db_session,
+                pass_threshold_percentage=await get_course_pass_threshold(
+                    course.id, db_session
+                ),
+            ):
                 await revoke_user_certificate(
                     user_id, course.id, db_session, reason="regraded_below_threshold"
                 )

@@ -37,6 +37,15 @@ class AwardKind(str, Enum):
 class CertificationBase(SQLModel):
     course_id: int = Field(sa_column= Column("course_id", ForeignKey("course.id", ondelete="CASCADE")))
     config: dict = Field(default_factory=dict, sa_column= Column("config", JSON))
+    # The bar a learner must clear on the course's WEIGHTED aggregate.
+    #
+    # Nullable on purpose, and it has no database default: a NULL means "use
+    # DEFAULT_WEIGHTED_PASS_THRESHOLD (50)", which is the same bar the legacy
+    # all-must-pass gate already applied. Backfilling every existing
+    # certification with 50 would look identical today but would quietly freeze
+    # the default into data, so a later change to the default could no longer
+    # reach those courses. It is ignored entirely in AND mode.
+    pass_threshold_percentage: Optional[float] = Field(default=None)
 
 
 class Certifications(CertificationBase, table=True):
@@ -76,11 +85,13 @@ class CertificationCreate(SQLModel):
     config: dict = Field(default_factory=dict)
     scope_kind: Optional[CredentialScopeKind] = CredentialScopeKind.COURSE
     scope_id: Optional[int] = None
+    pass_threshold_percentage: Optional[float] = Field(default=None, ge=0, le=100)
 
 class CertificationUpdate(SQLModel):
     config: Optional[dict] = None
     scope_kind: Optional[CredentialScopeKind] = None
     scope_id: Optional[int] = None
+    pass_threshold_percentage: Optional[float] = Field(default=None, ge=0, le=100)
 
 
 class CertificationRead(SQLModel):
@@ -90,6 +101,9 @@ class CertificationRead(SQLModel):
     config: dict
     scope_kind: Optional[str] = None
     scope_id: Optional[int] = None
+    # Echoed raw (None = "use the default"), not resolved, so the author UI can
+    # show an untouched field as untouched instead of implying 50 was chosen.
+    pass_threshold_percentage: Optional[float] = None
     creation_date: str
     update_date: str
 

@@ -791,54 +791,21 @@ async def sync_trailrun_status(
         await db_session.commit()
 
 
-async def are_course_assignments_passed(
-    user_id: int,
+async def _load_course_assessments(
     course_id: int,
     db_session: AsyncSession,
-) -> bool:
+) -> list:
     """
-    Certificate eligibility gate: returns True iff EVERY assignment activity in
-    the course has been graded AND passed by the user.
+    The assessments that actually count toward a course's certification:
+    assignments sitting on PUBLISHED activities that really are in this course.
 
-    - A course with no assignments returns True (completion alone certifies).
-    - A missing submission, a not-yet-GRADED submission (SUBMITTED/PENDING), or a
-      graded-but-failed submission all return False, so the certificate is
-      withheld until the learner actually passes.
-    - A formative (``ungraded``) assignment is the exception: it is satisfied by
-      being handed in, since it is never graded at all.
-    - Assessments on UNPUBLISHED activities are ignored entirely, matching
-      `is_course_fully_completed`: a draft is never shown to the learner, so it
-      must not gate their certificate.
-    - Pass/fail reuses the canonical grader with the assignment's configured
-      threshold, so "certified" always agrees with the score shown to the learner.
-
-    This is intentionally separate from course *completion* (progress/analytics):
-    completion means "all activities done", certification means "all assessments
-    passed".
+    Drafts are excluded (a learner has never seen them, so they cannot gate a
+    certificate) and the activity list comes from a subquery rather than a join,
+    so an activity placed in two chapters is not counted twice.
     """
-    # Lazy imports: the assignments service imports this module at load time, so
-    # importing it at module top would create a cycle.
-    from src.db.courses.assignments import (
-        Assignment,
-        AssignmentTask,
-        AssignmentUserSubmission,
-        AssignmentUserSubmissionStatus,
-    )
-    from src.services.courses.activities.assignments import (
-        _HANDED_IN_STATUSES,
-        compute_assignment_grade,
-    )
+    from src.db.courses.assignments import Assignment
 
-    # Assignments that belong to published activities actually in this course. Use
-    # an IN-subquery (not a join) so an activity reused across chapters isn't
-    # double-counted, and join Activity so a DRAFT assessment is excluded.
-    #
-    # A draft assessment has no business gating a certificate: the learner has
-    # never seen it, so they cannot submit it, so requiring it to be passed
-    # withheld the certificate forever. `is_course_fully_completed` already
-    # filters on published for the same reason; this gate has to agree or a
-    # half-published course can never certify.
-    assignments = (await db_session.execute(
+    return list((await db_session.execute(
         select(Assignment).where(
             Assignment.course_id == course_id,
             Assignment.activity_id.in_(
@@ -850,10 +817,52 @@ async def are_course_assignments_passed(
                 )
             ),
         )
-    )).scalars().all()
+    )).scalars().all())
 
+
+async def _evaluate_course_assessments(
+    user_id: int,
+    course_id: int,
+    db_session: AsyncSession,
+) -> list[dict]:
+    """
+    Score every gradable assessment in the course for one learner.
+
+    Every assessment in the course gets a record, tagged with what it can
+    contribute, because the three kinds are governed by three different rules
+    and conflating them is how a course ends up with a certificate nobody
+    expected:
+
+      gradable   has gradable points and is not formative. Can pass or fail,
+                 and is the only kind that carries weight.
+      formative  marked ungraded. Has no grade, so it can never "pass"; the
+                 legacy rule is that it is satisfied by being handed in at all.
+      neither    no gradable points (no tasks / all-zero max). Vacuously
+                 satisfied — there is nothing to pass or fail — and, like
+                 formative work, cannot carry a weight.
+
+    Each record carries:
+      assignment     the row
+      weight         the author's weight, or None
+      gradable       bool — participates in pass/fail AND in the weighted total
+      formative      bool — satisfied by submission alone
+      percentage     the score 0-100, or None when not yet gradable
+      passed         whether it clears the assignment's own threshold, or None
+      submitted      whether anything was handed in
+    """
+    from src.db.courses.assignments import (
+        AssignmentTask,
+        AssignmentUserSubmission,
+        AssignmentUserSubmissionStatus,
+    )
+    from src.services.courses.activities.assignments import (
+        _HANDED_IN_STATUSES,
+        compute_assignment_grade,
+    )
+
+    assignments = await _load_course_assessments(course_id, db_session)
     if not assignments:
-        return True
+        return []
 
     assignment_ids = [a.id for a in assignments if a.id is not None]
 
@@ -877,36 +886,232 @@ async def are_course_assignments_passed(
     )).scalars().all()
     sub_by_assignment = {s.assignment_id: s for s in subs}
 
+    results: list[dict] = []
     for assignment in assignments:
-        # A formative (ungraded) assignment has no grade to pass or fail — it is
-        # satisfied by handing the work in. Requiring GRADED here would make an
-        # ungraded assignment permanently block every certificate in its course,
-        # since nothing ever moves that submission out of SUBMITTED.
-        if getattr(assignment, "ungraded", False):
-            sub = sub_by_assignment.get(assignment.id)
-            if sub is None or sub.submission_status not in _HANDED_IN_STATUSES:
-                return False
-            continue
-        # An assignment with no gradable points (no tasks / all-zero max) can't
-        # be passed or failed — treat it as vacuously passed so it doesn't
-        # permanently block the certificate.
-        if max_by_assignment.get(assignment.id, 0) <= 0:
-            continue
-        sub = sub_by_assignment.get(assignment.id)
-        if sub is None:
-            return False
-        if sub.submission_status != AssignmentUserSubmissionStatus.GRADED:
-            return False
-        computed = compute_assignment_grade(
-            int(sub.grade or 0),
-            max_by_assignment.get(assignment.id, 0),
-            assignment.grading_type,
-            pass_threshold_percentage=assignment.pass_threshold_percentage,
-        )
-        if not computed["passed"]:
-            return False
+        formative = bool(getattr(assignment, "ungraded", False))
+        has_points = max_by_assignment.get(assignment.id, 0) > 0
+        gradable = has_points and not formative
 
-    return True
+        sub = sub_by_assignment.get(assignment.id)
+        submitted = sub is not None and (
+            sub.submission_status in _HANDED_IN_STATUSES
+        )
+        percentage = None
+        passed = None
+        # Only gradable work has a grade to read. A formative submission never
+        # reaches GRADED, so gating this on `gradable` also keeps the legacy
+        # rule that an ungraded assignment can never fail.
+        if gradable and sub is not None and (
+            sub.submission_status == AssignmentUserSubmissionStatus.GRADED
+        ):
+            computed = compute_assignment_grade(
+                int(sub.grade or 0),
+                max_by_assignment.get(assignment.id, 0),
+                assignment.grading_type,
+                pass_threshold_percentage=assignment.pass_threshold_percentage,
+            )
+            percentage = computed.get("percentage")
+            passed = bool(computed.get("passed"))
+
+        results.append({
+            "assignment": assignment,
+            "weight": getattr(assignment, "weight", None),
+            "gradable": gradable,
+            "formative": formative,
+            "percentage": float(percentage) if percentage is not None else None,
+            "passed": passed,
+            "submitted": submitted,
+        })
+    return results
+
+
+# Weights are authored as percentages by hand, so a total of exactly 100 is not a
+# reasonable expectation. This tolerance absorbs float addition and lets
+# 33.3 + 33.3 + 33.4 through.
+_WEIGHT_SUM_TOLERANCE = 0.01
+
+# Used when a course certifies by weighted aggregate but the author has not set
+# a course-level threshold. Matches the per-assessment default most grading
+# types already use, so switching modes does not silently move the bar.
+DEFAULT_WEIGHTED_PASS_THRESHOLD = 50.0
+
+
+def _gradable_records(records: list[dict]) -> list[dict]:
+    """
+    The assessments that can actually carry a weight and be scored.
+
+    Formative work and zero-point assessments are excluded from the arithmetic
+    entirely rather than counted as zero — an author who marks a third of the
+    course ungraded should still get weighted mode over the rest, not a total
+    that can never be reached.
+    """
+    return [r for r in records if r.get("gradable", True)]
+
+
+def resolve_certification_mode(records: list[dict]) -> tuple[str, float]:
+    """
+    Decide whether a course certifies by weighted aggregate or all-must-pass.
+
+    Weighted mode requires EVERY gradable assessment to carry a weight AND those
+    weights to total 100 (+/- tolerance). Anything else — one NULL weight, a
+    total of 95, a total of 140 — falls back to the legacy rule.
+
+    That strictness is the whole safety story. An author who weights two of five
+    assessments gets the old all-must-pass behaviour rather than a certificate
+    computed from a 40% total, so the feature cannot be half-enabled into a
+    wrong answer.
+
+    Returns (mode, threshold) where mode is "WEIGHTED" or "AND".
+    """
+    gradable = _gradable_records(records)
+    if not gradable:
+        return "AND", DEFAULT_WEIGHTED_PASS_THRESHOLD
+
+    weights = [r["weight"] for r in gradable]
+    if any(w is None for w in weights):
+        return "AND", DEFAULT_WEIGHTED_PASS_THRESHOLD
+
+    total = float(sum(float(w) for w in weights))  # type: ignore[arg-type]
+    if abs(total - 100.0) > _WEIGHT_SUM_TOLERANCE:
+        return "AND", DEFAULT_WEIGHTED_PASS_THRESHOLD
+
+    return "WEIGHTED", DEFAULT_WEIGHTED_PASS_THRESHOLD
+
+
+async def get_course_pass_threshold(
+    course_id: int,
+    db_session: AsyncSession,
+) -> float | None:
+    """
+    The course's own threshold for weighted mode, or None to use the default.
+
+    Callers that re-evaluate the gate for an existing certificate (regrades,
+    revocations) already have the certification row in hand and should read the
+    field directly; this exists for the paths that don't.
+    """
+    certification = await get_course_certification(course_id, db_session)
+    if certification is None:
+        return None
+    return certification.pass_threshold_percentage
+
+
+async def compute_course_certification_score(
+    user_id: int,
+    course_id: int,
+    db_session: AsyncSession,
+    pass_threshold_percentage: float | None = None,
+) -> dict:
+    """
+    The full picture behind a certification decision, for the gate and for the
+    learner's "am I there yet?" view.
+
+    mode          "WEIGHTED" or "AND"
+    passed        the actual decision
+    percentage    the weighted aggregate, or None in AND mode
+    threshold     the bar that was applied
+    breakdown     per-assessment detail, so a learner can be told exactly which
+                  assessment is holding them up instead of just "not yet"
+
+    An assessment with no submission, or one still awaiting grading, counts as
+    zero in the weighted total. That is deliberate: it withholds the certificate
+    exactly as AND mode does, so enabling weights cannot turn an unfinished
+    course into a certified one.
+    """
+    records = await _evaluate_course_assessments(user_id, course_id, db_session)
+
+    if not records:
+        return {
+            "mode": "AND",
+            "passed": True,
+            "percentage": None,
+            "threshold": DEFAULT_WEIGHTED_PASS_THRESHOLD,
+            "breakdown": [],
+        }
+
+    gradable = _gradable_records(records)
+    mode, default_threshold = resolve_certification_mode(records)
+    threshold = (
+        float(pass_threshold_percentage)
+        if pass_threshold_percentage is not None
+        else default_threshold
+    )
+
+    breakdown = [{
+        "assignment_uuid": r["assignment"].assignment_uuid,
+        "assessment_kind": getattr(r["assignment"], "assessment_kind", None),
+        "title": getattr(r["assignment"], "title", None),
+        "weight": r["weight"],
+        "gradable": r.get("gradable", True),
+        "formative": r.get("formative", False),
+        "percentage": r["percentage"],
+        "passed": r["passed"],
+        "submitted": r["submitted"],
+    } for r in records]
+
+    if mode == "AND":
+        # Legacy rule, unchanged. Three cases, exactly as before this feature:
+        #   gradable   must be graded AND pass
+        #   formative  must have been handed in (it has no grade to pass)
+        #   neither    vacuously satisfied — nothing to pass or fail
+        blocked = False
+        for r in records:
+            if r.get("formative", False):
+                if not r["submitted"]:
+                    blocked = True
+                    break
+            elif r.get("gradable", True):
+                if r["passed"] is not True:
+                    blocked = True
+                    break
+        return {
+            "mode": mode,
+            "passed": not blocked,
+            "percentage": None,
+            "threshold": threshold,
+            "breakdown": breakdown,
+        }
+
+    total = 0.0
+    for r in gradable:
+        weight = float(r["weight"])  # type: ignore[arg-type]
+        # Not yet graded or not yet submitted contributes zero rather than being
+        # skipped — skipping it would inflate the aggregate past 100 and let a
+        # half-finished course certify.
+        contribution = (r["percentage"] or 0.0) * (weight / 100.0)
+        total += contribution
+
+    total = max(0.0, min(100.0, total))
+    return {
+        "mode": mode,
+        "passed": total >= threshold,
+        "percentage": round(total, 2),
+        "threshold": threshold,
+        "breakdown": breakdown,
+    }
+
+
+async def are_course_assignments_passed(
+    user_id: int,
+    course_id: int,
+    db_session: AsyncSession,
+    pass_threshold_percentage: float | None = None,
+) -> bool:
+    """
+    Certificate eligibility gate: is this learner entitled to the certificate?
+
+    Delegates to :func:`compute_course_certification_score` so the boolean the
+    gate uses and the breakdown shown to the learner can never disagree — the
+    two used to be separate code paths, which is how a "certified" learner ends
+    up with a score display that says otherwise.
+
+    ``pass_threshold_percentage`` is the course-level bar for weighted mode and
+    is ignored in AND mode, where each assessment keeps using its own threshold.
+    """
+    result = await compute_course_certification_score(
+        user_id, course_id, db_session,
+        pass_threshold_percentage=pass_threshold_percentage,
+    )
+    return bool(result["passed"])
 
 
 _AWARD_RANK = {
@@ -1316,7 +1521,10 @@ async def check_course_completion_and_create_certificate(
             # every graded assignment in the course must be passed. This withholds
             # the certificate from learners who finished all activities but failed
             # (or haven't yet been graded on) a required assessment.
-            if not await are_course_assignments_passed(user_id, course_id, db_session):
+            if not await are_course_assignments_passed(
+                user_id, course_id, db_session,
+                pass_threshold_percentage=certification.pass_threshold_percentage,
+            ):
                 return False
             # SECURITY: Create certificate user link (system operation, no RBAC needed here)
             # This is called from mark_activity_as_done_for_user which already has proper RBAC checks

@@ -31,6 +31,29 @@ class SolutionRevealEnum(str, Enum):
     AFTER_GRADING = "AFTER_GRADING"
 
 
+class AssessmentKindEnum(str, Enum):
+    """Which tier an assessment sits at.
+
+    ASSIGNMENT  small, low-stakes, sits inside a chapter among the content.
+    CAT         ("Continuous Assessment Test") a checkpoint covering the
+                chapter(s) before it. Conventionally placed after the content
+                it covers.
+    EXAM        covers the whole course. Conventionally placed last.
+
+    These are conventions, not rules. Nothing here validates or enforces
+    placement — see ``get_assessment_placement_advice`` for advisory warnings.
+    An author who puts an EXAM in chapter 2 has authored a course with an exam
+    in chapter 2, and the platform's job is to say so, not to refuse.
+
+    Deliberately has no UNCLASSIFIED member: unclassified is represented by a
+    NULL column so it can be told apart from a deliberate ASSIGNMENT.
+    """
+
+    ASSIGNMENT = "ASSIGNMENT"
+    CAT = "CAT"
+    EXAM = "EXAM"
+
+
 class AssignmentBase(SQLModel):
     """Represents the common fields for an assignment."""
 
@@ -91,6 +114,32 @@ class AssignmentBase(SQLModel):
     solution_file: Optional[str] = None
     solution_reveal: Optional[SolutionRevealEnum] = SolutionRevealEnum.NEVER
 
+    # Which tier this assessment is. NULL means "legacy/unclassified" and is
+    # deliberately distinct from ASSIGNMENT: every assignment that existed
+    # before tiers shipped stays NULL so nothing changes behaviour for it, and
+    # so an author can classify some assessments and leave the rest alone
+    # without the unclassified ones silently becoming assignments.
+    #
+    # The tier is a label plus a handful of behaviours (weighted certification,
+    # placement advice). It is NOT a separate table or a subtype of activity:
+    # assignments, CATs and exams are the same grading machinery with different
+    # expectations, and duplicating that machinery three ways is how the three
+    # copies drift apart.
+    assessment_kind: Optional[AssessmentKindEnum] = None
+    # Share of the final grade, as a percentage. NULL means "not weighted".
+    #
+    # The certification gate uses a weighted aggregate only when EVERY
+    # assessment in the course has a non-NULL weight summing to 100 (+/-0.01);
+    # otherwise it falls back to the legacy all-must-pass rule. That fallback is
+    # what makes this safe to roll out: an author who weights two of five
+    # assessments gets the old behaviour rather than a certificate computed from
+    # a 40% total.
+    weight: Optional[float] = None
+    # When True, auto-grading stops short of finalising: the submission is left
+    # in a reviewable state for a human instead of being marked and released.
+    # NULL means "not requested" and auto-grades normally.
+    requires_human_review: Optional[bool] = None
+
     org_id: int
     course_id: int
     chapter_id: int
@@ -149,6 +198,9 @@ class AssignmentUpdate(SQLModel):
     ungraded: Optional[bool] = None
     solution: Optional[str] = None
     solution_reveal: Optional[SolutionRevealEnum] = None
+    assessment_kind: Optional[AssessmentKindEnum] = None
+    weight: Optional[float] = None
+    requires_human_review: Optional[bool] = None
     update_date: Optional[str] = None
 
 
@@ -164,6 +216,16 @@ class Assignment(AssignmentBase, table=True):
         # never runs migrations.
         UniqueConstraint(
             "activity_id", name="uq_assignment_activity_id"
+        ),
+        # A weight is a percentage share of the final grade, so anything
+        # outside 0-100 is meaningless — and a negative one would let a course
+        # reach a 100% total while containing an assessment that actively
+        # subtracts. Zero is allowed: an author may want a tier recorded but
+        # unscored (participation credit), which is different from NULL, which
+        # means "not weighted" and is what disables the weighted gate entirely.
+        CheckConstraint(
+            "weight IS NULL OR (weight >= 0 AND weight <= 100)",
+            name="ck_assignment_weight_range",
         ),
     )
 

@@ -354,11 +354,16 @@ class TestDossierRichSections:
         )
         db.add(other_course)
         await db.commit()
+        # activity_id 9001, not 1: an activity is one assessment
+        # (uq_assignment_activity_id), and reusing the main fixture's activity
+        # would be the duplicate-assessment state that constraint exists to
+        # prevent. The cross-tenant isolation this fixture tests does not depend
+        # on the activity id.
         other_assignment = Assignment(
             title="Other org final", description="", due_date="2026-01-01",
             grading_type=GradingTypeEnum.NUMERIC, max_grade_value=100,
             assignment_uuid="assignment_other", org_id=other_org.id,
-            course_id=other_course.id, chapter_id=1, activity_id=1,
+            course_id=other_course.id, chapter_id=1, activity_id=9001,
             creation_date=str(datetime.now()), update_date=str(datetime.now()),
         )
         db.add(other_assignment)
@@ -373,7 +378,7 @@ class TestDossierRichSections:
             }]},
             assignment_task_uuid="assignmenttask_other",
             assignment_id=other_assignment.id, org_id=other_org.id,
-            course_id=other_course.id, chapter_id=1, activity_id=1,
+            course_id=other_course.id, chapter_id=1, activity_id=9001,
             creation_date=str(datetime.now()), update_date=str(datetime.now()),
         )
         db.add(other_task)
@@ -385,7 +390,7 @@ class TestDossierRichSections:
             ]},
             grade=100, task_submission_grade_feedback="", manually_graded=False,
             assignment_type=AssignmentTaskTypeEnum.QUIZ, user_id=regular_user.id,
-            activity_id=1, course_id=other_course.id, chapter_id=1,
+            activity_id=9001, course_id=other_course.id, chapter_id=1,
             assignment_task_id=other_task.id,
             creation_date=str(datetime.now()), update_date=str(datetime.now()),
         ))

@@ -47,27 +47,6 @@ os.environ["VALIDBRIDGE_DEMO_ENABLED"] = "0"
 # models instead of the defaults. Set to "" rather than popped: load_dotenv()
 # never overrides a variable that exists, so a pop would be undone on the next
 # config read. "" falls through to config.yaml's (empty) values, as in CI.
-for _live_integration_var in (
-    "VALIDBRIDGE_SENTRY_DSN",
-    "VALIDBRIDGE_TINYBIRD_API_URL",
-    "VALIDBRIDGE_TINYBIRD_INGEST_TOKEN",
-    "VALIDBRIDGE_TINYBIRD_READ_TOKEN",
-    "VALIDBRIDGE_AI_PROVIDER",
-    "VALIDBRIDGE_AI_BASE_URL",
-    "VALIDBRIDGE_AI_MODEL_FAST",
-    "VALIDBRIDGE_AI_MODEL_STANDARD",
-    "VALIDBRIDGE_AI_MODEL_PRO",
-    "VALIDBRIDGE_AI_IMAGE_MODEL",
-    "VALIDBRIDGE_AI_TTS_MODEL",
-    "VALIDBRIDGE_AI_EMBEDDING_PROVIDER",
-    "VALIDBRIDGE_AI_EMBEDDING_MODEL",
-    "VALIDBRIDGE_AI_EMBEDDING_DIMENSIONS",
-    "VALIDBRIDGE_PAYSTACK_SECRET_KEY",
-    "VALIDBRIDGE_PAYSTACK_PUBLIC_KEY",
-    "VALIDBRIDGE_PLATFORM_PAYSTACK_SECRET_KEY",
-    "VALIDBRIDGE_PLATFORM_PAYSTACK_PUBLIC_KEY",
-):
-    os.environ[_live_integration_var] = ""
 os.environ["VALIDBRIDGE_SENTRY_DSN"] = ""
 os.environ["VALIDBRIDGE_TINYBIRD_API_URL"] = ""
 os.environ["VALIDBRIDGE_TINYBIRD_INGEST_TOKEN"] = ""

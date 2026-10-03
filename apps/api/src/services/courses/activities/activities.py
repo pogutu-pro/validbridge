@@ -3,8 +3,9 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.courses.courses import Course
 from src.db.courses.chapters import Chapter
-from src.db.courses.activities import ActivityCreate, Activity, ActivityRead, ActivityUpdate
+from src.db.courses.activities import ActivityCreate, Activity, ActivityRead, ActivityUpdate, ActivityTypeEnum
 from src.db.courses.chapter_activities import ChapterActivity
+from src.db.courses.assignments import Assignment
 from src.db.organizations import Organization, OrganizationRead
 from src.db.organization_config import OrganizationConfig
 from src.db.users import AnonymousUser, PublicUser, User
@@ -92,7 +93,12 @@ async def create_activity(
             ChapterActivity.chapter_id == activity_object.chapter_id
         )
     )).scalars().first()
-    to_be_used_order = (max_order or 0) + 1
+    # Order is 0-based, matching reorder_chapters_and_activities (which rewrites
+    # every order from `enumerate` on each save). `(max_order or 0) + 1` used to
+    # hand out order=1 to the first activity in an empty chapter, so a freshly
+    # created activity briefly disagreed with the 0-based order the editor then
+    # assigns.
+    to_be_used_order = max_order + 1 if max_order is not None else 0
 
     # Add activity to chapter
     activity_chapter = ChapterActivity(
@@ -404,6 +410,52 @@ async def update_activity(
 
     if 'content' in update_data and isinstance(update_data['content'], str):
         logger.warning("[Activity Update] Content is STRING not dict for %s", activity_uuid)
+
+    # Changing activity_type across the TYPE_ASSIGNMENT boundary needs an
+    # explicit decision, because the Assignment row and the activity type have
+    # to agree:
+    #
+    #  * assignment -> something else strands the Assignment (its tasks, answer
+    #    keys and every learner's submission) behind an activity that no longer
+    #    renders as an assessment, so the marks silently vanish from the course.
+    #  * something else -> assignment creates a TYPE_ASSIGNMENT activity with
+    #    no Assignment behind it. The learner sees an assessment they cannot
+    #    submit, and course completion can never finish.
+    #
+    # Both used to be a plain `setattr` below, which is how these states were
+    # reachable. Refuse the ambiguous direction and tell the author what to do.
+    new_activity_type = update_data.get('activity_type')
+    if new_activity_type is not None and new_activity_type != activity.activity_type:
+        assignment_exists = (await db_session.execute(
+            select(func.count(Assignment.id)).where(Assignment.activity_id == activity.id)
+        )).scalar_one()
+
+        if (
+            activity.activity_type == ActivityTypeEnum.TYPE_ASSIGNMENT
+            and new_activity_type != ActivityTypeEnum.TYPE_ASSIGNMENT
+            and assignment_exists
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "This activity still has an assignment with tasks and "
+                    "submissions. Delete the assignment before changing the "
+                    "activity type."
+                ),
+            )
+
+        if (
+            new_activity_type == ActivityTypeEnum.TYPE_ASSIGNMENT
+            and activity.activity_type != ActivityTypeEnum.TYPE_ASSIGNMENT
+            and not assignment_exists
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "This activity has no assignment to submit. Create an "
+                    "assignment before switching the activity type."
+                ),
+            )
 
     for field, value in update_data.items():
         setattr(activity, field, value)

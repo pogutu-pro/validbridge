@@ -568,8 +568,15 @@ async def is_course_fully_completed(
     # activity is never shown to the learner, so counting it in the total would
     # make the course impossible to complete (and permanently withhold the
     # certificate).
+    #
+    # DISTINCT on activity_id, matching the distinct count on the numerator
+    # below. Counting ChapterActivity *rows* would double-count any activity
+    # placed in two chapters (the join table only forbids the same
+    # chapter/activity pair, not the same activity in two different chapters),
+    # inflating the denominator past the number of distinct completions and
+    # making the course permanently uncompletable.
     total_activities = (await db_session.execute(
-        select(func.count(ChapterActivity.id))
+        select(func.count(func.distinct(ChapterActivity.activity_id)))
         .join(Activity, Activity.id == ChapterActivity.activity_id)
         .where(ChapterActivity.course_id == course_id, Activity.published == True)
     )).scalar_one()
@@ -662,6 +669,9 @@ async def are_course_assignments_passed(
       withheld until the learner actually passes.
     - A formative (``ungraded``) assignment is the exception: it is satisfied by
       being handed in, since it is never graded at all.
+    - Assessments on UNPUBLISHED activities are ignored entirely, matching
+      `is_course_fully_completed`: a draft is never shown to the learner, so it
+      must not gate their certificate.
     - Pass/fail reuses the canonical grader with the assignment's configured
       threshold, so "certified" always agrees with the score shown to the learner.
 
@@ -682,15 +692,24 @@ async def are_course_assignments_passed(
         compute_assignment_grade,
     )
 
-    # Assignments that belong to activities actually in this course. Use an
-    # IN-subquery (not a join) so an activity reused across chapters isn't
-    # double-counted.
+    # Assignments that belong to published activities actually in this course. Use
+    # an IN-subquery (not a join) so an activity reused across chapters isn't
+    # double-counted, and join Activity so a DRAFT assessment is excluded.
+    #
+    # A draft assessment has no business gating a certificate: the learner has
+    # never seen it, so they cannot submit it, so requiring it to be passed
+    # withheld the certificate forever. `is_course_fully_completed` already
+    # filters on published for the same reason; this gate has to agree or a
+    # half-published course can never certify.
     assignments = (await db_session.execute(
         select(Assignment).where(
             Assignment.course_id == course_id,
             Assignment.activity_id.in_(
-                select(ChapterActivity.activity_id).where(
-                    ChapterActivity.course_id == course_id
+                select(ChapterActivity.activity_id)
+                .join(Activity, Activity.id == ChapterActivity.activity_id)
+                .where(
+                    ChapterActivity.course_id == course_id,
+                    Activity.published == True,
                 )
             ),
         )

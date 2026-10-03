@@ -9,6 +9,7 @@ from src.security.auth import resolve_acting_user_id
 from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.chapter_activities import ChapterActivity
+from src.db.courses.assignments import Assignment
 from src.db.courses.chapters import (
     Chapter,
     ChapterCreate,
@@ -67,7 +68,11 @@ async def create_chapter(
             CourseChapter.course_id == chapter.course_id
         )
     )).scalars().first()
-    to_be_used_order = (max_order or 0) + 1
+    # Order is 0-based, matching reorder_chapters_and_activities (which rewrites
+    # every order from `enumerate` on each save). `(max_order or 0) + 1` used to
+    # hand out order=1 to the first chapter of a course, briefly disagreeing
+    # with the 0-based order the editor then assigns.
+    to_be_used_order = max_order + 1 if max_order is not None else 0
 
     # Flush to get the DB-assigned ID without committing yet
     db_session.add(chapter)
@@ -633,11 +638,34 @@ async def reorder_chapters_and_activities(
     }
 
     valid_chapter_ids = {co.chapter_id for co in chapters_order.chapter_order_by_ids}
-    requested_activity_ids = {
-        ao.activity_id
-        for co in chapters_order.chapter_order_by_ids
-        for ao in co.activities_order_by_ids
-    }
+
+    # An activity must end up in exactly one chapter. The join table only
+    # forbids a duplicate (chapter_id, activity_id) pair, so the same activity
+    # under two different chapters sails straight through and leaves the course
+    # with one activity shown twice. Reject it here rather than letting the
+    # request through — the editor can only express one placement, so this is
+    # always a malformed payload.
+    requested_placement: dict[int, int] = {}
+    duplicate_placements: list[tuple[int, int]] = []
+    for co in chapters_order.chapter_order_by_ids:
+        for ao in co.activities_order_by_ids:
+            previous_chapter = requested_placement.get(ao.activity_id)
+            if previous_chapter is not None and previous_chapter != co.chapter_id:
+                duplicate_placements.append((ao.activity_id, co.chapter_id))
+            else:
+                requested_placement[ao.activity_id] = co.chapter_id
+    if duplicate_placements:
+        activity_id, chapter_id = duplicate_placements[0]
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Activity {activity_id} is listed in more than one chapter "
+                f"(including chapter {chapter_id}); each activity must appear "
+                f"exactly once"
+            ),
+        )
+
+    requested_activity_ids = set(requested_placement)
     activity_owner_map = {}
     if requested_activity_ids:
         rows = (await db_session.execute(
@@ -691,6 +719,25 @@ async def reorder_chapters_and_activities(
     for ca in existing_chapter_activities:
         if (ca.chapter_id, ca.activity_id) not in activities_to_keep:
             await db_session.delete(ca)
+
+    # Keep Assignment.chapter_id in step with where the activity now sits.
+    # Moving an activity between chapters rewrites its ChapterActivity row but
+    # used to leave the assignment pointing at the old chapter, so the
+    # certificate gate — which groups assessments by assignment.chapter_id —
+    # silently lost track of the assessment after any drag across chapters.
+    if requested_placement:
+        assignment_rows = (await db_session.execute(
+            select(Assignment).where(
+                Assignment.activity_id.in_(list(requested_placement)) # type: ignore[arg-type]
+            )
+        )).scalars().all()
+        for assignment in assignment_rows:
+            new_chapter_id = requested_placement.get(assignment.activity_id)
+            if new_chapter_id is not None and assignment.chapter_id != new_chapter_id:
+                assignment.chapter_id = new_chapter_id
+                assignment.update_date = str(datetime.now())
+                db_session.add(assignment)
+
     await db_session.commit()
 
     return {"detail": "Chapters and activities reordered successfully"}

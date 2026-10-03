@@ -15,11 +15,13 @@ try:
 except Exception:  # pragma: no cover - fallback if the optional dep is absent
     _regex = None
 from fastapi import HTTPException, Request, UploadFile
+from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from src.db.courses.activities import Activity
+from src.db.courses.activities import Activity, ActivityTypeEnum
+from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.assignments import (
     Assignment,
     AssignmentCreate,
@@ -178,6 +180,41 @@ async def _is_assignment_instructor(
     return await authorization_verify_based_on_roles(
         request, current_user.id, "update", course_uuid, db_session
     )
+
+
+async def _ensure_assignment_visible(
+    request: Request,
+    assignment: Assignment,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+) -> None:
+    """Raise 404 when ``assignment`` is a draft and the caller is a learner.
+
+    ``Assignment.published`` used to be consulted on the course list endpoint
+    and nowhere else, so every direct route — read by uuid, read by activity,
+    list tasks, submit, write a task answer, retry — happily served a draft
+    assessment. A student who learned a draft UUID (or a URL leaked from a
+    previous cohort) could read next term's exam questions and submit answers
+    to it.
+
+    Drafts are instructor-only; they are the author's working copy. The status
+    code is 404 rather than 403 so an unreleased assessment is
+    indistinguishable from one that does not exist, and the endpoint does not
+    confirm the UUID is real.
+    """
+    if assignment.published:
+        return
+
+    course_uuid = (await db_session.execute(
+        select(Course.course_uuid).where(Course.id == assignment.course_id)  # type: ignore
+    )).scalars().first()
+
+    if course_uuid and await _is_assignment_instructor(
+        request, current_user, course_uuid, db_session
+    ):
+        return
+
+    raise HTTPException(status_code=404, detail="Assignment not found")
 
 
 def _is_assignment_past_due(assignment: Assignment) -> bool:
@@ -1126,6 +1163,38 @@ async def create_assignment(
             detail="Activity does not belong to the target course",
         )
 
+    # Derive the owning chapter from the activity's own ChapterActivity
+    # placement instead of trusting `assignment_object.chapter_id`. The body
+    # field was never validated against the activity, so a client could point an
+    # assignment at any chapter — including one in a different course — leaving
+    # `assignment.chapter_id` permanently disagreeing with where the activity
+    # actually sits. The certificate gate groups assessments by chapter_id, so
+    # that disagreement silently detached the assessment from its course.
+    #
+    # An activity should always have exactly one placement (create_activity
+    # writes ChapterActivity in the same commit as the Activity). More than one
+    # is the duplicate-placement defect the audit script reports; pick the
+    # oldest deterministically rather than an arbitrary row so the choice is
+    # stable across retries, and record the chapter we actually used.
+    placements = (await db_session.execute(
+        select(ChapterActivity)
+        .where(ChapterActivity.activity_id == parent_activity.id)
+        .order_by(ChapterActivity.id)
+    )).scalars().all()
+    if not placements:
+        raise HTTPException(
+            status_code=400,
+            detail="Activity is not placed in any chapter of this course",
+        )
+    if len(placements) > 1:
+        logger.warning(
+            "Activity %s is placed in %s chapters; using chapter %s for its assignment",
+            parent_activity.id,
+            len(placements),
+            placements[0].chapter_id,
+        )
+    assignment_chapter_id = placements[0].chapter_id
+
     # Create Assignment
     assignment = Assignment(**assignment_object.model_dump())
 
@@ -1142,6 +1211,7 @@ async def create_assignment(
     assignment.org_id = course.org_id
     assignment.course_id = course.id
     assignment.activity_id = parent_activity.id
+    assignment.chapter_id = assignment_chapter_id
 
     # Insert Assignment in DB
     db_session.add(assignment)
@@ -1182,6 +1252,8 @@ async def read_assignment(
 
     await authorize_assignment_access(request, db_session, current_user, course_uuid, AccessAction.READ)
 
+    await _ensure_assignment_visible(request, assignment, current_user, db_session)
+
     result = AssignmentRead.model_validate(assignment)
     result.course_uuid = course_uuid
     result.activity_uuid = activity_uuid
@@ -1216,6 +1288,8 @@ async def read_assignment_from_activity_uuid(
     assignment, course_uuid, activity_uuid_val = row
 
     await authorize_assignment_access(request, db_session, current_user, course_uuid, AccessAction.READ)
+
+    await _ensure_assignment_visible(request, assignment, current_user, db_session)
 
     result = AssignmentRead.model_validate(assignment)
     result.course_uuid = course_uuid
@@ -1424,6 +1498,50 @@ async def delete_assignment_solution_file(
     )
 
 
+async def _revert_orphaned_assignment_activity(
+    activity_id: int | None,
+    db_session: AsyncSession,
+) -> None:
+    """Turn an assignment activity back into a plain activity once it has none.
+
+    Deleting an Assignment used to leave its parent Activity sitting in
+    chapteractivity with ``activity_type = TYPE_ASSIGNMENT`` and ``published =
+    True``. The learner still saw it in the course navigation, but there was no
+    assignment behind it to submit, and the activity-completion path keys off
+    TYPE_ASSIGNMENT — so the course could never be completed and the
+    certificate was withheld forever, with no obvious way for an author to
+    diagnose it.
+
+    Reverting the type to TYPE_DOCUMENT puts the activity back in the set of
+    ordinary, completable activities. The activity's ``details`` is left alone:
+    the document renderer ignores the assignment-only keys, and rewriting the
+    author's content here would be a more surprising mutation than the one we
+    are fixing.
+
+    Only acts when no assignment rows remain for the activity, so it is a no-op
+    in the normal one-assignment-per-activity case and correct if a stray second
+    row ever existed.
+    """
+    if activity_id is None:
+        return
+
+    remaining = (await db_session.execute(
+        select(func.count(Assignment.id)).where(Assignment.activity_id == activity_id)
+    )).scalar_one()
+    if remaining:
+        return
+
+    activity = (await db_session.execute(
+        select(Activity).where(Activity.id == activity_id)
+    )).scalars().first()
+    if activity is None or activity.activity_type != ActivityTypeEnum.TYPE_ASSIGNMENT:
+        return
+
+    activity.activity_type = ActivityTypeEnum.TYPE_DOCUMENT
+    activity.update_date = str(datetime.now())
+    db_session.add(activity)
+
+
 async def delete_assignment(
     request: Request,
     assignment_uuid: str,
@@ -1458,6 +1576,12 @@ async def delete_assignment(
 
     # Delete Assignment
     await db_session.delete(assignment)
+    await db_session.flush()
+
+    # Put the parent activity back to something the learner can actually
+    # complete, so deleting an assessment can't strand the course.
+    await _revert_orphaned_assignment_activity(assignment.activity_id, db_session)
+
     await db_session.commit()
 
     return {"message": "Assignment deleted"}
@@ -1508,6 +1632,11 @@ async def delete_assignment_from_activity_uuid(
 
     # Delete Assignment
     await db_session.delete(assignment)
+    await db_session.flush()
+
+    # Same orphan guard as delete_assignment: the activity survives this call, so
+    # it must not be left as an unfinishable assignment activity.
+    await _revert_orphaned_assignment_activity(assignment.activity_id, db_session)
 
     await db_session.commit()
 
@@ -1603,6 +1732,8 @@ async def read_assignment_tasks(
 
     # RBAC check
     await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+
+    await _ensure_assignment_visible(request, assignment, current_user, db_session)
 
     # Students must not receive the answer key in the task payload. Instructors
     # see everything; a reveal-eligible student (own submission GRADED +
@@ -2174,6 +2305,11 @@ async def handle_assignment_task_submission(
         # SECURITY: Check if user has instructor/admin permissions for grading
         is_instructor = await authorization_verify_based_on_roles(request, current_user.id, "update", course.course_uuid, db_session)
         is_token_submit = False
+
+    # Writing an answer into a draft assessment is the same leak as submitting
+    # one: the draft is invisible in navigation, so only a guessed or leaked
+    # UUID gets here.
+    await _ensure_assignment_visible(request, assignment, current_user, db_session)
 
     # For non-instructors (session students AND token submit-on-behalf), the call
     # writes a learner ANSWER, never a grade.
@@ -2837,6 +2973,12 @@ async def create_assignment_submission(
             request, current_user.id, "update", course.course_uuid, db_session
         )
         is_token_submit = False
+
+    # A draft assessment must not be submittable. The learner cannot see it in
+    # navigation, so the only way to reach this is a guessed or leaked UUID.
+    # Checked after the instructor resolution above so an author can still
+    # submit their own draft as a dry run.
+    await _ensure_assignment_visible(request, assignment, current_user, db_session)
 
     # Session students are bound by the deadline; a token writing on behalf of a
     # learner is an authorized external writer (the custom frontend owns it).
@@ -3555,6 +3697,8 @@ async def retry_assignment_submission(
     # Only READ permission is required: the student is rescheduling their
     # own work, not editing the assignment configuration.
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+
+    await _ensure_assignment_visible(request, assignment, current_user, db_session)
 
     # Row-level lock on the user's submission so two concurrent retries can't
     # both read attempt_number=N, pass the cap check, and increment to N+1 —

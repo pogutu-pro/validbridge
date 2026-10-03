@@ -73,13 +73,121 @@ class TestEmailsService:
             assert "deleted" in send_email.call_args.kwargs["subject"].lower()
 
     def test_send_account_creation_email_escapes_username(self):
+        # No first name: the username is the greeting, and it is escaped.
         with patch("src.services.users.emails.send_email", return_value=True) as send_email:
-            result = send_account_creation_email(_user(), "user@test.com")
+            result = send_account_creation_email(_user(first_name=""), "user@test.com")
 
         assert result is True
         body = send_email.call_args.kwargs["body"]
         assert "user&lt;script&gt;" in body
-        assert "Get Started" in body
+        assert "Get Started" in body  # short welcome when no platform URL is known
+
+    def test_welcome_greets_by_first_name_escaped(self):
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+            send_account_creation_email(_user(first_name="Amina<b>"), "user@test.com",
+                                        cta_url="https://platform.test/organizations")
+        call = send_email.call_args.kwargs
+        assert "Welcome, Amina&lt;b&gt;!" in call["body"]
+        assert "Amina&lt;b&gt;" in call["subject"]
+        assert "user&lt;script&gt;" not in call["body"]
+
+    def test_welcome_offers_a_path_per_kind_of_user(self):
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+            send_account_creation_email(_user(), "user@test.com", cta_url="https://platform.test/organizations")
+        body = send_email.call_args.kwargs["body"]
+        assert "What brings you here?" in body
+        for role, title in (
+            ("admin", "I run a school or campus"), ("teacher", "I&#x27;m a teacher"),
+            ("creator", "I create and sell courses"), ("company", "I train a team"),
+            ("student", "I&#x27;m a student"),
+        ):
+            assert f"https://platform.test/new?role={role}" in body, role
+        for text in ("I run a school or campus", "I create and sell courses", "free for verified public institutions",
+                     "Everything is included", "Get started"):
+            assert text in body, text
+        assert "https://platform.test/organizations" in body  # main button
+
+    def test_creator_welcome_promises_a_person_only_when_replies_are_routed(self):
+        url = "https://platform.test/organizations"
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email, \
+             patch("src.services.users.emails._reply_to_address", return_value="hello@validbridge.co.ke"):
+            send_account_creation_email(_user(), "user@test.com", cta_url=url)
+        call = send_email.call_args.kwargs
+        assert "reply to this email" in call["body"]
+        assert call["headers"]["Reply-To"] == "hello@validbridge.co.ke"
+
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email, \
+             patch("src.services.users.emails._reply_to_address", return_value=""):
+            send_account_creation_email(_user(), "user@test.com", cta_url=url)
+        call = send_email.call_args.kwargs
+        assert "reply to this email" not in call["body"]
+        assert "headers" not in call
+
+    def test_org_created_email_is_personalised_by_role(self):
+        expected = {
+            "admin": ("Invite your teachers", "Set up your school"),
+            "teacher": ("Schedule a live class", "Create a course"),
+            "creator": ("Set up payouts", "Create your course"),
+            "company": ("Create a group for each team", "Set up your team"),
+        }
+        for role, (step, cta) in expected.items():
+            with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+                send_org_created_email("a@test.com", "Sunrise", "https://sunrise.test/dash", role=role, name="Amina")
+            body = send_email.call_args.kwargs["body"]
+            assert "Sunrise is ready, Amina!" in body, role
+            assert "Your first week" in body and step in body and cta in body, role
+            for other, (other_step, _cta) in expected.items():
+                if other != role:
+                    assert other_step not in body, (role, other)
+
+    def test_creator_email_says_full_price_only_when_learners_pay_fees(self, monkeypatch):
+        monkeypatch.setenv("VALIDBRIDGE_PAYMENTS_LEARNER_PAYS_FEES", "true")
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+            send_org_created_email("a@test.com", "S", "https://s.test/dash", role="creator", name="A")
+        assert "you receive your full price" in send_email.call_args.kwargs["body"]
+        monkeypatch.setenv("VALIDBRIDGE_PAYMENTS_LEARNER_PAYS_FEES", "false")
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+            send_org_created_email("a@test.com", "S", "https://s.test/dash", role="creator", name="A")
+        body = send_email.call_args.kwargs["body"]
+        assert "0% of your sales" in body and "full price" not in body
+
+    def test_public_institutions_hear_about_public_education(self):
+        for institution, shown in (("public_school", True), ("tvet_college", True), ("university", True),
+                                   ("private_school", False), (None, False)):
+            with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+                send_org_created_email("a@test.com", "S", "https://s.test/dash", role="admin",
+                                       institution_type=institution, name="A")
+            body = send_email.call_args.kwargs["body"]
+            assert ("Public Education" in body) is shown, institution
+            if shown:
+                assert "https://s.test/dash/onboarding" in body
+
+    def test_org_created_without_role_keeps_short_confirmation(self):
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+            send_org_created_email("a@test.com", "Org & Co", "https://x.test/dash")
+        body = send_email.call_args.kwargs["body"]
+        assert "Org &amp; Co is live!" in body and "Your first week" not in body
+
+    def test_locale_without_rich_copy_gets_short_welcome_in_one_language(self):
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+            send_account_creation_email(_user(), "user@test.com", lang="fr")
+        body = send_email.call_args.kwargs["body"]
+        # No English sections leaking into a French mail.
+        assert "Your first three steps" not in body
+        assert "Everything is included" not in body
+
+    def test_learner_welcome_is_about_the_school_not_validbridge(self):
+        with patch("src.services.users.emails.send_email", return_value=True) as send_email:
+            send_account_creation_email(
+                _user(), "user@test.com", cta_url="https://acme.test/home", org_name="Acme & Co",
+                brand_color="#ff5500",
+            )
+        body = send_email.call_args.kwargs["body"]
+        assert "Start learning" in body
+        assert "Learn at your own pace" in body
+        assert "0% of your course sales" not in body  # no creator marketing to learners
+        assert "Create your school" not in body
+        assert "#ff5500" in body  # school's button colour
 
     def test_orgless_welcome_uses_cta_url_and_validbridge_branding(self):
         with patch("src.services.users.emails.send_email", return_value=True) as send_email:

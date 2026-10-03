@@ -256,6 +256,7 @@ async def verify_email_token(
     r.delete(redis_key)
 
     # Dispatch webhook — resolve org_id from org_uuid
+    org = None
     if org_uuid != NO_ORG_UUID:
         org_statement = select(Organization).where(Organization.org_uuid == org_uuid)
         org = (await db_session.execute(org_statement)).scalars().first()
@@ -269,7 +270,50 @@ async def verify_email_token(
                 },
             )
 
+    await _send_welcome_after_verification(request, db_session, user, org)
+
     return user, "Email verified successfully"
+
+
+async def _send_welcome_after_verification(
+    request: Request, db_session: AsyncSession, user: User, org: Organization | None
+) -> None:
+    """Welcome a password signup once their address is confirmed.
+
+    OAuth signups are welcomed at creation (their address is already
+    verified); password signups only receive the verification mail then, so
+    without this they would never get a welcome at all. Runs only on the
+    first verification — the already-verified branch above returns early — and
+    never fails verification: the account is already confirmed.
+    """
+    try:
+        from src.services.email.branding import resolve_org_email_branding
+        from src.services.users.emails import send_account_creation_email
+        from src.services.users.users import _get_welcome_cta_url
+
+        user_read = UserRead.model_validate(user)
+        cta_url = await _get_welcome_cta_url(request, db_session, org.id if org else None)
+        if org is None:
+            send_account_creation_email(user=user_read, email=user_read.email, cta_url=cta_url)
+            return
+        org_config = (
+            await db_session.execute(
+                select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+            )
+        ).scalars().first()
+        send_account_creation_email(
+            user=user_read,
+            email=user_read.email,
+            cta_url=cta_url,
+            org_name=org.name,
+            **resolve_org_email_branding(org, org_config, request).as_kwargs(),
+        )
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).warning(
+            "Welcome email after verification not sent for %s", user.user_uuid, exc_info=True
+        )
 
 
 async def resend_verification_email(

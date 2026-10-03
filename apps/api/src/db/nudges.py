@@ -151,3 +151,47 @@ class EmailPreference(SQLModel, table=True):
     suppressed_reason: Optional[str] = Field(
         default=None, sa_column=Column(String(32), nullable=True)
     )
+
+
+class UserNudgeSend(SQLModel, table=True):
+    """Send ledger for lifecycle mail to users who belong to no organization.
+
+    ``nudge_send`` requires an org, and these people have none — that is the
+    point of the email. Same contract: the row is claimed *before* the send,
+    and the unique ``dedupe_key`` ("<nudge_id>:<user_id>") makes a re-run or
+    an overlapping run unable to send the same email twice.
+
+    Created by ``SQLModel.metadata.create_all`` at startup (no Alembic
+    revision), like the payments tables: a new table with no data to move
+    needs no migration, and a revision here would fork the migration head.
+    """
+
+    __tablename__ = "user_nudge_send"
+    __table_args__ = (
+        UniqueConstraint("dedupe_key", name="uq_user_nudge_send_dedupe"),
+        Index("ix_user_nudge_send_user_sent", "user_id", "sent_at"),
+    )
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    nudge_id: str = Field(sa_column=Column(String(64), nullable=False))
+    dedupe_key: str = Field(sa_column=Column(String(160), nullable=False))
+    user_id: int = Field(
+        sa_column=Column(
+            Integer,
+            ForeignKey("user.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+    )
+    status: str = Field(
+        default=NudgeSendStatus.CLAIMED,
+        sa_column=Column(String(16), nullable=False, default=NudgeSendStatus.CLAIMED),
+    )
+    lang: str = Field(default="en", sa_column=Column(String(8), nullable=False, default="en"))
+    claimed_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+    sent_at: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    error: Optional[str] = Field(default=None, sa_column=Column(String(255), nullable=True))

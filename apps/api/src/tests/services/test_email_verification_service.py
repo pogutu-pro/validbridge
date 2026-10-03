@@ -359,7 +359,9 @@ class TestEmailVerificationService:
         ), patch(
             "src.services.users.email_verification.dispatch_webhooks",
             new_callable=AsyncMock,
-        ) as mock_dispatch:
+        ) as mock_dispatch, patch(
+            "src.services.users.emails.send_account_creation_email",
+        ) as mock_welcome:
             returned_user, result = await verify_email_token(
                 mock_request,
                 db,
@@ -370,6 +372,11 @@ class TestEmailVerificationService:
         assert result == "Email verified successfully"
         assert returned_user.user_uuid == user.user_uuid
         mock_dispatch.assert_awaited_once()
+        # Password signups are welcomed once their address is confirmed,
+        # white-labeled to the org they signed up in.
+        mock_welcome.assert_called_once()
+        assert mock_welcome.call_args.kwargs["org_name"] == org.name
+        assert mock_welcome.call_args.kwargs["email"] == user.email
         assert (await db.execute(
             select(User).where(User.user_uuid == user.user_uuid)
         )).scalars().first().email_verified is True
@@ -452,7 +459,9 @@ class TestEmailVerificationService:
         ), patch(
             "src.services.users.email_verification.dispatch_webhooks",
             new_callable=AsyncMock,
-        ) as mock_dispatch:
+        ) as mock_dispatch, patch(
+            "src.services.users.emails.send_account_creation_email",
+        ) as mock_welcome:
             _result_user, result = await verify_email_token(
                 mock_request,
                 db,
@@ -462,7 +471,37 @@ class TestEmailVerificationService:
             )
         assert result == "Email already verified"
         mock_dispatch.assert_not_called()
+        mock_welcome.assert_not_called()  # clicking the link twice: one welcome
         assert fake_redis.delete.call_args.args[0] == redis_key
+
+    @pytest.mark.asyncio
+    async def test_platform_signup_welcome_and_failure_never_blocks_verification(
+        self, mock_request, db, regular_user
+    ):
+        user = (await db.execute(
+            select(User).where(User.email == regular_user.email)
+        )).scalars().first()
+        token = "platform-token"
+        fake_redis = Mock()
+        fake_redis.get.return_value = json.dumps({
+            "token": token,
+            "user_uuid": user.user_uuid,
+            "org_uuid": "none",
+            "email": user.email,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "expires_at": datetime.now(timezone.utc).timestamp() + TOKEN_TTL_SECONDS,
+        })
+        with patch(
+            "src.services.users.email_verification.get_redis_connection",
+            return_value=fake_redis,
+        ), patch(
+            "src.services.users.emails.send_account_creation_email",
+            side_effect=RuntimeError("provider down"),
+        ) as mock_welcome:
+            _user, result = await verify_email_token(mock_request, db, token, user.user_uuid, "none")
+        assert result == "Email verified successfully"
+        mock_welcome.assert_called_once()
+        assert "org_name" not in mock_welcome.call_args.kwargs  # ValidBridge-branded
 
     @pytest.mark.asyncio
     async def test_resend_verification_email_paths(

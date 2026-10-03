@@ -431,3 +431,28 @@ async def test_try_send_org_created_links_to_the_new_org_dashboard():
         await _try_send_org_created(MagicMock(), org, user, MagicMock())
 
     assert send_mock.call_args.args[2] == "https://acme.learn.test/dash"
+
+
+@pytest.mark.asyncio
+async def test_try_send_org_created_personalises_from_onboarding_answers():
+    """What the creator told /new (role, institution) and their first name
+    reach the email; a config without answers sends the plain confirmation."""
+    from types import SimpleNamespace
+
+    from src.services.orgs.orgs import _try_send_org_created
+
+    user = SimpleNamespace(email="amina@test.com", first_name="Amina", username="amina_k")
+    org = SimpleNamespace(name="Sunrise", slug="sunrise", id=7)
+    config = SimpleNamespace(config={"onboarding": {"role": "admin", "institution_type": "public_school"}})
+
+    with patch(
+        "src.services.email.utils.get_org_signup_base_url",
+        new_callable=AsyncMock,
+        return_value="https://sunrise.learn.test",
+    ), patch("src.services.users.emails.send_org_created_email") as send_mock:
+        await _try_send_org_created(MagicMock(), org, user, MagicMock(), config)
+        kwargs = send_mock.call_args.kwargs
+        assert kwargs == {"role": "admin", "institution_type": "public_school", "name": "Amina"}
+
+        await _try_send_org_created(MagicMock(), org, user, MagicMock(), SimpleNamespace(config={}))
+        assert send_mock.call_args.kwargs["role"] is None

@@ -310,6 +310,135 @@ def _email_layout(
 </html>"""
 
 
+# Every key the rich welcome renders. A locale gets the rich version only if it
+# ships all of them; otherwise the short welcome, which every locale has, so a
+# reader never gets a mail that switches language halfway down.
+# Paths a new account can take, in the order /new offers them. Each links to
+# /new?role=<id>, which opens setup straight after the role question.
+WELCOME_PATHS = ("admin", "teacher", "creator", "company", "student")
+
+_RICH_WELCOME_KEYS = (
+    "account_creation.intro",
+    "account_creation.paths_title",
+    *(f"account_creation.path_{p}_{part}" for p in WELCOME_PATHS for part in ("title", "body")),
+    "account_creation.public_note",
+    "account_creation.features_title",
+    "account_creation.feature_live", "account_creation.feature_assess",
+    "account_creation.feature_certs", "account_creation.feature_analytics",
+    "account_creation.cta_start", "account_creation.invited_note",
+    "account_creation.help_reply",
+)
+_RICH_ORG_WELCOME_KEYS = (
+    "account_creation.org_intro",
+    "account_creation.org_point1", "account_creation.org_point2", "account_creation.org_point3",
+    "account_creation.org_cta",
+)
+
+
+def _locale_has(lang: str, keys: tuple[str, ...]) -> bool:
+    from src.services.email.translations import EMAIL_TRANSLATIONS, normalize_language
+
+    bundle = EMAIL_TRANSLATIONS.get(normalize_language(lang)) or {}
+    return all(bundle.get(key) for key in keys)
+
+
+def display_name(user) -> str:
+    """What to call someone: their first name (from Google or the signup
+    form), else their username. Never an empty greeting."""
+    first = (getattr(user, "first_name", None) or "").strip()
+    return first or (getattr(user, "username", None) or "").strip() or "there"
+
+
+def _platform_origin(url: str | None) -> str | None:
+    """``https://host`` of a platform URL, for building sibling links."""
+    from urllib.parse import urlsplit
+
+    if not url:
+        return None
+    parts = urlsplit(url)
+    if not parts.scheme or not parts.netloc:
+        return None
+    return f"{parts.scheme}://{parts.netloc}"
+
+
+def _path_links(rows: list[tuple[str, str, str]]) -> str:
+    """"What brings you here?" choices: each row is a full-width link card."""
+    cells = []
+    for href, title, body in rows:
+        cells.append(
+            "<tr><td style=\"padding: 0 0 8px 0;\">"
+            f'<a href="{html.escape(href)}" style="display: block; text-decoration: none; '
+            'border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px 14px; '
+            'background-color: #ffffff; text-align: left;">'
+            '<span style="display: block; font-size: 14px; font-weight: 800; color: #000000; '
+            f'line-height: 1.4;">{title} <span style="color: rgba(0,0,0,0.3);">&rarr;</span></span>'
+            '<span style="display: block; font-size: 12px; color: rgba(0,0,0,0.5); font-weight: 500; '
+            f'line-height: 1.5; margin-top: 2px;">{body}</span>'
+            "</a></td></tr>"
+        )
+    return (
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" '
+        f'style="border-collapse: collapse;">{"".join(cells)}</table>'
+    )
+
+
+def _section_title(text: str) -> str:
+    return (
+        '<p style="margin: 0 0 14px 0; font-size: 11px; font-weight: 800; '
+        'letter-spacing: 0.08em; text-transform: uppercase; color: rgba(0,0,0,0.35); '
+        f'text-align: left;">{text}</p>'
+    )
+
+
+def _numbered_steps(steps: list[tuple[str, str]], accent: str) -> str:
+    """Numbered checklist as a table: lists and flexbox render inconsistently
+    across Gmail/Outlook, a table renders the same everywhere."""
+    from src.services.email.branding import contrasting_text_color
+
+    badge_text = contrasting_text_color(accent)
+    rows = []
+    for number, (title, body) in enumerate(steps, start=1):
+        rows.append(
+            "<tr>"
+            '<td valign="top" style="padding: 0 14px 18px 0; width: 28px;">'
+            f'<div style="width: 26px; height: 26px; line-height: 26px; border-radius: 13px; '
+            f'background-color: {accent}; color: {badge_text}; font-size: 13px; font-weight: 800; '
+            f'text-align: center;">{number}</div></td>'
+            '<td valign="top" style="padding: 0 0 18px 0; text-align: left;">'
+            f'<div style="font-size: 14px; font-weight: 800; color: #000000; line-height: 1.4;">{title}</div>'
+            f'<div style="font-size: 13px; color: rgba(0,0,0,0.5); font-weight: 500; line-height: 1.6; '
+            f'margin-top: 2px;">{body}</div></td>'
+            "</tr>"
+        )
+    return (
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" '
+        f'style="border-collapse: collapse; margin: 0 0 8px 0;">{"".join(rows)}</table>'
+    )
+
+
+def _check_list(items: list[str]) -> str:
+    rows = "".join(
+        "<tr>"
+        '<td valign="top" style="padding: 0 10px 10px 0; width: 16px; font-size: 14px; '
+        'font-weight: 900; color: #16a34a; line-height: 1.5;">&#10003;</td>'
+        '<td valign="top" style="padding: 0 0 10px 0; text-align: left; font-size: 13px; '
+        f'color: rgba(0,0,0,0.6); font-weight: 500; line-height: 1.5;">{item}</td>'
+        "</tr>"
+        for item in items
+    )
+    return (
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" '
+        f'style="border-collapse: collapse;">{rows}</table>'
+    )
+
+
+def _panel(inner: str) -> str:
+    return (
+        '<div style="background-color: #fafafa; border: 1px solid #f0f0f0; border-radius: 12px; '
+        f'padding: 18px 20px 8px 20px; margin: 0 0 28px 0; text-align: left;">{inner}</div>'
+    )
+
+
 def send_account_creation_email(
     user: UserRead,
     email: EmailStr,
@@ -323,49 +452,108 @@ def send_account_creation_email(
 ):
     """Welcome email sent once an account exists.
 
-    ``cta_url`` is where "Get Started" lands: the org-scoped URL when the
+    ``cta_url`` is where the main button lands: the org-scoped URL when the
     account was created inside an org, or the platform org-picker for org-less
     signups. Falls back to the public academy when no URL is supplied.
 
-    When ``org_name`` is set the email is WHITE-LABELED to that organization:
-    the subject and body name the org (not ValidBridge), the org's ``logo_url``
-    (or its name) replaces the ValidBridge mark, the button takes the org's
-    ``brand_color``, and the footer is reduced to a "Powered by ValidBridge"
-    line that ``powered_by=False`` removes. Org-less signups keep the
-    ValidBridge-branded variant with the Academy footer link.
+    Org-less signups (people starting a school) get the ValidBridge welcome:
+    three first steps, what is included, and a way to reach a person. When
+    ``org_name`` is set the email is WHITE-LABELED to that organization — a
+    learner's welcome naming the org, with its logo (or name), button colour
+    and an optional "Powered by ValidBridge" line; it never markets ValidBridge.
+
+    Locales without the rich copy get the short welcome, fully translated.
     """
-    safe_username = html.escape(user.username)
+    # Greet people by name; the template placeholder is still {username}.
+    safe_username = html.escape(display_name(user))
     white_label = bool(org_name)
     safe_org = html.escape(org_name) if org_name else ""
-
+    target = html.escape(cta_url or ACADEMY_URL)
     heading = t(lang, "account_creation.heading", username=safe_username)
-    cta = t(lang, "account_creation.cta")
+    preheader = ""
 
     if white_label:
         subject = t(lang, "account_creation.subject_org", org_name=safe_org, username=safe_username)
-        body_text = t(lang, "account_creation.body_in_org", org_name=safe_org)
         footer_note = ""
         logo_html = _brand_logo_html(logo_url, org_name)
+        button = _button_style(brand_color)
+        if _locale_has(lang, _RICH_ORG_WELCOME_KEYS):
+            intro = t(lang, "account_creation.org_intro", org_name=safe_org)
+            preheader = _first_sentence(t(lang, "account_creation.org_intro", org_name=org_name))
+            body_content = f"""
+        <h1 style="{STYLES['h1']}">{heading}</h1>
+        <p style="{STYLES['p']}">{intro}</p>
+        {_panel(_check_list([t(lang, f"account_creation.org_point{n}") for n in (1, 2, 3)]))}
+        <a href="{target}" style="{button}">{t(lang, "account_creation.org_cta")}</a>
+    """
+        else:
+            body_content = f"""
+        <h1 style="{STYLES['h1']}">{heading}</h1>
+        <p style="{STYLES['p']}">{t(lang, "account_creation.body_in_org", org_name=safe_org)}</p>
+        <a href="{target}" style="{button}">{t(lang, "account_creation.cta")}</a>
+    """
     else:
         subject = t(lang, "account_creation.subject", username=safe_username)
-        body_text = t(lang, "account_creation.body")
+        logo_html = PLATFORM_LOGO_HTML
         academy_link = (
             f'<a href="{ACADEMY_URL}" '
             'style="color: rgba(0,0,0,0.35); text-decoration: underline;">'
             f'{t(lang, "academy_link_text")}</a>'
         )
-        footer_note = t(lang, "account_creation.footer", academy_link=academy_link)
-        logo_html = PLATFORM_LOGO_HTML
-
-    body_content = f"""
+        origin = _platform_origin(cta_url)
+        if origin and _locale_has(lang, _RICH_WELCOME_KEYS):
+            intro = t(lang, "account_creation.intro")
+            preheader = _first_sentence(intro)
+            paths = [
+                (
+                    f"{origin}/new?role={path}",
+                    t(lang, f"account_creation.path_{path}_title"),
+                    t(lang, f"account_creation.path_{path}_body"),
+                )
+                for path in WELCOME_PATHS
+            ]
+            features = [
+                t(lang, f"account_creation.feature_{key}")
+                for key in ("live", "assess", "certs", "analytics")
+            ]
+            # Replies only promise a person when replies actually reach one.
+            footer_note = (
+                t(lang, "account_creation.help_reply", academy_link=academy_link)
+                if _reply_to_address()
+                else t(lang, "account_creation.footer", academy_link=academy_link)
+            )
+            body_content = f"""
         <h1 style="{STYLES['h1']}">{heading}</h1>
-        <p style="{STYLES['p']}">
-            {body_text}
+        <p style="{STYLES['p']}">{intro}</p>
+        <div style="text-align: left; margin: 0 0 8px 0;">
+            {_section_title(t(lang, "account_creation.paths_title"))}
+            {_path_links(paths)}
+        </div>
+        <p style="margin: 6px 0 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); font-weight: 500; line-height: 1.6; text-align: left;">
+            {t(lang, "account_creation.public_note")}
         </p>
-        <a href="{html.escape(cta_url or ACADEMY_URL)}" style="{_button_style(brand_color if white_label else None)}">
-            {cta}
-        </a>
+        <a href="{target}" style="{STYLES['button']}">{t(lang, "account_creation.cta_start")}</a>
+        <p style="margin: 14px 0 0 0; font-size: 12px; color: rgba(0,0,0,0.35); font-weight: 500; line-height: 1.6;">
+            {t(lang, "account_creation.invited_note")}
+        </p>
+        <hr style="{STYLES['divider']}">
+        <div style="text-align: left;">
+            {_section_title(t(lang, "account_creation.features_title"))}
+            {_check_list(features)}
+        </div>
     """
+        else:
+            footer_note = t(lang, "account_creation.footer", academy_link=academy_link)
+            body_content = f"""
+        <h1 style="{STYLES['h1']}">{heading}</h1>
+        <p style="{STYLES['p']}">{t(lang, "account_creation.body")}</p>
+        <a href="{target}" style="{STYLES['button']}">{t(lang, "account_creation.cta")}</a>
+    """
+
+    headers: dict[str, str] = {}
+    reply_to = _reply_to_address()
+    if reply_to and not white_label:
+        headers["Reply-To"] = reply_to
 
     return _send_notification_email(
         to=email,
@@ -375,10 +563,24 @@ def send_account_creation_email(
             body_content=body_content,
             footer_note=footer_note,
             logo_html=logo_html,
+            preheader=preheader,
             powered_by=white_label and powered_by,
             lang=lang,
         ),
         sender_name=sender_name,
+        **({"headers": headers} if headers else {}),
+    )
+
+
+_ORG_ROLES = ("admin", "teacher", "creator", "company")
+_PUBLIC_ED_INSTITUTIONS = ("public_school", "tvet_college", "university")
+
+
+def _org_role_keys(role: str) -> tuple[str, ...]:
+    return (
+        "org_created.greeting", "org_created.steps_title", f"org_created.{role}.intro",
+        *(f"org_created.{role}.step{n}_{part}" for n in (1, 2, 3, 4) for part in ("title", "body")),
+        f"org_created.{role}.cta",
     )
 
 
@@ -387,25 +589,73 @@ def send_org_created_email(
     org_name: str,
     dashboard_url: str,
     lang: str = "en",
+    role: str | None = None,
+    institution_type: str | None = None,
+    name: str | None = None,
 ):
-    """Confirmation email when a user creates a new organization."""
-    safe_name = html.escape(org_name)
-    heading = t(lang, "org_created.heading", org_name=safe_name)
-    body_text = t(lang, "org_created.body")
-    cta = t(lang, "org_created.cta")
+    """Confirmation when a user creates an organization, personalised to what
+    they told /new about themselves.
 
-    body_content = f"""
-        <h1 style="{STYLES['h1']}">{heading}</h1>
-        <p style="{STYLES['p']}">{body_text}</p>
-        <a href="{html.escape(dashboard_url)}" style="{STYLES['button']}">{cta}</a>
+    ``role`` (admin / teacher / creator / company) picks a first-week guide
+    that mirrors that role's in-app checklist; public schools, TVET colleges
+    and universities also hear about free Public Education access. Without a
+    role (older clients, API callers) — or in a locale without the guide — the
+    short confirmation is sent instead.
     """
+    safe_name = html.escape(org_name)
+    dashboard = html.escape(dashboard_url)
+    footer = t(lang, "org_created.footer")
+
+    if role in _ORG_ROLES and _locale_has(lang, _org_role_keys(role)):
+        greeting_name = html.escape((name or "").strip()) or safe_name
+        heading = t(lang, "org_created.greeting", org_name=safe_name, name=greeting_name)
+        steps = []
+        for n in (1, 2, 3, 4):
+            body_key = f"org_created.{role}.step{n}_body"
+            if role == "creator" and n == 3:
+                from src.services.payments import paystack
+
+                if paystack.learner_pays_fees():
+                    body_key = "org_created.creator.step3_body_fees"
+            steps.append((t(lang, f"org_created.{role}.step{n}_title"), t(lang, body_key)))
+
+        public_ed = ""
+        if institution_type in _PUBLIC_ED_INSTITUTIONS:
+            setup_url = html.escape(f"{dashboard_url.rstrip('/')}/onboarding")
+            public_ed = (
+                '<p style="margin: 0 0 24px 0; font-size: 12px; color: rgba(0,0,0,0.55); '
+                'font-weight: 500; line-height: 1.6; text-align: left; background-color: #f0fdf4; '
+                'border: 1px solid #dcfce7; border-radius: 10px; padding: 12px 14px;">'
+                f'{t(lang, "org_created.public_ed")} '
+                f'<a href="{setup_url}" style="color: #15803d; font-weight: 700;">'
+                f'{t(lang, "org_created.public_ed_link")}</a></p>'
+            )
+
+        body_content = f"""
+        <h1 style="{STYLES['h1']}">{heading}</h1>
+        <p style="{STYLES['p']}">{t(lang, f"org_created.{role}.intro")}</p>
+        {_panel(_section_title(t(lang, "org_created.steps_title")) + _numbered_steps(steps, "#000000"))}
+        {public_ed}
+        <a href="{dashboard}" style="{STYLES['button']}">{t(lang, f"org_created.{role}.cta")}</a>
+    """
+        preheader = _first_sentence(t(lang, f"org_created.{role}.intro"))
+    else:
+        heading = t(lang, "org_created.heading", org_name=safe_name)
+        preheader = ""
+        body_content = f"""
+        <h1 style="{STYLES['h1']}">{heading}</h1>
+        <p style="{STYLES['p']}">{t(lang, "org_created.body")}</p>
+        <a href="{dashboard}" style="{STYLES['button']}">{t(lang, "org_created.cta")}</a>
+    """
+
     return _send_notification_email(
         to=email,
         subject=t(lang, "org_created.subject", org_name=safe_name),
         body=_email_layout(
             title=heading,
             body_content=body_content,
-            footer_note=t(lang, "org_created.footer"),
+            footer_note=footer,
+            preheader=preheader,
         ),
     )
 
@@ -807,6 +1057,89 @@ def send_email_verification_email(
     )
 
 
+def _setup_checklist_html(lang: str, items: list[tuple[str, bool, str]] | None) -> str:
+    """"Where you left off": done steps ticked, the first open step marked
+    "Next step", every open step a link straight to where it is done."""
+    if not items:
+        return ""
+    rows = []
+    next_marked = False
+    for label, done, url in items:
+        safe_label = html.escape(label)
+        if done:
+            mark = '<span style="color: #16a34a; font-weight: 900;">&#10003;</span>'
+            text = f'<span style="color: rgba(0,0,0,0.4); text-decoration: line-through;">{safe_label}</span>'
+        else:
+            mark = '<span style="color: rgba(0,0,0,0.25); font-weight: 900;">&#9675;</span>'
+            badge = ""
+            if not next_marked:
+                next_marked = True
+                badge = (
+                    ' <span style="display: inline-block; font-size: 10px; font-weight: 800; '
+                    'letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff; '
+                    'background-color: #000000; border-radius: 6px; padding: 2px 6px; '
+                    f'margin-left: 4px;">{html.escape(t(lang, "nudge.common.next_step"))}</span>'
+                )
+            text = (
+                f'<a href="{html.escape(url)}" style="color: #000000; font-weight: 700; '
+                f'text-decoration: underline;">{safe_label}</a>{badge}'
+            )
+        rows.append(
+            "<tr>"
+            f'<td valign="top" style="padding: 0 10px 10px 0; width: 16px; font-size: 14px; line-height: 1.5;">{mark}</td>'
+            f'<td valign="top" style="padding: 0 0 10px 0; font-size: 13px; line-height: 1.5; text-align: left;">{text}</td>'
+            "</tr>"
+        )
+    return (
+        '<div style="background-color: #fafafa; border: 1px solid #f0f0f0; border-radius: 12px; '
+        'padding: 16px 18px 6px 18px; margin: 0 0 24px 0; text-align: left;">'
+        '<p style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; '
+        'text-transform: uppercase; color: rgba(0,0,0,0.35);">'
+        f'{html.escape(t(lang, "nudge.common.checklist_title"))}</p>'
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" '
+        f'style="border-collapse: collapse;">{"".join(rows)}</table></div>'
+    )
+
+
+def _support_html(lang: str, support: dict | None) -> str:
+    """"Want a hand?": WhatsApp or email (both prefilled — the reader picks)
+    and the getting-started guide. Renders only the channels configured."""
+    if not support:
+        return ""
+    buttons = []
+    if support.get("whatsapp_url"):
+        buttons.append(
+            f'<a href="{html.escape(support["whatsapp_url"])}" style="display: inline-block; '
+            'margin: 0 4px 8px 4px; padding: 10px 16px; background-color: #16a34a; color: #ffffff; '
+            'text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 700;">'
+            f'{html.escape(t(lang, "nudge.common.support_whatsapp"))}</a>'
+        )
+    if support.get("email_url"):
+        buttons.append(
+            f'<a href="{html.escape(support["email_url"])}" style="display: inline-block; '
+            'margin: 0 4px 8px 4px; padding: 10px 16px; background-color: #ffffff; color: #000000; '
+            'border: 1px solid #e5e5e5; text-decoration: none; border-radius: 10px; font-size: 13px; '
+            f'font-weight: 700;">{html.escape(t(lang, "nudge.common.support_email"))}</a>'
+        )
+    guide = ""
+    if support.get("help_url"):
+        guide = (
+            '<p style="margin: 6px 0 0 0; font-size: 12px; line-height: 1.6;">'
+            f'<a href="{html.escape(support["help_url"])}" style="color: rgba(0,0,0,0.5); '
+            f'text-decoration: underline;">{html.escape(t(lang, "nudge.common.support_help"))}</a></p>'
+        )
+    if not buttons and not guide:
+        return ""
+    return (
+        f'<hr style="{STYLES["divider"]}">'
+        '<p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 800; color: #000000;">'
+        f'{html.escape(t(lang, "nudge.common.support_title"))}</p>'
+        '<p style="margin: 0 0 14px 0; font-size: 13px; color: rgba(0,0,0,0.5); font-weight: 500; line-height: 1.6;">'
+        f'{html.escape(t(lang, "nudge.common.support_body"))}</p>'
+        f'<div>{"".join(buttons)}</div>{guide}'
+    )
+
+
 def send_nudge_email(
     nudge_id: str,
     email: EmailStr,
@@ -821,6 +1154,9 @@ def send_nudge_email(
     sender_name: str | None = None,
     brand_color: str | None = None,
     powered_by: bool = True,
+    checklist: list[tuple[str, bool, str]] | None = None,
+    support: dict | None = None,
+    footer_key: str = "nudge.common.footer",
     **copy_vars,
 ):
     """Send one lifecycle nudge.
@@ -868,7 +1204,8 @@ def send_nudge_email(
         <p style="{STYLES['p']}">
             {body_text}
         </p>
-        {stat_html}"""
+        {stat_html}
+        {_setup_checklist_html(lang, checklist)}"""
     if has_cta and cta_url:
         cta = t(lang, f"nudge.{nudge_id}.cta", **safe_vars)
         body_content += f"""
@@ -877,6 +1214,7 @@ def send_nudge_email(
         </a>
         <p style="{STYLES['link_text']}">{html.escape(cta_url)}</p>
     """
+    body_content += _support_html(lang, support)
 
     # The preheader is the body's opening sentence rather than a thirty-first
     # set of translated strings. It is already localised, and it gives the
@@ -900,7 +1238,7 @@ def send_nudge_email(
         body=_email_layout(
             title=heading,
             body_content=body_content,
-            footer_note=t(lang, "nudge.common.footer", org_name=safe_org_name),
+            footer_note=t(lang, footer_key, org_name=safe_org_name),
             logo_html=_brand_logo_html(logo_url, org_name),
             unsubscribe_url=unsubscribe_url,
             unsubscribe_label=t(lang, "nudge.common.unsubscribe"),

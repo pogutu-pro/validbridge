@@ -29,6 +29,8 @@ from src.services.nudges.catalog import NudgeSpec, matching_specs, next_plan
 from src.services.nudges.eligibility import iter_snapshots
 from src.services.nudges.preferences import get_opted_out_user_ids
 from src.services.nudges.snapshot import AdminRow, OrgSnapshot
+from src.services.nudges import setup_progress
+from src.services.email.translations import t
 from src.services.users.emails import send_nudge_email
 
 logger = logging.getLogger(__name__)
@@ -317,6 +319,36 @@ def _copy_vars(snapshot: OrgSnapshot, spec: NudgeSpec) -> dict:
     }
 
 
+# Tracks about getting set up. Their emails show "where you left off" while
+# the org's setup is unfinished, and offer a person to help.
+SETUP_TRACKS = frozenset({"activation", "content", "audience"})
+
+
+def _setup_extras(
+    spec: NudgeSpec, snapshot: OrgSnapshot, base_url: str
+) -> tuple[list[tuple[str, bool, str]] | None, dict | None]:
+    """Checklist rows and support links for a setup-phase nudge, else None."""
+    if spec.track not in SETUP_TRACKS:
+        return None, None
+    items = setup_progress.setup_checklist(snapshot, base_url)
+    if all(item.done for item in items):
+        return None, None
+    lang = snapshot.lang
+    checklist = [(t(lang, f"nudge.common.setup.{i.key}"), i.done, i.url) for i in items]
+    org = snapshot.org_name
+    support = {
+        "help_url": setup_progress.help_center_url(),
+        "whatsapp_url": setup_progress.whatsapp_url(
+            t(lang, "nudge.common.whatsapp_prefill", org_name=org)
+        ),
+        "email_url": setup_progress.email_url(
+            t(lang, "nudge.common.email_subject", org_name=org),
+            t(lang, "nudge.common.email_body", org_name=org),
+        ),
+    }
+    return checklist, support
+
+
 async def _claim(
     db_session: AsyncSession,
     spec: NudgeSpec,
@@ -586,6 +618,7 @@ async def run_nudges(
                             f"/logos/{snapshot.logo_image}"
                         )
 
+                checklist, support = _setup_extras(spec, snapshot, base_url)
                 result = send_nudge_email(
                     nudge_id=spec.id,
                     email=admin.email,
@@ -600,6 +633,8 @@ async def run_nudges(
                     sender_name=snapshot.sender_name,
                     brand_color=snapshot.brand_color,
                     powered_by=snapshot.powered_by,
+                    checklist=checklist,
+                    support=support,
                     **_copy_vars(snapshot, spec),
                 )
 

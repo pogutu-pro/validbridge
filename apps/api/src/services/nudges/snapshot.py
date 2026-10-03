@@ -105,6 +105,13 @@ class OrgSnapshot:
 
     ai_credits_used: int = 0
 
+    # Setup signals for the "where you left off" checklist.
+    onboarding_role: Optional[str] = None   # what the creator chose on /new
+    staff_count: int = 0                    # maintainers (teachers) + extra admins
+    payouts_ready: bool = False             # an active payments config
+    public_offer_count: int = 0             # offers learners can buy
+    usergroup_count: int = 0
+
     last_admin_login_at: Optional[datetime] = None
     last_activity_day: Optional[datetime] = None
 

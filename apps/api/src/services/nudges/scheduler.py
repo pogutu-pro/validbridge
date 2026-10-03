@@ -74,6 +74,15 @@ async def _run_once() -> None:
 
     async with _async_session_factory() as db_session:
         stats = await run_nudges(db_session)
+    # People with no organization: their own short sequence. A failure there
+    # must never cost the org nudges that already ran.
+    try:
+        from src.services.nudges.orgless import run_orgless_nudges
+
+        async with _async_session_factory() as db_session:
+            await run_orgless_nudges(db_session)
+    except Exception:
+        logger.exception("Org-less nudge run failed")
     result = stats.as_dict()
     if result["auto_seeded"]:
         logger.info("Nudge backlog seeded; sending begins on the next run")

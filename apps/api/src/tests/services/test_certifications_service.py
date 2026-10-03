@@ -2117,3 +2117,263 @@ class TestAwardKind:
         await db.refresh(issued)
         assert issued.award_kind == AwardKind.PASSED.value
         assert issued.award_detail == snapshot
+
+
+class TestIsChapterFullyCompleted:
+    """Chapter-level completion, the trigger condition for a milestone.
+
+    Mirrors the course-level tests deliberately: the same two invariants
+    (published-only, COUNT DISTINCT) and the same empty-case rule, because a
+    milestone that fires on different conditions than the certificate it sits
+    beside would be inexplicable to an author.
+    """
+
+    @staticmethod
+    def _activity(org, course, *, id_, uuid_, published=True):
+        from src.db.courses.activities import (
+            Activity, ActivityTypeEnum, ActivitySubTypeEnum,
+        )
+        return Activity(
+            id=id_, name=uuid_, activity_uuid=uuid_,
+            activity_type=ActivityTypeEnum.TYPE_DYNAMIC,
+            activity_sub_type=ActivitySubTypeEnum.SUBTYPE_DYNAMIC_PAGE,
+            published=published, org_id=org.id, course_id=course.id, content={},
+            creation_date="2024-01-01", update_date="2024-01-01",
+        )
+
+    @staticmethod
+    def _link(db, org, course, chapter_id, activity_id, *, order=1):
+        from src.db.courses.chapter_activities import ChapterActivity
+        db.add(ChapterActivity(
+            activity_id=activity_id, course_id=course.id,
+            chapter_id=chapter_id, org_id=org.id, order=order,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+
+    @pytest.mark.asyncio
+    async def test_empty_chapter_is_not_complete(
+        self, db, org, course, chapter, regular_user
+    ):
+        """A chapter with nothing published in it is an authoring state, not a
+        finished one. Returning True here would mint a milestone for an empty
+        chapter."""
+        from src.services.courses.certifications import (
+            is_chapter_fully_completed,
+        )
+
+        assert await is_chapter_fully_completed(
+            regular_user.id, chapter.id, db
+        ) is False
+
+    @pytest.mark.asyncio
+    async def test_all_published_complete_is_true(
+        self, db, org, course, chapter, regular_user
+    ):
+        from src.services.courses.certifications import (
+            is_chapter_fully_completed,
+        )
+
+        a = self._activity(org, course, id_=4201, uuid_="activity_ch_a")
+        db.add(a)
+        await db.commit()
+        self._link(db, org, course, chapter.id, a.id)
+        db.add(TrailStep(
+            complete=True, teacher_verified=False, grade="", data={},
+            trailrun_id=1, trail_id=1, activity_id=a.id,
+            course_id=course.id, org_id=org.id, user_id=regular_user.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+
+        assert await is_chapter_fully_completed(
+            regular_user.id, chapter.id, db
+        ) is True
+
+    @pytest.mark.asyncio
+    async def test_partially_complete_is_false(
+        self, db, org, course, chapter, regular_user
+    ):
+        from src.services.courses.certifications import (
+            is_chapter_fully_completed,
+        )
+
+        first = self._activity(org, course, id_=4202, uuid_="activity_ch_first")
+        second = self._activity(org, course, id_=4203, uuid_="activity_ch_second")
+        db.add(first)
+        db.add(second)
+        await db.commit()
+        self._link(db, org, course, chapter.id, first.id, order=1)
+        self._link(db, org, course, chapter.id, second.id, order=2)
+        db.add(TrailStep(
+            complete=True, teacher_verified=False, grade="", data={},
+            trailrun_id=1, trail_id=1, activity_id=first.id,
+            course_id=course.id, org_id=org.id, user_id=regular_user.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+
+        assert await is_chapter_fully_completed(
+            regular_user.id, chapter.id, db
+        ) is False
+
+    @pytest.mark.asyncio
+    async def test_unpublished_activity_does_not_block_chapter(
+        self, db, org, course, chapter, regular_user
+    ):
+        """Same reasoning as the course level: a draft is invisible to the
+        learner, so it must not withhold the milestone forever."""
+        from src.services.courses.certifications import (
+            is_chapter_fully_completed,
+        )
+
+        live = self._activity(org, course, id_=4204, uuid_="activity_ch_live")
+        draft = self._activity(
+            org, course, id_=4205, uuid_="activity_ch_draft", published=False
+        )
+        db.add(live)
+        db.add(draft)
+        await db.commit()
+        self._link(db, org, course, chapter.id, live.id, order=1)
+        self._link(db, org, course, chapter.id, draft.id, order=2)
+        db.add(TrailStep(
+            complete=True, teacher_verified=False, grade="", data={},
+            trailrun_id=1, trail_id=1, activity_id=live.id,
+            course_id=course.id, org_id=org.id, user_id=regular_user.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+
+        assert await is_chapter_fully_completed(
+            regular_user.id, chapter.id, db
+        ) is True
+
+    @pytest.mark.asyncio
+    async def test_another_users_completion_does_not_count(
+        self, db, org, course, chapter, regular_user, admin_user
+    ):
+        """The check must be scoped to one learner; a co-enrolled user's
+        finished steps are not evidence about this one."""
+        from src.services.courses.certifications import (
+            is_chapter_fully_completed,
+        )
+
+        a = self._activity(org, course, id_=4206, uuid_="activity_ch_other")
+        db.add(a)
+        await db.commit()
+        self._link(db, org, course, chapter.id, a.id)
+        db.add(TrailStep(
+            complete=True, teacher_verified=False, grade="", data={},
+            trailrun_id=1, trail_id=1, activity_id=a.id,
+            course_id=course.id, org_id=org.id, user_id=admin_user.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+
+        assert await is_chapter_fully_completed(
+            regular_user.id, chapter.id, db
+        ) is False
+
+    @pytest.mark.asyncio
+    async def test_activity_in_another_chapter_is_not_counted(
+        self, db, org, course, chapter, regular_user
+    ):
+        """Scope check: an activity completed in chapter 2 must not satisfy
+        chapter 1, even though both belong to the same course."""
+        from src.db.courses.chapters import Chapter
+        from src.services.courses.certifications import (
+            is_chapter_fully_completed,
+        )
+
+        other_chapter = Chapter(
+            id=8888, name="Other Chapter", published=True,
+            org_id=org.id, course_id=course.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        )
+        db.add(other_chapter)
+        a = self._activity(org, course, id_=4207, uuid_="activity_ch_elsewhere")
+        db.add(a)
+        await db.commit()
+        self._link(db, org, course, other_chapter.id, a.id)
+        db.add(TrailStep(
+            complete=True, teacher_verified=False, grade="", data={},
+            trailrun_id=1, trail_id=1, activity_id=a.id,
+            course_id=course.id, org_id=org.id, user_id=regular_user.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+
+        assert await is_chapter_fully_completed(
+            regular_user.id, chapter.id, db
+        ) is False
+
+    @pytest.mark.asyncio
+    async def test_activity_shared_by_two_chapters_counts_once_per_chapter(
+        self, db, org, course, chapter, regular_user
+    ):
+        """An activity placed in two chapters is counted once in each — never
+        twice in one. That double-count is what made the course-level check
+        unreachable, and uq_chapteractivity_chapter_activity already forbids the
+        exact-duplicate case, so this shared-row shape is the reachable one.
+        """
+        from src.db.courses.chapters import Chapter
+        from src.services.courses.certifications import (
+            is_chapter_fully_completed,
+            get_chapter_activities_for_learner,
+        )
+
+        sibling = Chapter(
+            id=8889, name="Sibling Chapter", published=True,
+            org_id=org.id, course_id=course.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        )
+        db.add(sibling)
+        shared = self._activity(org, course, id_=4208, uuid_="activity_ch_shared")
+        db.add(shared)
+        await db.commit()
+        self._link(db, org, course, chapter.id, shared.id, order=1)
+        self._link(db, org, course, sibling.id, shared.id, order=1)
+        db.add(TrailStep(
+            complete=True, teacher_verified=False, grade="", data={},
+            trailrun_id=1, trail_id=1, activity_id=shared.id,
+            course_id=course.id, org_id=org.id, user_id=regular_user.id,
+            creation_date="2024-01-01", update_date="2024-01-01",
+        ))
+        await db.commit()
+
+        # Each chapter sees exactly one activity, and the single completion
+        # satisfies both — not "two activities, one completion".
+        assert await get_chapter_activities_for_learner(chapter.id, db) == [shared.id]
+        assert await get_chapter_activities_for_learner(sibling.id, db) == [shared.id]
+        assert await is_chapter_fully_completed(
+            regular_user.id, chapter.id, db
+        ) is True
+        assert await is_chapter_fully_completed(
+            regular_user.id, sibling.id, db
+        ) is True
+
+    @pytest.mark.asyncio
+    async def test_get_chapter_activities_returns_published_in_order(
+        self, db, org, course, chapter, regular_user
+    ):
+        """The award path needs the chapter's activities in author order and
+        without drafts, so it can pick which assessment represents the
+        learner without re-querying per candidate."""
+        from src.services.courses.certifications import (
+            get_chapter_activities_for_learner,
+        )
+
+        first = self._activity(org, course, id_=4209, uuid_="activity_ord_1")
+        second = self._activity(org, course, id_=4210, uuid_="activity_ord_2")
+        draft = self._activity(
+            org, course, id_=4211, uuid_="activity_ord_draft", published=False
+        )
+        for a in (first, second, draft):
+            db.add(a)
+        await db.commit()
+        self._link(db, org, course, chapter.id, second.id, order=1)
+        self._link(db, org, course, chapter.id, first.id, order=2)
+        self._link(db, org, course, chapter.id, draft.id, order=3)
+
+        result = await get_chapter_activities_for_learner(chapter.id, db)
+
+        assert result == [second.id, first.id]

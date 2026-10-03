@@ -602,6 +602,89 @@ async def is_course_fully_completed(
     return completed_activities >= total_activities
 
 
+async def is_chapter_fully_completed(
+    user_id: int,
+    chapter_id: int,
+    db_session: AsyncSession,
+) -> bool:
+    """
+    Chapter-level counterpart to :func:`is_course_fully_completed`, and the
+    trigger condition for awarding a chapter milestone.
+
+    Pure check — no side effects, no credential writes. Awarding is a separate
+    step so that this stays safe to call from a GET (the learner UI asks
+    "have I earned this yet?" on every chapter load) without a write path
+    hidden inside it.
+
+    Same two invariants as the course version:
+      * only PUBLISHED activities count, or a draft would withhold the
+        milestone forever;
+      * COUNT(DISTINCT) on both sides, so the numerator and denominator can
+        never disagree about how many distinct activities there are.
+
+    At chapter scope the DISTINCT is belt-and-braces rather than a live fix —
+    filtering on chapter_id already collapses an activity shared with another
+    chapter — but the numerator joins TrailStep back to ChapterActivity without
+    repeating the chapter filter, so keeping both sides distinct is what
+    guarantees they stay comparable if that join is ever loosened.
+
+    An empty chapter is NOT complete. A chapter with nothing published in it is
+    an authoring state, not a finished one, and treating it as complete would
+    mint a milestone for a chapter that has no content.
+    """
+    total_activities = (await db_session.execute(
+        select(func.count(func.distinct(ChapterActivity.activity_id)))
+        .join(Activity, Activity.id == ChapterActivity.activity_id)
+        .where(
+            ChapterActivity.chapter_id == chapter_id,
+            Activity.published == True,
+        )
+    )).scalar_one()
+    if not total_activities:
+        return False
+
+    completed_activities = (await db_session.execute(
+        select(func.count(func.distinct(TrailStep.activity_id)))
+        .join(
+            ChapterActivity,
+            (ChapterActivity.activity_id == TrailStep.activity_id)
+            & (ChapterActivity.chapter_id == chapter_id),
+        )
+        .join(Activity, Activity.id == ChapterActivity.activity_id)
+        .where(
+            TrailStep.user_id == user_id,
+            TrailStep.complete == True,
+            Activity.published == True,
+        )
+    )).scalar_one()
+
+    return completed_activities >= total_activities
+
+
+async def get_chapter_activities_for_learner(
+    chapter_id: int,
+    db_session: AsyncSession,
+) -> list[int]:
+    """
+    The distinct published activity ids in a chapter, in author order.
+
+    Returned alongside the completion check by the milestone award path so it
+    can decide which assessment in the chapter represents the learner (for
+    award_kind) without re-querying per candidate.
+    """
+    rows = (await db_session.execute(
+        select(ChapterActivity.activity_id)
+        .join(Activity, Activity.id == ChapterActivity.activity_id)
+        .where(
+            ChapterActivity.chapter_id == chapter_id,
+            Activity.published == True,
+        )
+        .distinct()
+        .order_by(ChapterActivity.order)
+    )).scalars().all()
+    return list(rows)
+
+
 async def sync_trailrun_status(
     user_id: int,
     course_id: int,

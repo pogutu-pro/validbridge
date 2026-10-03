@@ -673,7 +673,22 @@
     "no_image_in_clipboard": "クリップボードに画像が見つかりません",
     "clipboard_read_error": "クリップボードを読み取れませんでした",
     "sign_in_to_see_courses": "コースを見るにはログインしてください",
-    "sign_in_to_see_courses_description": "このアカデミーのコースは、ログイン後にのみ表示される場合があります。"
+    "sign_in_to_see_courses_description": "このアカデミーのコースは、ログイン後にのみ表示される場合があります。",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "コミュニティ",
@@ -2257,7 +2272,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

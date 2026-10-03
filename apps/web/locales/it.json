@@ -663,7 +663,22 @@
     "no_image_in_clipboard": "Nessuna immagine trovata negli appunti",
     "clipboard_read_error": "Impossibile leggere gli appunti",
     "sign_in_to_see_courses": "Accedi per vedere i tuoi corsi",
-    "sign_in_to_see_courses_description": "I corsi di questa accademia potrebbero essere visibili solo dopo l'accesso."
+    "sign_in_to_see_courses_description": "I corsi di questa accademia potrebbero essere visibili solo dopo l'accesso.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Comunità",
@@ -2247,7 +2262,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

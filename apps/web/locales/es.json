@@ -663,7 +663,22 @@
     "no_image_in_clipboard": "No se encontró ninguna imagen en el portapapeles",
     "clipboard_read_error": "No se pudo leer el portapapeles",
     "sign_in_to_see_courses": "Inicia sesión para ver tus cursos",
-    "sign_in_to_see_courses_description": "Los cursos de esta academia podrían estar visibles solo después de iniciar sesión."
+    "sign_in_to_see_courses_description": "Los cursos de esta academia podrían estar visibles solo después de iniciar sesión.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Comunidades",
@@ -2247,7 +2262,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

@@ -673,7 +673,22 @@
     "no_image_in_clipboard": "剪贴板中未找到图片",
     "clipboard_read_error": "无法读取剪贴板",
     "sign_in_to_see_courses": "登录以查看你的课程",
-    "sign_in_to_see_courses_description": "登录后才能查看此学院中的课程。"
+    "sign_in_to_see_courses_description": "登录后才能查看此学院中的课程。",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "社区",
@@ -2257,7 +2272,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

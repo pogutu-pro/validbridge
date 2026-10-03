@@ -685,7 +685,22 @@
     "no_image_in_clipboard": "В буфере обмена нет изображения",
     "clipboard_read_error": "Не удалось прочитать буфер обмена",
     "sign_in_to_see_courses": "Войдите, чтобы увидеть свои курсы",
-    "sign_in_to_see_courses_description": "Курсы в этой академии могут быть доступны только после входа."
+    "sign_in_to_see_courses_description": "Курсы в этой академии могут быть доступны только после входа.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Сообщества",
@@ -2269,7 +2284,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

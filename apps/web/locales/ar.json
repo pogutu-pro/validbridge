@@ -708,7 +708,22 @@
     "no_image_in_clipboard": "لم يتم العثور على صورة في الحافظة",
     "clipboard_read_error": "تعذرت القراءة من الحافظة",
     "sign_in_to_see_courses": "سجّل الدخول لرؤية دوراتك",
-    "sign_in_to_see_courses_description": "قد لا تظهر الدورات في هذه الأكاديمية إلا بعد تسجيل الدخول."
+    "sign_in_to_see_courses_description": "قد لا تظهر الدورات في هذه الأكاديمية إلا بعد تسجيل الدخول.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "المجتمعات",
@@ -2403,7 +2418,16 @@
         "form": {
           "never_block_label": "حجب لا نهائي",
           "never_block_hint": "تخطي التقدم في الفصول",
-          "combination_warning": "تحديد خاطئ"
+          "combination_warning": "تحديد خاطئ",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

@@ -685,7 +685,22 @@
     "no_image_in_clipboard": "Tidak ada gambar di papan klip",
     "clipboard_read_error": "Gagal membaca dari papan klip",
     "sign_in_to_see_courses": "Masuk untuk melihat kursus Anda",
-    "sign_in_to_see_courses_description": "Kursus di akademi ini mungkin hanya terlihat setelah Anda masuk."
+    "sign_in_to_see_courses_description": "Kursus di akademi ini mungkin hanya terlihat setelah Anda masuk.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Komunitas",
@@ -2269,7 +2284,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

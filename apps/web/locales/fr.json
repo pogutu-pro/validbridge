@@ -663,7 +663,22 @@
     "no_image_in_clipboard": "Aucune image trouvée dans le presse-papiers",
     "clipboard_read_error": "Impossible de lire le presse-papiers",
     "sign_in_to_see_courses": "Connectez-vous pour voir vos cours",
-    "sign_in_to_see_courses_description": "Les cours de cette académie peuvent n’être visibles qu’après connexion."
+    "sign_in_to_see_courses_description": "Les cours de cette académie peuvent n’être visibles qu’après connexion.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Communautés",
@@ -2258,7 +2273,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

@@ -663,7 +663,22 @@
     "no_image_in_clipboard": "Nenhuma imagem encontrada na área de transferência",
     "clipboard_read_error": "Não foi possível ler a área de transferência",
     "sign_in_to_see_courses": "Entre para ver seus cursos",
-    "sign_in_to_see_courses_description": "Os cursos desta academia podem ficar visíveis apenas após o login."
+    "sign_in_to_see_courses_description": "Os cursos desta academia podem ficar visíveis apenas após o login.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Comunidades",
@@ -2247,7 +2262,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

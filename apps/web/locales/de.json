@@ -663,7 +663,22 @@
     "no_image_in_clipboard": "Kein Bild in der Zwischenablage gefunden",
     "clipboard_read_error": "Zwischenablage konnte nicht gelesen werden",
     "sign_in_to_see_courses": "Melde dich an, um deine Kurse zu sehen",
-    "sign_in_to_see_courses_description": "Kurse in dieser Akademie sind möglicherweise erst sichtbar, wenn du angemeldet bist."
+    "sign_in_to_see_courses_description": "Kurse in dieser Akademie sind möglicherweise erst sichtbar, wenn du angemeldet bist.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Communities",
@@ -2247,7 +2262,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

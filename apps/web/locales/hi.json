@@ -685,7 +685,22 @@
     "no_image_in_clipboard": "क्लिपबोर्ड में कोई इमेज नहीं मिली",
     "clipboard_read_error": "क्लिपबोर्ड से पढ़ा नहीं जा सका",
     "sign_in_to_see_courses": "अपने कोर्स देखने के लिए लॉग इन करें",
-    "sign_in_to_see_courses_description": "इस अकादमी के कोर्स साइन इन करने के बाद ही दिखाई दे सकते हैं।"
+    "sign_in_to_see_courses_description": "इस अकादमी के कोर्स साइन इन करने के बाद ही दिखाई दे सकते हैं।",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "समुदाय",
@@ -2269,7 +2284,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

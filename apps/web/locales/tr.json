@@ -685,7 +685,22 @@
     "no_image_in_clipboard": "Panoda resim bulunamadı",
     "clipboard_read_error": "Pano okunamadı",
     "sign_in_to_see_courses": "Kurslarınızı görmek için giriş yapın",
-    "sign_in_to_see_courses_description": "Bu akademideki kurslar yalnızca giriş yaptıktan sonra görüntülenebilir."
+    "sign_in_to_see_courses_description": "Bu akademideki kurslar yalnızca giriş yaptıktan sonra görüntülenebilir.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Topluluklar",
@@ -2269,7 +2284,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

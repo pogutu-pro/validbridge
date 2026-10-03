@@ -663,7 +663,22 @@
     "no_image_in_clipboard": "Geen afbeelding gevonden op het klembord",
     "clipboard_read_error": "Klembord kon niet worden gelezen",
     "sign_in_to_see_courses": "Log in om je cursussen te bekijken",
-    "sign_in_to_see_courses_description": "Cursussen in deze academie zijn mogelijk pas zichtbaar nadat je bent ingelogd."
+    "sign_in_to_see_courses_description": "Cursussen in deze academie zijn mogelijk pas zichtbaar nadat je bent ingelogd.",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "Community's",
@@ -2247,7 +2262,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

@@ -685,7 +685,22 @@
     "no_image_in_clipboard": "ক্লিপবোর্ডে কোনো ছবি পাওয়া যায়নি",
     "clipboard_read_error": "ক্লিপবোর্ড থেকে পড়া যায়নি",
     "sign_in_to_see_courses": "আপনার কোর্স দেখতে লগ ইন করুন",
-    "sign_in_to_see_courses_description": "এই একাডেমির কোর্সগুলো শুধু সাইন ইন করার পর দেখা যেতে পারে।"
+    "sign_in_to_see_courses_description": "এই একাডেমির কোর্সগুলো শুধু সাইন ইন করার পর দেখা যেতে পারে।",
+    "progression": {
+      "locked": "",
+      "locked_title": "",
+      "warning": "",
+      "warning_title": "",
+      "open": "",
+      "notice": {
+        "locked_heading": "",
+        "warning_heading": "",
+        "fallback": "",
+        "outstanding": "",
+        "not_passed": "",
+        "retry": ""
+      }
+    }
   },
   "communities": {
     "title": "কমিউনিটি",
@@ -2269,7 +2284,16 @@
         "form": {
           "never_block_label": "",
           "never_block_hint": "",
-          "combination_warning": ""
+          "combination_warning": "",
+          "enabled_label": "",
+          "enabled_hint": "",
+          "require_pass_label": "",
+          "require_pass_hint": ""
+        },
+        "sections": {
+          "title": "",
+          "subtitle": "",
+          "explainer": ""
         }
       }
     },

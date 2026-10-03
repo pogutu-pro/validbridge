@@ -37,7 +37,7 @@ from src.db.payments.payments_offers import (
     PaymentsOfferRead,
     SubscriptionIntervalEnum,
 )
-from src.security.secret_crypto import encrypt_secret
+from src.security.secret_crypto import encrypt_secret, resolve_secret
 from src.services.payments import group_sync, paystack
 
 
@@ -56,52 +56,130 @@ def _encrypt_provider_secrets(provider_config: dict) -> dict:
 
 # ── Config ───────────────────────────────────────────────────────────────────
 
+# Payout details safe to show the org admin (never keys or full account numbers).
+_PAYOUT_FIELDS = (
+    "business_name", "bank_code", "bank_name", "kind", "account_name", "account_last4",
+    "settlement_currency", "percentage_charge", "verified",
+)
+
+
+def _config_test_mode(provider_config: dict) -> bool | None:
+    """Whether this org's charges run on Paystack TEST keys (no real money),
+    or None when that cannot be told."""
+    if paystack.config_mode(provider_config) == paystack.MODE_MANAGED:
+        platform = paystack.platform_credentials()
+        return paystack.is_test_key(platform.secret_key) if platform else None
+    own = resolve_secret(provider_config.get("secret_key"))
+    return paystack.is_test_key(own) if own else None
+
+
+def _config_view(c: PaymentsConfig) -> dict:
+    provider_config = c.provider_config or {}
+    mode = paystack.config_mode(provider_config)
+    return {
+        "id": c.id,
+        "org_id": c.org_id,
+        "enabled": c.enabled,
+        "active": c.active,
+        "provider": c.provider.value if isinstance(c.provider, PaymentProviderEnum) else c.provider,
+        "mode": mode,
+        "payout": (
+            {k: provider_config.get(k) for k in _PAYOUT_FIELDS}
+            if mode == paystack.MODE_MANAGED
+            else None
+        ),
+        "has_own_keys": bool(provider_config.get("secret_key")),
+        "test_mode": _config_test_mode(provider_config),
+        "creation_date": c.creation_date,
+        "update_date": c.update_date,
+    }
+
+
+async def _get_config(org_id: int, db_session: AsyncSession) -> PaymentsConfig | None:
+    return (
+        await db_session.execute(
+            select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+        )
+    ).scalars().first()
+
+
 async def get_configs(org_id: int, db_session: AsyncSession) -> list[dict]:
     rows = (
         await db_session.execute(
             select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
         )
     ).scalars().all()
-    return [
-        {
-            "id": c.id,
-            "org_id": c.org_id,
-            "enabled": c.enabled,
-            "active": c.active,
-            "provider": c.provider.value if isinstance(c.provider, PaymentProviderEnum) else c.provider,
-            "creation_date": c.creation_date,
-            "update_date": c.update_date,
-        }
-        for c in rows
-    ]
+    return [_config_view(c) for c in rows]
+
+
+def _key_env(key: str) -> str | None:
+    if key.startswith(("sk_live_", "pk_live_")):
+        return "live"
+    if key.startswith(("sk_test_", "pk_test_")):
+        return "test"
+    return None
+
+
+async def _validate_own_keys(provider_config: dict) -> None:
+    """Catch pasted-key mistakes at save time instead of at a buyer's checkout."""
+    secret_key = (provider_config.get("secret_key") or "").strip()
+    public_key = (provider_config.get("public_key") or "").strip()
+    if not secret_key:
+        return
+    if not secret_key.startswith("sk_"):
+        raise HTTPException(
+            status_code=400,
+            detail="That isn't a Paystack secret key — it should start with sk_live_ or sk_test_.",
+        )
+    if public_key and not public_key.startswith("pk_"):
+        raise HTTPException(
+            status_code=400,
+            detail="That isn't a Paystack public key — it should start with pk_live_ or pk_test_.",
+        )
+    if public_key and _key_env(public_key) != _key_env(secret_key):
+        raise HTTPException(
+            status_code=400,
+            detail="Your secret and public keys are from different modes (one test, one live).",
+        )
+    try:
+        await paystack.check_secret_key(secret_key)
+    except paystack.PaystackError as exc:
+        raise HTTPException(status_code=400, detail=f"Paystack rejected this secret key: {exc}")
 
 
 async def initialize_config(
     org_id: int, provider: str, provider_config: dict, db_session: AsyncSession
 ) -> dict:
+    """Connect (or update) the org's OWN Paystack account (``byok`` mode)."""
     # ``active`` is a column, not provider-specific data — never persist it.
     requested_active = provider_config.pop("active", None)
+    if provider == PaymentProviderEnum.paystack.value:
+        await _validate_own_keys(provider_config)
     provider_config = _encrypt_provider_secrets(provider_config)
 
-    existing = (
-        await db_session.execute(
-            select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
-        )
-    ).scalars().first()
+    existing = await _get_config(org_id, db_session)
 
     if existing is not None:
+        previous = existing.provider_config or {}
+        account_changed = "secret_key" in provider_config
         existing.enabled = True
         if requested_active is not None:
             existing.active = bool(requested_active)
         existing.provider = PaymentProviderEnum(provider)
-        if provider_config:
-            existing.provider_config = {**existing.provider_config, **provider_config}
+        merged = {**previous, **provider_config}
+        if "secret_key" in provider_config or paystack.config_mode(previous) == paystack.MODE_BYOK:
+            merged["mode"] = paystack.MODE_BYOK
+        existing.provider_config = merged
         existing.update_date = _now()
         db_session.add(existing)
         await db_session.commit()
         await db_session.refresh(existing)
+        if account_changed and provider == PaymentProviderEnum.paystack.value:
+            await _reprovision_plans(org_id, db_session)
         return PaymentsConfigRead.model_validate(existing).model_dump()
 
+    if provider_config and provider == PaymentProviderEnum.paystack.value:
+        provider_config["mode"] = paystack.MODE_BYOK
     config = PaymentsConfig(
         org_id=org_id,
         enabled=True,
@@ -112,7 +190,237 @@ async def initialize_config(
     db_session.add(config)
     await db_session.commit()
     await db_session.refresh(config)
+    if provider == PaymentProviderEnum.paystack.value:
+        await _reprovision_plans(org_id, db_session)
     return PaymentsConfigRead.model_validate(config).model_dump()
+
+
+async def payout_options(org_id: int, db_session: AsyncSession) -> dict:
+    """What the "get paid to your bank" form needs: is it available, the
+    payout currency, ValidBridge's fee, and the bank list."""
+    platform = paystack.platform_credentials()
+    currency = paystack.settlement_currency()
+    base = {
+        "available": platform is not None,
+        "currency": currency,
+        "platform_fee_percent": paystack.platform_fee_percent(),
+        "fee_bearer": paystack.fee_bearer(),
+        "learner_pays_fees": paystack.learner_pays_fees(),
+        "learner_fee_percent": {m: round(paystack.fee_rate(m) * 100, 2) for m in paystack.CHECKOUT_METHODS},
+        "banks": [],
+    }
+    if platform is None:
+        return base
+    base["test_mode"] = paystack.is_test_key(platform.secret_key)
+    try:
+        base["banks"] = paystack.payout_destinations(
+            await paystack.list_banks(platform.secret_key, currency)
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=502, detail="Could not load the list of banks from Paystack. Try again."
+        )
+    return base
+
+
+def _clean_account_number(raw: str) -> str:
+    return "".join(ch for ch in (raw or "") if ch.isalnum())
+
+
+def _normalize_payout_number(kind: str, raw: str, currency: str) -> str:
+    """Validate and normalise the number for a payout destination.
+
+    Paystack accepts any string here and Kenya has no account-name lookup, so a
+    typo would silently send a school's money elsewhere — check the shape we
+    can know. Kenyan phones are stored in local form (07…/01…, 10 digits).
+    """
+    value = _clean_account_number(raw)
+    if kind == "mobile":
+        digits = "".join(ch for ch in value if ch.isdigit())
+        if currency == "KES":
+            if digits.startswith("254"):
+                digits = digits[3:]
+            if digits.startswith("0"):
+                digits = digits[1:]
+            if len(digits) != 9 or digits[0] not in "17":
+                raise HTTPException(
+                    status_code=400,
+                    detail="Enter a valid Kenyan phone number, e.g. 0712 345 678.",
+                )
+            return "0" + digits
+        if not 7 <= len(digits) <= 15:
+            raise HTTPException(status_code=400, detail="Enter a valid phone number.")
+        return digits
+    if kind == "till":
+        if not value.isdigit() or not 5 <= len(value) <= 8:
+            raise HTTPException(status_code=400, detail="Enter a valid M-PESA till number (5–8 digits).")
+        return value
+    if not 6 <= len(value) <= 20:
+        raise HTTPException(status_code=400, detail="Enter a valid account number.")
+    return value
+
+
+async def setup_managed_payouts(
+    org_id: int, data: dict, db_session: AsyncSession
+) -> dict:
+    """Create (or update) the org's Paystack subaccount — the whole "no
+    Paystack account needed" flow is one call: business name + bank + account.
+    """
+    platform = paystack.platform_credentials()
+    if platform is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Getting paid through ValidBridge isn't available yet. Connect your own Paystack account instead.",
+        )
+    business_name = (data.get("business_name") or "").strip()
+    bank_code = (data.get("bank_code") or "").strip()
+    if len(business_name) < 2:
+        raise HTTPException(status_code=400, detail="Enter the name payouts should be made out to.")
+
+    currency = paystack.settlement_currency()
+    try:
+        destinations = paystack.payout_destinations(
+            await paystack.list_banks(platform.secret_key, currency)
+        )
+    except Exception:
+        raise HTTPException(status_code=502, detail="Could not reach Paystack. Try again.")
+    bank = next((b for b in destinations if b["code"] == bank_code), None)
+    if bank is None:
+        raise HTTPException(status_code=400, detail="Choose where to get paid from the list.")
+    account_number = _normalize_payout_number(
+        bank["kind"], data.get("account_number") or "", currency
+    )
+
+    account_name = await paystack.resolve_account_name(
+        platform.secret_key, account_number, bank_code
+    )
+    fee = paystack.platform_fee_percent()
+    fields: dict = {
+        "business_name": business_name,
+        "settlement_bank": bank_code,
+        "account_number": account_number,
+        "percentage_charge": fee,
+        "description": f"ValidBridge org {org_id}",
+    }
+    for src_key, dst_key in (
+        ("contact_email", "primary_contact_email"),
+        ("contact_name", "primary_contact_name"),
+        ("contact_phone", "primary_contact_phone"),
+    ):
+        value = (data.get(src_key) or "").strip()
+        if value:
+            fields[dst_key] = value
+
+    existing = await _get_config(org_id, db_session)
+    previous = (existing.provider_config or {}) if existing else {}
+    code = previous.get("subaccount_code")
+    try:
+        if code:
+            result = await paystack.update_subaccount(platform.secret_key, code, **fields)
+        else:
+            result = await paystack.create_subaccount(platform.secret_key, **fields)
+    except paystack.PaystackError as exc:
+        raise HTTPException(status_code=400, detail=f"Paystack could not save these bank details: {exc}")
+    except Exception:
+        raise HTTPException(status_code=502, detail="Could not reach Paystack. Try again.")
+    code = result.get("subaccount_code") or code
+    if not code:
+        raise HTTPException(status_code=502, detail="Paystack did not return a payout account.")
+
+    payout = {
+        "mode": paystack.MODE_MANAGED,
+        "subaccount_code": code,
+        "business_name": business_name,
+        "bank_code": bank_code,
+        "bank_name": bank["name"],
+        "kind": bank["kind"],
+        "account_name": account_name or result.get("account_name"),
+        "account_last4": account_number[-4:],
+        "settlement_currency": currency,
+        "percentage_charge": fee,
+        # New or changed payout details must be re-verified by the platform
+        # owner in Paystack before Paystack releases payouts.
+        "verified": bool(result.get("is_verified")),
+    }
+    was_managed = paystack.config_mode(previous) == paystack.MODE_MANAGED and bool(previous.get("subaccount_code"))
+    if existing is None:
+        existing = PaymentsConfig(
+            org_id=org_id,
+            enabled=True,
+            active=True,
+            provider=PaymentProviderEnum.paystack,
+            provider_config=payout,
+        )
+    else:
+        # Keep any own keys: they still verify webhooks for past sales.
+        existing.provider_config = {**previous, **payout}
+        existing.provider = PaymentProviderEnum.paystack
+        existing.enabled = True
+        existing.active = True
+        existing.update_date = _now()
+    db_session.add(existing)
+    await db_session.commit()
+    await db_session.refresh(existing)
+    if not was_managed:
+        await _reprovision_plans(org_id, db_session)
+    return _config_view(existing)
+
+
+async def payout_status(org_id: int, db_session: AsyncSession) -> dict:
+    """Refresh whether Paystack has verified this org's payout account.
+
+    Paystack holds a subaccount's payouts until the platform owner verifies it
+    in the Paystack Dashboard. Asked only while unverified, then remembered.
+    """
+    config = await _get_config(org_id, db_session)
+    provider_config = (config.provider_config or {}) if config else {}
+    if config is None or paystack.config_mode(provider_config) != paystack.MODE_MANAGED:
+        raise HTTPException(status_code=404, detail="No payout account set up")
+    if provider_config.get("verified"):
+        return {"verified": True, "active": True}
+    platform = paystack.platform_credentials()
+    code = provider_config.get("subaccount_code")
+    if platform is None or not code:
+        return {"verified": False, "active": False}
+    try:
+        remote = await paystack.fetch_subaccount(platform.secret_key, code)
+    except Exception:
+        return {"verified": False, "active": None}
+    verified = bool(remote.get("is_verified"))
+    if verified:
+        config.provider_config = {**provider_config, "verified": True}
+        config.update_date = _now()
+        db_session.add(config)
+        await db_session.commit()
+    return {"verified": verified, "active": remote.get("active")}
+
+
+async def _reprovision_plans(org_id: int, db_session: AsyncSession) -> None:
+    """Re-create subscription plans on the org's current Paystack account.
+
+    Plan codes belong to one Paystack account; after the org switches account
+    the old codes would fail at checkout. Best effort per offer: one that
+    cannot be provisioned is left without a plan (checkout then says so).
+    """
+    offers = (
+        await db_session.execute(
+            select(PaymentsOffer).where(
+                PaymentsOffer.org_id == org_id,
+                PaymentsOffer.offer_type == OfferTypeEnum.subscription,
+                PaymentsOffer.is_archived.is_(False),
+            )
+        )
+    ).scalars().all()
+    for offer in offers:
+        offer.provider_product_id = None
+        try:
+            offer.provider_product_id = await _provision_plan(org_id, offer, db_session)
+        except Exception:
+            offer.provider_product_id = None
+        offer.update_date = _now()
+        db_session.add(offer)
+    if offers:
+        await db_session.commit()
 
 
 async def delete_config(org_id: int, config_id: str, db_session: AsyncSession) -> None:
@@ -126,6 +434,19 @@ async def delete_config(org_id: int, config_id: str, db_session: AsyncSession) -
     if config is None:
         raise HTTPException(status_code=404, detail="Payment configuration not found")
     await db_session.delete(config)
+    # The plan codes lived on the disconnected account; drop them so a later
+    # reconnect re-creates them instead of checkout failing on a foreign plan.
+    offers = (
+        await db_session.execute(
+            select(PaymentsOffer).where(
+                PaymentsOffer.org_id == org_id,
+                PaymentsOffer.provider_product_id.is_not(None),
+            )
+        )
+    ).scalars().all()
+    for offer in offers:
+        offer.provider_product_id = None
+        db_session.add(offer)
     await db_session.commit()
 
 
@@ -346,9 +667,15 @@ async def _provision_plan(org_id: int, offer: PaymentsOffer, db_session: AsyncSe
         interval_value = interval.value
     else:
         interval_value = interval or SubscriptionIntervalEnum.monthly.value
+    plan_amount = offer.amount
+    if credentials.mode == paystack.MODE_MANAGED and paystack.learner_pays_fees():
+        # Renewals charge the plan amount on a card, so it carries the card fee.
+        plan_amount = paystack.gross_up_minor(
+            int(round(offer.amount * 100)), paystack.fee_rate("card")
+        ) / 100
     plan_args = {
         "name": offer.name,
-        "amount_major": offer.amount,
+        "amount_major": plan_amount,
         "currency": offer.currency,
         "interval": interval_value,
     }
@@ -477,6 +804,13 @@ async def _offer_public_shape(offer: PaymentsOffer, db_session: AsyncSession) ->
         "benefits": offer.benefits,
         "payments_group_id": offer.payments_group_id,
         "included_resources": included,
+        # Fee-inclusive totals per payment method when the learner pays
+        # Paystack's fee; None means one plain button at ``amount``.
+        "checkout_methods": (
+            _checkout_methods(offer, offer.amount)
+            if await _learner_pays_fees(offer.org_id, db_session)
+            else None
+        ),
     }
 
 
@@ -673,6 +1007,37 @@ async def list_my_enrollments(org_id: int, user_id: int, db_session: AsyncSessio
 
 # ── Billing portal ───────────────────────────────────────────────────────────
 
+async def _learner_pays_fees(org_id: int, db_session: AsyncSession) -> bool:
+    """Managed orgs (paid through ValidBridge) add Paystack's fee on top so the
+    instructor receives the full price. Own-key orgs keep their own Paystack
+    pricing, which ValidBridge does not know."""
+    if not paystack.learner_pays_fees():
+        return False
+    config = await _get_config(org_id, db_session)
+    return config is not None and paystack.config_mode(config.provider_config) == paystack.MODE_MANAGED
+
+
+def _checkout_methods(offer: PaymentsOffer, base_major: float) -> list[dict]:
+    """One checkout option per payment method with its fee-inclusive total.
+    Subscriptions renew automatically, which only cards support."""
+    is_sub = offer.offer_type in (OfferTypeEnum.subscription, "subscription")
+    labels = {"mobile_money": "M-PESA", "card": "Card"}
+    base_minor = int(round(base_major * 100))
+    methods = []
+    for method in paystack.CHECKOUT_METHODS:
+        if is_sub and method != "card":
+            continue
+        total = paystack.gross_up_minor(base_minor, paystack.fee_rate(method))
+        methods.append({
+            "method": method,
+            "label": labels[method],
+            "fee_percent": round(paystack.fee_rate(method) * 100, 2),
+            "fee": (total - base_minor) / 100,
+            "total": total / 100,
+        })
+    return methods
+
+
 async def _org_uses_custom_provider(org_id: int, db_session: AsyncSession) -> bool:
     config = (
         await db_session.execute(
@@ -761,6 +1126,20 @@ async def billing_transactions(
             )
         except Exception:
             remote = []
+        # The account may be shared (managed mode runs every school on the
+        # platform account) or used outside ValidBridge: keep only this org's
+        # own sales so one school never sees another's charges.
+        # Paystack's ``customer`` filter takes a customer id, so an email may
+        # not narrow the list at all — match the buyer on each row as well, or
+        # a learner could see other learners' payments.
+        prefix = f"vb_{org_id}_"
+        buyer = email.strip().lower()
+        remote = [
+            t for t in remote
+            if buyer
+            and str(t.get("reference") or "").startswith(prefix)
+            and str((t.get("customer") or {}).get("email") or "").strip().lower() == buyer
+        ]
         if remote:
             offer_ids = [
                 (t.get("metadata") or {}).get("offer_id")
@@ -772,7 +1151,8 @@ async def billing_transactions(
                 rows = (
                     await db_session.execute(
                         select(PaymentsOffer.id, PaymentsOffer.name).where(
-                            PaymentsOffer.id.in_(offer_ids)
+                            PaymentsOffer.id.in_(offer_ids),
+                            PaymentsOffer.org_id == org_id,
                         )
                     )
                 ).all()
@@ -949,6 +1329,7 @@ async def create_checkout_session(
     redirect_uri: str,
     db_session: AsyncSession,
     amount: float | None = None,
+    method: str | None = None,
 ) -> dict:
     offer = (
         await db_session.execute(
@@ -1010,18 +1391,54 @@ async def create_checkout_session(
             detail="This organization uses a custom payment provider; checkout is handled outside ValidBridge.",
         )
 
-    credentials = await paystack.resolve_paystack_credentials(org_id, db_session)
+    # No platform fallback: an org that has not set up payouts (or paused
+    # them) cannot take money — it would land in someone else's account.
+    try:
+        credentials = await paystack.resolve_paystack_credentials(
+            org_id, db_session, require_active=True
+        )
+    except paystack.PaymentsNotConfiguredError:
+        raise HTTPException(
+            status_code=409,
+            detail="This school isn't accepting payments yet. Please try again later.",
+        )
     reference = paystack.make_reference(org_id)
-    session = await paystack.initialize_transaction(
-        credentials.secret_key,
-        email=user_email,
-        amount_major=charge_amount,
-        currency=offer.currency,
-        reference=reference,
-        callback_url=redirect_uri,
-        metadata={"org_id": org_id, "offer_id": offer.id, "user_id": user_id},
-        plan=offer.provider_product_id if offer.offer_type == OfferTypeEnum.subscription else None,
-    )
+    managed = credentials.mode == paystack.MODE_MANAGED
+    is_subscription = offer.offer_type == OfferTypeEnum.subscription
+
+    # Learner pays Paystack's fee (managed mode): charge the fee-inclusive total
+    # for the chosen method and lock the checkout to that method, so the fee
+    # added always matches the fee Paystack takes.
+    base_minor = int(round(charge_amount * 100))
+    fee_minor = 0
+    channels = None
+    if managed and paystack.learner_pays_fees():
+        method = method or ("card" if is_subscription else "mobile_money")
+        if method not in paystack.CHECKOUT_METHODS:
+            raise HTTPException(status_code=400, detail="Choose M-PESA or card.")
+        if is_subscription and method != "card":
+            raise HTTPException(status_code=400, detail="Subscriptions are paid by card.")
+        fee_minor = paystack.gross_up_minor(base_minor, paystack.fee_rate(method)) - base_minor
+        channels = [method]
+    try:
+        session = await _start_paystack_checkout(
+            credentials.secret_key,
+            email=user_email,
+            amount_major=(base_minor + fee_minor) / 100,
+            currency=offer.currency,
+            reference=reference,
+            callback_url=redirect_uri,
+            metadata={
+                "org_id": org_id, "offer_id": offer.id, "user_id": user_id,
+                "base_minor": base_minor, "fee_minor": fee_minor,
+            },
+            plan=offer.provider_product_id if offer.offer_type == OfferTypeEnum.subscription else None,
+            subaccount=credentials.subaccount_code if managed else None,
+            bearer=paystack.fee_bearer() if managed else None,
+            channels=channels,
+        )
+    except paystack.PaystackError as exc:
+        raise HTTPException(status_code=502, detail=f"Paystack could not start checkout: {exc}")
 
     # Reuse an in-flight pending enrollment for this (offer, user) so repeated
     # checkout attempts do not pile up duplicate pending rows.
@@ -1052,6 +1469,25 @@ async def create_checkout_session(
     await db_session.commit()
 
     return {"checkout_url": session["authorization_url"]}
+
+
+async def _start_paystack_checkout(secret_key: str, **kwargs) -> dict:
+    """``initialize_transaction`` with Paystack's refusal (unsupported
+    currency, bad plan, …) turned into PaystackError instead of a bare 500."""
+    import httpx
+
+    try:
+        return await paystack.initialize_transaction(secret_key, **kwargs)
+    except httpx.HTTPStatusError as exc:
+        try:
+            message = exc.response.json().get("message")
+        except ValueError:
+            message = None
+        raise paystack.PaystackError(message or f"HTTP {exc.response.status_code}")
+    except httpx.HTTPError:
+        raise paystack.PaystackError("Paystack could not be reached. Try again.")
+    except RuntimeError as exc:
+        raise paystack.PaystackError(str(exc))
 
 
 # ── Webhook ──────────────────────────────────────────────────────────────────
@@ -1110,18 +1546,30 @@ async def handle_webhook(raw_body: bytes, signature: str | None, db_session: Asy
             ).scalars().first()
             org_id = enrollment
 
+    # ``subscription.create`` carries neither our reference nor a code we have
+    # stored yet — resolve the org from the plan, which belongs to one offer.
+    if org_id is None and event_type == "subscription.create":
+        plan_code = (data.get("plan") or {}).get("plan_code")
+        if plan_code:
+            org_id = (
+                await db_session.execute(
+                    select(PaymentsOffer.org_id).where(
+                        PaymentsOffer.provider_product_id == plan_code
+                    )
+                )
+            ).scalars().first()
+
     # Route the event to the org whose credentials signed it. If we cannot
     # determine the org, there is nothing to verify against — reject.
     if org_id is None:
         return {"result": "ignored", "ok": True}
 
-    try:
-        credentials = await paystack.resolve_paystack_credentials(org_id, db_session)
-    except paystack.PaymentsNotConfiguredError:
+    keys = await paystack.webhook_secret_keys(org_id, db_session)
+    if not keys:
         # No usable credentials for this org → cannot verify, so ignore rather
         # than 500 (which would make Paystack retry forever).
         return {"result": "ignored", "ok": True}
-    if not paystack.verify_webhook_signature(credentials.secret_key, raw_body, signature):
+    if not any(paystack.verify_webhook_signature(k, raw_body, signature) for k in keys):
         raise HTTPException(status_code=400, detail="Invalid webhook signature")
     event_id = _webhook_event_key(event_type, data, reference)
 
@@ -1147,6 +1595,8 @@ async def handle_webhook(raw_body: bytes, signature: str | None, db_session: Asy
 
     if event_type == "charge.success" and data.get("status") == "success":
         await _grant_enrollment(org_id, data, db_session)
+    elif event_type == "subscription.create":
+        await _attach_subscription(org_id, data, db_session)
     elif event_type in _REFUND_EVENTS:
         await _refund_enrollment(org_id, reference, db_session)
     elif event_type == "subscription.disable":
@@ -1165,19 +1615,29 @@ async def handle_webhook(raw_body: bytes, signature: str | None, db_session: Asy
 
 
 def _paid_amount_matches(offer: PaymentsOffer, data: dict) -> bool:
-    """Reject webhooks whose paid amount/currency does not match the offer.
+    """Reject payments whose amount/currency does not match the offer.
 
-    ``amount`` arrives in minor units (kobo/pesewa). Fixed-price offers must
-    match exactly; ``customer_choice`` offers must meet the configured minimum.
+    ``amount`` arrives in minor units. It may include the processing fee the
+    learner paid on top (``metadata.fee_minor``, set by our own checkout); the
+    price part must then match exactly for fixed-price offers and meet the
+    minimum for ``customer_choice`` offers. The fee may never exceed what the
+    dearest payment method adds, so an inflated "fee" cannot hide underpayment.
     """
     paid = data.get("amount")
-    if not isinstance(paid, (int, float)):
+    if not isinstance(paid, (int, float)) or isinstance(paid, bool):
+        return False
+    try:
+        fee = int((data.get("metadata") or {}).get("fee_minor") or 0)
+    except (TypeError, ValueError):
+        return False
+    base = int(paid) - fee
+    if fee < 0 or base <= 0 or fee > paystack.max_fee_minor(base):
         return False
     expected = int(round(offer.amount * 100))
     if offer.price_type == OfferPriceTypeEnum.customer_choice:
-        if paid < expected:
+        if base < expected:
             return False
-    elif paid != expected:
+    elif base != expected:
         return False
     currency = data.get("currency")
     if currency and offer.currency and str(currency).upper() != str(offer.currency).upper():
@@ -1255,6 +1715,117 @@ async def _grant_enrollment(org_id: int, data: dict, db_session: AsyncSession) -
     # Grant through the platform usergroup machinery when the offer is part of
     # a payments group (the sync is idempotent and runs in this transaction).
     await _sync_membership_for_offer(offer, user_id, db_session, granted=True)
+
+
+async def _attach_subscription(org_id: int, data: dict, db_session: AsyncSession) -> None:
+    """``subscription.create`` → store the subscription code and email token
+    on the buyer's enrollment, so renewals, failures and cancellations (which
+    carry only the code) can find it."""
+    from src.db.users import User
+
+    code = data.get("subscription_code")
+    plan_code = (data.get("plan") or {}).get("plan_code")
+    email = (data.get("customer") or {}).get("email")
+    if not code or not plan_code or not email:
+        return
+    offer = (
+        await db_session.execute(
+            select(PaymentsOffer).where(
+                PaymentsOffer.org_id == org_id,
+                PaymentsOffer.provider_product_id == plan_code,
+            )
+        )
+    ).scalars().first()
+    user = (
+        await db_session.execute(select(User).where(User.email == email))
+    ).scalars().first()
+    if offer is None or user is None:
+        return
+    enrollment = (
+        await db_session.execute(
+            select(PaymentsEnrollment).where(
+                PaymentsEnrollment.org_id == org_id,
+                PaymentsEnrollment.offer_id == offer.id,
+                PaymentsEnrollment.user_id == user.id,
+            )
+        )
+    ).scalars().first()
+    if enrollment is None:
+        return
+    enrollment.subscription_code = code
+    enrollment.email_token = data.get("email_token") or enrollment.email_token
+    enrollment.update_date = _now()
+    db_session.add(enrollment)
+
+
+async def verify_checkout(
+    org_id: int, reference: str, user_id: int, db_session: AsyncSession
+) -> dict:
+    """The buyer is back from Paystack: confirm the charge directly with
+    Paystack and grant access now, without waiting for the webhook.
+
+    Safe to repeat and to race the webhook — granting is idempotent, and the
+    data comes from Paystack's verify endpoint, never from the client.
+    """
+    if paystack.reference_to_org_id(reference) != org_id:
+        raise HTTPException(status_code=400, detail="Unknown payment reference")
+    if await _org_uses_custom_provider(org_id, db_session):
+        return {"status": "unknown"}
+    try:
+        credentials = await paystack.resolve_paystack_credentials(org_id, db_session)
+        data = await paystack.verify_transaction(credentials.secret_key, reference)
+    except Exception:
+        return {"status": "pending"}
+    if not data:
+        return {"status": "pending"}
+    metadata = data.get("metadata") or {}
+    if str(metadata.get("user_id")) != str(user_id):
+        raise HTTPException(status_code=404, detail="Payment not found")
+    status = str(data.get("status") or "pending")
+    if status != "success":
+        return {"status": status}
+    try:
+        offer_id = int(metadata.get("offer_id"))
+    except (TypeError, ValueError):
+        return {"status": "failed"}
+    offer = (
+        await db_session.execute(
+            select(PaymentsOffer).where(
+                PaymentsOffer.org_id == org_id,
+                PaymentsOffer.id == offer_id,
+            )
+        )
+    ).scalars().first()
+    if offer is None or not _paid_amount_matches(offer, data):
+        return {"status": "failed"}
+    await _grant_enrollment(org_id, data, db_session)
+    await db_session.commit()
+    return {"status": "paid", "offer_uuid": offer.offer_uuid}
+
+
+async def dispatch_webhook(raw_body: bytes, signature: str | None, db_session: AsyncSession) -> dict:
+    """One entry point for every Paystack webhook URL.
+
+    Paystack allows ONE webhook URL per account, and the platform account
+    carries both ValidBridge's own billing and managed schools' course sales,
+    so whichever endpoint it points at must handle both. References route it:
+    ``vbp_/vbw_/vbc_/vbi_`` are platform billing, everything else course sales.
+    """
+    from src.services.billing import engine
+
+    try:
+        body = paystack.parse_webhook_body(raw_body)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid webhook body")
+    data = body.get("data") or {}
+    reference = (
+        data.get("reference")
+        or data.get("transaction_reference")
+        or (data.get("transaction") or {}).get("reference")
+    )
+    if engine.reference_org_id(reference or "") is not None:
+        return await engine.handle_platform_webhook(raw_body, signature, db_session)
+    return await handle_webhook(raw_body, signature, db_session)
 
 
 async def _find_enrollment_by_subscription(

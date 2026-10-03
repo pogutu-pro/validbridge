@@ -1,11 +1,22 @@
 """BYOK Paystack secret is encrypted at rest and resolved transparently."""
 
+from unittest.mock import AsyncMock
+
+import pytest
 from sqlmodel import select
 
 from src.db.payments.payments import PaymentsConfig
 from src.security.secret_crypto import resolve_secret
 from src.services.payments.paystack import resolve_paystack_credentials
 from src.services.payments.service import initialize_config
+
+
+@pytest.fixture(autouse=True)
+def _accept_keys(monkeypatch):
+    # Saving keys asks Paystack whether they work; no network in tests.
+    monkeypatch.setattr(
+        "src.services.payments.service.paystack.check_secret_key", AsyncMock()
+    )
 
 
 async def test_secret_key_encrypted_at_rest(db, org):

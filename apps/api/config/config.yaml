@@ -63,10 +63,10 @@ redis_config:
   redis_connection_string: redis://localhost:6379/validbridge
 
 payments_config:
-  # Payment provider configuration. Organizations bring their own Paystack
-  # merchant account (per-org credentials are stored on the org's
-  # PaymentsConfig row, not here). These are the PLATFORM-LEVEL fallbacks used
-  # only when an org's own config has no credentials configured.
+  # ValidBridge's own Paystack account: platform billing, plus the account
+  # that "get paid to your bank" schools' subaccounts live under. Schools that
+  # connect their own keys store them on their PaymentsConfig row instead.
+  # Never used as a silent fallback for a school that set up neither.
   paystack:
     secret_key: ""       # sk_live_... / sk_test_...  (VALIDBRIDGE_PAYSTACK_SECRET_KEY)
     public_key: ""       # pk_live_... / pk_test_...  (VALIDBRIDGE_PAYSTACK_PUBLIC_KEY)

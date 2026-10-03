@@ -15,6 +15,7 @@ import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import { isOSSMode } from '@services/config/config'
 import { MobileDashTabBar, DashTabItem } from '@components/Dashboard/Shared/DashTabBar/DashTabBar'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
+import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled'
 
 export type PaymentsParams = {
   subpage: string
@@ -57,6 +58,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
   }
 
   const { h1, h2 } = getPageTitle()
+  const { mode: paymentsMode } = usePaymentsEnabled()
   const paymentsEnabled = org?.config?.config?.resolved_features?.payments?.enabled ?? org?.config?.config?.features?.payments?.enabled !== false
 
   // Fire the gate-blocked impression for the deterministic OSS block.
@@ -138,6 +140,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
                 <ExternalLink size={12} className="text-gray-400" />
               </Link>
             )}
+            {paymentsMode !== 'managed' && (
             <a
               href="https://dashboard.paystack.com"
               target="_blank"
@@ -148,6 +151,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
               <span>Paystack Dashboard</span>
               <ExternalLink size={12} className="text-gray-400" />
             </a>
+            )}
           </div>
         </div>
         <MobileDashTabBar tabs={tabs} />

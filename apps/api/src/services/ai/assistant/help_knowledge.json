@@ -526,7 +526,7 @@
   {
     "id": "payments/payments-overview",
     "title": "How payments work",
-    "summary": "ValidBridge uses Paystack with bring-your-own keys: your organization connects its own Paystack account and learners' payments go straight to it.",
+    "summary": "Learners pay through Paystack. Get paid straight to your bank with just your bank details, or connect your own Paystack account.",
     "audience": [
       "admins"
     ],
@@ -539,19 +539,31 @@
       "merchant",
       "paystack",
       "mpesa",
-      "m-pesa"
+      "m-pesa",
+      "bank",
+      "payout"
     ],
-    "text": "Payments in ValidBridge run on Paystack using a bring-your-own-key model. Each organization connects its own Paystack merchant account by pasting its API keys. Learners pay on Paystack's secure checkout page and the money settles directly into your Paystack account — ValidBridge never holds your funds.\nThe flow at a glance\nAn admin connects Paystack under Payments → Configuration.\nYou create offers — a price (one-time or subscription) linked to courses or a payment group.\nA learner clicks Get access or Subscribe and pays on Paystack.\nPaystack notifies ValidBridge, which unlocks the courses for that learner immediately.\nWhat learners can pay with\nWhatever your Paystack account accepts — typically cards, bank payments and mobile money such as M-Pesa, depending on your country and Paystack settings.\nPayments tabWhat it is for\nOverviewEvery customer, the offer they bought, amount, status and since when.\nOffersThe things you sell: price, type and the courses they unlock.\nPayment GroupsBundles of courses sold together, optionally mirrored into a user group.\nConfigurationConnect, update or remove your Paystack keys.\n\nTurn the feature on first\nPayments must be enabled for your organization. If you do not see Payments in the dashboard, check the features in Organization settings or contact support."
+    "text": "Payments in ValidBridge run on Paystack. Learners pay on Paystack's secure checkout page. You choose how you get paid:\nGet paid to M-PESA or your bank (recommended) — no Paystack account needed. Enter your M-PESA, till, Airtel Money or bank details once and Paystack pays each sale straight to you.\nUse your own Paystack account — if you already have one, connect it with your API keys and the money settles into it.\nThe flow at a glance\nAn admin connects Paystack under Payments → Configuration.\nYou create offers — a price (one-time or subscription) linked to courses or a payment group.\nA learner clicks Get access or Subscribe and pays on Paystack.\nPaystack notifies ValidBridge, which unlocks the courses for that learner immediately.\nWhat learners can pay with\nWhatever your Paystack account accepts — typically cards, bank payments and mobile money such as M-Pesa, depending on your country and Paystack settings.\nPayments tabWhat it is for\nOverviewEvery customer, the offer they bought, amount, status and since when.\nOffersThe things you sell: price, type and the courses they unlock.\nPayment GroupsBundles of courses sold together, optionally mirrored into a user group.\nConfigurationChoose how you get paid: your bank details, or your own Paystack keys.\n\nTurn the feature on first\nPayments must be enabled for your organization. If you do not see Payments in the dashboard, check the features in Organization settings or contact support."
   },
   {
     "id": "payments/connect-paystack",
-    "title": "Connect your Paystack account",
-    "summary": "Paste your Paystack secret key (and optional public key), activate it, and point Paystack's webhook at ValidBridge.",
+    "title": "Set up how you get paid",
+    "summary": "Get paid to M-PESA, a till, Airtel Money or a bank (no Paystack account needed), or connect your own Paystack account.",
     "audience": [
       "admins"
     ],
     "keywords": [
       "connect",
+      "bank",
+      "bank details",
+      "payout",
+      "account number",
+      "mpesa",
+      "m-pesa",
+      "till",
+      "airtel",
+      "verify",
+      "verification",
       "api key",
       "secret key",
       "public key",
@@ -561,7 +573,7 @@
       "test mode",
       "live mode"
     ],
-    "text": "Before you start\nA Paystack business account (create one at dashboard.paystack.com), activated for live payments when you are ready to charge real money.\nThe Admin role in your ValidBridge organization.\n1. Copy your keys from Paystack\nIn the Paystack Dashboard, open Settings → API Keys & Webhooks. Copy the secret key (starts with sk_live_ or sk_test_) and, optionally, the public key (pk_live_ / pk_test_).\n2. Paste them into ValidBridge\nIn the dashboard, go to Payments → Configuration.\nOn the Paystack card, click Connect.\nPaste the Secret key and, if you like, the Public key.\nClick Save & Activate. The card shows Connected.\n3. Set the webhook URL in Paystack\nThis step is essential: ValidBridge unlocks a course when Paystack tells it a payment succeeded. In the same Paystack settings page, set the Webhook URL to your ValidBridge API address followed by /api/v1/payments/paystack/webhook — the Configuration page shows the path. Paystack signs each notification with your secret key and ValidBridge rejects anything it cannot verify.\nNo webhook, no access\nIf the webhook is missing or wrong, learners are charged but their course stays locked. If you are not sure of your API address, contact support before going live.\n\nTest first\nUse your sk_test_ key to try the whole flow with Paystack's test cards, then click Update keys and switch to your live key (and the live webhook URL) when you are ready.\nUpdating or removing keys\nUpdate keys replaces the stored keys, for example after rotating them in Paystack.\nRemove disconnects Paystack and disables payments for the organization.\nYour keys are protected\nThe secret key is encrypted before it is stored, is only used by the ValidBridge server to talk to Paystack, and is never shown to learners."
+    "text": "Go to Payments → Configuration (you need the Admin role) and pick one of the two options.\nOption A: Get paid to M-PESA or your bank\nThe quickest way. You do not need a Paystack account.\nClick Get paid to M-PESA or your bank.\nChoose how you are paid: M-PESA (a phone number), M-PESA Till (a Buy Goods till number), Bank account or Airtel Money.\nEnter the number and the name on the account, then click Continue.\nCheck the summary carefully and click Yes, start accepting payments.\nDouble-check the number\nIn Kenya, Paystack cannot look up the account holder's name, so a mistyped number would send your money to someone else. The summary step is there to catch this.\n\nVerification before the first payout\nYou can start selling as soon as you save. Before the first payout, ValidBridge confirms your payout details; until then the page shows Verifying your payout details and your earnings are held safely. Once verified, each sale is paid out automatically, usually within one or two business days. If you change your payout details, they are verified again.\nValidBridge takes 0% of your sales. Paystack's processing fee is added on top for the learner — they choose Pay with M-PESA or Pay with card and see the exact total — so you receive your full price. Subscriptions are paid by card. M-PESA Paybill numbers are not supported yet — use a till, phone or bank account.\nOption B: Use your own Paystack account\nIn the Paystack Dashboard (dashboard.paystack.com), open Settings → API Keys & Webhooks and copy your secret key (sk_live_ or sk_test_) and, optionally, your public key.\nIn ValidBridge, click I already have a Paystack account, paste the keys and click Connect. ValidBridge checks them with Paystack before saving, and tells you if a key is wrong or if you mixed test and live keys.\nIn the same Paystack settings page, set the Webhook URL to your ValidBridge API address followed by /api/v1/payments/paystack/webhook. ValidBridge uses it to hear about renewals, cancellations and refunds.\nTest with your sk_test_ key and Paystack's test cards first, then click Update keys and switch to your live key (and the live webhook URL).\nSwitching or turning off\nYou can switch between the two options at any time from the same page.\nTurn off stops new sales. Learners who already paid keep their access.\nYour details are protected\nSecret keys are encrypted before they are stored and are only used by the ValidBridge server. Only the last four digits of your bank account are kept on ValidBridge."
   },
   {
     "id": "payments/create-offer",
@@ -620,7 +632,7 @@
       "invoice",
       "price"
     ],
-    "text": "Open the course, or the offer in the marketplace.\nClick Get access (one-time) or Subscribe. For pay-what-you-want offers, enter an amount at or above the minimum. Sign in if asked.\nYou are taken to Paystack's secure checkout. Pay with any method it offers you.\nYou return to ValidBridge and the course unlocks as soon as Paystack confirms the payment — usually within seconds.\nYour purchases and receipts\nAccount → Purchases — the courses and subscriptions you have bought.\nAccount → Billing — active subscriptions with the next payment date, and your payment history.\nWho you are paying\nYou pay the organization that runs the course, through its own Paystack account. For refunds or questions about a charge, contact that organization."
+    "text": "Open the course, or the offer in the marketplace.\nClick the button for how you want to pay — for example Pay with M-PESA or Pay with card (subscriptions are paid by card). Each button shows the exact total, including the small payment processing fee for that method. For pay-what-you-want offers, enter an amount at or above the minimum first. Sign in if asked.\nYou are taken to Paystack's secure checkout to complete the payment.\nYou return to ValidBridge and the course unlocks as soon as Paystack confirms the payment — usually within seconds.\nYour purchases and receipts\nAccount → Purchases — the courses and subscriptions you have bought.\nAccount → Billing — active subscriptions with the next payment date, and your payment history.\nWho you are paying\nYou pay the organization that runs the course, through Paystack. For refunds or questions about a charge, contact that organization."
   },
   {
     "id": "payments/subscriptions-and-refunds",
@@ -640,7 +652,7 @@
       "payout",
       "settlement"
     ],
-    "text": "Renewals\nSubscriptions are billed by Paystack every month or year. Each successful renewal keeps access active; a failed renewal suspends access until a later payment succeeds.\nCancelling\nLearners cancel from Account → Billing (click Cancel next to the subscription). Billing stops in Paystack and access ends immediately — there is no grace period.\nRefunds\nRefunds are issued from your Paystack Dashboard (use the Paystack Dashboard button on the Payments pages). When Paystack reports the refund, ValidBridge marks the purchase refunded and removes the access it granted.\nPayouts\nMoney is settled by Paystack to the bank or mobile-money account set up in your Paystack account, on Paystack's schedule and fees. ValidBridge does not take a cut of or hold these payments.\nPurchase statuses\nStatusMeaning\nPendingCheckout started but not yet paid.\nCompletedOne-time purchase paid — access granted.\nActiveSubscription paid and current — access granted.\nCancelledSubscription cancelled — access ended.\nFailedA subscription payment failed — access suspended.\nRefundedPayment refunded — access removed."
+    "text": "Renewals\nSubscriptions are billed by Paystack every month or year. Each successful renewal keeps access active; a failed renewal suspends access until a later payment succeeds.\nCancelling\nLearners cancel from Account → Billing (click Cancel next to the subscription). Billing stops in Paystack and access ends immediately — there is no grace period.\nRefunds\nIf you use your own Paystack account, issue refunds from your Paystack Dashboard (use the Paystack Dashboard button on the Payments pages). If you get paid through ValidBridge, contact ValidBridge support to refund a sale. When Paystack reports the refund, ValidBridge marks the purchase refunded and removes the access it granted.\nPayouts\nIf you get paid through ValidBridge (M-PESA, till, Airtel Money or bank), Paystack pays each sale into the account you entered — your full price, because learners pay the processing fee on top — once your payout details are verified. If you use your own Paystack account, the money settles into it on Paystack's schedule and fees.\nPurchase statuses\nStatusMeaning\nPendingCheckout started but not yet paid.\nCompletedOne-time purchase paid — access granted.\nActiveSubscription paid and current — access granted.\nCancelledSubscription cancelled — access ended.\nFailedA subscription payment failed — access suspended.\nRefundedPayment refunded — access removed."
   },
   {
     "id": "payments/payments-faq",
@@ -658,7 +670,7 @@
       "webhook",
       "problem"
     ],
-    "text": "Learners see no checkout button\nPayments may be switched off for the organization, Paystack may not be connected, or the offer is not public. Check Payments → Configuration and the offer settings.\n\nA learner paid but the course is still locked\nValidBridge unlocks the course when Paystack's webhook arrives. Check the webhook URL in your Paystack settings (see Connect Paystack) and that the key mode (test or live) matches. The purchase shows as Pending in Payments → Overview until it is confirmed.\n\n“Cannot create a subscription without credentials configured”\nSubscription offers need a Paystack plan, so connect Paystack before saving the offer.\n\n“Amount must be at least …”\nOn a pay-what-you-want offer the amount entered is below the minimum price."
+    "text": "Learners see no checkout button\nPayments may be switched off for the organization, Paystack may not be connected, or the offer is not public. Check Payments → Configuration and the offer settings.\n\nA learner paid but the course is still locked\nValidBridge checks the payment with Paystack as soon as the learner returns from checkout, and again when Paystack's webhook arrives. If the learner closed the page early and you use your own Paystack account, check the webhook URL in your Paystack settings (see Set up how you get paid) and that the key mode (test or live) matches. The purchase shows as Pending in Payments → Overview until it is confirmed.\n\n“Cannot create a subscription without credentials configured”\nSubscription offers need a Paystack plan, so connect Paystack before saving the offer.\n\n“Amount must be at least …”\nOn a pay-what-you-want offer the amount entered is below the minimum price."
   },
   {
     "id": "analytics/analytics-admin",

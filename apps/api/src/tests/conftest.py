@@ -36,6 +36,39 @@ os.environ["VALIDBRIDGE_DISABLE_EE"] = "1"
 # and nowhere else. Tests that need the feature on enable it themselves.
 os.environ["VALIDBRIDGE_DEMO_ENABLED"] = "0"
 
+# Blank the developer's live integrations for the whole suite.
+#
+# The same leak, wider: a developer shell (or apps/api/.env via load_dotenv)
+# carries real Sentry, Tinybird, AI-model and Paystack settings. Unblanked,
+# importing app.py runs sentry_sdk.init() with the real DSN — events go to the
+# live project and Sentry's httpx integration wraps every test client, which
+# breaks tests that mock sentry_sdk.get_client — analytics tests post to live
+# Tinybird and cache that client, and the AI tier tests see the developer's
+# models instead of the defaults. Set to "" rather than popped: load_dotenv()
+# never overrides a variable that exists, so a pop would be undone on the next
+# config read. "" falls through to config.yaml's (empty) values, as in CI.
+for _live_integration_var in (
+    "VALIDBRIDGE_SENTRY_DSN",
+    "VALIDBRIDGE_TINYBIRD_API_URL",
+    "VALIDBRIDGE_TINYBIRD_INGEST_TOKEN",
+    "VALIDBRIDGE_TINYBIRD_READ_TOKEN",
+    "VALIDBRIDGE_AI_PROVIDER",
+    "VALIDBRIDGE_AI_BASE_URL",
+    "VALIDBRIDGE_AI_MODEL_FAST",
+    "VALIDBRIDGE_AI_MODEL_STANDARD",
+    "VALIDBRIDGE_AI_MODEL_PRO",
+    "VALIDBRIDGE_AI_IMAGE_MODEL",
+    "VALIDBRIDGE_AI_TTS_MODEL",
+    "VALIDBRIDGE_AI_EMBEDDING_PROVIDER",
+    "VALIDBRIDGE_AI_EMBEDDING_MODEL",
+    "VALIDBRIDGE_AI_EMBEDDING_DIMENSIONS",
+    "VALIDBRIDGE_PAYSTACK_SECRET_KEY",
+    "VALIDBRIDGE_PAYSTACK_PUBLIC_KEY",
+    "VALIDBRIDGE_PLATFORM_PAYSTACK_SECRET_KEY",
+    "VALIDBRIDGE_PLATFORM_PAYSTACK_PUBLIC_KEY",
+):
+    os.environ[_live_integration_var] = ""
+
 # Pin the deployment mode and billing flags to their production defaults
 # ('ee', billing off, enforcement 'shadow') so a developer shell exporting
 # them cannot change the suite's behaviour. Tests that need another mode set

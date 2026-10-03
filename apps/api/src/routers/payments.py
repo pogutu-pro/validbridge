@@ -13,7 +13,7 @@ Every query is scoped by the path ``org_id``; there is no cross-org access.
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.core.events.database import get_db_session
@@ -32,6 +32,15 @@ class ConfigInitBody(BaseModel):
     active: Optional[bool] = None
     secret_key: Optional[str] = None
     public_key: Optional[str] = None
+
+
+class ManagedPayoutBody(BaseModel):
+    business_name: str = Field(max_length=100)
+    bank_code: str = Field(max_length=32)
+    account_number: str = Field(max_length=40)
+    contact_email: Optional[str] = Field(default=None, max_length=320)
+    contact_name: Optional[str] = Field(default=None, max_length=100)
+    contact_phone: Optional[str] = Field(default=None, max_length=32)
 
 
 class GroupBody(BaseModel):
@@ -91,6 +100,37 @@ async def api_initialize_config(
     if body.active is not None:
         provider_config["active"] = body.active
     return await service.initialize_config(org_id, body.provider or "paystack", provider_config, db_session)
+
+
+@router.get("/{org_id}/config/payout-options")
+async def api_payout_options(
+    org_id: int,
+    db_session: AsyncSession = Depends(get_db_session),
+    _=Depends(require_payments_admin),
+):
+    """Everything the "get paid to your bank" form needs (banks, fee, currency)."""
+    return await service.payout_options(org_id, db_session)
+
+
+@router.get("/{org_id}/config/payout-status")
+async def api_payout_status(
+    org_id: int,
+    db_session: AsyncSession = Depends(get_db_session),
+    _=Depends(require_payments_admin),
+):
+    """Has Paystack verified this org's payout account yet?"""
+    return await service.payout_status(org_id, db_session)
+
+
+@router.post("/{org_id}/config/managed")
+async def api_setup_managed_payouts(
+    org_id: int,
+    body: ManagedPayoutBody,
+    db_session: AsyncSession = Depends(get_db_session),
+    _=Depends(require_payments_admin),
+):
+    """Get paid without a Paystack account: creates a Paystack subaccount."""
+    return await service.setup_managed_payouts(org_id, body.model_dump(), db_session)
 
 
 @router.delete("/{org_id}/config")
@@ -243,6 +283,7 @@ async def api_offer_checkout(
     offer_uuid: str,
     redirect_uri: str,
     amount: Optional[float] = None,
+    method: Optional[str] = None,
     current_user=Depends(get_current_user),
     db_session: AsyncSession = Depends(get_db_session),
 ):
@@ -258,8 +299,23 @@ async def api_offer_checkout(
     if not await is_allowed_return_url(redirect_uri, db_session):
         raise HTTPException(status_code=400, detail="Invalid redirect_uri")
     return await service.create_checkout_session(
-        org_id, offer_uuid, email, user_id, redirect_uri, db_session, amount=amount
+        org_id, offer_uuid, email, user_id, redirect_uri, db_session, amount=amount,
+        method=method,
     )
+
+
+@router.post("/{org_id}/checkout/verify")
+async def api_verify_checkout(
+    org_id: int,
+    reference: str,
+    current_user=Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_db_session),
+):
+    """Buyer returned from Paystack: confirm the payment and unlock now."""
+    user_id = resolve_acting_user_id(current_user)
+    if user_id == 0:
+        raise HTTPException(status_code=401, detail="You must be logged in")
+    return await service.verify_checkout(org_id, reference[:100], user_id, db_session)
 
 
 # ── Enrollments & customers ──────────────────────────────────────────────────
@@ -325,4 +381,4 @@ async def api_billing_invoices(
 async def api_paystack_webhook(request: Request, db_session: AsyncSession = Depends(get_db_session)):
     raw_body = await request.body()
     signature = request.headers.get("x-paystack-signature")
-    return await service.handle_webhook(raw_body, signature, db_session)
+    return await service.dispatch_webhook(raw_body, signature, db_session)

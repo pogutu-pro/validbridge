@@ -20,8 +20,13 @@ export function usePaymentsEnabled() {
   // True if any payment provider is active — not tied to a specific provider
   const isAnyProviderActive = paymentConfigs?.some((config: any) => config.active);
 
+  // 'managed' = paid to a bank via a ValidBridge subaccount (no Paystack login)
+  const activeConfig = paymentConfigs?.find?.((config: any) => config.active);
+  const mode: 'managed' | 'byok' | null = activeConfig ? (activeConfig.mode ?? 'byok') : null;
+
   return {
     isEnabled: !!isAnyProviderActive,
+    mode,
     isLoading,
     error
   };

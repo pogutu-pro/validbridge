@@ -65,12 +65,24 @@ export async function getOfferCheckoutSession(
   offerUuid: string,
   redirect_uri: string,
   access_token: string,
-  amount?: number
+  amount?: number,
+  method?: 'mobile_money' | 'card'
 ) {
   const params = new URLSearchParams({ redirect_uri })
   if (amount != null) params.set('amount', String(amount))
+  if (method) params.set('method', method)
   const result = await secureFetch(
     `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/offers/${encodeURIComponent(offerUuid)}/checkout?${params.toString()}`,
+    RequestBodyWithAuthHeader('POST', null, null, access_token)
+  );
+  return getResponseMetadata(result);
+}
+
+// Buyer is back from Paystack: confirm the payment now instead of waiting
+// for the webhook. Returns {success, data: {status}}.
+export async function verifyOfferCheckout(orgId: number, reference: string, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/checkout/verify?reference=${encodeURIComponent(reference)}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token)
   );
   return getResponseMetadata(result);

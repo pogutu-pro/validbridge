@@ -106,8 +106,12 @@ async def api_catalog(db_session: AsyncSession = Depends(get_db_session)):
 
 @router.post("/paystack/webhook")
 async def api_paystack_webhook(request: Request, db_session: AsyncSession = Depends(get_db_session)):
+    # The platform account's one webhook URL also receives managed schools'
+    # course sales, so route by reference rather than assume platform billing.
+    from src.services.payments import service as payments_service
+
     raw = await request.body()
-    return await engine.handle_platform_webhook(
+    return await payments_service.dispatch_webhook(
         raw, request.headers.get("x-paystack-signature"), db_session
     )
 

@@ -116,8 +116,8 @@ const EXTRA_STEPS: Omit<OnboardingStep, 'completed'>[] = [
   {
     id: 'connect_paystack',
     title: 'Ready to get paid',
-    description: 'Connect your Paystack account so learners can pay by card or M-Pesa.',
-    action: 'Connect Paystack',
+    description: 'Add your bank details so learners can pay by card or M-Pesa — no Paystack account needed.',
+    action: 'Set up payouts',
     href: '/dash/payments/configuration',
     completePath: '/dash/payments/configuration',
   },

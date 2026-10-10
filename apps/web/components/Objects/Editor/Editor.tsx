@@ -300,6 +300,23 @@ function Editor(props: EditorProps) {
       savedContentSnapshotRef.current = getEditorContentSnapshot(editor.getJSON())
       setHasUnsavedChanges(false)
       track(AnalyticsEvent.ActivityEditorOpened, { ai_enabled: canUseAI })
+      // Arriving from the Assignments page with ?addQuiz=1: make sure the lesson
+      // ends with a quiz block to fill in. A lesson that already has one is left
+      // alone, so following the link twice never adds a second quiz.
+      try {
+        const params = new URLSearchParams(window.location.search)
+        if (params.get('addQuiz') === '1') {
+          const hasQuiz = JSON.stringify(editor.getJSON()).includes('"blockQuiz"')
+          if (!hasQuiz) {
+            editor.chain().focus('end').insertContent({ type: 'blockQuiz' }).run()
+          }
+          params.delete('addQuiz')
+          const qs = params.toString()
+          window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''))
+        }
+      } catch (_e) {
+        // Convenience only: a failure here must never stop the editor opening.
+      }
       setTimeout(() => {
         setEditorReady(true)
         props.onReady?.()

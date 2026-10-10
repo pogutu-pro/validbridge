@@ -4570,7 +4570,7 @@
             "change_reference_file": "Change Reference File",
             "loading": "Loading",
             "reference_file_updated": "Reference file updated successfully",
-            "allowed_formats": "Allowed formats: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+            "allowed_formats": "Allowed formats: pdf, docx, mp4, jpg, jpeg, png, pptx, zip, md, txt, and code files (py, js, ts, java, c, cpp, go, rs, sql, json…)",
             "sign_in_required": "Please sign in to upload files",
             "auth_required": "Authentication required. Please sign in to upload files.",
             "auth_required_submit": "Authentication required. Please sign in to submit your task.",

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
@@ -21,12 +21,15 @@ export default function NewAssignmentModal({
   courses,
   org,
   onCreated,
+  preset,
 }: {
   open: boolean
   onClose: () => void
   courses: any[] | undefined
   org: any
   onCreated?: () => void
+  // Jump straight to the assignment form for a known course and chapter.
+  preset?: { courseUuid: string; chapterId: number } | null
 }) {
   const { t } = useTranslation()
   const session = useVBSession() as any
@@ -35,6 +38,14 @@ export default function NewAssignmentModal({
   const [step, setStep] = useState<'course' | 'chapter' | 'form'>('course')
   const [selectedCourseUuid, setSelectedCourseUuid] = useState<string | null>(null)
   const [selectedChapterId, setSelectedChapterId] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (open && preset) {
+      setSelectedCourseUuid(preset.courseUuid)
+      setSelectedChapterId(preset.chapterId)
+      setStep('form')
+    }
+  }, [open, preset])
 
   const { data: courseDetail, isLoading: courseLoading } = useQuery({
     queryKey: ['assignment-course-structure', selectedCourseUuid],

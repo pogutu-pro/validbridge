@@ -37,6 +37,24 @@ export async function markActivityAsComplete(
   return res
 }
 
+export type LessonQuizVerdict = { passed: boolean; correct: number; total: number }
+
+/**
+ * Submit a lesson's quiz for judging. The server holds the answer key, scores
+ * the answers, and completes the lesson on a pass, which opens the next one.
+ */
+export async function submitLessonQuiz(
+  activity_uuid: string,
+  answers: { question_id: string; answer_id: string }[],
+  access_token: any
+): Promise<LessonQuizVerdict> {
+  const result: any = await fetch(
+    `${getAPIUrl()}activities/${activity_uuid}/quiz/submit`,
+    RequestBodyWithAuthHeader('POST', { answers }, null, access_token)
+  )
+  return errorHandling(result)
+}
+
 export async function unmarkActivityAsComplete(
   org_slug: string,
   course_uuid: string,

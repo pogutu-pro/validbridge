@@ -13,10 +13,15 @@ import {
   Sparkle,
 } from '@phosphor-icons/react'
 import dynamic from 'next/dynamic'
+import toast from 'react-hot-toast'
 const ReactConfetti = dynamic(() => import('react-confetti'), { ssr: false })
 const AIQuizGeneratorModal = dynamic(() => import('@components/Objects/AI/AIQuizGeneratorModal'), { ssr: false })
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { useTranslation } from 'react-i18next'
+import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { useVBSession } from '@components/Contexts/VBSessionContext'
+import { submitLessonQuiz } from '@services/courses/activity'
 import {
   QUIZ_GRADING_ALL_OR_NOTHING,
   QUIZ_RESPONSE_MULTIPLE,
@@ -66,6 +71,15 @@ function QuizBlockComponent(props: any) {
   const isEditable = editorState.isEditable
   const [showAIGenerator, setShowAIGenerator] = React.useState(false)
   const activityUuid = props.extension?.options?.activity?.activity_uuid
+  const session = useVBSession() as any
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const [checking, setChecking] = React.useState(false)
+  // A learner reading a saved lesson is judged by the server, which holds the
+  // answer key; the key is not sent to them. The editor and previews have no
+  // signed-in learner flow, so they keep the local self-check.
+  const serverJudged =
+    !isEditable && !!activityUuid && session?.status === 'authenticated'
 
   const applyGeneratedQuiz = (quiz: { quizId: string; questions: Question[] }) => {
     // Append the generated questions to whatever is already in the block.
@@ -107,7 +121,34 @@ function QuizBlockComponent(props: any) {
     setSubmissionMessage('')
   }
 
+  const handleServerSubmission = async () => {
+    setChecking(true)
+    try {
+      const verdict = await submitLessonQuiz(
+        activityUuid,
+        userAnswers,
+        session.data?.tokens?.access_token
+      )
+      setSubmitted(true)
+      setSubmissionMessage(verdict.passed ? 'correct' : 'incorrect')
+      if (verdict.passed) {
+        // The lesson is now complete: refresh progress so the next lesson opens.
+        await queryClient.invalidateQueries()
+        router.refresh()
+      }
+    } catch (error: any) {
+      setSubmissionMessage('')
+      toast.error(error?.message || t('editor.blocks.quiz_block.submit_failed', 'Could not check your answers. Try again.'))
+    } finally {
+      setChecking(false)
+    }
+  }
+
   const handleUserSubmission = () => {
+    if (serverJudged) {
+      void handleServerSubmission()
+      return
+    }
     setSubmitted(true)
 
     // This block is an ungraded client-side self-check, so it stays
@@ -337,7 +378,7 @@ function QuizBlockComponent(props: any) {
               </button>
               <button
                 onClick={handleUserSubmission}
-                disabled={submitted || !hasAnyAnswer || totalQuestions === 0}
+                disabled={checking || submitted || !hasAnyAnswer || totalQuestions === 0}
                 className={cn(
                   'text-xs font-medium px-2.5 py-1 rounded-md transition-colors outline-none',
                   submitted || !hasAnyAnswer || totalQuestions === 0
@@ -489,9 +530,11 @@ function QuizBlockComponent(props: any) {
                         userAnswer.answer_id === answer.answer_id
                     )
                     const isMarkedCorrect = answer.correct
-                    const isCorrectReveal = submitted && isMarkedCorrect
+                    // Server-judged quizzes carry no answer key, so there is
+                    // nothing to reveal; marking selections "wrong" would be false.
+                    const isCorrectReveal = !serverJudged && submitted && isMarkedCorrect
                     const isWrongSelection =
-                      submitted && isSelected && !isMarkedCorrect
+                      !serverJudged && submitted && isSelected && !isMarkedCorrect
                     const letter = getAnswerLetter(aIndex)
 
                     const row = cn(

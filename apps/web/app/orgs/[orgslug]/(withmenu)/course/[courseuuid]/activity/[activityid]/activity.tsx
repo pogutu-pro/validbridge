@@ -535,10 +535,14 @@ function ActivityClient(props: ActivityClientProps) {
             <Lock className="text-rose-500" size={24} />
           </div>
           <h1 className="text-xl font-semibold text-gray-900 mb-2">
-            {t('course.locked_title', 'This activity is locked')}
+            {activity?.progression_message
+              ? t('course.locked_progression_title', 'Finish the previous lesson first')
+              : t('course.locked_title', 'This activity is locked')}
           </h1>
           <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-            {isAuthenticated
+            {activity?.progression_message
+              ? t('course.locked_progression', 'Pass the quiz in the previous lesson to open this one.')
+              : isAuthenticated
               ? t('course.locked_restricted', 'You need to be a member of the right user group to access this. Ask a course admin to add you.')
               : t('course.locked_auth_required', 'You need to sign in to access this activity.')}
           </p>
@@ -1226,9 +1230,14 @@ export function MarkStatus(props: {
         const nextUuid = nextActivity.activity_uuid?.replace('activity_', '');
         router.push(getUriWithOrg(props.orgslug, '') + `/course/${cleanCourseUuid}/activity/${nextUuid}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error marking activity as complete:', error);
-      toast.error(t('activities.failed_mark_complete'));
+      // A 403 carries the reason (locked lesson, quiz not passed); show it.
+      toast.error(
+        error?.status === 403 && error?.message
+          ? error.message
+          : t('activities.failed_mark_complete')
+      );
     } finally {
       setIsLoading(false);
     }

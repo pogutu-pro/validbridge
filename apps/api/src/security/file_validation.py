@@ -219,6 +219,13 @@ CODE_FILE_TYPES = {
 }
 
 
+# Kept apart from EXT_TO_CANONICAL_MIME / MIME_TO_SAFE_EXT on purpose. Those are
+# shared with course import and media handling, which refuse script and style
+# files; merging these in would quietly let imports store .js and .css.
+CODE_EXT_TO_MIME = {ext: mime for ext, (mime, _) in CODE_FILE_TYPES.items()}
+CODE_MIME_TO_SAFE_EXT = {mime: safe_ext for mime, safe_ext in CODE_FILE_TYPES.values()}
+
+
 def validate_text_content(content: bytes) -> bool:
     """True for UTF-8 text with no NUL bytes.
 
@@ -315,7 +322,6 @@ FILE_TYPES = {
 
 
 EXT_TO_CANONICAL_MIME = {
-    **{ext: mime for ext, (mime, _) in CODE_FILE_TYPES.items()},
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.png': 'image/png',
@@ -342,7 +348,6 @@ EXT_TO_CANONICAL_MIME = {
 
 
 MIME_TO_SAFE_EXT = {
-    **{mime: safe_ext for mime, safe_ext in CODE_FILE_TYPES.values()},
     'image/jpeg': 'jpg',
     'image/png': 'png',
     'image/gif': 'gif',
@@ -456,7 +461,7 @@ def validate_upload(
     content = buffered if buffered is not None else file.file.read()
     _rewind(file.file)
 
-    canonical_type = EXT_TO_CANONICAL_MIME.get(ext, file.content_type)
+    canonical_type = EXT_TO_CANONICAL_MIME.get(ext) or CODE_EXT_TO_MIME.get(ext) or file.content_type
     return canonical_type, content
 
 
@@ -476,7 +481,7 @@ def get_safe_filename(
     compatibility.
     """
     if content_type is not None:
-        safe_ext = MIME_TO_SAFE_EXT.get(content_type)
+        safe_ext = MIME_TO_SAFE_EXT.get(content_type) or CODE_MIME_TO_SAFE_EXT.get(content_type)
         if safe_ext:
             return f"{prefix}.{safe_ext}"
         return f"{prefix}.bin"

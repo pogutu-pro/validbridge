@@ -159,8 +159,47 @@ async def get_activity(
     activity_read.last_modified_by_username = last_modified_user.username if last_modified_user else None
 
     await _apply_activity_lock(activity_read, activity, course, current_user, db_session)
+    await _apply_progression_lock(
+        request, activity_read, activity, course, current_user, db_session
+    )
 
     return activity_read
+
+
+async def _apply_progression_lock(
+    request: Request,
+    activity_read: ActivityRead,
+    activity: Activity,
+    course: Course,
+    current_user,
+    db_session: AsyncSession,
+) -> None:
+    """Scrub a lesson the learner has not reached yet (earlier quiz not passed).
+
+    Same treatment as a restricted lesson, so the client renders its existing
+    locked state; ``progression_message`` says why. Authors, admins and
+    anonymous viewers are untouched: the gate is about a learner's own path.
+    """
+    from src.services.courses.lesson_progression import (
+        can_bypass_progression,
+        evaluate_lesson_gates,
+    )
+
+    if isinstance(current_user, AnonymousUser):
+        return
+    if await can_bypass_progression(request, current_user, course, db_session):
+        return
+    gates = await evaluate_lesson_gates(
+        course.id, resolve_acting_user_id(current_user), db_session,
+        policy=course.progression_config,
+    )
+    gate = gates.get(activity.id)
+    if gate is None or not gate.locked:
+        return
+    activity_read.is_locked = True
+    activity_read.content = {}
+    activity_read.details = None
+    activity_read.progression_message = gate.message
 
 
 class EditorBootstrapCourse(BaseModel):

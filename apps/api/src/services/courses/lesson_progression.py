@@ -161,3 +161,21 @@ async def is_lesson_unlocked(
     """Only an explicit lock blocks; anything unknown is open."""
     gate = (await evaluate_lesson_gates(course_id, user_id, db_session, policy)).get(activity_id)
     return gate is None or not gate.locked
+
+
+async def can_bypass_progression(request: Any, user: Any, course: Any, db_session: AsyncSession) -> bool:
+    """Authors and admins must be able to open every lesson to check their work.
+
+    Anyone allowed to edit the course is exempt; the gate exists for learners.
+    """
+    from fastapi import HTTPException
+
+    from src.security.rbac import AccessAction, check_resource_access
+
+    try:
+        await check_resource_access(
+            request, db_session, user, course.course_uuid, AccessAction.UPDATE
+        )
+        return True
+    except HTTPException:
+        return False

@@ -18,7 +18,9 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
   try {
     const result = await getPublicOffer(org.id, offerid)
     offerName = result?.data?.name || 'Offer'
-  } catch {}
+  } catch {
+    // Title falls back to a generic name; the page itself shows the not-found state.
+  }
   const title = buildPageTitle(offerName, org?.name || 'Organization', seoConfig)
   return {
     title,
@@ -37,7 +39,9 @@ export default async function OfferPage({ params }: { params: PageParams }) {
   try {
     const result = await getPublicOffer(org.id, offerid)
     offer = result?.data ?? result
-  } catch {}
+  } catch {
+    // Leave offer null: the client renders the "Offer not found" state.
+  }
 
   // Other offers that sell exactly the same content (e.g. a one-time price next
   // to a subscription), so the buyer can pick how to pay on this one page.

@@ -8,7 +8,7 @@ N+1 opens. Everything here is built around one asymmetry:
 A learner who cannot progress is a support incident with no self-service exit,
 so every ambiguous input resolves to "unlocked":
 
-* No policy configured            -> unlocked (the feature is opt-in).
+* Instructor turned it off         -> unlocked (``enabled: false``).
 * Instructor never placed work    -> unlocked (nothing to wait for).
 * Assessment is a draft           -> unlocked (invisible to learners).
 * Assessment has no activity      -> unlocked (cannot be submitted).
@@ -66,10 +66,14 @@ def resolve_progression_policy(raw: Any) -> ResolvedProgressionPolicy:
     """
     Read an instructor's stored config defensively.
 
-    Anything unrecognised resolves to the inert default. A typo in the stored
-    JSON therefore disables gating rather than blocking every learner on the
-    course, which is the only acceptable direction for this failure.
+    A course that was never configured (``None``) follows the platform default:
+    lessons and chapters open in order. Anything *present but unrecognised*
+    resolves to the inert policy instead. A typo in the stored JSON therefore
+    disables gating rather than blocking every learner on the course, which is
+    the only acceptable direction for this failure.
     """
+    if raw is None:
+        return ResolvedProgressionPolicy(enabled=True)
     if not isinstance(raw, dict):
         return ResolvedProgressionPolicy()
 

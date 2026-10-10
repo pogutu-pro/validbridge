@@ -41,8 +41,9 @@ _OMITTED = object()
 class TestPolicyResolution:
     """Malformed config must disable gating, never half-enable it."""
 
-    def test_missing_config_is_off(self):
-        assert resolve_progression_policy(None).enabled is False
+    def test_missing_config_follows_platform_default(self):
+        # Never configured: lessons open in order, with no opt-in required.
+        assert resolve_progression_policy(None).enabled is True
 
     def test_non_dict_is_off(self):
         assert resolve_progression_policy("nonsense").enabled is False
@@ -198,7 +199,7 @@ class TestFailsOpen:
         c2 = await h.add_chapter("Two")
         await h.add_assessment(c1, grade=None)
 
-        gates = await h.gates(None)
+        gates = await h.gates({"enabled": False})
         assert gates[c2.id].locked is False
         assert gates[c2.id].blocking == []
 

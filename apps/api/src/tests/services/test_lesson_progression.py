@@ -147,3 +147,22 @@ async def test_opt_out_and_warn_only_policies_never_lock(db, org, course, regula
     assert (await h.gates({"enabled": False}))[l2.id].locked is False
     warn = (await h.gates({"enabled": True, "never_block": True}))[l2.id]
     assert warn.locked is False and warn.blocking
+
+
+@pytest.mark.asyncio
+async def test_existing_progress_past_a_quiz_is_honoured(db, org, course, regular_user):
+    """A learner who already finished lesson 3 never took lesson 1's quiz.
+
+    Quizzes used to be client-side only, so nothing was recorded. Locking that
+    learner behind a quiz they have already moved past would trap them.
+    """
+    h = Course3(db, org, course, regular_user)
+    await h.chapter_()
+    await h.lesson(QUIZ)
+    l2 = await h.lesson(PLAIN)
+    l3 = await h.lesson(PLAIN)
+    await h.complete(l3)
+
+    gates = await h.gates()
+    assert gates[l2.id].locked is False
+    assert gates[l3.id].locked is False

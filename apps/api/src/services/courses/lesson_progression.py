@@ -125,8 +125,17 @@ async def evaluate_lesson_gates(
         course_id, user_id, db_session, policy=policy
     )
 
+    # Learners who were already part-way through before quizzes were enforced
+    # have completed later lessons without a recorded quiz pass. Progress they
+    # have already made is honoured: a quiz only blocks while the learner has
+    # not yet completed anything after it. New progress cannot slip past a quiz
+    # this way, because completing a later lesson now requires the earlier ones.
+    furthest_done = max(
+        (i for i, (a, _) in enumerate(lessons) if a.id in done), default=-1
+    )
+
     outstanding: list[dict] = []
-    for activity, chapter_id in lessons:
+    for index, (activity, chapter_id) in enumerate(lessons):
         gate = gates[activity.id]
         chapter_gate = chapter_gates.get(chapter_id)
 
@@ -141,7 +150,7 @@ async def evaluate_lesson_gates(
             gate.message = chapter_gate.message
             gate.locked = True
 
-        if activity.id not in done and lesson_has_quiz(activity.content):
+        if index >= furthest_done and activity.id not in done and lesson_has_quiz(activity.content):
             outstanding.append({
                 "activity_uuid": activity.activity_uuid,
                 "name": activity.name,

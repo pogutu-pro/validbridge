@@ -110,6 +110,9 @@ def strip_quiz_answer_keys(content: Any) -> Any:
     """
     import copy
 
+    if not extract_quiz_questions(content):
+        return content  # nothing to strip, so nothing worth copying
+
     out = copy.deepcopy(content)
 
     def walk(node: Any) -> None:

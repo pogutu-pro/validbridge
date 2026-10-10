@@ -108,3 +108,9 @@ class TestStripAnswerKeys:
         assert all("correct" not in a for a in answers)
         # Original (stored) content still scores.
         assert score_lesson_quiz(content, _pick("q1", "a")).passed is True
+
+    def test_content_without_a_quiz_is_returned_as_is(self):
+        from src.services.courses.lesson_quiz import strip_quiz_answer_keys
+
+        plain = {"type": "doc", "content": [{"type": "paragraph"}]}
+        assert strip_quiz_answer_keys(plain) is plain

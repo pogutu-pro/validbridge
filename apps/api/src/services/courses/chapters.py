@@ -7,6 +7,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.users import AnonymousUser, APITokenUser, PublicUser
 from src.security.auth import resolve_acting_user_id
 from src.db.courses.course_chapters import CourseChapter
+from src.services.courses.lesson_quiz import strip_quiz_answer_keys
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.assignments import Assignment
@@ -489,6 +490,10 @@ async def _apply_locks_to_chapters(
             if activity_locked:
                 activity.content = {}
                 activity.details = None
+            elif isinstance(activity.content, dict) and activity.content:
+                # Quizzes are judged on the server; the answer key must not ride
+                # along in the course listing (admins returned above keep it).
+                activity.content = strip_quiz_answer_keys(activity.content)
 
 
 # Important Note : this is legacy code that has been used because

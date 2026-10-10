@@ -99,3 +99,31 @@ def score_lesson_quiz(content: Any, selected: Any) -> QuizResult:
         gradable=len(gradable),
         correct=correct,
     )
+
+
+def strip_quiz_answer_keys(content: Any) -> Any:
+    """A copy of the lesson with every Quiz block's answer key removed.
+
+    Learners get this copy. The key is only needed to judge answers, which the
+    server does, so sending it would let anyone read the answers from the
+    response and pass without trying. Stored content is untouched.
+    """
+    import copy
+
+    out = copy.deepcopy(content)
+
+    def walk(node: Any) -> None:
+        if isinstance(node, dict):
+            if node.get("type") == BLOCK_QUIZ_NODE and isinstance(node.get("attrs"), dict):
+                for q in node["attrs"].get("questions") or []:
+                    if isinstance(q, dict):
+                        for a in q.get("answers") or []:
+                            if isinstance(a, dict):
+                                a.pop("correct", None)
+            walk(node.get("content"))
+        elif isinstance(node, list):
+            for child in node:
+                walk(child)
+
+    walk(out)
+    return out

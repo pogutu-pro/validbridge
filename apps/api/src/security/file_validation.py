@@ -187,6 +187,55 @@ def validate_ole_content(content: bytes) -> bool:
 # path streams to a temp file in migration_service with its own limits.
 _GB = 1024 * 1024 * 1024
 _MB = 1024 * 1024
+
+# Plain-text submissions: Markdown and source code. Each extension gets its own
+# MIME and stored extension so a `.py` stays a `.py`, but only formats that are
+# inert as text. HTML, SVG, XML, shell/batch scripts and PHP are deliberately
+# absent: they are the ones a browser or server could execute.
+CODE_FILE_TYPES = {
+    '.md': ('text/markdown', 'md'),
+    '.txt': ('text/plain', 'txt'),
+    '.py': ('text/x-python', 'py'),
+    '.js': ('text/javascript', 'js'),
+    '.jsx': ('text/x-jsx', 'jsx'),
+    '.ts': ('text/x-typescript', 'ts'),
+    '.tsx': ('text/x-tsx', 'tsx'),
+    '.java': ('text/x-java', 'java'),
+    '.c': ('text/x-c', 'c'),
+    '.h': ('text/x-chdr', 'h'),
+    '.cpp': ('text/x-c++', 'cpp'),
+    '.cs': ('text/x-csharp', 'cs'),
+    '.go': ('text/x-go', 'go'),
+    '.rs': ('text/x-rust', 'rs'),
+    '.rb': ('text/x-ruby', 'rb'),
+    '.kt': ('text/x-kotlin', 'kt'),
+    '.swift': ('text/x-swift', 'swift'),
+    '.sql': ('text/x-sql', 'sql'),
+    '.json': ('application/json', 'json'),
+    '.yml': ('text/x-yaml', 'yml'),
+    '.yaml': ('text/x-yaml', 'yml'),
+    '.css': ('text/css', 'css'),
+    '.ipynb': ('application/x-ipynb+json', 'ipynb'),
+}
+
+
+def validate_text_content(content: bytes) -> bool:
+    """True for UTF-8 text with no NUL bytes.
+
+    The sample may end mid-character (it is a bounded prefix), so decoding is
+    incremental and a truncated tail is not an error. Binary files fail on the
+    NUL byte or on invalid UTF-8, whatever extension they were renamed to.
+    """
+    import codecs
+
+    if not content or b'\x00' in content:
+        return False
+    try:
+        codecs.getincrementaldecoder('utf-8')().decode(content, final=False)
+    except UnicodeDecodeError:
+        return False
+    return True
+
 FILE_TYPES = {
     'image': {
         'extensions': ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
@@ -249,6 +298,12 @@ FILE_TYPES = {
         'max_size': 100 * _MB,
         'validator': validate_ole_content
     },
+    'code': {
+        'extensions': list(CODE_FILE_TYPES),
+        'mime_types': sorted({mime for mime, _ in CODE_FILE_TYPES.values()}),
+        'max_size': 5 * _MB,
+        'validator': validate_text_content
+    },
     'archive': {
         'extensions': ['.zip'],
         'mime_types': ['application/zip', 'application/x-zip-compressed'],
@@ -260,6 +315,7 @@ FILE_TYPES = {
 
 
 EXT_TO_CANONICAL_MIME = {
+    **{ext: mime for ext, (mime, _) in CODE_FILE_TYPES.items()},
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.png': 'image/png',
@@ -286,6 +342,7 @@ EXT_TO_CANONICAL_MIME = {
 
 
 MIME_TO_SAFE_EXT = {
+    **{mime: safe_ext for mime, safe_ext in CODE_FILE_TYPES.values()},
     'image/jpeg': 'jpg',
     'image/png': 'png',
     'image/gif': 'gif',

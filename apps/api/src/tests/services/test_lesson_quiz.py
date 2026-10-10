@@ -96,3 +96,15 @@ class TestScoring:
     def test_lesson_without_a_quiz_never_passes_by_scoring(self):
         # Nothing to judge: callers must not treat this as a pass verdict.
         assert score_lesson_quiz({"type": "doc"}, []).passed is False
+
+
+class TestStripAnswerKeys:
+    def test_key_removed_from_copy_only(self):
+        from src.services.courses.lesson_quiz import strip_quiz_answer_keys
+
+        content = _quiz(_question("q1", {"a"}))
+        stripped = strip_quiz_answer_keys(content)
+        answers = stripped["content"][1]["attrs"]["questions"][0]["answers"]
+        assert all("correct" not in a for a in answers)
+        # Original (stored) content still scores.
+        assert score_lesson_quiz(content, _pick("q1", "a")).passed is True

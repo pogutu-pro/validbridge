@@ -195,6 +195,12 @@ async def _apply_progression_lock(
     )
     gate = gates.get(activity.id)
     if gate is None or not gate.locked:
+        # Open to this learner, but the quiz is judged on the server, so the
+        # answer key must not travel with the lesson.
+        if isinstance(activity_read.content, dict):
+            from src.services.courses.lesson_quiz import strip_quiz_answer_keys
+
+            activity_read.content = strip_quiz_answer_keys(activity_read.content)
         return
     activity_read.is_locked = True
     activity_read.content = {}

@@ -149,6 +149,39 @@ async def api_submit_lesson_quiz(
     )
 
 
+class LessonQuizQuestionCheck(BaseModel):
+    question_id: str
+    answer_ids: list[str]
+
+
+@router.post(
+    "/{activity_uuid}/quiz/check",
+    summary="Check one quiz question",
+    description=(
+        "Instant feedback for a single question while a learner works through a "
+        "quiz. Returns whether it was right and, only if so, the explanation. "
+        "Does not complete the lesson."
+    ),
+    responses={
+        200: {"description": "Verdict: correct and explanation."},
+        401: {"description": "Authentication required"},
+        404: {"description": "Activity or question not found"},
+    },
+)
+async def api_check_lesson_quiz_question(
+    request: Request,
+    activity_uuid: str,
+    body: LessonQuizQuestionCheck,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> dict:
+    from src.services.courses.lesson_quiz_submit import check_lesson_quiz_question
+
+    return await check_lesson_quiz_question(
+        request, activity_uuid, body.question_id, body.answer_ids, current_user, db_session
+    )
+
+
 @router.get(
     "/{activity_uuid}/versions",
     response_model=List[ActivityVersionRead],

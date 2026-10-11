@@ -37,7 +37,13 @@ export async function markActivityAsComplete(
   return res
 }
 
-export type LessonQuizVerdict = { passed: boolean; correct: number; total: number }
+export type LessonQuizVerdict = {
+  passed: boolean
+  correct: number
+  total: number
+  // Per question. `explanation` is only present when it was answered correctly.
+  results?: { question_id: string; correct: boolean; explanation?: string | null }[]
+}
 
 /**
  * Submit a lesson's quiz for judging. The server holds the answer key, scores

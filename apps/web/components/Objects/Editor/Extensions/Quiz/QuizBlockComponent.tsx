@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { submitLessonQuiz } from '@services/courses/activity'
+import { convertImportedQuiz } from '@/lib/quiz/importQuiz'
 import {
   QUIZ_GRADING_ALL_OR_NOTHING,
   QUIZ_RESPONSE_MULTIPLE,
@@ -47,7 +48,15 @@ interface Question {
   // authored before the mode existed — always read it through
   // `questionResponseType`, never directly.
   response_type?: QuizResponseType
+  // Shown to the learner once they answer this question correctly.
+  explanation?: string
   answers: Answer[]
+}
+
+// What the learner is told about one question after submitting.
+interface QuestionFeedback {
+  correct: boolean
+  explanation?: string | null
 }
 
 /** The response mode of a question: explicit when set, inferred from the key. */
@@ -75,6 +84,9 @@ function QuizBlockComponent(props: any) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [checking, setChecking] = React.useState(false)
+  const [feedback, setFeedback] = React.useState<Record<string, QuestionFeedback>>({})
+  const [showImport, setShowImport] = React.useState(false)
+  const [importText, setImportText] = React.useState('')
   // A learner reading a saved lesson is judged by the server, which holds the
   // answer key; the key is not sent to them. The editor and previews have no
   // signed-in learner flow, so they keep the local self-check.
@@ -119,6 +131,7 @@ function QuizBlockComponent(props: any) {
     setUserAnswers([])
     setSubmitted(false)
     setSubmissionMessage('')
+    setFeedback({})
   }
 
   const handleServerSubmission = async () => {
@@ -131,6 +144,11 @@ function QuizBlockComponent(props: any) {
       )
       setSubmitted(true)
       setSubmissionMessage(verdict.passed ? 'correct' : 'incorrect')
+      const next: Record<string, QuestionFeedback> = {}
+      for (const r of verdict.results ?? []) {
+        next[r.question_id] = { correct: r.correct, explanation: r.explanation }
+      }
+      setFeedback(next)
       if (verdict.passed) {
         // The lesson is now complete: refresh progress so the next lesson opens.
         await queryClient.invalidateQueries()
@@ -161,7 +179,9 @@ function QuizBlockComponent(props: any) {
       (question.answers ?? []).some((answer: Answer) => answer.correct)
     )
 
-    const allCorrect = gradable.every((question: Question) => {
+    const localFeedback: Record<string, QuestionFeedback> = {}
+    // Judge every question (no short-circuit) so each gets its own feedback.
+    const judged = gradable.map((question: Question) => {
       const outcomes = question.answers.map((answer: Answer) => ({
         correct: !!answer.correct,
         selected: userAnswers.some(
@@ -170,15 +190,21 @@ function QuizBlockComponent(props: any) {
             userAnswer.answer_id === answer.answer_id
         ),
       }))
-      return (
+      const isCorrect =
         scoreQuizQuestion(
           outcomes,
           questionResponseType(question),
           QUIZ_GRADING_ALL_OR_NOTHING
         ) === 1
-      )
+      localFeedback[question.question_id] = {
+        correct: isCorrect,
+        explanation: isCorrect ? question.explanation : null,
+      }
+      return isCorrect
     })
+    const allCorrect = judged.every(Boolean)
 
+    setFeedback(localFeedback)
     setSubmissionMessage(allCorrect ? 'correct' : 'incorrect')
   }
 
@@ -253,6 +279,40 @@ function QuizBlockComponent(props: any) {
         : question
     )
     saveQuestions(newQuestions)
+  }
+
+  const changeExplanation = (question_id: string, value: string) => {
+    saveQuestions(
+      questions.map((question: Question) =>
+        question.question_id === question_id
+          ? { ...question, explanation: value }
+          : question
+      )
+    )
+  }
+
+  // Paste quiz JSON ({question, options, correct, explanation}) to fill the block.
+  const importQuizJson = () => {
+    try {
+      const { questions: imported, skipped } = convertImportedQuiz(
+        JSON.parse(importText),
+        uuidv4
+      )
+      if (imported.length === 0) {
+        toast.error('No usable questions found. Each needs text, 2+ options and a valid "correct" index.')
+        return
+      }
+      saveQuestions([...questions, ...(imported as Question[])])
+      setImportText('')
+      setShowImport(false)
+      toast.success(
+        skipped
+          ? `Imported ${imported.length} questions, skipped ${skipped} that were incomplete.`
+          : `Imported ${imported.length} questions.`
+      )
+    } catch (error: any) {
+      toast.error(error instanceof SyntaxError ? 'That is not valid JSON.' : error.message)
+    }
   }
 
   const deleteQuestion = (question_id: string) => {
@@ -359,6 +419,12 @@ function QuizBlockComponent(props: any) {
                 {t('editor.blocks.quiz_block.generate_with_ai', 'Generate with AI')}
               </button>
               <button
+                onClick={() => setShowImport((v) => !v)}
+                className="flex items-center gap-1 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 text-xs font-medium px-2.5 py-1 rounded-md transition-colors outline-none"
+              >
+                Paste JSON
+              </button>
+              <button
                 onClick={addSampleQuestion}
                 className="flex items-center gap-1 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 text-xs font-medium px-2.5 py-1 rounded-md transition-colors outline-none"
               >
@@ -406,6 +472,39 @@ function QuizBlockComponent(props: any) {
                     defaultValue: 'This quiz has no questions yet.',
                   })}
             </p>
+          </div>
+        )}
+
+        {isEditable && showImport && (
+          <div className="mb-3 rounded-lg bg-white nice-shadow p-3 space-y-2">
+            <p className="text-xs text-neutral-500">
+              Paste a list of questions. Each one needs <code>question</code>,{' '}
+              <code>options</code> (a list), <code>correct</code> (the index of the right option,
+              starting at 0) and optionally <code>explanation</code>.
+            </p>
+            <textarea
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              rows={8}
+              spellCheck={false}
+              className="w-full rounded-md border border-neutral-200 p-2 text-xs font-mono outline-none focus:ring-2 focus:ring-neutral-200"
+              placeholder='[{"question": "...", "options": ["A", "B"], "correct": 1, "explanation": "..."}]'
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowImport(false)}
+                className="text-xs font-medium text-neutral-500 hover:text-neutral-700 px-2 py-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={importQuizJson}
+                disabled={!importText.trim()}
+                className="text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 disabled:opacity-40 rounded-md px-3 py-1.5"
+              >
+                Import questions
+              </button>
+            </div>
           </div>
         )}
 
@@ -734,6 +833,41 @@ function QuizBlockComponent(props: any) {
                       <Plus weight="duotone" size={11} />
                       {t('editor.blocks.quiz_block.add_answer')}
                     </button>
+                  )}
+
+                  {/* Author: the explanation learners see after a correct answer */}
+                  {isEditable && (
+                    <textarea
+                      value={question.explanation ?? ''}
+                      onChange={(e) => changeExplanation(question.question_id, e.target.value)}
+                      rows={2}
+                      placeholder="Explanation, shown after the learner answers correctly (optional)"
+                      className="w-full rounded-lg bg-white border border-neutral-200 px-2 py-1.5 text-xs text-neutral-700 placeholder:text-neutral-400 outline-none focus:ring-2 focus:ring-neutral-200"
+                    />
+                  )}
+
+                  {/* Learner: result for this question after submitting */}
+                  {!isEditable && submitted && feedback[question.question_id] && (
+                    <div
+                      role="status"
+                      className={cn(
+                        'rounded-lg px-3 py-2 text-xs leading-relaxed',
+                        feedback[question.question_id].correct
+                          ? 'bg-emerald-50 text-emerald-800'
+                          : 'bg-red-50 text-red-700'
+                      )}
+                    >
+                      {feedback[question.question_id].correct ? (
+                        <>
+                          <span className="font-semibold">Correct.</span>
+                          {feedback[question.question_id].explanation && (
+                            <span> {feedback[question.question_id].explanation}</span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="font-semibold">Not quite. Reset and try again.</span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

@@ -13,7 +13,7 @@ the other: all-or-nothing per question, every gradable question must be right,
 and a question with no correct answer marked is skipped rather than failed.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 BLOCK_QUIZ_NODE = "blockQuiz"
@@ -24,6 +24,10 @@ class QuizResult:
     passed: bool
     gradable: int
     correct: int
+    # One entry per judged question: {"question_id", "correct", "explanation"}.
+    # The explanation is only present when that question was answered correctly,
+    # because it usually states the answer and must not be readable before then.
+    results: list = field(default_factory=list)
 
 
 def extract_quiz_questions(content: Any) -> list[dict]:
@@ -85,19 +89,28 @@ def score_lesson_quiz(content: Any, selected: Any) -> QuizResult:
 
     gradable = _gradable(extract_quiz_questions(content))
     correct = 0
+    results: list[dict] = []
     for question in gradable:
         qid = question.get("question_id")
         answers = [a for a in question.get("answers") or [] if isinstance(a, dict)]
-        if all(
+        is_correct = all(
             bool(a.get("correct")) == ((qid, a.get("answer_id")) in chosen)
             for a in answers
-        ):
+        )
+        if is_correct:
             correct += 1
+        explanation = question.get("explanation")
+        results.append({
+            "question_id": qid,
+            "correct": is_correct,
+            "explanation": explanation if is_correct and isinstance(explanation, str) and explanation.strip() else None,
+        })
 
     return QuizResult(
         passed=bool(gradable) and correct == len(gradable),
         gradable=len(gradable),
         correct=correct,
+        results=results,
     )
 
 
@@ -120,6 +133,9 @@ def strip_quiz_answer_keys(content: Any) -> Any:
             if node.get("type") == BLOCK_QUIZ_NODE and isinstance(node.get("attrs"), dict):
                 for q in node["attrs"].get("questions") or []:
                     if isinstance(q, dict):
+                        # Explanations usually give the answer away; the server
+                        # returns one only after that question is answered right.
+                        q.pop("explanation", None)
                         answers = [a for a in q.get("answers") or [] if isinstance(a, dict)]
                         # Questions saved before `response_type` existed let the
                         # page infer pick-one vs pick-several from the key. Stamp

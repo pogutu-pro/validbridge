@@ -57,4 +57,5 @@ async def submit_lesson_quiz(
         "passed": result.passed,
         "correct": result.correct,
         "total": result.gradable,
+        "results": result.results,
     }

@@ -127,3 +127,33 @@ class TestStripAnswerKeys:
         assert modes == {"m": "multiple", "s": "single", "e": "multiple"}
         # The stored content is not modified.
         assert "response_type" not in multi
+
+
+class TestExplanations:
+    def _with_explanation(self, qid, correct_ids, text):
+        return {**_question(qid, correct_ids), "explanation": text}
+
+    def test_explanation_is_returned_only_for_a_correct_answer(self):
+        content = _quiz(
+            self._with_explanation("q1", {"a"}, "Because a."),
+            self._with_explanation("q2", {"b"}, "Because b."),
+        )
+        result = score_lesson_quiz(content, _pick("q1", "a") + _pick("q2", "c"))
+        by_id = {r["question_id"]: r for r in result.results}
+        assert by_id["q1"] == {"question_id": "q1", "correct": True, "explanation": "Because a."}
+        # Wrong answer: no explanation, which would give the answer away.
+        assert by_id["q2"]["correct"] is False and by_id["q2"]["explanation"] is None
+
+    def test_blank_or_missing_explanation_is_none(self):
+        content = _quiz(self._with_explanation("q1", {"a"}, "  "), _question("q2", {"a"}))
+        result = score_lesson_quiz(content, _pick("q1", "a") + _pick("q2", "a"))
+        assert [r["explanation"] for r in result.results] == [None, None]
+
+    def test_explanation_is_not_sent_to_learners(self):
+        from src.services.courses.lesson_quiz import strip_quiz_answer_keys
+
+        content = _quiz(self._with_explanation("q1", {"a"}, "Because a."))
+        stripped = strip_quiz_answer_keys(content)
+        assert "explanation" not in stripped["content"][1]["attrs"]["questions"][0]
+        # Stored content keeps it so it can still be returned after a correct answer.
+        assert content["content"][1]["attrs"]["questions"][0]["explanation"] == "Because a."

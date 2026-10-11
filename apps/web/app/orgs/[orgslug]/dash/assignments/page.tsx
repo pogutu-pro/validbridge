@@ -32,6 +32,7 @@ import Link from 'next/link';
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import NewAssignmentModal from './_components/NewAssignmentModal';
+import CourseOutline, { AssignmentTarget } from './_components/CourseOutline';
 
 type StatusFilter = 'all' | 'published' | 'drafts';
 
@@ -73,6 +74,8 @@ function AssignmentsHome() {
   const org = useOrg() as any;
   const queryClient = useQueryClient();
   const [showNewAssignment, setShowNewAssignment] = useState(false);
+  // Set when the modal is opened from a chapter, so it skips the course/chapter steps.
+  const [assignmentTarget, setAssignmentTarget] = useState<AssignmentTarget | null>(null);
 
   const invalidateAssignments = () => {
     queryClient.invalidateQueries({ queryKey: ['assignments-all'] });
@@ -369,6 +372,15 @@ function AssignmentsHome() {
           ))}
         </div>
 
+        <CourseOutline
+          courses={courses}
+          org={org}
+          onAddAssignment={(target) => {
+            setAssignmentTarget(target)
+            setShowNewAssignment(true)
+          }}
+        />
+
         {/* Filter result summary */}
         {courseAssignments && filteredCourseRows.length > 0 && (
           <p className='text-xs text-gray-400 pt-1'>
@@ -382,10 +394,14 @@ function AssignmentsHome() {
 
       <NewAssignmentModal
         open={showNewAssignment}
-        onClose={() => setShowNewAssignment(false)}
+        onClose={() => {
+          setShowNewAssignment(false)
+          setAssignmentTarget(null)
+        }}
         courses={courses}
         org={org}
         onCreated={invalidateAssignments}
+        preset={assignmentTarget}
       />
     </div>
   )

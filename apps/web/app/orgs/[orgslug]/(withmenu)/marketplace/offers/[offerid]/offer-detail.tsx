@@ -31,6 +31,9 @@ interface OfferDetailClientProps {
   orgId: number
   offerUuid: string
   offer: any
+  // Other offers for the same content (e.g. a subscription next to a one-time
+  // price). When present, the buyer picks how to pay on this page.
+  siblings?: any[]
   access_token: string | null
 }
 
@@ -117,15 +120,49 @@ function ResourceCard({ resource, orgslug }: { resource: Resource; orgslug: stri
   return url ? <Link href={url}>{card}</Link> : card
 }
 
-export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, access_token }: OfferDetailClientProps) {
+const NO_SIBLINGS: any[] = []
+
+export default function OfferDetailClient({ orgslug, orgId, offerUuid: initialOfferUuid, offer: initialOffer, siblings = NO_SIBLINGS, access_token }: OfferDetailClientProps) {
   const { i18n } = useTranslation()
   const session = useVBSession() as any
   const token = session?.data?.tokens?.access_token ?? access_token
   const router = useRouter()
   const [loading, setLoading] = useState<false | 'default' | 'mobile_money' | 'card'>(false)
   const [customAmount, setCustomAmount] = useState<string>('')
+  // Which way of paying is selected. Everything below (price, amount box, fee
+  // buttons, benefits) renders from the selected offer, so switching reuses the
+  // one checkout flow rather than duplicating it.
+  const [selectedUuid, setSelectedUuid] = useState<string>(initialOfferUuid)
+  const choices = [initialOffer, ...siblings].filter(Boolean)
+  const offer = choices.find((o: any) => (o.offer_uuid ?? initialOfferUuid) === selectedUuid) ?? initialOffer
+  const offerUuid: string = offer?.offer_uuid ?? initialOfferUuid
+  const oneTimeChoice = choices.find((o: any) => o.offer_type !== 'subscription')
+  const subscriptionChoice = choices.find((o: any) => o.offer_type === 'subscription')
+  const hasBothChoices = !!oneTimeChoice && !!subscriptionChoice
+  const knownOfferUuids = React.useMemo(
+    () => [initialOfferUuid, ...siblings.map((o: any) => o.offer_uuid)],
+    [initialOfferUuid, siblings],
+  )
   const { track } = useVBAnalytics('learner')
   const verifiedRef = useRef(false)
+  // True while the buyer is paying in the other tab. This page stays open and
+  // unlocks itself when that tab confirms the payment.
+  const [awaitingPayment, setAwaitingPayment] = useState(false)
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return
+    const channel = new BroadcastChannel('vb-checkout')
+    channel.onmessage = (event) => {
+      // The tab the buyer returns in may have loaded either way of paying, so
+      // match any offer on this page rather than only the selected one.
+      if (event.data?.type === 'paid' && knownOfferUuids.includes(event.data?.offerUuid)) {
+        setAwaitingPayment(false)
+        toast.success('Payment received — you now have access.')
+        router.refresh()
+      }
+    }
+    return () => channel.close()
+  }, [knownOfferUuids, router])
 
   // Back from Paystack (?reference=…): confirm the payment right away so the
   // buyer gets access now, not whenever the webhook lands.
@@ -142,6 +179,14 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
         const status = res?.data?.status
         if (status === 'paid') {
           toast.success('Payment received — you now have access.')
+          // Tell the tab the buyer started from, so it unlocks too.
+          try {
+            const channel = new BroadcastChannel('vb-checkout')
+            channel.postMessage({ type: 'paid', offerUuid })
+            channel.close()
+          } catch (_e) {
+            // BroadcastChannel unsupported: this tab still unlocks.
+          }
           router.refresh()
         } else if (status === 'pending') {
           toast('Payment is processing. Access will unlock in a moment.')
@@ -152,6 +197,11 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
       .catch(() => {})
       .finally(clean)
   }, [token, orgId, offerUuid, router, track])
+
+  const chooseOffer = (uuid: string) => {
+    setSelectedUuid(uuid)
+    setCustomAmount('')
+  }
 
   useTrackView(
     AnalyticsEvent.OfferViewed,
@@ -210,18 +260,30 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
       currency: offer.currency,
     })
     setLoading(method ?? 'default')
+    // Payment happens in a separate tab. The tab has to be opened here, inside
+    // the click, because browsers block pop-ups opened after an await.
+    const checkoutTab = window.open('', '_blank')
     try {
       const redirectUri = window.location.origin + window.location.pathname
       const result = await getOfferCheckoutSession(orgId, offerUuid, redirectUri, token, chosenAmount, method)
       const url = result?.data?.checkout_url
       if (url) {
         track(AnalyticsEvent.CheckoutSessionCreated, { offer_type: offer.offer_type, amount: chosenAmount ?? offer.amount })
-        window.location.assign(url)
+        if (checkoutTab && !checkoutTab.closed) {
+          checkoutTab.opener = null
+          checkoutTab.location.href = url
+          setAwaitingPayment(true)
+        } else {
+          // Pop-up blocked: fall back to paying in this tab.
+          window.location.assign(url)
+        }
       } else {
+        checkoutTab?.close()
         track(AnalyticsEvent.CheckoutSessionFailed, { failure_reason: 'no_checkout_url' })
         toast.error('Could not start checkout. Please try again.')
       }
     } catch (err) {
+      checkoutTab?.close()
       track(AnalyticsEvent.CheckoutSessionFailed, { failure_reason: 'exception' })
       toast.error(meaningfulMessage(err))
     } finally {
@@ -238,6 +300,21 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
         >
           <ArrowLeft size={14} /> Back to store
         </Link>
+
+        {awaitingPayment && (
+          <div
+            role="status"
+            className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            <span>Finish your payment in the new tab. This page unlocks as soon as it is confirmed.</span>
+            <button
+              onClick={() => router.refresh()}
+              className="font-semibold underline underline-offset-2 hover:text-amber-900"
+            >
+              I have paid — check access
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left col */}
@@ -292,6 +369,38 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
           {/* Right col — sticky pricing card */}
           <div className="lg:col-span-1">
             <div className="rounded-2xl nice-shadow bg-white p-6 sticky top-24">
+              {/* How to pay: one page, both ways */}
+              {hasBothChoices && (
+                <div role="radiogroup" aria-label="How would you like to pay?" className="mb-5">
+                  <p className="text-xs text-gray-400 font-medium mb-2">How would you like to pay?</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { choice: oneTimeChoice, label: 'Pay once', hint: 'One payment, keep access' },
+                      { choice: subscriptionChoice, label: 'Subscribe', hint: 'Recurring, cancel any time' },
+                    ].map(({ choice, label, hint }) => {
+                      const active = choice.offer_uuid === offerUuid
+                      return (
+                        <button
+                          key={choice.offer_uuid}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          onClick={() => chooseOffer(choice.offer_uuid)}
+                          className={`rounded-xl border px-3 py-2.5 text-start transition-colors ${
+                            active
+                              ? 'border-gray-900 bg-gray-900 text-white'
+                              : 'border-gray-200 bg-white text-gray-800 hover:bg-gray-50'
+                          }`}
+                        >
+                          <span className="block text-sm font-bold">{label}</span>
+                          <span className={`block text-[11px] ${active ? 'text-gray-300' : 'text-gray-400'}`}>{hint}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Price */}
               <div className="mb-5">
                 <p className="text-xs text-gray-400 font-medium mb-1">

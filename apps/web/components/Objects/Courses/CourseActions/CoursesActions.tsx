@@ -6,7 +6,7 @@ import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import { getOffersByResource } from '@services/payments/offers'
 import { UserPen, ClockIcon, ArrowRight, BookOpen, UserPlus } from 'lucide-react'
-import { OfferCard } from './OfferCard'
+import { OfferList } from './OfferList'
 import { applyForContributor } from '@services/courses/courses'
 import toast from 'react-hot-toast'
 import { useContributorStatus } from '../../../../hooks/useContributorStatus'
@@ -451,9 +451,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
             {linkedOffers.length} options available
           </p>
         )}
-        {linkedOffers.map((offer: any) => (
-          <OfferCard key={offer.offer_id} offer={offer} orgslug={orgslug} />
-        ))}
+        <OfferList offers={linkedOffers} orgslug={orgslug} />
         {renderContributorButton()}
       </div>
     )

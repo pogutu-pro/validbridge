@@ -309,3 +309,51 @@ async def api_get_course_progression(
         "never_block": policy.never_block,
         "chapters": [gates[cid].as_dict() for cid in sorted(gates)],
     }
+
+
+@router.get(
+    "/course/{course_id}/lesson-progression",
+    summary="Lesson progression state for the current learner",
+    description=(
+        "Which lessons are open to this learner. A lesson is closed while an "
+        "earlier lesson's quiz is unpassed or its chapter is gated behind an "
+        "unfinished assignment. Authors and admins see everything open."
+    ),
+)
+async def api_get_lesson_progression(
+    request: Request,
+    course_id: int,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> dict:
+    from sqlmodel import select
+
+    from src.db.courses.courses import Course
+    from src.security.auth import resolve_acting_user_id
+    from src.security.rbac import AccessAction, check_resource_access
+    from src.services.courses.lesson_progression import (
+        can_bypass_progression,
+        evaluate_lesson_gates,
+    )
+
+    course = (await db_session.execute(
+        select(Course).where(Course.id == course_id)
+    )).scalars().first()
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course does not exist")
+
+    await check_resource_access(
+        request, db_session, current_user, course.course_uuid, AccessAction.READ
+    )
+
+    bypass = await can_bypass_progression(request, current_user, course, db_session)
+    gates = await evaluate_lesson_gates(
+        course.id,
+        None if bypass else resolve_acting_user_id(current_user),
+        db_session,
+        policy=course.progression_config,
+    )
+    return {
+        "course_id": course.id,
+        "lessons": [gates[aid].as_dict() for aid in gates],
+    }

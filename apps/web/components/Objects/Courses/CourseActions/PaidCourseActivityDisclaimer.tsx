@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ShoppingBag, Loader2 } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getOffersByResource } from '@services/payments/offers'
-import { OfferCard } from './OfferCard'
+import { OfferList } from './OfferList'
 import { useTranslation } from 'react-i18next'
 import { asArray } from '@services/utils/ts/requests'
 
@@ -50,9 +50,7 @@ function PaidCourseActivityDisclaimer({ course }: PaidCourseActivityProps) {
             </p>
           )}
           <div className="space-y-3">
-            {offers.map((offer: any) => (
-              <OfferCard key={offer.offer_id} offer={offer} orgslug={org.slug} />
-            ))}
+            <OfferList offers={offers} orgslug={org.slug} />
           </div>
         </>
       )}

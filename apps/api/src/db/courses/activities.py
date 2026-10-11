@@ -107,3 +107,6 @@ class ActivityRead(ActivityBase):
     last_modified_by_username: Optional[str] = None
     # Computed per-request: true if current user cannot access this activity.
     is_locked: bool = False
+    # Set with is_locked when the lesson is closed by sequential progression
+    # (an earlier lesson's quiz is not passed), so the client can say why.
+    progression_message: Optional[str] = None

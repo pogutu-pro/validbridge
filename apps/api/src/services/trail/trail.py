@@ -214,11 +214,62 @@ async def get_user_trail_with_orgid(
     return await _build_trail_read(trail, list(trail_runs_raw), db_session)
 
 
+async def _enforce_lesson_order(
+    request: Request,
+    user: PublicUser,
+    course: Course,
+    activity: Activity,
+    db_session: AsyncSession,
+    *,
+    quiz_verified: bool,
+) -> None:
+    """Refuse completions that skip the lesson order or a lesson's quiz.
+
+    Authors and admins are exempt. A lesson with a gradable quiz can only be
+    completed through the server-side quiz submit (``quiz_verified``); the plain
+    completion call is refused for it, otherwise the quiz could be bypassed by
+    calling this endpoint directly.
+    """
+    from src.services.courses.lesson_progression import (
+        can_bypass_progression,
+        evaluate_lesson_gates,
+    )
+    from src.services.courses.lesson_quiz import lesson_has_quiz
+
+    if await can_bypass_progression(request, user, course, db_session):
+        return
+
+    gates = await evaluate_lesson_gates(
+        course.id, user.id, db_session, policy=course.progression_config
+    )
+    gate = gates.get(activity.id)
+    if gate is not None and gate.locked:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=gate.message or "Finish the earlier lessons first.",
+        )
+
+    if not quiz_verified and lesson_has_quiz(activity.content):
+        already_done = (await db_session.execute(
+            select(TrailStep.id).where(
+                TrailStep.activity_id == activity.id,
+                TrailStep.user_id == user.id,
+                TrailStep.complete == True,  # noqa: E712
+            )
+        )).first()
+        if already_done is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Pass this lesson's quiz to complete it.",
+            )
+
+
 async def add_activity_to_trail(
     request: Request,
     user: PublicUser | AnonymousUser,
     activity_uuid: str,
     db_session: AsyncSession,
+    quiz_verified: bool = False,
 ) -> TrailRead:
     if isinstance(user, AnonymousUser):
         raise HTTPException(
@@ -245,6 +296,10 @@ async def add_activity_to_trail(
 
     await check_resource_access(
         request, db_session, user, course.course_uuid, AccessAction.READ
+    )
+
+    await _enforce_lesson_order(
+        request, user, course, activity, db_session, quiz_verified=quiz_verified
     )
 
     trail = await check_trail_presence(

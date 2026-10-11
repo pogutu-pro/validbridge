@@ -116,6 +116,39 @@ async def api_create_activity(
 # Versioning endpoints - MUST be before /{activity_uuid} catch-all routes
 
 
+class LessonQuizSubmission(BaseModel):
+    answers: list[dict]
+
+
+@router.post(
+    "/{activity_uuid}/quiz/submit",
+    summary="Submit a lesson quiz",
+    description=(
+        "Judge the learner's quiz answers on the server. A passing score marks "
+        "the lesson complete, which opens the next lesson."
+    ),
+    responses={
+        200: {"description": "Verdict: passed, correct and total counts."},
+        400: {"description": "The lesson has no quiz"},
+        401: {"description": "Authentication required"},
+        403: {"description": "The lesson is locked behind earlier lessons"},
+        404: {"description": "Activity not found"},
+    },
+)
+async def api_submit_lesson_quiz(
+    request: Request,
+    activity_uuid: str,
+    body: LessonQuizSubmission,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> dict:
+    from src.services.courses.lesson_quiz_submit import submit_lesson_quiz
+
+    return await submit_lesson_quiz(
+        request, activity_uuid, body.answers, current_user, db_session
+    )
+
+
 @router.get(
     "/{activity_uuid}/versions",
     response_model=List[ActivityVersionRead],

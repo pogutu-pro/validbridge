@@ -158,6 +158,10 @@ function LessonRow({ activity, courseUuid, org }: { activity: any; courseUuid: s
         <Link
           // addQuiz makes the editor append a quiz block if the lesson has none.
           href={hasQuiz ? editorHref : `${editorHref}?addQuiz=1`}
+          // Open the editor in its own tab so this page (and its open course
+          // outline) stays where it is while the quiz is written.
+          target="_blank"
+          rel="noopener noreferrer"
           className={
             hasQuiz
               ? 'flex-none inline-flex items-center gap-1.5 text-xs font-semibold text-gray-800 bg-white border border-gray-200 hover:bg-gray-100 rounded-lg px-3 py-1.5 transition-colors'

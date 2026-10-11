@@ -1293,6 +1293,9 @@ export function MarkStatus(props: {
     return null;
   }
 
+  // A lesson with a quiz is completed by passing the quiz, not by this button.
+  const quizFirst = !!props.activity?.quiz_required
+
   return (
     <>
       {isActivityCompleted() ? (
@@ -1342,8 +1345,10 @@ export function MarkStatus(props: {
         <div className="flex items-center space-x-2">
           <div className="relative">
             <div
-              className={`${isLoading ? 'opacity-90' : ''} bg-gray-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition-all duration-200 ${isLoading ? 'cursor-not-allowed' : 'hover:bg-gray-700'}`}
-              onClick={!isLoading ? markActivityAsCompleteFront : undefined}
+              className={`${isLoading || quizFirst ? 'opacity-70' : ''} bg-gray-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition-all duration-200 ${isLoading || quizFirst ? 'cursor-not-allowed' : 'hover:bg-gray-700'}`}
+              onClick={!isLoading && !quizFirst ? markActivityAsCompleteFront : undefined}
+              aria-disabled={quizFirst || undefined}
+              title={quizFirst ? t('activities.pass_quiz_first', 'Answer the quiz below to complete this lesson.') : undefined}
             >
               <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
               <div className="flex items-center space-x-2">
@@ -1376,7 +1381,7 @@ export function MarkStatus(props: {
                     <rect x="3" y="3" width="18" height="18" rx="2" />
                   </svg>
                 )}
-                <span className="text-xs font-bold min-w-[90px]">{isLoading ? t('activities.marking') : t('activities.mark_as_complete')}</span>
+                <span className="text-xs font-bold min-w-[90px]">{isLoading ? t('activities.marking') : quizFirst ? t('activities.pass_quiz_to_continue', 'Pass the quiz to continue') : t('activities.mark_as_complete')}</span>
               </div>
             </div>
             {showUnmarkedTooltip && (

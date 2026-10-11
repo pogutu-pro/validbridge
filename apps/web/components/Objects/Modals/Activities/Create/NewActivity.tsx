@@ -1,5 +1,5 @@
 import React from 'react'
-import { Browsers, PlayCircle, FileText, Backpack, MarkdownLogo, Globe, Package, Cube } from '@phosphor-icons/react'
+import { Browsers, PlayCircle, FileText, Backpack, MarkdownLogo, Globe, Package, Cube, Question } from '@phosphor-icons/react'
 import { SiGoogledocs, SiGooglesheets, SiGoogleslides, SiGoogleforms, SiFigma, SiNotion, SiCanvas, SiLoom, SiMiro, SiYoutube, SiSpotify, SiAirtable, SiTypeform, SiDropbox, SiTrello } from '@icons-pack/react-simple-icons'
 import dynamic from 'next/dynamic'
 import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal'
@@ -66,6 +66,8 @@ type ActivityTypeCard = {
   icon: any
   customIcon?: React.ComponentType
   labelKey: string
+  // Shown when the locale files have no entry for labelKey yet.
+  fallbackLabel?: string
   color: { icon: string }
   pattern: string
   patternSize?: string
@@ -80,6 +82,19 @@ export const activityTypes: ActivityTypeCard[] = [
       icon: 'text-blue-400',
     },
     pattern: `radial-gradient(circle, rgba(191,219,254,0.3) 1px, transparent 1px)`,
+    patternSize: '12px 12px',
+  },
+  {
+    // A page that opens with a quiz block, so a quiz gets its own page in the
+    // chapter, placed wherever the author adds it.
+    key: 'quiz',
+    icon: Question,
+    labelKey: 'dashboard.courses.structure.activity.types.quiz',
+    fallbackLabel: 'Quiz page',
+    color: {
+      icon: 'text-violet-400',
+    },
+    pattern: `radial-gradient(circle, rgba(221,214,254,0.4) 1px, transparent 1px)`,
     patternSize: '12px 12px',
   },
   {
@@ -202,7 +217,7 @@ function NewActivityModal({
                     />
                   )}
                   <span className="text-xs font-medium text-gray-500 bg-white nice-shadow rounded-full px-3 py-1">
-                    {t(activity.labelKey)}
+                    {t(activity.labelKey, { defaultValue: activity.fallbackLabel })}
                   </span>
                 </div>
               </div>
@@ -215,6 +230,15 @@ function NewActivityModal({
         <div className="p-5">
           {selectedView === 'dynamic' && (
             <DynamicCanvaModal
+              submitActivity={submitActivity}
+              chapterId={chapterId}
+              course={course}
+            />
+          )}
+
+          {selectedView === 'quiz' && (
+            <DynamicCanvaModal
+              quiz
               submitActivity={submitActivity}
               chapterId={chapterId}
               course={course}

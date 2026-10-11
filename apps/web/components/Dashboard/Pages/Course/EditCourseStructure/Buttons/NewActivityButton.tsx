@@ -29,12 +29,24 @@ type NewActivityButtonProps = {
   // When true, the add-activity modal opens automatically on mount. Used right
   // after a course is created to drop the teacher straight into adding content.
   autoOpen?: boolean
+  // Controlled use: the parent opens and closes the dialog, and the built-in
+  // "Add Activity" button is hidden. Used to add next to an existing activity.
+  open?: boolean
+  onOpenChange?: (_open: boolean) => void
+  hideTrigger?: boolean
+  // Where to put the new activity inside the chapter instead of at the end.
+  insertTarget?: { activityUuid: string; position: 'above' | 'below' } | null
 }
 
 function NewActivityButton(props: NewActivityButtonProps) {
   const { t } = useTranslation()
   const { track } = useVBAnalytics('dashboard')
-  const [newActivityModal, setNewActivityModal] = React.useState(false)
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  const newActivityModal = props.open ?? internalOpen
+  const setNewActivityModal = (value: boolean) => {
+    if (props.open === undefined) setInternalOpen(value)
+    else props.onOpenChange?.(value)
+  }
   const [selectedView, setSelectedView] = React.useState('home')
   const router = useRouter()
   const course = useCourse() as any
@@ -60,7 +72,20 @@ function NewActivityButton(props: NewActivityButtonProps) {
       { revalidate: 1800 }
     )
     const toast_loading = toast.loading(t('dashboard.courses.structure.activity.toasts.creating'))
-    await createActivity(activity, props.chapterId, org.id, access_token)
+    await createActivity(
+      {
+        ...activity,
+        ...(props.insertTarget
+          ? {
+              insert_relative_to: props.insertTarget.activityUuid,
+              insert_position: props.insertTarget.position,
+            }
+          : {}),
+      },
+      props.chapterId,
+      org.id,
+      access_token
+    )
     track(AnalyticsEvent.ActivityCreated, { activity_type: activity?.type ?? activity?.activity_type })
     queryClient.invalidateQueries({ queryKey: queryKeys.courses.meta(cleanCourseUuid(course.courseStructure.course_uuid)) })
     toast.dismiss(toast_loading)
@@ -79,6 +104,20 @@ function NewActivityButton(props: NewActivityButtonProps) {
   }
 
   // Submit File Upload
+  // Only pages, markdown, embeds, resources and assignments can be placed next to
+  // an existing activity. Uploaded files and videos are created by other routes
+  // and land at the end of the chapter, so say so instead of silently misplacing.
+  const noteEndPlacement = () => {
+    if (!props.insertTarget) return
+    toast(
+      t('dashboard.courses.structure.activity.toasts.placed_at_end', {
+        defaultValue:
+          'Files and videos are added at the end of the chapter. Drag the activity into position.',
+      }),
+      { duration: 6000 }
+    )
+  }
+
   const submitFileActivity = async (
     file: any,
     type: any,
@@ -86,6 +125,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
     chapterId: string,
     captions?: { enabled: boolean; source_language: string; languages: { code: string; label?: string }[] }
   ) => {
+    noteEndPlacement()
     // Video uploads run in the BACKGROUND with a progress notification, so the
     // modal closes immediately and the teacher can keep working.
     if (type === 'video') {
@@ -148,6 +188,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
     activity: any,
     _chapterId: string
   ) => {
+    noteEndPlacement()
     const toast_loading = toast.loading(t('dashboard.courses.structure.activity.toasts.creating_uploading'))
     await createExternalVideoActivity(
       external_video_data,
@@ -216,17 +257,19 @@ function NewActivityButton(props: NewActivityButtonProps) {
         dialogTitle={dialogTitle}
         dialogDescription={selectedView === 'home' ? t('dashboard.courses.structure.modals.new_activity.description') : undefined}
       />
-      <div
-        onClick={() => {
-          openNewActivityModal(props.chapterId)
-        }}
-        className="flex w-44 h-10 items-center justify-center py-2 my-3 rounded-xl text-white bg-black hover:cursor-pointer"
-      >
-        <Layers size={17} />
-        <div className="text-sm font-bold ms-2">
-          {t('dashboard.courses.structure.actions.add_activity')}
+      {!props.hideTrigger && (
+        <div
+          onClick={() => {
+            openNewActivityModal(props.chapterId)
+          }}
+          className="flex w-44 h-10 items-center justify-center py-2 my-3 rounded-xl text-white bg-black hover:cursor-pointer"
+        >
+          <Layers size={17} />
+          <div className="text-sm font-bold ms-2">
+            {t('dashboard.courses.structure.actions.add_activity')}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

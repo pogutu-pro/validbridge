@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import * as Form from '@radix-ui/react-form'
 import BarLoader from 'react-spinners/BarLoader'
-import { Browsers } from '@phosphor-icons/react'
+import { Browsers, Question } from '@phosphor-icons/react'
+import { v4 as uuidv4 } from 'uuid'
 
-function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
+// With `quiz`, the new page starts with an empty quiz block, so a quiz gets its own
+// page in the chapter; the author fills in the questions in the editor.
+function DynamicCanvaModal({ submitActivity, chapterId, course, quiz = false }: any) {
   const [activityName, setActivityName] = useState('')
   const [activityDescription, setActivityDescription] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,6 +22,14 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
       published_version: 1,
       version: 1,
       course_id: course.id,
+      ...(quiz
+        ? {
+            content: {
+              type: 'doc',
+              content: [{ type: 'blockQuiz', attrs: { quizId: uuidv4(), questions: [] } }],
+            },
+          }
+        : {}),
     })
     setIsSubmitting(false)
   }
@@ -34,8 +45,12 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
         }}
       >
         <span className="flex items-center gap-2 bg-white nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600">
-          <Browsers size={18} weight="duotone" className="text-blue-400" />
-          Dynamic Page
+          {quiz ? (
+            <Question size={18} weight="duotone" className="text-violet-400" />
+          ) : (
+            <Browsers size={18} weight="duotone" className="text-blue-400" />
+          )}
+          {quiz ? 'Quiz Page' : 'Dynamic Page'}
         </span>
       </div>
 

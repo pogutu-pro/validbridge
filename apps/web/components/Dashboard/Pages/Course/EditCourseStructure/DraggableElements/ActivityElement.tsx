@@ -15,6 +15,8 @@ import {
 import { revalidateTags } from '@services/utils/ts/requests'
 import LockPopover, { LockType } from './LockPopover'
 import {
+  ArrowDownToLine,
+  ArrowUpToLine,
   Backpack,
   Check,
   Eye,
@@ -64,6 +66,8 @@ type ActivitiyElementProps = {
   isSelected?: boolean
   onToggleSelect?: () => void
   selectionMode?: boolean
+  // Add a new activity directly above or below this one.
+  onInsert?: (_position: 'above' | 'below') => void
 }
 
 interface ModifiedActivityInterface {
@@ -478,6 +482,18 @@ function ActivityElement(props: ActivitiyElementProps) {
                     <Pencil size={14} />
                     <span>{t('dashboard.courses.structure.actions.rename')}</span>
                   </DropdownMenuItem>
+                  {props.onInsert && (
+                    <>
+                      <DropdownMenuItem onClick={() => props.onInsert?.('above')}>
+                        <ArrowUpToLine size={14} />
+                        <span>{t('dashboard.courses.structure.actions.add_above', { defaultValue: 'Add activity above' })}</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => props.onInsert?.('below')}>
+                        <ArrowDownToLine size={14} />
+                        <span>{t('dashboard.courses.structure.actions.add_below', { defaultValue: 'Add activity below' })}</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={changePublicStatus} disabled={isPublishing}>
                     {props.activity.published ? <EyeOff size={14} /> : <Globe size={14} />}

@@ -277,6 +277,10 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Report-only. On a private repo this action needs GitHub Advanced Security
+    # (paid), which is not enabled, so it fails before reviewing anything and
+    # would block every pull request. Remove this line once it is enabled.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
       - uses: actions/dependency-review-action@v5

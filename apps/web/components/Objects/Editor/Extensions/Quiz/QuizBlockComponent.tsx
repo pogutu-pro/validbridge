@@ -21,7 +21,8 @@ import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
-import { submitLessonQuiz } from '@services/courses/activity'
+import { checkLessonQuizQuestion, submitLessonQuiz } from '@services/courses/activity'
+import QuizTakeView, { TakeQuestion } from './QuizTakeView'
 import { convertImportedQuiz } from '@/lib/quiz/importQuiz'
 import {
   QUIZ_GRADING_ALL_OR_NOTHING,
@@ -388,6 +389,63 @@ function QuizBlockComponent(props: any) {
 
   const totalQuestions = questions.length
   const hasAnyAnswer = userAnswers.length > 0
+
+  // Learners (and previews) take the quiz one question per page; the editing
+  // view below is only used by authors.
+  if (!isEditable) {
+    const checkQuestion = async (question: TakeQuestion, answerIds: string[]) => {
+      if (serverJudged) {
+        return checkLessonQuizQuestion(
+          activityUuid,
+          question.question_id,
+          answerIds,
+          session.data?.tokens?.access_token
+        )
+      }
+      // No signed-in learner (preview): judge locally from the content.
+      const outcomes = question.answers.map((answer) => ({
+        correct: !!answer.correct,
+        selected: answerIds.includes(answer.answer_id),
+      }))
+      const gradable = outcomes.some((o) => o.correct)
+      const correct =
+        !gradable ||
+        scoreQuizQuestion(
+          outcomes,
+          questionResponseType(question as unknown as Question),
+          QUIZ_GRADING_ALL_OR_NOTHING
+        ) === 1
+      const explanation = (questions as Question[]).find(
+        (q) => q.question_id === question.question_id
+      )?.explanation
+      return { correct, explanation: correct ? explanation : null }
+    }
+
+    const finishQuiz = async (selections: { question_id: string; answer_id: string }[]) => {
+      if (!serverJudged) return
+      const verdict = await submitLessonQuiz(
+        activityUuid,
+        selections,
+        session.data?.tokens?.access_token
+      )
+      if (!verdict.passed) {
+        throw new Error('Some answers could not be verified. Please take the quiz again.')
+      }
+      // The lesson is now complete: refresh progress so the next lesson opens.
+      await queryClient.invalidateQueries()
+      router.refresh()
+    }
+
+    return (
+      <NodeViewWrapper className="block-quiz">
+        <QuizTakeView
+          questions={questions as TakeQuestion[]}
+          checkQuestion={checkQuestion}
+          onFinished={finishQuiz}
+        />
+      </NodeViewWrapper>
+    )
+  }
 
   return (
     <NodeViewWrapper className="block-quiz">

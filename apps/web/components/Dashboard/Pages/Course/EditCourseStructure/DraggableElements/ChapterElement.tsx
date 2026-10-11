@@ -71,6 +71,11 @@ function ChapterElement(props: ChapterElementProps) {
 
   // Selection state
   const [selectedActivities, setSelectedActivities] = React.useState<Set<string>>(new Set())
+  // Set when an activity's menu asks to add a new activity above or below it.
+  const [insertTarget, setInsertTarget] = React.useState<{
+    activityUuid: string
+    position: 'above' | 'below'
+  } | null>(null)
   const [isBulkLoading, setIsBulkLoading] = React.useState(false)
   const hasSelection = selectedActivities.size > 0
   const allSelected = activities.length > 0 && selectedActivities.size === activities.length
@@ -404,6 +409,9 @@ function ChapterElement(props: ChapterElementProps) {
                     isSelected={selectedActivities.has(activity.activity_uuid)}
                     onToggleSelect={() => toggleActivitySelection(activity.activity_uuid)}
                     selectionMode={hasSelection}
+                    onInsert={(position) =>
+                      setInsertTarget({ activityUuid: activity.activity_uuid, position })
+                    }
                   />
                 ))}
                 {provided.placeholder}
@@ -414,6 +422,17 @@ function ChapterElement(props: ChapterElementProps) {
             orgslug={props.orgslug}
             chapterId={props.chapter.id}
             autoOpen={props.autoOpenNewActivity}
+          />
+          {/* Same flow, opened from an activity's menu to add above/below it. */}
+          <NewActivityButton
+            orgslug={props.orgslug}
+            chapterId={props.chapter.id}
+            hideTrigger
+            open={!!insertTarget}
+            onOpenChange={(open) => {
+              if (!open) setInsertTarget(null)
+            }}
+            insertTarget={insertTarget}
           />
           <div className="h-6">
             <div className="flex items-center">

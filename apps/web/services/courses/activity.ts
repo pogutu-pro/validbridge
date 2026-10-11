@@ -61,6 +61,26 @@ export async function submitLessonQuiz(
   return errorHandling(result)
 }
 
+export type QuizQuestionVerdict = { correct: boolean; explanation?: string | null }
+
+/**
+ * Instant feedback for one question. The server holds the answer key, so a wrong
+ * answer reveals nothing and a right one returns the explanation. Does not
+ * complete the lesson; submitLessonQuiz does that.
+ */
+export async function checkLessonQuizQuestion(
+  activity_uuid: string,
+  question_id: string,
+  answer_ids: string[],
+  access_token: any
+): Promise<QuizQuestionVerdict> {
+  const result: any = await fetch(
+    `${getAPIUrl()}activities/${activity_uuid}/quiz/check`,
+    RequestBodyWithAuthHeader('POST', { question_id, answer_ids }, null, access_token)
+  )
+  return errorHandling(result)
+}
+
 export async function unmarkActivityAsComplete(
   org_slug: string,
   course_uuid: string,

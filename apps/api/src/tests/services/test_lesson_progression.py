@@ -166,3 +166,20 @@ async def test_existing_progress_past_a_quiz_is_honoured(db, org, course, regula
     gates = await h.gates()
     assert gates[l2.id].locked is False
     assert gates[l3.id].locked is False
+
+
+@pytest.mark.asyncio
+async def test_quiz_is_required_until_the_lesson_is_completed(db, org, course, regular_user):
+    from src.services.courses.lesson_progression import is_quiz_required
+
+    h = Course3(db, org, course, regular_user)
+    await h.chapter_()
+    quiz_lesson = await h.lesson(QUIZ)
+    plain_lesson = await h.lesson(PLAIN)
+
+    assert await is_quiz_required(quiz_lesson, regular_user.id, db) is True
+    assert await is_quiz_required(plain_lesson, regular_user.id, db) is False
+    assert await is_quiz_required(quiz_lesson, None, db) is False
+
+    await h.complete(quiz_lesson)
+    assert await is_quiz_required(quiz_lesson, regular_user.id, db) is False

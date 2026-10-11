@@ -157,3 +157,46 @@ class TestExplanations:
         assert "explanation" not in stripped["content"][1]["attrs"]["questions"][0]
         # Stored content keeps it so it can still be returned after a correct answer.
         assert content["content"][1]["attrs"]["questions"][0]["explanation"] == "Because a."
+
+
+class TestCheckQuestion:
+    def _content(self):
+        return _quiz(
+            {**_question("q1", {"b"}), "explanation": "Because b."},
+            _question("q2", {"a", "c"}),
+            _question("q3", set()),
+        )
+
+    def test_correct_answer_returns_explanation(self):
+        from src.services.courses.lesson_quiz import check_quiz_question
+
+        assert check_quiz_question(self._content(), "q1", ["b"]) == {
+            "correct": True,
+            "explanation": "Because b.",
+        }
+
+    def test_wrong_answer_reveals_nothing(self):
+        from src.services.courses.lesson_quiz import check_quiz_question
+
+        assert check_quiz_question(self._content(), "q1", ["a"]) == {
+            "correct": False,
+            "explanation": None,
+        }
+
+    def test_multiple_response_needs_the_exact_set(self):
+        from src.services.courses.lesson_quiz import check_quiz_question
+
+        assert check_quiz_question(self._content(), "q2", ["a", "c"])["correct"] is True
+        assert check_quiz_question(self._content(), "q2", ["a"])["correct"] is False
+
+    def test_unknown_question_is_none_and_unkeyed_cannot_trap(self):
+        from src.services.courses.lesson_quiz import check_quiz_question
+
+        assert check_quiz_question(self._content(), "nope", ["a"]) is None
+        assert check_quiz_question(self._content(), "q3", [])["correct"] is True
+
+    def test_malformed_answers_can_only_fail(self):
+        from src.services.courses.lesson_quiz import check_quiz_question
+
+        for bad in (None, "b", 5, [None], [1]):
+            assert check_quiz_question(self._content(), "q1", bad)["correct"] is False

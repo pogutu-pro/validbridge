@@ -62,6 +62,53 @@ def _gradable(questions: list[dict]) -> list[dict]:
     ]
 
 
+def _chosen_pairs(selected: Any) -> set[tuple[str, str]]:
+    chosen: set[tuple[str, str]] = set()
+    if isinstance(selected, list):
+        for item in selected:
+            if isinstance(item, dict):
+                qid, aid = item.get("question_id"), item.get("answer_id")
+                if isinstance(qid, str) and isinstance(aid, str):
+                    chosen.add((qid, aid))
+    return chosen
+
+
+def _question_is_correct(question: dict, chosen: set[tuple[str, str]]) -> bool:
+    qid = question.get("question_id")
+    answers = [a for a in question.get("answers") or [] if isinstance(a, dict)]
+    return all(
+        bool(a.get("correct")) == ((qid, a.get("answer_id")) in chosen)
+        for a in answers
+    )
+
+
+def check_quiz_question(content: Any, question_id: str, answer_ids: Any) -> dict | None:
+    """Judge ONE question, for instant feedback as the learner works through a quiz.
+
+    Returns ``{"correct", "explanation"}``, or ``None`` when the question does not
+    exist. The explanation is only included for a correct answer, and a wrong
+    answer reveals nothing about which choice was right. A question with no
+    answer key cannot be judged, so it counts as correct rather than trapping
+    the learner (the final submit skips it the same way).
+    """
+    question = next(
+        (q for q in extract_quiz_questions(content) if q.get("question_id") == question_id),
+        None,
+    )
+    if question is None:
+        return None
+    if not _gradable([question]):
+        return {"correct": True, "explanation": None}
+    ids = answer_ids if isinstance(answer_ids, list) else []
+    chosen = {(question_id, a) for a in ids if isinstance(a, str)}
+    correct = _question_is_correct(question, chosen)
+    explanation = question.get("explanation")
+    return {
+        "correct": correct,
+        "explanation": explanation if correct and isinstance(explanation, str) and explanation.strip() else None,
+    }
+
+
 def lesson_has_quiz(content: Any) -> bool:
     """True when the lesson holds at least one question that can be judged.
 

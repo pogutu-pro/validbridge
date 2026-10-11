@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getCourseMetadata } from '@services/courses/courses'
 import { getUriWithOrg } from '@services/config/config'
-import { Backpack, BookOpen, ChevronDown, ChevronRight, HelpCircle, Plus } from 'lucide-react'
+import { countQuizQuestions } from '@/lib/quiz/countQuizQuestions'
+import { Backpack, BookOpen, CheckCircle2, ChevronDown, ChevronRight, HelpCircle, Pencil, Plus } from 'lucide-react'
 
 const clean = (u: string, prefix: string) => (u ?? '').replace(new RegExp(`^${prefix}`), '')
 
@@ -135,21 +136,38 @@ function LessonRow({ activity, courseUuid, org }: { activity: any; courseUuid: s
   const activityUuid = clean(activity.activity_uuid, 'activity_')
   const isContentPage = activity.activity_type === 'TYPE_DYNAMIC'
   const isAssignment = activity.activity_type === 'TYPE_ASSIGNMENT'
+  // The course structure carries each lesson's content for editors, so a quiz
+  // that was already added can be recognised and edited instead of added twice.
+  const quizQuestions = isContentPage ? countQuizQuestions(activity.content) : 0
+  const hasQuiz = quizQuestions > 0
+  const editorHref = `${getUriWithOrg(org.slug, '')}/course/${courseUuid}/activity/${activityUuid}/edit`
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 bg-gray-50">
       <span className="flex items-center gap-2 min-w-0 text-sm text-gray-800">
         {isAssignment && <Backpack size={14} className="text-amber-500 flex-none" />}
         <span className="truncate">{activity.name}</span>
+        {hasQuiz && (
+          <span className="flex-none inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 rounded-full px-2 py-0.5">
+            <CheckCircle2 size={12} />
+            {t('dashboard.assignments.outline.quiz_added', { defaultValue: 'Quiz added' })} · {quizQuestions}
+          </span>
+        )}
       </span>
       {isContentPage && (
         <Link
           // addQuiz makes the editor append a quiz block if the lesson has none.
-          href={`${getUriWithOrg(org.slug, '')}/course/${courseUuid}/activity/${activityUuid}/edit?addQuiz=1`}
-          className="flex-none inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-black hover:bg-gray-800 rounded-lg px-3 py-1.5 transition-colors"
+          href={hasQuiz ? editorHref : `${editorHref}?addQuiz=1`}
+          className={
+            hasQuiz
+              ? 'flex-none inline-flex items-center gap-1.5 text-xs font-semibold text-gray-800 bg-white border border-gray-200 hover:bg-gray-100 rounded-lg px-3 py-1.5 transition-colors'
+              : 'flex-none inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-black hover:bg-gray-800 rounded-lg px-3 py-1.5 transition-colors'
+          }
         >
-          <HelpCircle size={13} />
-          {t('dashboard.assignments.outline.add_quiz', { defaultValue: 'Add quiz' })}
+          {hasQuiz ? <Pencil size={13} /> : <HelpCircle size={13} />}
+          {hasQuiz
+            ? t('dashboard.assignments.outline.edit_quiz', { defaultValue: 'Edit quiz' })
+            : t('dashboard.assignments.outline.add_quiz', { defaultValue: 'Add quiz' })}
         </Link>
       )}
     </div>

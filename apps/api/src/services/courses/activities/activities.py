@@ -183,14 +183,18 @@ async def _apply_progression_lock(
     from src.services.courses.lesson_progression import (
         can_bypass_progression,
         evaluate_lesson_gates,
+        is_quiz_required,
     )
 
     if isinstance(current_user, AnonymousUser):
         return
     if await can_bypass_progression(request, current_user, course, db_session):
         return
+    learner_id = resolve_acting_user_id(current_user)
+    # Computed from the stored content, before the answer key is stripped below.
+    activity_read.quiz_required = await is_quiz_required(activity, learner_id, db_session)
     gates = await evaluate_lesson_gates(
-        course.id, resolve_acting_user_id(current_user), db_session,
+        course.id, learner_id, db_session,
         policy=course.progression_config,
     )
     gate = gates.get(activity.id)

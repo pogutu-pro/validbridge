@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
@@ -78,7 +78,12 @@ class ActivityCreate(ActivityBase):
     activity_sub_type: ActivitySubTypeEnum = ActivitySubTypeEnum.SUBTYPE_CUSTOM
     details: dict = Field(default_factory=dict, sa_column=Column(JSON))
     extra_metadata: Optional[dict] = None
-    pass
+    # Place the new activity next to an existing one in the same chapter instead
+    # of at the end, so a skipped activity can be added where it belongs.
+    # `insert_relative_to` is that activity's uuid; `insert_position` defaults to
+    # "below". Neither is stored on the activity.
+    insert_relative_to: Optional[str] = None
+    insert_position: Optional[Literal["above", "below"]] = None
 
 
 class ActivityUpdate(SQLModel):

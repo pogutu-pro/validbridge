@@ -21,6 +21,7 @@ import logging
 from src.security.rbac import check_resource_access, AccessAction
 from src.core.ee_hooks import check_ee_activity_paid_access
 from src.services.courses.activities.versioning import create_activity_version
+from src.services.courses.activities.placement import make_room_for_insert
 from src.services.courses.locks import (
     batch_accessible_restricted_uuids,
     is_locked_for_user,
@@ -69,7 +70,11 @@ async def create_activity(
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.CREATE)
 
     # Create Activity
-    activity = Activity(**activity_object.model_dump())
+    # The placement fields describe where to put the activity; they are not
+    # columns on it.
+    activity = Activity(
+        **activity_object.model_dump(exclude={"insert_relative_to", "insert_position"})
+    )
 
     activity.activity_uuid = str(f"activity_{uuid4()}")
     activity.creation_date = str(datetime.now())
@@ -99,6 +104,13 @@ async def create_activity(
     # created activity briefly disagreed with the 0-based order the editor then
     # assigns.
     to_be_used_order = max_order + 1 if max_order is not None else 0
+    if activity_object.insert_relative_to:
+        to_be_used_order = await make_room_for_insert(
+            db_session,
+            activity_object.chapter_id,
+            activity_object.insert_relative_to,
+            activity_object.insert_position,
+        )
 
     # Add activity to chapter
     activity_chapter = ChapterActivity(

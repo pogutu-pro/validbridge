@@ -117,3 +117,6 @@ class ActivityRead(ActivityBase):
     progression_message: Optional[str] = None
     # True for a learner who still has to pass this lesson's quiz to complete it.
     quiz_required: bool = False
+    # True for staff (authors/admins) on a lesson that has a quiz: they are exempt from
+    # the quiz rule, and the page says so, so a preview is not mistaken for what students see.
+    staff_bypass_quiz: bool = False

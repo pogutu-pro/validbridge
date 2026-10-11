@@ -183,3 +183,34 @@ async def test_quiz_is_required_until_the_lesson_is_completed(db, org, course, r
 
     await h.complete(quiz_lesson)
     assert await is_quiz_required(quiz_lesson, regular_user.id, db) is False
+
+
+@pytest.mark.asyncio
+async def test_activity_read_flags_staff_versus_learner(db, org, course, regular_user, monkeypatch):
+    """Staff are exempt and told so; a learner who owes the quiz is told that instead."""
+    from src.db.courses.activities import ActivityRead
+    from src.services.courses.activities.activities import _apply_progression_lock
+    import src.services.courses.lesson_progression as lp
+
+    h = Course3(db, org, course, regular_user)
+    await h.chapter_()
+    quiz_lesson = await h.lesson(QUIZ)
+    plain_lesson = await h.lesson(PLAIN)
+
+    async def read(activity, is_staff):
+        async def fake_bypass(*_a, **_k):
+            return is_staff
+        monkeypatch.setattr(lp, "can_bypass_progression", fake_bypass)
+        out = ActivityRead.model_validate(activity)
+        await _apply_progression_lock(None, out, activity, course, regular_user, db)
+        return out
+
+    staff_quiz = await read(quiz_lesson, True)
+    assert staff_quiz.staff_bypass_quiz is True and staff_quiz.quiz_required is False
+    staff_plain = await read(plain_lesson, True)
+    assert staff_plain.staff_bypass_quiz is False
+
+    learner_quiz = await read(quiz_lesson, False)
+    assert learner_quiz.quiz_required is True and learner_quiz.staff_bypass_quiz is False
+    learner_plain = await read(plain_lesson, False)
+    assert learner_plain.quiz_required is False

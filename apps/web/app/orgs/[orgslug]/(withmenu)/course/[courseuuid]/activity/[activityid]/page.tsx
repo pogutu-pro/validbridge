@@ -26,7 +26,9 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     getCourseMetadata(params.courseuuid, { revalidate: 120, tags: ['courses'] }, access_token || null, { slim: true }),
     getActivityWithAuthHeader(
       params.activityid,
-      { revalidate: 120, tags: ['activities'] },
+      // A signed-in learner's copy carries their own quiz and lock state, which
+      // changes the moment they pass a quiz, so it must not be served from cache.
+      access_token ? { revalidate: 0, tags: ['activities'] } : { revalidate: 120, tags: ['activities'] },
       access_token || null
     ).catch(() => null),
   ])

@@ -177,6 +177,14 @@ function ActivityActions({ activity, activityid, course, orgslug, assignment, sh
 
   return (
     <div className="flex space-x-2 items-center">
+      {activity?.staff_bypass_quiz && (
+        <span
+          className="hidden sm:inline-block max-w-[220px] rounded-md bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold leading-tight text-amber-800"
+          title="Course owners and admins can move on without the quiz so they can review the course."
+        >
+          Staff preview: students must pass this quiz before moving on.
+        </span>
+      )}
       {activity && activity.published == true && activity.content.paid_access != false && (
         <AuthenticatedClientElement checkMethod="authentication">
           {activity.activity_type != 'TYPE_ASSIGNMENT' && (

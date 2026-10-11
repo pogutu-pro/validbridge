@@ -120,9 +120,16 @@ def strip_quiz_answer_keys(content: Any) -> Any:
             if node.get("type") == BLOCK_QUIZ_NODE and isinstance(node.get("attrs"), dict):
                 for q in node["attrs"].get("questions") or []:
                     if isinstance(q, dict):
-                        for a in q.get("answers") or []:
-                            if isinstance(a, dict):
-                                a.pop("correct", None)
+                        answers = [a for a in q.get("answers") or [] if isinstance(a, dict)]
+                        # Questions saved before `response_type` existed let the
+                        # page infer pick-one vs pick-several from the key. Stamp
+                        # the mode on this copy before the key is removed, or
+                        # every such question would turn into pick-one.
+                        if q.get("response_type") not in ("single", "multiple"):
+                            correct_count = sum(1 for a in answers if a.get("correct"))
+                            q["response_type"] = "multiple" if correct_count >= 2 else "single"
+                        for a in answers:
+                            a.pop("correct", None)
             walk(node.get("content"))
         elif isinstance(node, list):
             for child in node:

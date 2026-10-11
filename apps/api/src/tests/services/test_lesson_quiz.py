@@ -114,3 +114,16 @@ class TestStripAnswerKeys:
 
         plain = {"type": "doc", "content": [{"type": "paragraph"}]}
         assert strip_quiz_answer_keys(plain) is plain
+
+    def test_response_mode_survives_key_removal(self):
+        """An older question has no response_type; the page inferred it from the key."""
+        from src.services.courses.lesson_quiz import strip_quiz_answer_keys
+
+        multi = _question("m", {"a", "b"})
+        single = _question("s", {"a"})
+        explicit = {**_question("e", {"a"}), "response_type": "multiple"}
+        stripped = strip_quiz_answer_keys(_quiz(multi, single, explicit))
+        modes = {q["question_id"]: q["response_type"] for q in stripped["content"][1]["attrs"]["questions"]}
+        assert modes == {"m": "multiple", "s": "single", "e": "multiple"}
+        # The stored content is not modified.
+        assert "response_type" not in multi

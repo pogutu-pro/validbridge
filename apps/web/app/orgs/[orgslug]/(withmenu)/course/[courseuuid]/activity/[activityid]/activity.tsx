@@ -204,7 +204,7 @@ function ActivityActions({ activity, activityid, course, orgslug, assignment, sh
             </>
           )}
           {showNavigation && (
-            <NextActivityButton course={course} currentActivityId={activity.id} orgslug={orgslug} />
+            <NextActivityButton course={course} currentActivityId={activity.id} orgslug={orgslug} quizRequired={!!activity.quiz_required} />
           )}
         </AuthenticatedClientElement>
       )}
@@ -390,6 +390,8 @@ function ActivityClient(props: ActivityClientProps) {
 
   // Past the last activity lies the course-end screen holding the certificate.
   const isLastActivity = currentIndex >= 0 && !nextActivity;
+  // True for a learner who still has to pass this lesson's quiz; Next stays shut.
+  const quizRequired = !!activity?.quiz_required;
 
   // Navigate to an activity. A null target means "there is nothing after this
   // one" — on the final activity that means the course-end/certificate screen
@@ -405,6 +407,14 @@ function ActivityClient(props: ActivityClientProps) {
 
     router.push(getUriWithOrg(orgslug, '') + `/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
   };
+
+  // The quiz's score screen has its own "Next lesson" button; it asks the page to
+  // move on, which only happens once the quiz has been passed.
+  React.useEffect(() => {
+    const goNext = () => navigateToActivity(nextActivity)
+    window.addEventListener('vb:next-lesson', goNext)
+    return () => window.removeEventListener('vb:next-lesson', goNext)
+  })
 
   // Initialize focus mode from localStorage
   React.useEffect(() => {
@@ -779,13 +789,15 @@ function ActivityClient(props: ActivityClientProps) {
                             <button
                               onClick={() => navigateToActivity(nextActivity)}
                               className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${
-                                nextActivity || isLastActivity
+                                (nextActivity || isLastActivity) && !quizRequired
                                   ? 'text-gray-700'
                                   : 'opacity-50 text-gray-400 cursor-not-allowed'
                               }`}
-                              disabled={!nextActivity && !isLastActivity}
+                              disabled={(!nextActivity && !isLastActivity) || quizRequired}
                               title={
-                                nextActivity
+                                quizRequired
+                                  ? t('activities.pass_quiz_first', 'Answer the quiz below to complete this lesson.')
+                                  : nextActivity
                                   ? `${t('common.next')}: ${nextActivity.name}`
                                   : isLastActivity
                                     ? t('course.finish_course', 'Finish course')
@@ -1064,6 +1076,7 @@ function ActivityClient(props: ActivityClientProps) {
                               course={course}
                               currentActivityId={activity.id}
                               orgslug={orgslug}
+                              quizRequired={!!activity?.quiz_required}
                             />
                           </div>
                         </div>
@@ -1401,7 +1414,7 @@ export function MarkStatus(props: {
   )
 }
 
-function NextActivityButton({ course, currentActivityId, orgslug }: { course: any, currentActivityId: string, orgslug: string }) {
+function NextActivityButton({ course, currentActivityId, orgslug, quizRequired = false }: { course: any, currentActivityId: string, orgslug: string, quizRequired?: boolean }) {
   const { t } = useTranslation();
   const router = useRouter();
   const _isMobile = useMediaQuery('(max-width: 768px)');
@@ -1442,6 +1455,8 @@ function NextActivityButton({ course, currentActivityId, orgslug }: { course: an
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
 
   const navigateToActivity = () => {
+    // A learner who still owes this lesson's quiz cannot skip ahead.
+    if (quizRequired) return
     router.push(
       isLastActivity
         ? getUriWithOrg(orgslug, '') + `/course/${cleanCourseUuid}/activity/end`
@@ -1452,7 +1467,9 @@ function NextActivityButton({ course, currentActivityId, orgslug }: { course: an
   return (
     <div
       onClick={navigateToActivity}
-      className="bg-gray-200 rounded-md px-3 sm:px-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] flex flex-col p-2 sm:p-2.5 text-gray-600 hover:cursor-pointer transition delay-150 duration-300 ease-in-out hover:bg-gray-200"
+      aria-disabled={quizRequired || undefined}
+      title={quizRequired ? t('activities.pass_quiz_first', 'Answer the quiz below to complete this lesson.') : undefined}
+      className={`bg-gray-200 rounded-md px-3 sm:px-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] flex flex-col p-2 sm:p-2.5 text-gray-600 transition delay-150 duration-300 ease-in-out ${quizRequired ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer hover:bg-gray-200'}`}
     >
       <span className="text-[10px] font-bold text-gray-500 mb-1 uppercase">{t('common.next')}</span>
       <div className="flex items-center space-x-1">

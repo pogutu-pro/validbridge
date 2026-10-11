@@ -442,6 +442,7 @@ function QuizBlockComponent(props: any) {
           questions={questions as TakeQuestion[]}
           checkQuestion={checkQuestion}
           onFinished={finishQuiz}
+          onNextLesson={() => window.dispatchEvent(new CustomEvent('vb:next-lesson'))}
         />
       </NodeViewWrapper>
     )

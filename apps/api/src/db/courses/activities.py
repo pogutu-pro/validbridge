@@ -110,3 +110,5 @@ class ActivityRead(ActivityBase):
     # Set with is_locked when the lesson is closed by sequential progression
     # (an earlier lesson's quiz is not passed), so the client can say why.
     progression_message: Optional[str] = None
+    # True for a learner who still has to pass this lesson's quiz to complete it.
+    quiz_required: bool = False

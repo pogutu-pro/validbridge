@@ -188,3 +188,24 @@ async def can_bypass_progression(request: Any, user: Any, course: Any, db_sessio
         return True
     except HTTPException:
         return False
+
+
+async def is_quiz_required(
+    activity: Activity, user_id: int | None, db_session: AsyncSession
+) -> bool:
+    """True when this learner still has to pass this lesson's quiz.
+
+    The page uses it to say "pass the quiz" on the complete button instead of
+    letting the learner click and be refused. It mirrors the server's own rule:
+    a lesson with a gradable quiz can only be completed through the quiz submit.
+    """
+    if user_id is None or not lesson_has_quiz(activity.content):
+        return False
+    done = (await db_session.execute(
+        select(TrailStep.id).where(
+            TrailStep.activity_id == activity.id,
+            TrailStep.user_id == user_id,
+            TrailStep.complete == True,  # noqa: E712
+        )
+    )).first()
+    return done is None

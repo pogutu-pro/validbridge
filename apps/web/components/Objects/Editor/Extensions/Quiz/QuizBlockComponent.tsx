@@ -522,7 +522,7 @@ function QuizBlockComponent(props: any) {
                 {/* Question header */}
                 <div className="flex items-start justify-between gap-2 mb-1.5 px-1">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[10px] uppercase tracking-widest font-bold text-neutral-400 mb-0.5">
+                    <div className="text-xs uppercase tracking-widest font-bold text-neutral-400 mb-0.5">
                       {t('editor.blocks.quiz_block.question_label', {
                         defaultValue: 'Question',
                       })}{' '}
@@ -540,10 +540,10 @@ function QuizBlockComponent(props: any) {
                             e.target.value
                           )
                         }
-                        className="w-full text-neutral-800 bg-transparent text-sm font-semibold outline-none placeholder:text-neutral-300"
+                        className="w-full text-neutral-800 bg-transparent text-lg font-semibold outline-none placeholder:text-neutral-300"
                       />
                     ) : (
-                      <p className="text-neutral-800 text-sm font-semibold break-words leading-snug">
+                      <p className="text-neutral-800 text-lg font-semibold break-words leading-snug">
                         {question.question || (
                           <span className="text-neutral-300 italic font-normal">
                             {t(
@@ -602,7 +602,7 @@ function QuizBlockComponent(props: any) {
                   </div>
                 ) : (
                   !isSingleResponse && (
-                    <p className="mb-1.5 px-1 text-[10px] font-medium text-neutral-500">
+                    <p className="mb-1.5 px-1 text-xs font-medium text-neutral-500">
                       {t('editor.blocks.quiz_block.select_all_that_apply')}
                     </p>
                   )
@@ -771,13 +771,13 @@ function QuizBlockComponent(props: any) {
                               placeholder={t(
                                 'editor.blocks.quiz_block.answer_placeholder'
                               )}
-                              className="w-full bg-transparent border-0 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none"
+                              className="w-full bg-transparent border-0 text-base text-neutral-700 placeholder:text-neutral-400 outline-none"
                               onClick={(e) => e.stopPropagation()}
                             />
                           ) : (
                             <span
                               className={cn(
-                                'text-sm break-words',
+                                'text-base break-words',
                                 isCorrectReveal
                                   ? 'text-emerald-900 font-medium'
                                   : isWrongSelection
@@ -842,7 +842,7 @@ function QuizBlockComponent(props: any) {
                       onChange={(e) => changeExplanation(question.question_id, e.target.value)}
                       rows={2}
                       placeholder="Explanation, shown after the learner answers correctly (optional)"
-                      className="w-full rounded-lg bg-white border border-neutral-200 px-2 py-1.5 text-xs text-neutral-700 placeholder:text-neutral-400 outline-none focus:ring-2 focus:ring-neutral-200"
+                      className="w-full rounded-lg bg-white border border-neutral-200 px-2 py-1.5 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:ring-2 focus:ring-neutral-200"
                     />
                   )}
 
@@ -851,7 +851,7 @@ function QuizBlockComponent(props: any) {
                     <div
                       role="status"
                       className={cn(
-                        'rounded-lg px-3 py-2 text-xs leading-relaxed',
+                        'rounded-lg px-3 py-2 text-sm leading-relaxed',
                         feedback[question.question_id].correct
                           ? 'bg-emerald-50 text-emerald-800'
                           : 'bg-red-50 text-red-700'
@@ -881,7 +881,7 @@ function QuizBlockComponent(props: any) {
           <div className="mt-2.5">
             <div
               className={cn(
-                'inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-md',
+                'inline-flex items-center gap-1.5 text-sm font-medium px-2 py-1 rounded-md',
                 submissionMessage === 'correct'
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-red-50 text-red-700'

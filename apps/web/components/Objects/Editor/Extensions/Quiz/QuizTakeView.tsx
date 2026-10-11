@@ -38,10 +38,23 @@ interface QuizTakeViewProps {
 
 const letter = (i: number) => String.fromCharCode('A'.charCodeAt(0) + i)
 
+// Fisher-Yates on a copy. Only the DISPLAY order changes; answer ids stay the
+// same, so the server judges the same answers whatever order they were shown in.
+function shuffled<T>(items: T[]): T[] {
+  const out = [...items]
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[out[i], out[j]] = [out[j], out[i]]
+  }
+  return out
+}
+
 // One question per page. The learner picks an answer and is told straight away:
 // a correct answer shows the explanation as a success message and unlocks the
-// next question; a wrong one lets them try again without revealing the answer.
-// Finishing the last question completes the quiz.
+// next question. A wrong answer ends the attempt: nothing is revealed and the
+// learner has to restart the quiz, with the choices shuffled. One try per
+// question is deliberate, otherwise a quiz can be passed by clicking every option
+// until one works. Finishing the last question completes the quiz.
 export default function QuizTakeView({ questions, checkQuestion, onFinished }: QuizTakeViewProps) {
   const [index, setIndex] = React.useState(0)
   const [selected, setSelected] = React.useState<string[]>([])
@@ -50,9 +63,16 @@ export default function QuizTakeView({ questions, checkQuestion, onFinished }: Q
   const [finishing, setFinishing] = React.useState(false)
   const [done, setDone] = React.useState(false)
   const [rightSelections, setRightSelections] = React.useState<Record<string, string[]>>({})
+  // Bumped on every restart so each attempt shows the choices in a new order.
+  const [attempt, setAttempt] = React.useState(0)
 
   const total = questions.length
   const question = questions[index]
+  const displayAnswers = React.useMemo(
+    () => (question ? shuffled(question.answers) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [question?.question_id, attempt]
+  )
 
   if (total === 0) {
     return (
@@ -87,7 +107,7 @@ export default function QuizTakeView({ questions, checkQuestion, onFinished }: Q
   }
 
   const choose = (answerId: string) => {
-    if (checking || answeredRight) return
+    if (checking || answeredRight || answeredWrong) return
     if (isSingle) {
       setSelected([answerId])
       void runCheck([answerId])
@@ -126,6 +146,7 @@ export default function QuizTakeView({ questions, checkQuestion, onFinished }: Q
     setVerdict(null)
     setRightSelections({})
     setDone(false)
+    setAttempt((a) => a + 1)
   }
 
   if (done) {
@@ -176,7 +197,7 @@ export default function QuizTakeView({ questions, checkQuestion, onFinished }: Q
         className="space-y-2.5"
         aria-label={question.question}
       >
-        {question.answers.map((answer, i) => {
+        {displayAnswers.map((answer, i) => {
           const isSelected = selected.includes(answer.answer_id)
           const showRight = answeredRight && isSelected
           const showWrong = answeredWrong && isSelected
@@ -186,7 +207,7 @@ export default function QuizTakeView({ questions, checkQuestion, onFinished }: Q
               type="button"
               role={isSingle ? 'radio' : 'checkbox'}
               aria-checked={isSelected}
-              disabled={checking || answeredRight}
+              disabled={checking || answeredRight || answeredWrong}
               onClick={() => choose(answer.answer_id)}
               className={cn(
                 'flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-start text-lg transition-colors outline-none',
@@ -195,7 +216,7 @@ export default function QuizTakeView({ questions, checkQuestion, onFinished }: Q
                 showWrong && 'border-red-300 bg-red-50 text-red-800',
                 !showRight && !showWrong && isSelected && 'border-neutral-800 bg-white',
                 !showRight && !showWrong && !isSelected && 'border-neutral-200 bg-white hover:bg-neutral-100',
-                (checking || answeredRight) && 'cursor-default'
+                (checking || answeredRight || answeredWrong) && 'cursor-default'
               )}
             >
               <span
@@ -216,7 +237,7 @@ export default function QuizTakeView({ questions, checkQuestion, onFinished }: Q
         })}
       </div>
 
-      {!isSingle && !answeredRight && (
+      {!isSingle && !answeredRight && !answeredWrong && (
         <button
           onClick={() => void runCheck(selected)}
           disabled={checking || selected.length === 0}
@@ -244,8 +265,14 @@ export default function QuizTakeView({ questions, checkQuestion, onFinished }: Q
         </div>
       )}
       {answeredWrong && (
-        <div role="status" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-base font-medium text-red-700">
-          Not quite. {isSingle ? 'Pick another answer.' : 'Change your selection and check again.'}
+        <div role="status" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-base text-red-700">
+          <p className="font-bold">Incorrect.</p>
+          <button
+            onClick={restart}
+            className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-base font-semibold text-white transition-colors hover:bg-red-700"
+          >
+            Restart quiz
+          </button>
         </div>
       )}
     </div>

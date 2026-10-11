@@ -201,6 +201,9 @@ async def _apply_progression_lock(
     if isinstance(current_user, AnonymousUser):
         return
     if await can_bypass_progression(request, current_user, course, db_session):
+        from src.services.courses.lesson_quiz import lesson_has_quiz
+
+        activity_read.staff_bypass_quiz = lesson_has_quiz(activity.content)
         return
     learner_id = resolve_acting_user_id(current_user)
     # Computed from the stored content, before the answer key is stripped below.

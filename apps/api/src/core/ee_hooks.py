@@ -107,7 +107,30 @@ async def check_ee_activity_paid_access(request, activity_id, user, db_session) 
         paywall_offer = await get_paywall_offer(course_uuid, db_session)
         if paywall_offer is None:
             return True
+        # Authors, maintainers and admins always see the content they manage. The
+        # permission layer already exempts them from the paywall; this gate did
+        # not, so attaching an offer to a course blanked the lesson for the people
+        # building it, including in the editor, where an instructor then saw an
+        # empty lesson and could not add a quiz.
+        if await _can_manage_course(request, user, course_uuid, db_session):
+            return True
         return await check_enrollment_access(course_uuid, user_id, db_session)
+    except Exception:
+        return False
+
+
+async def _can_manage_course(request, user, course_uuid: str, db_session) -> bool:
+    """True when the user may edit the course (author, maintainer or admin).
+
+    Any failure to decide counts as "not staff", never as an error: the caller then
+    falls through to the paid-enrolment check, so a problem here cannot lock out a
+    student who has paid.
+    """
+    from src.security.rbac import AccessAction, check_resource_access
+
+    try:
+        await check_resource_access(request, db_session, user, course_uuid, AccessAction.UPDATE)
+        return True
     except Exception:
         return False
 

@@ -90,6 +90,17 @@ function NewActivityButton(props: NewActivityButtonProps) {
     queryClient.invalidateQueries({ queryKey: queryKeys.courses.meta(cleanCourseUuid(course.courseStructure.course_uuid)) })
     toast.dismiss(toast_loading)
     toast.success(t('dashboard.courses.structure.activity.toasts.create_success'))
+    // New activities start as drafts and students cannot see a draft. A quiz page
+    // is the one authors most often forget to publish, so say so.
+    if (activity?.content?.content?.[0]?.type === 'blockQuiz') {
+      toast(
+        t('dashboard.courses.structure.activity.toasts.quiz_is_draft', {
+          defaultValue:
+            'Quiz page created as a draft. Add questions, then publish it from its menu so students can see it.',
+        }),
+        { duration: 8000 }
+      )
+    }
     setNewActivityModal(false)
     await revalidateTags(['courses'], props.orgslug)
     router.refresh()

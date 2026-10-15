@@ -147,6 +147,14 @@ function LessonRow({ activity, courseUuid, org }: { activity: any; courseUuid: s
       <span className="flex items-center gap-2 min-w-0 text-sm text-gray-800">
         {isAssignment && <Backpack size={14} className="text-amber-500 flex-none" />}
         <span className="truncate">{activity.name}</span>
+        {activity.published === false && (
+          <span
+            className="flex-none rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
+            title="Students cannot see a draft. Publish it from the course structure menu."
+          >
+            {t('dashboard.assignments.outline.draft', { defaultValue: 'Draft: students cannot see this' })}
+          </span>
+        )}
         {hasQuiz && (
           <span className="flex-none inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 rounded-full px-2 py-0.5">
             <CheckCircle2 size={12} />

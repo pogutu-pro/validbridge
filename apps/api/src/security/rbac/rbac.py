@@ -18,7 +18,7 @@ from src.security.rbac.utils import (
 )
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
-from src.services.payments.payments_access import check_enrollment_access, get_paywall_offer
+from src.services.payments.payments_access import check_enrollment_access, get_paywall_offer, started_before_paywall
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +81,16 @@ async def check_usergroup_access(
         # from 403 Forbidden) so the frontend can render the paywall.
         offer_meta = await get_paywall_offer(resource_uuid, db_session)
         if offer_meta:
+            # A student who was already taking the course before it went behind an
+            # offer keeps their access; only students who start afterwards pay. Only
+            # asked when an offer would otherwise deny them, and any failure to
+            # decide counts as "no head start", so it can never grant by accident.
+            try:
+                if await started_before_paywall(resource_uuid, user_id, db_session):
+                    logger.info("[USERGROUP_ACCESS] User %s started before the paywall, granting access", user_id)
+                    return True
+            except Exception:
+                logger.exception("[USERGROUP_ACCESS] head-start check failed, treating as none")
             logger.info("[USERGROUP_ACCESS] Resource is behind paid offer %s, returning 402", offer_meta["offer_id"])
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,

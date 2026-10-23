@@ -64,6 +64,10 @@ def invalidate_org_billing_caches(org_id: int) -> None:
         logger.debug("billing cache invalidation failed", exc_info=True)
 
 
+# Plans a school can hold without having paid for a period (the free entry tiers).
+FREE_TRIAL_BASE_PLANS = frozenset({"starter", "public-education"})
+
+
 async def grant_plan(
     org_id: int,
     plan: str,

@@ -222,3 +222,51 @@ async def test_manual_plan_activates_for_the_period(db, org, sa, monkeypatch):
     assert sub.plan == "business" and sub.period_end is not None
     inv = (await db.execute(select(Invoice))).scalars().one()
     assert inv.status == "paid" and inv.total_cents == kes(96900)
+
+
+async def test_free_trial_grants_the_plan_then_reverts_without_charging(db, org, sa, monkeypatch):
+    from datetime import UTC, datetime, timedelta
+    from src.services.billing import cycle, notify
+
+    async def quiet(*a, **k):
+        return None
+
+    monkeypatch.setattr(notify, "_send", quiet)
+    monkeypatch.setenv("VALIDBRIDGE_BILLING_ENABLED", "true")
+    await _cfg(db, org.id, "starter")
+    out = await sab.api_free_trial(org.id, sab.FreeTrialBody(reason="client onboarding trial", plan="growth", days=30), None, sa, db)
+    assert out["plan"] == "growth"
+    assert (await ent_mod.get_entitlements(org.id, db, use_cache=False)).plan == "growth"
+    sub = await accounts.get_subscription(org.id, db)
+    assert sub.pending_plan == "starter" and sub.period_end is not None
+    assert (await db.execute(select(Invoice))).scalars().all() == [], "a trial raises no invoice"
+
+    # Mid-trial the billing run neither charges nor downgrades.
+    await cycle.run_cycle(db, now=datetime.now(UTC) + timedelta(days=10))
+    assert (await ent_mod.get_entitlements(org.id, db, use_cache=False)).plan == "growth"
+    assert (await db.execute(select(Invoice))).scalars().all() == []
+
+    # After the period the plan returns to Starter, still with nothing charged.
+    await cycle.run_cycle(db, now=datetime.now(UTC) + timedelta(days=31))
+    assert (await ent_mod.get_entitlements(org.id, db, use_cache=False)).plan == "starter"
+    assert (await db.execute(select(Invoice))).scalars().all() == []
+    assert await _audits(db, "free_trial")
+
+
+async def test_free_trial_rejects_free_plans_and_orgs_already_paying(db, org, sa, monkeypatch):
+    from src.services.billing import notify
+
+    async def quiet(*a, **k):
+        return None
+
+    monkeypatch.setattr(notify, "_send", quiet)
+    await _cfg(db, org.id, "starter")
+    with pytest.raises(HTTPException) as e:
+        await sab.api_free_trial(org.id, sab.FreeTrialBody(reason="nothing to trial", plan="starter"), None, sa, db)
+    assert e.value.status_code == 400
+    await sab.api_manual_plan(org.id, sab.ManualPlanBody(
+        reason="paid by M-Pesa to paybill", plan="business", cycle="monthly", months=1,
+        amount_cents=kes(9000), method="mpesa", payment_reference="QK1"), None, sa, db)
+    with pytest.raises(HTTPException) as e:
+        await sab.api_free_trial(org.id, sab.FreeTrialBody(reason="already paying", plan="growth"), None, sa, db)
+    assert e.value.status_code == 409

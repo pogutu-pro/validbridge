@@ -39,6 +39,7 @@ export default function DealCard({ orgId, accessToken }: { orgId: string; access
   const [method, setMethod] = useState('bank_transfer')
   const [payRef, setPayRef] = useState('')
   const [mp, setMp] = useState({ plan: 'growth', cycle: 'monthly', months: '1', amount: '' })
+  const [trial, setTrial] = useState({ plan: 'growth', days: '30' })
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -165,6 +166,30 @@ export default function DealCard({ orgId, accessToken }: { orgId: string; access
               remove custom price
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Free trial */}
+      <div>
+        <p className="text-xs font-semibold text-[#262626]/70 mb-2">Free trial</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-[#262626]/70">Give</span>
+          <select value={trial.plan} onChange={(e) => setTrial({ ...trial, plan: e.target.value })} className={input}>
+            {PLANS.filter((p) => p !== 'starter').map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <span className="text-sm text-[#262626]/70">free for</span>
+          <input value={trial.days} onChange={(e) => setTrial({ ...trial, days: e.target.value })} className={`${input} w-14`} />
+          <span className="text-sm text-[#262626]/70">days, then back to Starter</span>
+          <button
+            disabled={busy || !reasonOk || !(Number(trial.days) >= 1)}
+            onClick={() => {
+              if (!window.confirm(`Start a free ${trial.plan} trial for ${trial.days} days? Nothing is charged, and the plan returns to Starter when it ends.`)) return
+              call('/free-trial', 'POST', { plan: trial.plan, days: Number(trial.days) }, 'Free trial started')
+            }}
+            className={btn}
+          >
+            Start trial
+          </button>
         </div>
       </div>
 

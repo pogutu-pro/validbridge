@@ -515,6 +515,63 @@ async def api_manual_plan(
     return {"status": "ok", "plan": body.plan, "until": end.isoformat(), "invoice": number}
 
 
+class FreeTrialBody(Reason):
+    plan: str = Field(max_length=32)
+    days: int = Field(default=30, ge=1, le=90)
+
+
+@router.post("/orgs/{org_id}/free-trial")
+async def api_free_trial(
+    org_id: int,
+    body: FreeTrialBody,
+    request: Request,
+    current_user: Any = Depends(require_session_superadmin),
+    db: AsyncSession = Depends(get_db_session),
+):
+    """Give a school any paid plan free for ``days`` (30 by default).
+
+    The plan is granted now and a downgrade to Starter is recorded as the
+    subscription's pending change, which the billing cycle applies when the
+    period ends. No invoice is raised and nothing is charged. If the school
+    buys a plan during the trial, ``grant_plan`` clears the pending downgrade.
+    """
+    from datetime import timedelta
+
+    _, catalog = await get_active_catalog(db)
+    plans = catalog.get("plans") or {}
+    if body.plan not in plans or not (plans[body.plan] or {}).get("price_cents"):
+        raise HTTPException(status_code=400, detail="A free trial needs a paid plan")
+    await accounts.ensure_account(org_id, db, lock=True)
+    current = await accounts.current_plan(org_id, db)
+    existing = await accounts.get_subscription(org_id, db)
+    now = utcnow()
+    still_paid = (
+        existing is not None
+        and existing.plan not in grants.FREE_TRIAL_BASE_PLANS
+        and not existing.pending_plan
+        and (existing.period_end is None or pricing.aware(existing.period_end) > now)
+    )
+    if still_paid:
+        raise HTTPException(
+            status_code=409,
+            detail=f"This organization is already on a paid {existing.plan} plan; a trial would not add anything",
+        )
+    end = now + timedelta(days=body.days)
+    await grants.grant_plan(org_id, body.plan, "monthly", now, end, db)
+    sub = await accounts.get_subscription(org_id, db)
+    sub.pending_plan = "starter"
+    sub.pending_cycle = "monthly"
+    db.add(sub)
+    await db.commit()
+    grants.invalidate_org_billing_caches(org_id)
+    await record_superadmin_action(
+        db, _acting_user_id(current_user), "billing.free_trial", org_id=org_id, reason=body.reason,
+        before={"plan": current}, after={"plan": body.plan, "trial_until": end.isoformat(), "days": body.days},
+        request=request, diff_only=False, strict=True,
+    )
+    return {"status": "ok", "plan": body.plan, "trial_until": end.isoformat()}
+
+
 @router.post("/orgs/{org_id}/grant-pack")
 async def api_grant_pack(
     org_id: int,

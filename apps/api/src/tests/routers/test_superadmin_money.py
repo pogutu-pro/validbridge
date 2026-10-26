@@ -15,7 +15,11 @@ from src.routers.superadmin_money import router
 from src.security.superadmin import _get_current_user_lazy
 
 BASE = "/api/v1/ee/superadmin"
-NOW = datetime.now(timezone.utc)
+
+
+def now():
+    # Evaluated per test: a module-level value goes stale during a long suite run.
+    return datetime.now(timezone.utc)
 
 
 @pytest.fixture
@@ -38,23 +42,23 @@ async def client(db):
 
 
 async def test_money_dashboard(client, db, org):
-    last_month = NOW.replace(day=1) - timedelta(days=3)
+    last_month = now().replace(day=1) - timedelta(days=3)
     db.add_all([
-        PaymentAttempt(reference="vb_a", org_id=org.id, purpose="invoice", amount_cents=500000, status="success", created_at=NOW),
+        PaymentAttempt(reference="vb_a", org_id=org.id, purpose="invoice", amount_cents=500000, status="success", created_at=now()),
         PaymentAttempt(reference="vb_b", org_id=org.id, purpose="invoice", amount_cents=200000, status="success", created_at=last_month),
-        PaymentAttempt(reference="vbw_c", org_id=org.id, purpose="wallet", amount_cents=999999, status="success", created_at=NOW),
-        PaymentAttempt(reference="vb_d", org_id=org.id, purpose="invoice", amount_cents=999999, status="failed", created_at=NOW),
-        Invoice(org_id=org.id, number="I1", period="p", lines=[], total_cents=1000, status="open", catalog_version=1, created_at=NOW - timedelta(days=5)),
-        Invoice(org_id=org.id, number="I2", period="p", lines=[], total_cents=2000, status="failed", catalog_version=1, created_at=NOW - timedelta(days=45)),
-        Invoice(org_id=org.id, number="I3", period="p", lines=[], total_cents=4000, status="open", catalog_version=1, created_at=NOW - timedelta(days=90)),
+        PaymentAttempt(reference="vbw_c", org_id=org.id, purpose="wallet", amount_cents=999999, status="success", created_at=now()),
+        PaymentAttempt(reference="vb_d", org_id=org.id, purpose="invoice", amount_cents=999999, status="failed", created_at=now()),
+        Invoice(org_id=org.id, number="I1", period="p", lines=[], total_cents=1000, status="open", catalog_version=1, created_at=now() - timedelta(days=5)),
+        Invoice(org_id=org.id, number="I2", period="p", lines=[], total_cents=2000, status="failed", catalog_version=1, created_at=now() - timedelta(days=45)),
+        Invoice(org_id=org.id, number="I3", period="p", lines=[], total_cents=4000, status="open", catalog_version=1, created_at=now() - timedelta(days=90)),
         Invoice(org_id=org.id, number="I4", period="p", lines=[], total_cents=700, status="paid", paid_via="manual", catalog_version=1),
-        BillingSubscription(org_id=org.id, plan="growth", cycle="monthly", period_start=NOW, period_end=NOW + timedelta(days=30)),
+        BillingSubscription(org_id=org.id, plan="growth", cycle="monthly", period_start=now(), period_end=now() + timedelta(days=30)),
         LedgerEntry(org_id=org.id, amount_cents=8000, kind="topup", balance_after_cents=8000),
     ])
     await db.commit()
     body = (await client.get(f"{BASE}/money")).json()
     months = {m["month"]: m["cents"] for m in body["collected_by_month"]}
-    assert len(months) == 6 and months[NOW.strftime("%Y-%m")] == 500000, "wallet top-ups and failed payments are not revenue"
+    assert len(months) == 6 and months[now().strftime("%Y-%m")] == 500000, "wallet top-ups and failed payments are not revenue"
     assert sum(months.values()) == 700000
     assert [(b["count"], b["cents"]) for b in body["unpaid_aging"]] == [(1, 1000), (1, 2000), (1, 4000)]
     assert body["unpaid_total_cents"] == 7000 and body["recorded_manually"] == {"count": 1, "cents": 700}
@@ -82,7 +86,7 @@ async def test_health_reports_each_check_and_hides_secrets(client, monkeypatch):
 
 async def test_health_flags_stuck_live_classes(client, db, org, course, monkeypatch):
     db.add(LiveSession(session_uuid="old", org_id=org.id, course_id=course.id, title="Forgotten", status=LiveSessionStatus.LIVE,
-                       scheduled_at=NOW - timedelta(hours=20), livekit_room_name="r"))
+                       scheduled_at=now() - timedelta(hours=20), livekit_room_name="r"))
     await db.commit()
     checks = {c["name"]: c for c in (await client.get(f"{BASE}/health")).json()["checks"]}
     assert checks["Live classes"]["ok"] is False and "1 live classes" in checks["Live classes"]["detail"]

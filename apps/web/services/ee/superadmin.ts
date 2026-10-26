@@ -301,3 +301,41 @@ export async function getViewAsPage(accessToken: string, grant: string, orgId: n
   if (!res.ok) return failure(res, 'Could not load this page')
   return res.json()
 }
+
+// ── Search and people ─────────────────────────────────────────────────────────
+
+export interface SearchResults {
+  people: { user_uuid: string; username: string; email: string; name: string }[]
+  orgs: { id: number; name: string; slug: string }[]
+}
+
+export async function searchPlatform(accessToken: string, q: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/search?q=${encodeURIComponent(q)}`, {
+    headers: authHeaders(accessToken),
+  })
+  if (!res.ok) return failure(res, 'Search failed')
+  return (await res.json()) as SearchResults
+}
+
+export async function getPerson(accessToken: string, userUuid: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/people/${encodeURIComponent(userUuid)}`, {
+    headers: authHeaders(accessToken),
+  })
+  if (!res.ok) return failure(res, 'Person not found')
+  return res.json()
+}
+
+export async function personAction(
+  accessToken: string,
+  userUuid: string,
+  action: 'sign-out' | 'unlock' | 'verify-email',
+  reason: string
+) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/people/${encodeURIComponent(userUuid)}/${action}`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ reason }),
+  })
+  if (!res.ok) return failure(res, 'Action failed')
+  return res.json()
+}

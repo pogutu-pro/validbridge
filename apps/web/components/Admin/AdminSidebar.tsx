@@ -21,6 +21,8 @@ import {
   MagnifyingGlass,
   Gauge,
   Broadcast,
+  CurrencyCircleDollar,
+  Heartbeat,
 } from '@phosphor-icons/react'
 import { signOut } from '@components/Contexts/AuthContext'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
@@ -148,6 +150,17 @@ export default function AdminSidebar() {
     {
       label: 'GOVERNANCE',
       items: [
+        {
+          href: '/admin/money',
+          icon: <CurrencyCircleDollar size={18} weight={isActive('/admin/money') ? 'fill' : 'bold'} />,
+          label: 'Money',
+          requires: 'billing_read',
+        },
+        {
+          href: '/admin/health',
+          icon: <Heartbeat size={18} weight={isActive('/admin/health') ? 'fill' : 'bold'} />,
+          label: 'System health',
+        },
         {
           href: '/admin/audit',
           icon: <ClockCounterClockwise size={18} weight={isActive('/admin/audit') ? 'fill' : 'bold'} />,

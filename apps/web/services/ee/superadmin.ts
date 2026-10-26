@@ -353,3 +353,17 @@ export async function getMonitor(accessToken: string, kind: 'live' | 'exams') {
   if (!res.ok) return failure(res, 'Failed to load the monitor')
   return (await res.json()) as { items: any[] }
 }
+
+// ── Money dashboard and system health ─────────────────────────────────────────
+
+export async function getMoneyDashboard(accessToken: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/money`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load the money dashboard')
+  return res.json()
+}
+
+export async function getSystemHealth(accessToken: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/health`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load system health')
+  return res.json()
+}

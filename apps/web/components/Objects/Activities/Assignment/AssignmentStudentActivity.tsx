@@ -290,7 +290,8 @@ function AssignmentStudentActivity() {
         const taskPassed = taskPercentage >= passingThreshold;
 
         return (
-          <div className='flex flex-col space-y-2' key={task.assignment_task_uuid}>
+          // The id is the anchor the exam question navigator scrolls to.
+          <div className='flex flex-col space-y-2 scroll-mt-24' id={`exam-q-${task.assignment_task_uuid}`} key={task.assignment_task_uuid}>
             <div className='flex flex-col md:flex-row md:justify-between py-2 space-y-2 md:space-y-0'>
               <div className='flex flex-wrap space-x-2 font-semibold text-slate-800'>
                 <p>{t('assignments.task')} {index + 1} : </p>

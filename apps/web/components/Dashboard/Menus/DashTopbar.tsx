@@ -20,6 +20,7 @@ const SECTION_TITLES: { match: string; labelKey: string; fallback: string }[] = 
   { match: '/dash/courses/migrate', labelKey: 'dashboard.courses.migrate', fallback: 'Migrate courses' },
   { match: '/dash/courses', labelKey: 'courses.courses', fallback: 'Courses' },
   { match: '/dash/assignments', labelKey: 'common.assignments', fallback: 'Assignments' },
+  { match: '/dash/exams', labelKey: 'common.exams', fallback: 'Exams' },
   { match: '/dash/library', labelKey: 'library.library', fallback: 'Library' },
   { match: '/dash/connect', labelKey: 'communities.title', fallback: 'Connect' },
   { match: '/dash/podcasts', labelKey: 'podcasts.podcasts', fallback: 'Podcasts' },

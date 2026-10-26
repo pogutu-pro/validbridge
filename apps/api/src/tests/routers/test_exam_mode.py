@@ -429,3 +429,48 @@ class TestOneBrowserAtATime:
         await self._start(client, "window-b")
         events = await _events(db)
         assert ("second_window", False) in events and ("second_window", True) not in events
+
+
+class TestOrgOverview:
+    async def test_staff_see_every_exam_with_live_counts(self, client, db, state, org, admin_user, regular_user, assignment, task, enrolled):
+        await _enable(client, state, admin_user, regular_user, duration_minutes=30)
+        state["user"] = admin_user
+        row = (await client.get(f"/api/v1/exams/org/{org.id}")).json()[0]
+        assert row["title"] == "CAT 1" and row["course_name"] == "Test Course" and row["state"] == "open"
+        assert (row["enrolled"], row["not_started"], row["in_progress"], row["submitted"], row["flagged"]) == (1, 1, 0, 0, 0)
+
+        state["user"] = regular_user
+        await client.post(f"/api/v1/exams/{UUID}/start")
+        await client.post(f"/api/v1/exams/{UUID}/heartbeat", json={"camera_on": False, "screen_shared": True, "fullscreen": True})
+        state["user"] = admin_user
+        row = (await client.get(f"/api/v1/exams/org/{org.id}")).json()[0]
+        assert row["state"] == "running"
+        assert (row["not_started"], row["in_progress"], row["flagged"], row["disconnected"]) == (0, 1, 1, 0)
+
+        state["user"] = regular_user
+        await client.post(f"/api/v1/exams/{UUID}/finish")
+        state["user"] = admin_user
+        row = (await client.get(f"/api/v1/exams/org/{org.id}")).json()[0]
+        assert (row["in_progress"], row["submitted"]) == (0, 1) and row["state"] == "open"
+
+    async def test_a_silent_browser_counts_as_disconnected(self, client, db, state, org, admin_user, regular_user, assignment, enrolled):
+        await _enable(client, state, admin_user, regular_user)
+        await client.post(f"/api/v1/exams/{UUID}/start")
+        session = await _session(db)
+        session.last_seen_at = datetime.now(timezone.utc) - timedelta(seconds=60)
+        db.add(session)
+        await db.commit()
+        state["user"] = admin_user
+        assert (await client.get(f"/api/v1/exams/org/{org.id}")).json()[0]["disconnected"] == 1
+
+    async def test_students_see_nothing_and_exams_that_are_off_are_not_listed(self, client, db, state, org, admin_user, regular_user, assignment, enrolled):
+        await _enable(client, state, admin_user, regular_user)
+        assert (await client.get(f"/api/v1/exams/org/{org.id}")).json() == [], "a student is not staff on any course"
+        state["user"] = admin_user
+        await client.put(f"/api/v1/exams/{UUID}", json={"enabled": False, "duration_minutes": 30})
+        assert (await client.get(f"/api/v1/exams/org/{org.id}")).json() == []
+
+    async def test_other_organisations_are_off_limits(self, client, state, other_org, admin_user):
+        state["user"] = admin_user
+        assert (await client.get(f"/api/v1/exams/org/{other_org.id}")).status_code == 403
+        assert (await client.get("/api/v1/exams/org/9999")).status_code == 404

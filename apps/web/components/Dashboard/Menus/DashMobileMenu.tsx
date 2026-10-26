@@ -6,6 +6,7 @@ import {
   House,
   BookOpen,
   Files,
+  ShieldCheck,
   Users,
   CurrencyCircleDollar,
   Buildings,
@@ -111,6 +112,7 @@ function DashMobileMenu() {
           {/* Progressive reveal — more icons as viewport widens */}
           <PillLink href="/dash/courses" icon={<BookOpen size={17} weight="fill" />} active={isActive('/dash/courses')} className="flex" />
           <PillLink href="/dash/assignments" icon={<Files size={17} weight="fill" />} active={isActive('/dash/assignments')} className="flex" />
+          <PillLink href="/dash/exams" icon={<ShieldCheck size={17} weight="fill" />} active={isActive('/dash/exams')} className="hidden min-[360px]:flex" />
           {access.users && <PillLink href="/dash/users/settings/users" icon={<Users size={17} weight="fill" />} active={isActive('/dash/users')} className="hidden min-[410px]:flex" />}
           {isEnabled('communities') && (
             <PillLink href="/dash/connect" icon={<ChatsCircle size={17} weight="fill" />} active={isActive('/dash/connect')} className="hidden min-[460px]:flex" />
@@ -222,6 +224,7 @@ function DashMobileMenu() {
                 <PanelItem href="/dash/courses" icon={<BookOpen size={15} weight="fill" />} label={t('courses.courses')} active={isActive('/dash/courses')} onClick={close} />
                 {isEnabled('folders') && <PanelItem href="/dash/library" icon={<FolderSimple size={15} weight="fill" />} label={t('library.library')} active={isActive('/dash/library')} onClick={close} />}
                 <PanelItem href="/dash/assignments" icon={<Files size={15} weight="fill" />} label={t('common.assignments')} active={isActive('/dash/assignments')} onClick={close} />
+                <PanelItem href="/dash/exams" icon={<ShieldCheck size={15} weight="fill" />} label={t('common.exams', { defaultValue: 'Exams' })} active={isActive('/dash/exams')} onClick={close} />
                 {access.users && <PanelItem href="/dash/users/settings/users" icon={<Users size={15} weight="fill" />} label={t('common.users')} active={isActive('/dash/users')} onClick={close} />}
                 {isEnabled('communities') && <PanelItem href="/dash/connect" icon={<ChatsCircle size={15} weight="fill" />} label={t('communities.title')} active={isActive('/dash/connect')} onClick={close} />}
                 {isEnabled('podcasts') && <PanelItem href="/dash/podcasts" icon={<Headphones size={15} weight="fill" />} label={t('podcasts.podcasts')} active={isActive('/dash/podcasts')} onClick={close} />}

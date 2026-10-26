@@ -19,6 +19,7 @@ import {
   useAIEditorDispatch,
 } from '@components/Contexts/AI/AIEditorContext'
 import { useTranslation } from 'react-i18next'
+import toast from 'react-hot-toast'
 import { useVBAnalytics, AnalyticsEvent } from '@services/analytics'
 
 // Extensions
@@ -309,6 +310,7 @@ function Editor(props: EditorProps) {
           const hasQuiz = JSON.stringify(editor.getJSON()).includes('"blockQuiz"')
           if (!hasQuiz) {
             editor.chain().focus('end').insertContent({ type: 'blockQuiz' }).run()
+            toast('Quiz added at the end of this lesson. Add your questions, then press Save so students can see it.', { duration: 8000 })
           }
           params.delete('addQuiz')
           const qs = params.toString()

@@ -456,3 +456,151 @@ class TestMyLiveLessons:
         await _create(client)
         state["user"] = regular_user
         assert (await client.get("/api/v1/live/me")).json() == {"sessions": [], "recordings": []}
+
+
+# ---------------------------------------------------------------------------
+# Recordings are for the students who missed the lesson
+# ---------------------------------------------------------------------------
+
+
+class TestShareWithAbsentees:
+    @pytest.fixture
+    def mail(self):
+        with patch("src.services.email.utils.send_email") as send, patch(
+            "src.services.email.utils.get_org_signup_base_url", new_callable=AsyncMock, return_value="https://school.example.test/"
+        ):
+            yield send
+
+    async def _drain(self):
+        import asyncio
+        from src.services.live import invitations
+
+        if invitations._background:
+            await asyncio.gather(*list(invitations._background))
+
+    async def _attendee(self, db, org, course, session_uuid):
+        """A second enrolled student who really joined the lesson."""
+        from src.db.live_sessions import LiveParticipantRole, LiveSessionParticipant
+        from src.db.trail_runs import TrailRun
+        from src.db.trails import Trail
+        from src.db.user_organizations import UserOrganization
+        from src.db.users import User
+
+        db.add(User(id=3, username="present", first_name="Pat", last_name="Present", email="present@test.com", password="x",
+                    user_uuid="user_present", creation_date="now", update_date="now"))
+        await db.commit()
+        db.add(UserOrganization(user_id=3, org_id=org.id, role_id=4, creation_date="now", update_date="now"))
+        trail = Trail(org_id=org.id, user_id=3, trail_uuid="trail_present", creation_date="now", update_date="now")
+        db.add(trail)
+        await db.commit()
+        db.add(TrailRun(trail_id=trail.id, course_id=course.id, org_id=org.id, user_id=3, creation_date="now", update_date="now"))
+        s = await _load(db, session_uuid)
+        db.add(LiveSessionParticipant(session_id=s.id, user_id=3, org_id=org.id, role=LiveParticipantRole.LEARNER, connection_count=1))
+        await db.commit()
+
+    async def _record(self, client, db, **extra):
+        uuid = await _live(client, db, **extra)
+        await client.post(f"/api/v1/live/sessions/{uuid}/recordings/start")
+        await _egress(client, db, uuid, "EGRESS_COMPLETE", "egress_ended")
+        return uuid
+
+    async def test_a_published_recording_is_sent_to_the_students_who_missed_the_lesson(
+        self, client, db, org, course, chapter, admin_user, regular_user, enrolled, recording_env, mail
+    ):
+        uuid = await _live(client, db)
+        await self._attendee(db, org, course, uuid)
+        await client.post(f"/api/v1/live/sessions/{uuid}/recordings/start")
+        await _egress(client, db, uuid, "EGRESS_COMPLETE", "egress_ended")
+        await self._drain()
+        assert [c.args[0] for c in mail.call_args_list] == ["regular@test.com"], "the student who attended is not emailed; the one who missed it is"
+        subject, body = mail.call_args_list[0].args[1:3]
+        rec = await _recording(db, uuid)
+        assert subject == "You missed Week 1 live lecture: watch the recording"
+        assert f"https://school.example.test/course/test/activity/{rec.activity_uuid.removeprefix('activity_')}" in body
+        assert (await _load(db, uuid)).recording_shared_at is not None
+
+    async def test_a_draft_recording_is_not_sent(self, client, db, org, course, chapter, enrolled, recording_env, mail):
+        await self._record(client, db, publish_recordings=False)
+        await self._drain()
+        mail.assert_not_called()
+
+    async def test_the_automatic_send_happens_once_per_lesson(self, client, db, org, course, chapter, enrolled, recording_env, mail):
+        from src.services.live.recording_share import auto_share
+
+        uuid = await self._record(client, db)
+        await self._drain()
+        assert mail.call_count == 1
+        rec = await _recording(db, uuid)
+        lesson = (await db.execute(select(Activity).where(Activity.activity_uuid == rec.activity_uuid))).scalars().one()
+        assert await auto_share(db, await _load(db, uuid), lesson) == 0
+        await self._drain()
+        assert mail.call_count == 1
+
+    async def test_nobody_enrolled_means_nobody_emailed(self, client, db, org, course, chapter, recording_env, mail):
+        uuid = await self._record(client, db)
+        await self._drain()
+        mail.assert_not_called()
+        assert (await _load(db, uuid)).status is not None
+
+    async def test_staff_can_publish_a_draft_and_share_it(self, client, db, org, course, chapter, admin_user, regular_user, enrolled, recording_env, mail):
+        uuid = await self._record(client, db, publish_recordings=False)
+        rec = await _recording(db, uuid)
+        res = await client.post(f"/api/v1/live/recordings/{rec.recording_uuid}/share", json={"publish": True, "audience": "absent"})
+        assert res.status_code == 200, res.text
+        assert res.json() == {"published": True, "published_now": True, "queued": 1, "audience": "absent"}
+        await self._drain()
+        lesson = (await db.execute(select(Activity).where(Activity.activity_uuid == rec.activity_uuid))).scalars().one()
+        await db.refresh(lesson)
+        assert lesson.published is True
+        assert [c.args[0] for c in mail.call_args_list] == ["regular@test.com"]
+
+    async def test_a_draft_is_not_shared_unless_staff_agree_to_publish_it(self, client, db, org, course, chapter, enrolled, recording_env, mail):
+        uuid = await self._record(client, db, publish_recordings=False)
+        rec = await _recording(db, uuid)
+        res = await client.post(f"/api/v1/live/recordings/{rec.recording_uuid}/share", json={"publish": False})
+        assert res.status_code == 409 and res.json()["detail"]["code"] == "RECORDING_NOT_PUBLISHED"
+        await self._drain()
+        mail.assert_not_called()
+
+    async def test_sharing_with_everyone_includes_those_who_attended(self, client, db, org, course, chapter, admin_user, regular_user, enrolled, recording_env, mail):
+        uuid = await _live(client, db)
+        await self._attendee(db, org, course, uuid)
+        await client.post(f"/api/v1/live/sessions/{uuid}/recordings/start")
+        await _egress(client, db, uuid, "EGRESS_COMPLETE", "egress_ended")
+        await self._drain()
+        mail.reset_mock()
+        rec = await _recording(db, uuid)
+        res = await client.post(f"/api/v1/live/recordings/{rec.recording_uuid}/share", json={"audience": "everyone"})
+        assert res.json()["queued"] == 2
+        await self._drain()
+        assert sorted(c.args[0] for c in mail.call_args_list) == ["present@test.com", "regular@test.com"]
+        assert mail.call_args_list[0].args[1] == "Recording available: Week 1 live lecture"
+
+    async def test_only_ready_recordings_can_be_shared_and_only_by_staff(self, client, db, state, org, course, chapter, admin_user, regular_user, enrolled, recording_env, mail):
+        uuid = await _live(client, db)
+        await client.post(f"/api/v1/live/sessions/{uuid}/recordings/start")
+        rec = await _recording(db, uuid)
+        res = await client.post(f"/api/v1/live/recordings/{rec.recording_uuid}/share", json={})
+        assert res.status_code == 409 and res.json()["detail"]["code"] == "RECORDING_NOT_READY"
+        await _egress(client, db, uuid, "EGRESS_COMPLETE", "egress_ended")
+        state["user"] = regular_user
+        assert (await client.post(f"/api/v1/live/recordings/{rec.recording_uuid}/share", json={})).status_code == 403
+        state["user"] = admin_user
+        assert (await client.post("/api/v1/live/recordings/recording_nope/share", json={})).status_code == 404
+
+    async def test_resharing_is_rate_limited(self, client, db, org, course, chapter, admin_user, regular_user, enrolled, recording_env, mail):
+        uuid = await self._record(client, db)
+        rec = await _recording(db, uuid)
+        counts = {}
+
+        class FakeRedis:
+            def incr(self, key):
+                counts[key] = counts.get(key, 0) + 1
+                return counts[key]
+
+            def expire(self, key, seconds):
+                return True
+
+        with patch("src.core.redis.get_redis_client", return_value=FakeRedis()):
+            codes = [(await client.post(f"/api/v1/live/recordings/{rec.recording_uuid}/share", json={})).status_code for _ in range(4)]
+        assert codes == [200, 200, 200, 429]

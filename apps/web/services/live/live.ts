@@ -391,6 +391,17 @@ export const createLiveSession = (
 export const getLiveClassroom = (sessionUuid: string, token?: string) =>
   liveRequest<LiveClassroom>(`${s(sessionUuid)}/classroom`, token)
 
+export const shareLiveRecording = (
+  recordingUuid: string,
+  body: { publish: boolean; audience: 'absent' | 'everyone' },
+  token?: string
+) =>
+  liveRequest<{ published: boolean; published_now: boolean; queued: number; audience: string }>(
+    `recordings/${encodeURIComponent(recordingUuid)}/share`,
+    token,
+    { method: 'POST', body }
+  )
+
 export const startLiveSession = (sessionUuid: string, token?: string) =>
   liveRequest<LiveSession>(`${s(sessionUuid)}/start`, token, { method: 'POST' })
 

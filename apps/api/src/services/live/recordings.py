@@ -574,6 +574,13 @@ async def finalize_recording(db: AsyncSession, recording: LiveRecording) -> bool
         logger.warning("live_recording_ready analytics failed", exc_info=True)
 
     await sync_session_recording_status(db, session, "webhook")
+    # The point of a recording is the students who could not be there.
+    try:
+        from src.services.live.recording_share import auto_share
+
+        await auto_share(db, session, activity)
+    except Exception:
+        logger.warning("Live recording %s: sharing with absent students failed", recording.recording_uuid, exc_info=True)
     _log(
         "ready",
         recording=recording.recording_uuid,

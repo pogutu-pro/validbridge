@@ -407,10 +407,20 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid: initialOf
 
               {/* Price */}
               <div className="mb-5">
-                <p className="text-xs text-gray-400 font-medium mb-1">
+                {offer.price_type === 'customer_choice' && offer.total_amount ? (
+                  <div className="mb-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+                    <p className="text-sm font-semibold text-orange-900">
+                      Full price {formatCurrency(offer.total_amount, offer.currency, i18n.language)}
+                    </p>
+                    <p className="mt-0.5 text-sm text-orange-800">
+                      Start from {formatCurrency(offer.amount, offer.currency, i18n.language)} and pay the rest later.
+                    </p>
+                  </div>
+                ) : null}
+                <p className={`${offer.total_amount ? 'text-sm text-gray-600' : 'text-xs text-gray-400'} font-medium mb-1`}>
                   {offer.price_type === 'customer_choice'
                     ? offer.total_amount
-                      ? `Full price ${formatCurrency(offer.total_amount, offer.currency, i18n.language)}. Start from ${formatCurrency(offer.amount, offer.currency, i18n.language)} and pay the rest later`
+                      ? `Amount to pay now (min. ${formatCurrency(offer.amount, offer.currency, i18n.language)})`
                       : `Pay what you want (min. ${formatCurrency(offer.amount, offer.currency, i18n.language)})`
                     : isSubscription ? 'Subscription price' : 'One-time price'}
                 </p>

@@ -17,7 +17,11 @@ from src.security.superadmin import _get_current_user_lazy
 from src.tests.services.conftest import assignment  # noqa: F401  (fixture)
 
 BASE = "/api/v1/ee/superadmin"
-NOW = datetime.now(timezone.utc)
+
+
+def now():
+    # Evaluated per test: a module-level value goes stale during a long suite run.
+    return datetime.now(timezone.utc)
 
 
 @pytest.fixture
@@ -54,8 +58,8 @@ async def test_empty_platform(client):
 async def test_money_and_schools_that_need_attention(client, db, org):
     db.add(Invoice(org_id=org.id, number="VB-1", period="2026-10", lines=[], total_cents=250000, status="failed", catalog_version=1))
     db.add(Invoice(org_id=org.id, number="VB-2", period="2026-09", lines=[], total_cents=100, status="paid", catalog_version=1))
-    db.add(BillingSubscription(org_id=org.id, plan="growth", cycle="monthly", period_start=NOW - timedelta(days=25),
-                               period_end=NOW + timedelta(days=3), pending_plan="starter"))
+    db.add(BillingSubscription(org_id=org.id, plan="growth", cycle="monthly", period_start=now() - timedelta(days=25),
+                               period_end=now() + timedelta(days=3), pending_plan="starter"))
     db.add(OrgSuspension(org_id=org.id, reason="unpaid for 60 days"))
     await db.commit()
     body = (await client.get(f"{BASE}/command-center")).json()
@@ -66,8 +70,8 @@ async def test_money_and_schools_that_need_attention(client, db, org):
 
 
 async def test_subscription_changes_far_in_the_future_are_not_flagged(client, db, org):
-    db.add(BillingSubscription(org_id=org.id, plan="growth", cycle="monthly", period_start=NOW,
-                               period_end=NOW + timedelta(days=20), pending_plan="starter"))
+    db.add(BillingSubscription(org_id=org.id, plan="growth", cycle="monthly", period_start=now(),
+                               period_end=now() + timedelta(days=20), pending_plan="starter"))
     await db.commit()
     assert (await client.get(f"{BASE}/command-center")).json()["plan_changes_soon"] == []
 
@@ -75,19 +79,19 @@ async def test_subscription_changes_far_in_the_future_are_not_flagged(client, db
 async def test_live_classes_across_schools(client, db, org, course, staff):
     for n, status in enumerate((LiveSessionStatus.LIVE, LiveSessionStatus.SCHEDULED)):
         db.add(LiveSession(session_uuid=f"ls_{n}", org_id=org.id, course_id=course.id, instructor_id=staff["owner"].id,
-                           title=f"Lesson {n}", status=status, scheduled_at=NOW, livekit_room_name=f"room-{n}"))
+                           title=f"Lesson {n}", status=status, scheduled_at=now(), livekit_room_name=f"room-{n}"))
     await db.commit()
     items = (await client.get(f"{BASE}/monitor/live")).json()["items"]
     assert [(i["title"], i["org_name"]) for i in items] == [("Lesson 0", org.name)], "only classes that are live"
 
 
 async def test_exams_in_progress_with_disconnects_and_violations(client, db, org, assignment, staff):  # noqa: F811
-    fresh, stale = NOW - timedelta(seconds=5), NOW - timedelta(minutes=5)
+    fresh, stale = now() - timedelta(seconds=5), now() - timedelta(minutes=5)
     for uid, seen, violations, status in ((1, fresh, 0, "in_progress"), (2, stale, 3, "in_progress"), (3, fresh, 9, "submitted")):
         db.add(User(id=uid + 10, username=f"s{uid}", first_name="S", last_name="X", email=f"s{uid}@t.com", password="x",
                     user_uuid=f"user_s{uid}", creation_date="now", update_date="now"))
         await db.commit()
-        db.add(ExamSession(assignment_id=assignment.id, user_id=uid + 10, status=status, deadline_at=NOW + timedelta(minutes=20),
+        db.add(ExamSession(assignment_id=assignment.id, user_id=uid + 10, status=status, deadline_at=now() + timedelta(minutes=20),
                            last_seen_at=seen, violation_count=violations))
     await db.commit()
     (exam,) = (await client.get(f"{BASE}/monitor/exams")).json()["items"]

@@ -43,13 +43,14 @@ LIMITED_ROLES = (SUPPORT, FINANCE)
 #   tokens         platform API tokens
 #   billing_admin  catalogue, enforcement mode and the billing run
 #   staff_manage   grant or remove Support and Finance access
+#   view_as        open a reason-gated, read-only view of what a school sees
 ALL_CAPABILITIES = frozenset({
-    "read", "billing_read", "billing_write", "trial_grant", "audit_read", "org_write", "destructive", "tokens", "billing_admin", "staff_manage",
+    "read", "billing_read", "billing_write", "trial_grant", "audit_read", "org_write", "destructive", "tokens", "billing_admin", "staff_manage", "view_as",
 })
 CAPABILITIES: dict[str, frozenset[str]] = {
     OWNER: ALL_CAPABILITIES,
-    SUPPORT: frozenset({"read", "billing_read", "trial_grant", "audit_read"}),
-    FINANCE: frozenset({"read", "billing_read", "billing_write", "trial_grant", "audit_read"}),
+    SUPPORT: frozenset({"read", "billing_read", "trial_grant", "audit_read", "view_as"}),
+    FINANCE: frozenset({"read", "billing_read", "billing_write", "trial_grant", "audit_read", "view_as"}),
 }
 
 

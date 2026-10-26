@@ -179,7 +179,7 @@ export default function OrgDetailPage() {
               <Buildings size={24} weight="fill" className="text-[#262626]/30" />
             </div>
           )}
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-[#262626]">{org.name}</h1>
             <div className="flex items-center gap-3 mt-1">
               <span className="text-sm text-[#262626]/40 font-mono">{org.slug}</span>
@@ -200,6 +200,13 @@ export default function OrgDetailPage() {
               )}
             </div>
           </div>
+          <Link
+            href={`/admin/organizations/${orgId}/view-as`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-[#262626] hover:bg-black/[0.04]"
+          >
+            <Eye size={16} weight="bold" />
+            View as school
+          </Link>
         </div>
       </div>
 

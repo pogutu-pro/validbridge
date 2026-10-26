@@ -279,3 +279,25 @@ export async function downloadAuditCsv(accessToken: string, filters: AuditFilter
   link.click()
   setTimeout(() => URL.revokeObjectURL(url), 10_000)
 }
+
+// ── View as school (read-only, reason required, 30 minutes) ───────────────────
+
+export type ViewAsPage = 'billing' | 'invoices' | 'ledger' | 'members'
+
+export async function startViewAs(accessToken: string, orgId: number, reason: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/view-as`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ org_id: orgId, reason }),
+  })
+  if (!res.ok) return failure(res, 'Could not start the view')
+  return (await res.json()) as { grant: string; expires_at: string; org: { id: number; name: string; slug: string } }
+}
+
+export async function getViewAsPage(accessToken: string, grant: string, orgId: number, page: ViewAsPage) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/view-as/${orgId}/${page}`, {
+    headers: { ...authHeaders(accessToken), 'X-View-As-Grant': grant },
+  })
+  if (!res.ok) return failure(res, 'Could not load this page')
+  return res.json()
+}

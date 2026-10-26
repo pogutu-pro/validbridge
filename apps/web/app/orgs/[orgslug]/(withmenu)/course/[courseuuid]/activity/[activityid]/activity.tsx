@@ -57,6 +57,7 @@ const AssignmentStudentActivity = lazy(() => import('@components/Objects/Activit
 // what the API will actually accept. Static import: it's a pure function, and
 // gating render on the lazy chunk would flash the wrong control.
 import { isAssignmentPastDue } from '@components/Objects/Activities/Assignment/AssignmentStudentActivity'
+import { ExamHide, ExamSwitch } from '@components/Objects/Activities/Exam/useExamAccess'
 import { useAICopilot } from '@components/Contexts/AI/AICopilotContext'
 const ScormActivity = lazy(() => import('../../../../../../../../ee/components/Activities/ScormActivity'))
 const MarkdownActivity = lazy(() => import('@components/Objects/Activities/Markdown/MarkdownActivity'))
@@ -200,15 +201,17 @@ function ActivityActions({ activity, activityid, course, orgslug, assignment, sh
           )}
           {activity.activity_type == 'TYPE_ASSIGNMENT' && (
             <>
-              <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
-                <AssignmentTools
-                  assignment={assignment}
-                  activity={activity}
-                  activityid={activityid}
-                  course={course}
-                  orgslug={orgslug}
-                />
-              </AssignmentSubmissionProvider>
+              <ExamHide assignmentUuid={assignment?.assignment_uuid} courseUuid={course?.course_uuid}>
+                <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
+                  <AssignmentTools
+                    assignment={assignment}
+                    activity={activity}
+                    activityid={activityid}
+                    course={course}
+                    orgslug={orgslug}
+                  />
+                </AssignmentSubmissionProvider>
+              </ExamHide>
             </>
           )}
           {showNavigation && (
@@ -376,13 +379,16 @@ function ActivityClient(props: ActivityClientProps) {
                 Otherwise AssignmentSubmissionProvider would wait for
                 AssignmentProvider's gated load before firing its own
                 requests, adding an extra round-trip phase. */}
-            <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
-              <AssignmentProvider assignment_uuid={assignment?.assignment_uuid}>
-                <AssignmentsTaskProvider>
-                  <AssignmentStudentActivity />
-                </AssignmentsTaskProvider>
-              </AssignmentProvider>
-            </AssignmentSubmissionProvider>
+            {/* An assessment in exam mode shows learners the timed exam screen instead. */}
+            <ExamSwitch assignmentUuid={assignment?.assignment_uuid} courseUuid={course?.course_uuid}>
+              <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
+                <AssignmentProvider assignment_uuid={assignment?.assignment_uuid}>
+                  <AssignmentsTaskProvider>
+                    <AssignmentStudentActivity />
+                  </AssignmentsTaskProvider>
+                </AssignmentProvider>
+              </AssignmentSubmissionProvider>
+            </ExamSwitch>
           </Suspense>
         ) : null;
       case 'TYPE_SCORM':

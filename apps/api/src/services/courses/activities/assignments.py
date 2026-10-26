@@ -72,6 +72,7 @@ from src.services.courses.activities.quiz_modes import (
     score_question,
 )
 from src.services.trail.trail import check_trail_presence
+from src.services.courses.activities.exams import enforce_exam_mode
 from src.services.courses.certifications import (
     award_milestone_for_activity_completion,
     check_course_completion_and_create_certificate,
@@ -1742,6 +1743,8 @@ async def read_assignment_tasks(
     # show_correct_answers, no retries left) sees the per-answer keys but never
     # the CODE solution or hidden tests; everyone else gets a full strip.
     is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
+    # An exam's questions are only served inside a live sitting.
+    await enforce_exam_mode(db_session, assignment, current_user, action="read_questions", is_staff=is_instructor)
     reveal_to_student = (
         not is_instructor
         and await _student_may_see_answer_key(current_user, assignment, db_session)
@@ -1803,6 +1806,7 @@ async def read_assignment_task(
     # per-answer keys but never the CODE solution or hidden tests (keep_answer_keys).
     read = AssignmentTaskRead.model_validate(assignmenttask)
     is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
+    await enforce_exam_mode(db_session, assignment, current_user, action="read_questions", is_staff=is_instructor)
     if not is_instructor:
         reveal_to_student = await _student_may_see_answer_key(
             current_user, assignment, db_session
@@ -1951,6 +1955,7 @@ async def put_assignment_task_submission_file(
     is_instructor = await authorization_verify_based_on_roles(
         request, current_user.id, "update", course.course_uuid, db_session
     )
+    await enforce_exam_mode(db_session, assignment, current_user, action="write_answer", is_staff=is_instructor)
     if not is_instructor and _is_assignment_past_due(assignment):
         raise HTTPException(
             status_code=403,
@@ -2321,6 +2326,9 @@ async def handle_assignment_task_submission(
     # one: the draft is invisible in navigation, so only a guessed or leaked
     # UUID gets here.
     await _ensure_assignment_visible(request, assignment, current_user, db_session)
+
+    # In exam mode a learner (or a token writing for one) can only answer inside a live sitting.
+    await enforce_exam_mode(db_session, assignment, current_user, action="write_answer", is_staff=is_instructor)
 
     # For non-instructors (session students AND token submit-on-behalf), the call
     # writes a learner ANSWER, never a grade.
@@ -2990,6 +2998,9 @@ async def create_assignment_submission(
     # Checked after the instructor resolution above so an author can still
     # submit their own draft as a dry run.
     await _ensure_assignment_visible(request, assignment, current_user, db_session)
+
+    # In exam mode the only way to submit is to finish the sitting.
+    await enforce_exam_mode(db_session, assignment, current_user, action="submit", is_staff=is_instructor)
 
     # Session students are bound by the deadline; a token writing on behalf of a
     # learner is an authorized external writer (the custom frontend owns it).
@@ -3718,6 +3729,12 @@ async def retry_assignment_submission(
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
 
     await _ensure_assignment_visible(request, assignment, current_user, db_session)
+
+    # An exam is a single sitting: it cannot be retried.
+    await enforce_exam_mode(
+        db_session, assignment, current_user, action="retry",
+        is_staff=await _is_assignment_instructor(request, current_user, course.course_uuid, db_session),
+    )
 
     # Row-level lock on the user's submission so two concurrent retries can't
     # both read attempt_number=N, pass the cap check, and increment to N+1 —

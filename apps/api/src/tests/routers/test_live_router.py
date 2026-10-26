@@ -1072,3 +1072,126 @@ class TestRealtimeScenarios:
         state["user"] = regular_user
         resp = await client.post(f"/api/v1/live/sessions/{uuid}/join")
         assert resp.status_code == 403
+
+
+class TestEditAndDelete:
+    @pytest.fixture(autouse=True)
+    def _course(self, course):
+        """Every test here schedules a lesson, which needs the course to exist."""
+
+    @pytest.fixture
+    def sent(self):
+        with patch("src.services.email.utils.send_email") as send, patch(
+            "src.services.email.utils.get_org_signup_base_url",
+            new_callable=AsyncMock, return_value="https://school.example.test/",
+        ):
+            yield send
+
+    async def _drain(self):
+        import asyncio
+        from src.services.live import invitations
+
+        if invitations._background:
+            await asyncio.gather(*list(invitations._background))
+
+    async def _set_status(self, db, uuid, status):
+        s = await _load(db, uuid)
+        s.status = status
+        db.add(s)
+        await db.commit()
+
+    async def test_edit_title_description_and_recording_options(self, client, db, lk_calls, livekit_env):
+        uuid = (await _create(client)).json()["session_uuid"]
+        res = await client.patch(f"/api/v1/live/sessions/{uuid}", json={
+            "title": "  Week 1 revision  ", "description": "Bring your notes", "record_automatically": True, "publish_recordings": False, "notify_students": False})
+        assert res.status_code == 200, res.text
+        body = res.json()
+        assert body["title"] == "Week 1 revision" and body["description"] == "Bring your notes"
+        assert body["record_automatically"] is True and body["publish_recordings"] is False and body["invitations_queued"] is None
+        stored = await _load(db, uuid)
+        assert stored.title == "Week 1 revision" and stored.scheduled_at is not None
+
+    async def test_reschedule_emails_students_the_new_time(self, client, db, lk_calls, livekit_env, enrolled, sent):
+        uuid = (await _create(client)).json()["session_uuid"]
+        res = await client.patch(f"/api/v1/live/sessions/{uuid}", json={"scheduled_at": "2026-09-25T10:00:00Z"})
+        assert res.status_code == 200 and res.json()["invitations_queued"] == 1
+        await self._drain()
+        assert [c.args[0] for c in sent.call_args_list] == ["regular@test.com"]
+        body = sent.call_args_list[0].args[2]
+        assert "Friday 25 September 2026, 10:00 UTC" in body and "This lesson was updated" in body
+
+    async def test_no_email_when_nothing_that_students_see_changed_or_when_switched_off(self, client, db, lk_calls, livekit_env, enrolled, sent):
+        uuid = (await _create(client)).json()["session_uuid"]
+        await client.patch(f"/api/v1/live/sessions/{uuid}", json={"description": "Only the description"})
+        await client.patch(f"/api/v1/live/sessions/{uuid}", json={"title": "Quiet change", "notify_students": False})
+        await self._drain()
+        sent.assert_not_called()
+
+    async def test_a_started_lesson_keeps_its_time_but_can_be_renamed(self, client, db, lk_calls, livekit_env):
+        uuid = (await _create(client)).json()["session_uuid"]
+        assert (await client.post(f"/api/v1/live/sessions/{uuid}/start")).status_code == 200
+        moved = await client.patch(f"/api/v1/live/sessions/{uuid}", json={"scheduled_at": "2026-10-01T10:00:00Z"})
+        assert moved.status_code == 409 and moved.json()["detail"]["code"] == "SESSION_STARTED"
+        renamed = await client.patch(f"/api/v1/live/sessions/{uuid}", json={"title": "Renamed", "notify_students": False})
+        assert renamed.status_code == 200 and renamed.json()["title"] == "Renamed"
+
+    async def test_live_and_finished_lessons_cannot_be_edited(self, client, db, lk_calls, livekit_env):
+        for status in (LiveSessionStatus.LIVE, LiveSessionStatus.ENDED, LiveSessionStatus.COMPLETED):
+            uuid = (await _create(client)).json()["session_uuid"]
+            await self._set_status(db, uuid, status)
+            res = await client.patch(f"/api/v1/live/sessions/{uuid}", json={"title": "Too late"})
+            assert res.status_code == 409 and res.json()["detail"]["code"] == "SESSION_LOCKED", status
+
+    async def test_empty_title_is_refused(self, client, lk_calls, livekit_env):
+        uuid = (await _create(client)).json()["session_uuid"]
+        assert (await client.patch(f"/api/v1/live/sessions/{uuid}", json={"title": "   "})).status_code == 422
+        assert (await client.patch(f"/api/v1/live/sessions/{uuid}", json={"title": ""})).status_code == 422
+
+    async def test_learners_cannot_edit_or_delete(self, client, state, regular_user, lk_calls, livekit_env, enrolled):
+        uuid = (await _create(client)).json()["session_uuid"]
+        state["user"] = regular_user
+        assert (await client.patch(f"/api/v1/live/sessions/{uuid}", json={"title": "Mine now"})).status_code == 403
+        assert (await client.delete(f"/api/v1/live/sessions/{uuid}")).status_code == 403
+        state["user"] = None
+
+    async def test_delete_a_scheduled_lesson_and_tell_the_students(self, client, db, lk_calls, livekit_env, enrolled, sent):
+        uuid = (await _create(client)).json()["session_uuid"]
+        res = await client.delete(f"/api/v1/live/sessions/{uuid}")
+        assert res.status_code == 200 and res.json() == {"deleted": True, "notified": 1}
+        await self._drain()
+        assert (await client.get(f"/api/v1/live/sessions/{uuid}")).status_code == 404
+        assert [c.args[0] for c in sent.call_args_list] == ["regular@test.com"]
+        subject, body = sent.call_args_list[0].args[1:3]
+        assert subject.startswith("Cancelled: Week 1 live lecture") and "cancelled" in body.lower()
+        assert "school.example.test" not in body, "a cancellation carries no join link"
+
+    async def test_delete_without_notifying(self, client, db, lk_calls, livekit_env, enrolled, sent):
+        uuid = (await _create(client)).json()["session_uuid"]
+        res = await client.delete(f"/api/v1/live/sessions/{uuid}?notify_students=false")
+        assert res.json() == {"deleted": True, "notified": 0}
+        await self._drain()
+        sent.assert_not_called()
+
+    async def test_deleting_an_opened_room_closes_it(self, client, db, lk_calls, livekit_env):
+        uuid = (await _create(client)).json()["session_uuid"]
+        assert (await client.post(f"/api/v1/live/sessions/{uuid}/start")).status_code == 200
+        res = await client.delete(f"/api/v1/live/sessions/{uuid}?notify_students=false")
+        assert res.status_code == 200
+        lk_calls["delete"].assert_awaited()
+        assert (await db.execute(select(LiveSession).where(LiveSession.session_uuid == uuid))).scalars().first() is None
+
+    async def test_a_live_lesson_must_be_ended_first_and_a_finished_one_is_kept(self, client, db, lk_calls, livekit_env):
+        live = (await _create(client)).json()["session_uuid"]
+        await self._set_status(db, live, LiveSessionStatus.LIVE)
+        res = await client.delete(f"/api/v1/live/sessions/{live}")
+        assert res.status_code == 409 and res.json()["detail"]["code"] == "SESSION_LIVE"
+        for status in (LiveSessionStatus.ENDED, LiveSessionStatus.PROCESSING, LiveSessionStatus.COMPLETED):
+            uuid = (await _create(client)).json()["session_uuid"]
+            await self._set_status(db, uuid, status)
+            res = await client.delete(f"/api/v1/live/sessions/{uuid}")
+            assert res.status_code == 409 and res.json()["detail"]["code"] == "SESSION_HAS_HISTORY", status
+            assert (await _load(db, uuid)).status == status
+
+    async def test_unknown_lesson(self, client, lk_calls, livekit_env):
+        assert (await client.delete("/api/v1/live/sessions/livesession_nope")).status_code == 404
+        assert (await client.patch("/api/v1/live/sessions/livesession_nope", json={"title": "x"})).status_code == 404

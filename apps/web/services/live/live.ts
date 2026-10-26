@@ -391,6 +391,22 @@ export const createLiveSession = (
 export const getLiveClassroom = (sessionUuid: string, token?: string) =>
   liveRequest<LiveClassroom>(`${s(sessionUuid)}/classroom`, token)
 
+export const updateLiveSession = (
+  sessionUuid: string,
+  body: {
+    title?: string
+    description?: string
+    scheduled_at?: string
+    record_automatically?: boolean
+    publish_recordings?: boolean
+    notify_students?: boolean
+  },
+  token?: string
+) => liveRequest<LiveSession>(s(sessionUuid), token, { method: 'PATCH', body })
+
+export const deleteLiveSession = (sessionUuid: string, notifyStudents: boolean, token?: string) =>
+  liveRequest<{ deleted: boolean; notified: number }>(`${s(sessionUuid)}?notify_students=${notifyStudents}`, token, { method: 'DELETE' })
+
 export const startLiveSession = (sessionUuid: string, token?: string) =>
   liveRequest<LiveSession>(`${s(sessionUuid)}/start`, token, { method: 'POST' })
 

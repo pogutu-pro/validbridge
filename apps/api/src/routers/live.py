@@ -37,6 +37,7 @@ from src.db.live_sessions import (
     LiveReactionCreate,
     LiveSessionCreate,
     LiveSessionRead,
+    LiveSessionUpdate,
     LiveStageUpdate,
 )
 from src.db.users import PublicUser
@@ -44,6 +45,7 @@ from src.security.auth import get_current_user
 from src.services.live import classroom, insights, invitations, livekit, quizzes, recordings
 from src.services.live.sessions import (
     create_session,
+    delete_session,
     end_session,
     get_attendance,
     get_classroom,
@@ -52,6 +54,7 @@ from src.services.live.sessions import (
     list_course_sessions,
     require_livekit,
     start_session,
+    update_session,
 )
 from src.services.live.telemetry import log_event
 from src.services.live.webhooks import handle_webhook
@@ -180,6 +183,45 @@ async def api_end_live_session(
     current_user: PublicUser = Depends(get_current_user),
 ) -> LiveSessionRead:
     return await end_session(request, db_session, current_user, session_uuid)
+
+
+@router.patch(
+    "/sessions/{session_uuid}",
+    response_model=LiveSessionRead,
+    summary="Edit a live session",
+    description=(
+        "Staff only, before the lesson starts. Change the title, description, recording options, or (while still "
+        "scheduled) the time. By default the course's students are emailed when the title or time changes."
+    ),
+    responses={**_COMMON_ERRORS, 409: {"description": "The lesson has started or ended"}},
+)
+async def api_update_live_session(
+    request: Request,
+    session_uuid: str,
+    payload: LiveSessionUpdate,
+    db_session: AsyncSession = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+) -> LiveSessionRead:
+    return await update_session(request, db_session, current_user, session_uuid, payload)
+
+
+@router.delete(
+    "/sessions/{session_uuid}",
+    summary="Delete (cancel) a live session",
+    description=(
+        "Staff only, for a lesson that has not started. Lessons that took place keep their attendance and "
+        "recordings and cannot be deleted. By default the course's students are emailed that it was cancelled."
+    ),
+    responses={**_COMMON_ERRORS, 409: {"description": "The lesson is live or has already taken place"}},
+)
+async def api_delete_live_session(
+    request: Request,
+    session_uuid: str,
+    notify_students: bool = True,
+    db_session: AsyncSession = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+) -> dict:
+    return await delete_session(request, db_session, current_user, session_uuid, notify_students)
 
 
 @router.post(

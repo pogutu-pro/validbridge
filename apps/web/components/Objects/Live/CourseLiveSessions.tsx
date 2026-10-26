@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
-import { BarChart3, CalendarPlus, Loader2, PlayCircle, UserPlus } from 'lucide-react'
+import { BarChart3, CalendarPlus, Loader2, Pencil, PlayCircle, Trash2, UserPlus } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import {
@@ -18,7 +18,7 @@ import { useCourseRights } from '@components/Hooks/useCourseRights'
 import { useCourseLiveRecordings, useCourseLiveSessions, useLiveAccessToken } from '@/hooks/queries/useLive'
 import { queryKeys } from '@lib/query/keys'
 import { getUriWithOrg } from '@services/config/config'
-import { createLiveSession, isEndedStatus, type LiveRecording, type LiveSession } from '@services/live/live'
+import { createLiveSession, deleteLiveSession, isEndedStatus, updateLiveSession, type LiveRecording, type LiveSession } from '@services/live/live'
 import { cn } from '@/lib/utils'
 import InviteDialog from './InviteDialog'
 import { formatDuration } from './liveMath'
@@ -37,34 +37,69 @@ function defaultStart(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
+function toLocalInput(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+/** Schedules a lesson, or edits one that has not started (pass `editing`, and mount with a `key` per lesson). */
 export function ScheduleDialog({
   courseUuid,
   open,
   onOpenChange,
   onCreated,
+  editing,
 }: {
   courseUuid: string
   open: boolean
   onOpenChange: (_open: boolean) => void
   /** Called with the new lesson, e.g. to offer invitations straight away. */
   onCreated?: (_session: LiveSession) => void
+  /** A lesson that has not started: the dialog edits it instead of creating one. */
+  editing?: LiveSession | null
 }) {
   const { t } = useTranslation()
   const qc = useQueryClient()
   const token = useLiveAccessToken()
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [start, setStart] = useState(defaultStart)
-  const [recordAutomatically, setRecordAutomatically] = useState(false)
-  const [publishRecordings, setPublishRecordings] = useState(true)
+  const [title, setTitle] = useState(editing?.title ?? '')
+  const [description, setDescription] = useState(editing?.description ?? '')
+  const [start, setStart] = useState(() => (editing ? toLocalInput(editing.scheduled_at) : defaultStart()))
+  const [recordAutomatically, setRecordAutomatically] = useState(editing?.record_automatically ?? false)
+  const [publishRecordings, setPublishRecordings] = useState(editing?.publish_recordings ?? true)
   const [notifyStudents, setNotifyStudents] = useState(true)
   const [saving, setSaving] = useState(false)
   const valid = title.trim().length > 0 && !!start
+  // The time can only move while the lesson is still scheduled; once its room is open it stays put.
+  const timeLocked = !!editing && editing.status !== 'scheduled'
 
   const submit = async () => {
     if (!valid || saving) return
     setSaving(true)
     try {
+      if (editing) {
+        const updated = await updateLiveSession(
+          editing.session_uuid,
+          {
+            title: title.trim(),
+            description: description.trim(),
+            ...(timeLocked ? {} : { scheduled_at: new Date(start).toISOString() }),
+            record_automatically: recordAutomatically,
+            publish_recordings: publishRecordings,
+            notify_students: notifyStudents,
+          },
+          token
+        )
+        await qc.invalidateQueries({ queryKey: queryKeys.live.courseSessions(courseUuid) })
+        qc.invalidateQueries({ queryKey: queryKeys.live.courseOverview(courseUuid) })
+        toast.success(
+          updated.invitations_queued
+            ? t('live.schedule.updated_notified', { count: updated.invitations_queued, defaultValue: 'Lesson updated. {{count}} student(s) were emailed.' })
+            : t('live.schedule.updated', { defaultValue: 'Lesson updated' })
+        )
+        onOpenChange(false)
+        return
+      }
       const created = await createLiveSession(
         {
           course_uuid: courseUuid,
@@ -101,8 +136,8 @@ export function ScheduleDialog({
     <Dialog open={open} onOpenChange={(next) => !saving && onOpenChange(next)}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t('live.schedule.title')}</DialogTitle>
-          <DialogDescription>{t('live.schedule.description')}</DialogDescription>
+          <DialogTitle>{editing ? t('live.schedule.edit_title', { defaultValue: 'Edit live lesson' }) : t('live.schedule.title')}</DialogTitle>
+          <DialogDescription>{editing ? t('live.schedule.edit_description', { defaultValue: 'Changes apply before the lesson starts.' }) : t('live.schedule.description')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
@@ -115,7 +150,10 @@ export function ScheduleDialog({
             <label htmlFor="vb-live-start" className="text-sm font-medium text-neutral-800">
               {t('live.schedule.starts_at')}
             </label>
-            <input id="vb-live-start" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} className={field} />
+            <input id="vb-live-start" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} disabled={timeLocked} className={`${field} disabled:bg-neutral-50 disabled:text-neutral-500`} />
+            {timeLocked && (
+              <p className="text-xs text-neutral-500">{t('live.schedule.time_locked', { defaultValue: 'The time cannot change once the lesson has been opened.' })}</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <label htmlFor="vb-live-description" className="text-sm font-medium text-neutral-800">
@@ -164,8 +202,8 @@ export function ScheduleDialog({
               className="mt-0.5 size-4 accent-[hsl(var(--primary))]"
             />
             <span>
-              {t('live.schedule.notify_students')}
-              <span className="block text-xs text-neutral-500">{t('live.schedule.notify_students_hint')}</span>
+              {editing ? t('live.schedule.notify_changes', { defaultValue: 'Email students if the title or time changed' }) : t('live.schedule.notify_students')}
+              <span className="block text-xs text-neutral-500">{editing ? t('live.schedule.notify_changes_hint', { defaultValue: 'Students enrolled in this course are told the new details.' }) : t('live.schedule.notify_students_hint')}</span>
             </span>
           </label>
         </div>
@@ -180,7 +218,7 @@ export function ScheduleDialog({
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
           >
             {saving && <Loader2 className="size-4 animate-spin" />}
-            {t('live.schedule.submit')}
+            {editing ? t('live.schedule.save', { defaultValue: 'Save changes' }) : t('live.schedule.submit')}
           </button>
         </DialogFooter>
       </DialogContent>
@@ -188,7 +226,85 @@ export function ScheduleDialog({
   )
 }
 
-function SessionRow({ session, href, onInvite, staff }: { session: LiveSession; href: string; onInvite?: () => void; staff?: boolean }) {
+export function DeleteLiveDialog({
+  session,
+  courseUuid,
+  onClose,
+}: {
+  session: Pick<LiveSession, 'session_uuid' | 'title' | 'status'>
+  courseUuid: string
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  const qc = useQueryClient()
+  const token = useLiveAccessToken()
+  const [notify, setNotify] = useState(true)
+  const [busy, setBusy] = useState(false)
+
+  const confirm = async () => {
+    setBusy(true)
+    try {
+      const res = await deleteLiveSession(session.session_uuid, notify, token)
+      await qc.invalidateQueries({ queryKey: queryKeys.live.courseSessions(courseUuid) })
+      qc.invalidateQueries({ queryKey: queryKeys.live.courseOverview(courseUuid) })
+      toast.success(
+        res.notified
+          ? t('live.delete.done_notified', { count: res.notified, defaultValue: 'Lesson deleted. {{count}} student(s) were told.' })
+          : t('live.delete.done', { defaultValue: 'Lesson deleted' })
+      )
+      onClose()
+    } catch (error) {
+      toast.error(t(liveErrorKey(error)))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(next) => !busy && !next && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t('live.delete.title', { defaultValue: 'Delete this live lesson?' })}</DialogTitle>
+          <DialogDescription>
+            {t('live.delete.description', { defaultValue: '"{{title}}" will be removed and its link will stop working. This cannot be undone.', title: session.title })}
+          </DialogDescription>
+        </DialogHeader>
+        <label className="flex items-start gap-3 rounded-lg bg-neutral-50 p-3 text-sm text-neutral-800">
+          <input type="checkbox" checked={notify} onChange={(e) => setNotify(e.target.checked)} className="mt-0.5 size-4 accent-[hsl(var(--primary))]" />
+          <span>
+            {t('live.delete.notify', { defaultValue: 'Email the students that it was cancelled' })}
+            <span className="block text-xs text-neutral-500">{t('live.delete.notify_hint', { defaultValue: 'Students who were sent the link are told, so nobody turns up to a dead link.' })}</span>
+          </span>
+        </label>
+        <DialogFooter className="gap-2">
+          <button type="button" onClick={onClose} disabled={busy} className="h-10 rounded-lg px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
+            {t('live.common.cancel')}
+          </button>
+          <button type="button" onClick={confirm} disabled={busy} className="inline-flex h-10 items-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white disabled:opacity-50">
+            {busy && <Loader2 className="size-4 animate-spin" />}
+            {t('live.delete.confirm', { defaultValue: 'Delete lesson' })}
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function SessionRow({
+  session,
+  href,
+  onInvite,
+  onEdit,
+  onDelete,
+  staff,
+}: {
+  session: LiveSession
+  href: string
+  onInvite?: () => void
+  onEdit?: () => void
+  onDelete?: () => void
+  staff?: boolean
+}) {
   const { t } = useTranslation()
   const live = session.status === 'live'
   const when = new Date(session.scheduled_at).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -204,6 +320,28 @@ function SessionRow({ session, href, onInvite, staff }: { session: LiveSession; 
           <p className="mt-0.5 text-xs text-neutral-500">{when}</p>
         )}
       </div>
+      {onEdit && (
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={t('live.edit.button', { defaultValue: 'Edit lesson' })}
+          title={t('live.edit.button', { defaultValue: 'Edit lesson' })}
+          className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-neutral-600 hover:bg-neutral-100"
+        >
+          <Pencil className="size-4" />
+        </button>
+      )}
+      {onDelete && (
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label={t('live.delete.button', { defaultValue: 'Delete lesson' })}
+          title={t('live.delete.button', { defaultValue: 'Delete lesson' })}
+          className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-neutral-600 hover:bg-red-50 hover:text-red-600"
+        >
+          <Trash2 className="size-4" />
+        </button>
+      )}
       {onInvite && (
         <button
           type="button"
@@ -273,6 +411,8 @@ export default function CourseLiveSessions({ courseUuid, orgslug }: { courseUuid
   const canSchedule = hasPermission('update')
   const [scheduling, setScheduling] = useState(false)
   const [inviting, setInviting] = useState<LiveSession | null>(null)
+  const [editing, setEditing] = useState<LiveSession | null>(null)
+  const [deleting, setDeleting] = useState<LiveSession | null>(null)
 
   if (isError || !sessions) return null
   const active = sessions
@@ -306,7 +446,16 @@ export default function CourseLiveSessions({ courseUuid, orgslug }: { courseUuid
       ) : (
         <ul className="mt-2 divide-y divide-neutral-100">
           {visible.map((s) => (
-            <SessionRow key={s.session_uuid} session={s} href={hrefFor(s)} staff={canSchedule} onInvite={canSchedule ? () => setInviting(s) : undefined} />
+            <SessionRow
+              key={s.session_uuid}
+              session={s}
+              href={hrefFor(s)}
+              staff={canSchedule}
+              onInvite={canSchedule ? () => setInviting(s) : undefined}
+              // A lesson can be changed or deleted until it goes live.
+              onEdit={canSchedule && (s.status === 'scheduled' || s.status === 'ready') ? () => setEditing(s) : undefined}
+              onDelete={canSchedule && (s.status === 'scheduled' || s.status === 'ready') ? () => setDeleting(s) : undefined}
+            />
           ))}
         </ul>
       )}
@@ -331,6 +480,10 @@ export default function CourseLiveSessions({ courseUuid, orgslug }: { courseUuid
       {canSchedule && (
         <ScheduleDialog courseUuid={courseUuid} open={scheduling} onOpenChange={setScheduling} />
       )}
+      {canSchedule && editing && (
+        <ScheduleDialog key={editing.session_uuid} courseUuid={courseUuid} open editing={editing} onOpenChange={(next) => !next && setEditing(null)} />
+      )}
+      {canSchedule && deleting && <DeleteLiveDialog session={deleting} courseUuid={courseUuid} onClose={() => setDeleting(null)} />}
       {canSchedule && inviting && (
         <InviteDialog
           session={inviting}

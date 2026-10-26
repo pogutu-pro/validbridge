@@ -45,6 +45,7 @@ from src.db.live_sessions import (
     LiveRecordingStatus,
     LiveSession,
     LiveSessionCreate,
+    LiveSessionUpdate,
     LiveSessionEvent,
     LiveSessionEventType,
     LiveSessionParticipant,
@@ -597,6 +598,86 @@ async def create_session(
         record_automatically=session.record_automatically,
     )
     return to_read(session)
+
+
+async def update_session(
+    request: Request, db: AsyncSession, user, session_uuid: str, payload: LiveSessionUpdate
+) -> LiveSessionRead:
+    """Edit a lesson that has not started. The time can only move while it is still SCHEDULED."""
+    user = _require_user(user)
+    session = await get_session_by_uuid(db, session_uuid)
+    course = await _get_course(db, session.course_id)
+    await _require_staff(request, db, user, course)
+
+    if session.status not in (LiveSessionStatus.SCHEDULED, LiveSessionStatus.READY):
+        raise _error(409, "SESSION_LOCKED", "A lesson can only be changed before it starts")
+    fields = payload.model_dump(exclude_unset=True)
+    fields.pop("notify_students", None)
+    if "scheduled_at" in fields and (fields["scheduled_at"] is None or session.status != LiveSessionStatus.SCHEDULED):
+        raise _error(409, "SESSION_STARTED", "The time can only be changed while the lesson is still scheduled")
+
+    title_before, when_before = session.title, as_utc(session.scheduled_at)
+    if "title" in fields:
+        title = (fields["title"] or "").strip()
+        if not title:
+            raise HTTPException(status_code=422, detail="The title cannot be empty")
+        session.title = title
+    if "description" in fields:
+        session.description = fields["description"]
+    if "scheduled_at" in fields:
+        session.scheduled_at = as_utc(fields["scheduled_at"])
+    if fields.get("record_automatically") is not None:
+        session.record_automatically = fields["record_automatically"]
+    if fields.get("publish_recordings") is not None:
+        session.publish_recordings = fields["publish_recordings"]
+    session.updated_at = utcnow()
+    db.add(session)
+    await db.commit()
+    await db.refresh(session)
+    if session.status == LiveSessionStatus.READY:
+        await push_room_metadata(session)
+    log_event("session.updated", session=session.session_uuid, course=course.course_uuid, org_id=course.org_id, changed=sorted(fields))
+
+    read = to_read(session)
+    if payload.notify_students and (session.title != title_before or as_utc(session.scheduled_at) != when_before):
+        from src.services.live import invitations
+
+        read.invitations_queued = await invitations.invite_enrolled_students(
+            request, db, user, session.session_uuid,
+            message="This lesson was updated. The title and time above are the latest.",
+        )
+    return read
+
+
+async def delete_session(request: Request, db: AsyncSession, user, session_uuid: str, notify_students: bool = True) -> dict:
+    """Cancel a lesson that has not started. Lessons that ran keep their attendance and recordings."""
+    user = _require_user(user)
+    session = await get_session_by_uuid(db, session_uuid)
+    course = await _get_course(db, session.course_id)
+    await _require_staff(request, db, user, course)
+
+    if session.status == LiveSessionStatus.LIVE:
+        raise _error(409, "SESSION_LIVE", "This lesson is live. End it first.")
+    if session.status != LiveSessionStatus.SCHEDULED and session.status != LiveSessionStatus.READY:
+        raise _error(409, "SESSION_HAS_HISTORY", "Lessons that took place keep their attendance and recordings, so they cannot be deleted")
+
+    notified = 0
+    if notify_students:
+        from src.services.live import invitations
+
+        notified = await invitations.send_cancellation(request, db, user, course, session)
+    if session.status == LiveSessionStatus.READY:
+        settings = get_livekit_settings()
+        if settings is not None:
+            try:
+                await livekit.delete_room(settings, session.livekit_room_name)
+            except livekit.LiveKitError as exc:
+                log_event("livekit.room_delete_failed", logging.WARNING, session=session.session_uuid, error=str(exc))
+    uuid = session.session_uuid
+    await db.delete(session)
+    await db.commit()
+    log_event("session.deleted", session=uuid, course=course.course_uuid, org_id=course.org_id, notified=notified)
+    return {"deleted": True, "notified": notified}
 
 
 async def list_course_sessions(

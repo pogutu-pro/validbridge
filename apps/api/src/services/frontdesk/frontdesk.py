@@ -27,7 +27,7 @@ from src.db.user_organizations import UserOrganization
 from src.db.usergroup_user import UserGroupUser
 from src.db.usergroups import UserGroup
 from src.db.users import InternalUser, PublicUser, User
-from src.services.frontdesk.access import get_org, is_student_in_org, require_frontdesk, student_role_id
+from src.services.frontdesk.access import is_student_in_org, require_frontdesk, student_role_id
 
 logger = logging.getLogger(__name__)
 

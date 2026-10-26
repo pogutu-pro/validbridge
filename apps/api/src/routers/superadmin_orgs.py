@@ -22,8 +22,8 @@ from src.db.courses.courses import Course
 from src.db.org_suspensions import OrgSuspension
 from src.db.organizations import Organization
 from src.db.user_organizations import UserOrganization
-from src.routers.superadmin import _acting_user_id, _invalidate_org_caches, require_session_superadmin
-from src.security.superadmin import require_superadmin
+from src.routers.superadmin import _acting_user_id, _invalidate_org_caches
+from src.security.staff import require_staff
 from src.services.audit.superadmin_audit import record_superadmin_action
 from src.services.orgs import suspension as svc
 
@@ -78,7 +78,7 @@ async def _admin_emails(org_id: int, db: AsyncSession) -> list[str]:
 @router.get("/organizations/{org_id}/status")
 async def api_org_status(
     org_id: int,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db: AsyncSession = Depends(get_db_session),
 ):
     org = await _org(org_id, db)
@@ -103,7 +103,7 @@ async def api_suspend(
     org_id: int,
     body: SuspendBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("destructive", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     org = await _org(org_id, db)
@@ -129,7 +129,7 @@ async def api_unsuspend(
     org_id: int,
     body: Reason,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("destructive", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     org = await _org(org_id, db)
@@ -152,7 +152,7 @@ async def api_prepare_delete(
     org_id: int,
     body: Reason,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("destructive", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Step 1 of 2: check the org can be deleted and issue a 10-minute token."""
@@ -180,7 +180,7 @@ async def api_delete(
     org_id: int,
     body: DeleteBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("destructive", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Step 2 of 2: permanently delete the org and everything in it."""

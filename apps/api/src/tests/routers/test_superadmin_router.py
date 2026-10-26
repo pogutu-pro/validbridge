@@ -7,7 +7,7 @@ from httpx import ASGITransport, AsyncClient
 from src.core.events.database import get_db_session
 from src.db.users import SuperadminAPITokenUser
 from src.routers.superadmin import router as superadmin_router
-from src.security.superadmin import require_superadmin
+from src.security.staff import all_staff_dependencies
 
 
 @pytest.fixture
@@ -26,7 +26,8 @@ async def client(app):
 
 
 def auth_as(app, user):
-    app.dependency_overrides[require_superadmin] = lambda: user
+    for _dep in all_staff_dependencies():
+        app.dependency_overrides[_dep] = lambda: user
 
 
 class TestSuperadminGate:
@@ -40,7 +41,9 @@ class TestSuperadminGate:
         auth_as(app, admin_user)
         response = await client.get("/api/v1/ee/superadmin/status")
         assert response.status_code == 200
-        assert response.json() == {"is_superadmin": True}
+        body = response.json()
+        assert body["is_superadmin"] is True and body["role"] == "owner"
+        assert "staff_manage" in body["capabilities"] and "billing_write" in body["capabilities"]
 
 
 class TestOrganizations:

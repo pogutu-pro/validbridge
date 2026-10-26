@@ -160,3 +160,122 @@ export async function openPublicEdDocument(accessToken: string, id: number) {
   else window.location.href = url
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
+
+// ── Platform staff tiers and audit log ────────────────────────────────────────
+
+export type StaffRole = 'owner' | 'support' | 'finance'
+
+export interface StaffAccess {
+  is_superadmin: boolean
+  role: StaffRole | null
+  capabilities: string[]
+}
+
+export interface StaffMember {
+  user_uuid: string
+  username: string
+  email: string
+  name: string
+  role: StaffRole | null
+  last_login_at?: string | null
+}
+
+export interface AuditRow {
+  id: number
+  created_at: string
+  actor: string | null
+  action: string
+  org_id: number | null
+  org_name: string | null
+  resource_id: string | null
+  reason: string | null
+  before: unknown
+  after: unknown
+  ip_address: string | null
+  method: string | null
+  path: string | null
+  status_code: number | null
+}
+
+export interface AuditFilters {
+  kind?: 'actions' | 'requests'
+  actor?: string
+  action?: string
+  q?: string
+  org_id?: string
+  since?: string
+  until?: string
+  page?: number
+  limit?: number
+}
+
+const authHeaders = (accessToken: string) => ({
+  Authorization: `Bearer ${accessToken}`,
+  'Content-Type': 'application/json',
+})
+
+async function failure(res: Response, fallback: string): Promise<never> {
+  const detail = await res.json().catch(() => ({}))
+  throw new Error(typeof detail?.detail === 'string' ? detail.detail : fallback)
+}
+
+export async function listStaff(accessToken: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/staff`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load staff')
+  return (await res.json()) as { items: StaffMember[] }
+}
+
+export async function addStaff(accessToken: string, email: string, role: 'support' | 'finance', reason: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/staff`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ email, role, reason }),
+  })
+  if (!res.ok) return failure(res, 'Failed to add staff member')
+  return res.json()
+}
+
+export async function setStaffRole(
+  accessToken: string,
+  userUuid: string,
+  role: 'support' | 'finance' | null,
+  reason: string
+) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/staff/${encodeURIComponent(userUuid)}`, {
+    method: 'PUT',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ role, reason }),
+  })
+  if (!res.ok) return failure(res, 'Failed to change role')
+  return res.json()
+}
+
+function auditQuery(filters: AuditFilters) {
+  const params = new URLSearchParams()
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') params.set(key, String(value))
+  })
+  return params.toString()
+}
+
+export async function getAuditLog(accessToken: string, filters: AuditFilters) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/audit?${auditQuery(filters)}`, {
+    headers: authHeaders(accessToken),
+  })
+  if (!res.ok) return failure(res, 'Failed to load the audit log')
+  return (await res.json()) as { items: AuditRow[]; total: number; page: number; limit: number; role: StaffRole }
+}
+
+/** Download the filtered log as CSV (the export itself is written to the audit log). */
+export async function downloadAuditCsv(accessToken: string, filters: AuditFilters) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/audit/export?${auditQuery(filters)}`, {
+    headers: authHeaders(accessToken),
+  })
+  if (!res.ok) return failure(res, 'Export failed')
+  const url = URL.createObjectURL(await res.blob())
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 10_000)
+}

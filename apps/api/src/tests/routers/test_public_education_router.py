@@ -16,7 +16,7 @@ from src.routers.orgs.public_education import router as public_ed_router
 from src.routers.superadmin import router as superadmin_router
 from src.security.auth import get_current_user
 from src.security.submission_file_access import is_private_org_file
-from src.security.superadmin import require_superadmin
+from src.security.staff import all_staff_dependencies
 from src.services.orgs.public_education import add_months, is_official_domain
 
 BASE = "/api/v1/orgs/1/public-education/application"
@@ -64,7 +64,8 @@ def as_user(app, user):
 
 
 def as_superadmin(app, user):
-    app.dependency_overrides[require_superadmin] = lambda: user
+    for _dep in all_staff_dependencies():
+        app.dependency_overrides[_dep] = lambda: user
 
 
 class TestOrgApplication:

@@ -39,9 +39,16 @@ const SuperadminAuthorization: React.FC<SuperadminAuthorizationProps> = ({
       return
     }
 
-    setIsAuthorized(session?.data?.user?.is_superadmin === true)
+    // Owners are superadmins; Support and Finance carry a platform_role. The API
+    // decides what each may do, so this only lets them into the console.
+    const platformRole = session?.data?.user?.platform_role
+    setIsAuthorized(
+      session?.data?.user?.is_superadmin === true ||
+        platformRole === 'support' ||
+        platformRole === 'finance'
+    )
     setIsChecking(false)
-  }, [session.status, isUserAuthenticated, session?.data?.user?.is_superadmin, router])
+  }, [session.status, isUserAuthenticated, session?.data?.user?.is_superadmin, session?.data?.user?.platform_role, router])
 
   useEffect(() => {
     checkAuth()

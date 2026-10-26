@@ -40,6 +40,13 @@ async def _make_user(db, org, role, uid, username, first, last, **extra):
     return u
 
 
+@pytest.fixture(autouse=True)
+def no_redis():
+    """Rate limits must not leak between runs through a developer's real Redis."""
+    with patch("src.core.redis.get_redis_client", return_value=None):
+        yield
+
+
 @pytest.fixture
 async def roles(db, org, admin_role, user_role):
     """The roles as production names them: the learner role is role_global_user."""
@@ -299,6 +306,28 @@ class TestClassAndExamDays:
                 await asyncio.gather(*list(invitations._background))
         assert [c.args[0] for c in send.call_args_list] == ["amina@test.com"]
         assert "https://school.example.test/course/test/live/1" in send.call_args_list[0].args[2]
+
+    async def test_resend_is_rate_limited_per_student(self, db, client, org, course, people):
+        db.add(LiveSession(session_uuid="livesession_1", org_id=org.id, course_id=course.id, instructor_id=11, title="Maths live",
+                           scheduled_at=datetime.now(timezone.utc) + timedelta(hours=3), livekit_room_name="room1"))
+        await db.commit()
+        counts = {}
+
+        class FakeRedis:
+            def incr(self, key):
+                counts[key] = counts.get(key, 0) + 1
+                return counts[key]
+
+            def expire(self, key, seconds):
+                return True
+
+        with patch("src.core.redis.get_redis_client", return_value=FakeRedis()), patch("src.services.email.utils.send_email"), patch(
+            "src.services.email.utils.get_org_signup_base_url", new_callable=AsyncMock, return_value="https://school.example.test/"
+        ):
+            codes = [(await client.post("/api/v1/frontdesk/orgs/1/live/livesession_1/resend", json={"user_uuid": "user_amina"})).status_code for _ in range(4)]
+            other = (await client.post("/api/v1/frontdesk/orgs/1/live/livesession_1/resend", json={"user_uuid": "user_brian"})).status_code
+        assert codes == [200, 200, 200, 429], "a fourth resend to the same student within the hour is refused"
+        assert other == 200, "another student is unaffected"
 
     async def test_resend_is_for_students_of_this_school_only(self, db, client, org, course, people):
         db.add(LiveSession(session_uuid="livesession_1", org_id=org.id, course_id=course.id, instructor_id=11, title="Maths live",

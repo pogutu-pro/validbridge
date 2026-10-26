@@ -101,7 +101,7 @@ def _email_html(
     return subject, layout
 
 
-async def _throttle(session_uuid: str) -> None:
+async def _throttle(session_uuid: str, limit: int = _SENDS_PER_HOUR) -> None:
     try:
         from src.core.redis import get_redis_client
 
@@ -114,15 +114,22 @@ async def _throttle(session_uuid: str) -> None:
             await asyncio.to_thread(client.expire, key, 3600)
     except Exception:  # pragma: no cover - Redis is an optimisation
         return
-    if count > _SENDS_PER_HOUR:
+    if count > limit:
         from src.services.live.sessions import _error
 
         raise _error(429, "SLOW_DOWN", "Too many invitations for this lesson. Try again later.")
 
 
 async def send_invitations(
-    request: Request, db: AsyncSession, user, session_uuid: str, payload: LiveInvitationCreate
+    request: Request, db: AsyncSession, user, session_uuid: str, payload: LiveInvitationCreate,
+    *, authorized: bool = False, throttle: bool = True,
 ) -> LiveInvitationResult:
+    """Email the classroom link.
+
+    ``authorized`` skips only the course-staff check, for callers that have decided
+    on their own that this user may send (the front desk). ``throttle=False`` lets
+    such a caller apply its own, finer rate limit.
+    """
     from src.services.email.branding import resolve_org_email_branding
     from src.services.email.utils import get_org_signup_base_url, send_email
     from src.services.live.sessions import _get_course, _require_staff, _require_user, get_session_by_uuid
@@ -132,7 +139,8 @@ async def send_invitations(
     user = _require_user(user)
     session: LiveSession = await get_session_by_uuid(db, session_uuid)
     course = await _get_course(db, session.course_id)
-    await _require_staff(request, db, user, course)
+    if not authorized:
+        await _require_staff(request, db, user, course)
     if session.status not in (LiveSessionStatus.SCHEDULED, *ACTIVE_STATUSES):
         from src.services.live.sessions import _error
 
@@ -153,7 +161,8 @@ async def send_invitations(
         raise HTTPException(status_code=422, detail="Add at least one email or choose all enrolled students")
     if len(recipients) > MAX_RECIPIENTS:
         raise HTTPException(status_code=422, detail=f"At most {MAX_RECIPIENTS} recipients per send")
-    await _throttle(session.session_uuid)
+    if throttle:
+        await _throttle(session.session_uuid)
 
     org = await db.get(Organization, course.org_id)
     org_config = (

@@ -29,6 +29,7 @@ from src.routers import payments as payments_router_module
 from src.routers import billing as billing_router_module
 from src.routers import superadmin_billing as superadmin_billing_router_module
 from src.routers.courses import chapters, courses, assignments, certifications, exams
+from src.routers import frontdesk as frontdesk_router
 from src.routers.folders import folders as folders_router_module
 from src.routers.media import media as media_router_module
 from src.routers.courses import migration as migration_router_module
@@ -255,6 +256,13 @@ v1_router.include_router(
     prefix="/exams",
     tags=["exams"],
     # Sessions only: exams are taken by people, never by API tokens.
+    dependencies=[Depends(require_authenticated_user)],
+)
+v1_router.include_router(
+    frontdesk_router.router,
+    prefix="/frontdesk",
+    tags=["frontdesk"],
+    # People only: reception work is never done by an API token.
     dependencies=[Depends(require_authenticated_user)],
 )
 v1_router.include_router(chapters.router, prefix="/chapters", tags=["chapters"])

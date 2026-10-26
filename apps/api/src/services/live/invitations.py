@@ -207,3 +207,24 @@ async def send_invitations(
     task.add_done_callback(_background.discard)
     return LiveInvitationResult(queued=len(ordered))
 
+
+
+async def invite_enrolled_students(request: Request, db: AsyncSession, user, session_uuid: str) -> int:
+    """Email the classroom link to every student enrolled in the lesson's course.
+
+    Used when a lesson is scheduled. Scheduling must never fail because an email
+    could not be queued (no students yet, email not enabled for the school, a
+    mail-quota limit), so every problem is logged and counted as zero emailed.
+    Returns how many emails were queued.
+    """
+    try:
+        result = await send_invitations(
+            request, db, user, session_uuid, LiveInvitationCreate(all_enrolled=True)
+        )
+        return result.queued
+    except HTTPException as exc:
+        # 422: nobody to invite yet. 429: the per-lesson send budget. Both are normal.
+        logger.info("Live session %s: no automatic invitations (%s)", session_uuid, exc.status_code)
+    except Exception:
+        logger.warning("Live session %s: automatic invitations failed", session_uuid, exc_info=True)
+    return 0

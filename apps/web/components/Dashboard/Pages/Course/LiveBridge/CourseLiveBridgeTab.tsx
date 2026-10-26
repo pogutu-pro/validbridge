@@ -581,9 +581,11 @@ function Overview({
                               orgslug,
                               `/course/${shortCourse}/live/${s.session_uuid.replace(/^livesession_/, '')}`
                             )}
-                            className="text-xs font-medium text-primary hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex h-8 items-center rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
                           >
-                            {t('live.dashboard.open_classroom')}
+                            {t('live.course.join_class')}
                           </Link>
                         </span>
                       ) : (
@@ -777,7 +779,6 @@ export default function CourseLiveBridgeTab({
         courseUuid={courseUuid}
         open={scheduling}
         onOpenChange={setScheduling}
-        onCreated={setInviting}
       />
       {inviting && (
         <InviteDialog

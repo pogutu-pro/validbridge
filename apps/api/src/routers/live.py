@@ -95,7 +95,12 @@ async def api_create_live_session(
     db_session: AsyncSession = Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> LiveSessionRead:
-    return await create_session(request, db_session, current_user, payload)
+    created = await create_session(request, db_session, current_user, payload)
+    if payload.notify_students:
+        created.invitations_queued = await invitations.invite_enrolled_students(
+            request, db_session, current_user, created.session_uuid
+        )
+    return created
 
 
 @router.get(

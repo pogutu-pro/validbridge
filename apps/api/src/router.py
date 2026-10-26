@@ -513,4 +513,12 @@ v1_router.include_router(
     tags=["superadmin"],
 )
 
+from src.routers import superadmin_staff as superadmin_staff_router_module  # noqa: E402
+
+v1_router.include_router(
+    superadmin_staff_router_module.router,
+    prefix="/ee/superadmin",
+    tags=["superadmin"],
+)
+
 register_ee_routers(v1_router)

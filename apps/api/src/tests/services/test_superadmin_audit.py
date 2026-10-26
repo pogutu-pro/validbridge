@@ -14,7 +14,7 @@ from src.db.users import SuperadminAPITokenUser
 from src.routers.orgs.ai_credits import router as ai_credits_router
 from src.routers.superadmin import router as superadmin_router
 from src.security.auth import get_current_user
-from src.security.superadmin import require_superadmin
+from src.security.staff import all_staff_dependencies
 from src.services.audit.superadmin_audit import (
     SUPERADMIN_AUDIT_RESOURCE,
     record_superadmin_action,
@@ -109,7 +109,8 @@ def app(db, admin_user):
     app = FastAPI()
     app.include_router(superadmin_router, prefix="/api/v1/ee/superadmin")
     app.dependency_overrides[get_db_session] = lambda: db
-    app.dependency_overrides[require_superadmin] = lambda: admin_user
+    for _dep in all_staff_dependencies():
+        app.dependency_overrides[_dep] = lambda: admin_user
     yield app
     app.dependency_overrides.clear()
 
@@ -214,9 +215,9 @@ class TestSuperadminRouterAudit:
         assert secret not in str([r.payload for r in rows])
 
     async def test_token_principal_is_attributed_to_minting_user(self, client, db, app, org, org_config, admin_user):
-        app.dependency_overrides[require_superadmin] = lambda: SuperadminAPITokenUser(
-            id=999, created_by_user_id=admin_user.id
-        )
+        token_user = SuperadminAPITokenUser(id=999, created_by_user_id=admin_user.id)
+        for _dep in all_staff_dependencies():
+            app.dependency_overrides[_dep] = lambda: token_user
         response = await client.put(
             f"/api/v1/ee/superadmin/organizations/{org.id}/plan", json={"plan": "growth"}
         )

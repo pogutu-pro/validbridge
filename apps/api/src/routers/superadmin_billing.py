@@ -30,10 +30,10 @@ from src.db.billing import (
 )
 from src.db.billing._common import utcnow
 from src.db.billing.usage import PACK_KINDS
-from src.routers.superadmin import _acting_user_id, require_session_superadmin
+from src.routers.superadmin import _acting_user_id
 from src.security.features_utils import entitlements as ent
 from src.security.features_utils.entitlements import get_active_catalog
-from src.security.superadmin import require_superadmin
+from src.security.staff import require_staff
 from src.services.audit.superadmin_audit import record_superadmin_action
 from src.services.billing import accounts, engine, grants, pricing
 from src.services.payments import paystack
@@ -137,7 +137,7 @@ def _check_modes(modes: dict[str, str]) -> None:
 @router.get("/orgs/{org_id}")
 async def api_org_billing(
     org_id: int,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("billing_read")),
     db: AsyncSession = Depends(get_db_session),
 ):
     account = await accounts.ensure_account(org_id, db)
@@ -210,7 +210,7 @@ async def api_update_account(
     org_id: int,
     body: AccountBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     if body.enforcement_overrides is not None:
@@ -271,7 +271,7 @@ async def api_override_limits(
     org_id: int,
     body: OverrideBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Lift every limit (and any billing pause) for ``days`` — e.g. the school
@@ -298,7 +298,7 @@ async def api_end_override(
     org_id: int,
     body: Reason,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     before = await _set_override(org_id, None, db)
@@ -313,7 +313,7 @@ async def api_end_override(
 @router.get("/orgs/{org_id}/deal")
 async def api_get_deal(
     org_id: int,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("billing_read")),
     db: AsyncSession = Depends(get_db_session),
 ):
     row = await _org_config_row(org_id, db)
@@ -333,7 +333,7 @@ async def api_set_deal(
     org_id: int,
     body: DealBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Agree custom terms with a school: allowances above (or below) its plan,
@@ -426,7 +426,7 @@ async def api_mark_invoice_paid(
     invoice_id: int,
     body: MarkPaidBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """The school paid outside Paystack (bank, M-Pesa, cash…): settle the
@@ -463,7 +463,7 @@ async def api_manual_plan(
     org_id: int,
     body: ManualPlanBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Activate a plan for a period the school paid for outside Paystack.
@@ -525,7 +525,7 @@ async def api_free_trial(
     org_id: int,
     body: FreeTrialBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("trial_grant", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Give a school any paid plan free for ``days`` (30 by default).
@@ -577,7 +577,7 @@ async def api_grant_pack(
     org_id: int,
     body: PackGrantBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Give free credits / live seconds / code runs (support, goodwill, deals)."""
@@ -606,7 +606,7 @@ async def api_wallet_adjust(
     org_id: int,
     body: WalletAdjustBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Credit or debit the wallet. Corrections are new ledger entries; nothing
@@ -636,7 +636,7 @@ async def api_refund(
     org_id: int,
     body: RefundBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Refund a card/M-Pesa payment through Paystack. The ledger and the
@@ -678,7 +678,7 @@ async def api_void_invoice(
     invoice_id: int,
     body: Reason,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_write", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     invoice = (
@@ -721,7 +721,7 @@ async def api_void_invoice(
 
 @router.get("/enforcement")
 async def api_get_enforcement(
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("billing_read")),
     db: AsyncSession = Depends(get_db_session),
 ):
     rows = {f.metric: f.mode for f in (await db.execute(select(EnforcementFlag))).scalars().all()}
@@ -738,7 +738,7 @@ async def api_get_enforcement(
 async def api_set_enforcement(
     body: EnforcementBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_admin", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """The rollout lever (§9): shadow → enforce one metric at a time, and back
@@ -766,7 +766,7 @@ async def api_set_enforcement(
 
 @router.get("/catalog")
 async def api_catalog_versions(
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("billing_read")),
     db: AsyncSession = Depends(get_db_session),
 ):
     version, items = await get_active_catalog(db)
@@ -800,7 +800,7 @@ def _validate_catalog(items: dict) -> None:
 async def api_publish_catalog(
     body: CatalogBody,
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_admin", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Publish a new catalogue version. Past versions are never edited;
@@ -829,7 +829,7 @@ async def api_publish_catalog(
 @router.post("/run-cycle")
 async def api_run_cycle(
     request: Request,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("billing_admin", session_only=True)),
     db: AsyncSession = Depends(get_db_session),
 ):
     from src.services.billing.cycle import run_cycle
@@ -845,7 +845,7 @@ async def api_run_cycle(
 
 @router.get("/report")
 async def api_report(
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("billing_read")),
     db: AsyncSession = Depends(get_db_session),
 ):
     """MRR-style snapshot: paid subscriptions by plan, unpaid invoices, this

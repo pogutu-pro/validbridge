@@ -2,7 +2,7 @@ from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from sqlmodel import Field, SQLModel
-from sqlalchemy import JSON, Column, Index
+from sqlalchemy import JSON, Column, Index, String
 from sqlalchemy.dialects.postgresql import JSONB
 from src.db.roles import RoleRead
 
@@ -71,6 +71,8 @@ class UserRead(UserBase):
     last_login_at: Optional[str] = None
     signup_method: Optional[str] = None
     is_superadmin: bool = False
+    # Limited platform staff ('support' or 'finance'). Owners are is_superadmin instead.
+    platform_role: Optional[str] = None
 
 
 class UserReadPublic(SQLModel):
@@ -184,6 +186,10 @@ class User(UserBase, table=True):
     last_login_ip: Optional[str] = None
     signup_method: Optional[str] = None
     is_superadmin: bool = Field(default=False)
+    # Platform staff with limited powers: 'support' or 'finance'. None for everyone else.
+    # Deliberately NOT is_superadmin: that flag is the all-access bypass used across the
+    # platform, and limited staff must never inherit it.
+    platform_role: Optional[str] = Field(default=None, sa_column=Column(String(16), nullable=True))
     password_changed_at: Optional[datetime] = Field(default=None)
     creation_date: str = ""
     update_date: str = ""

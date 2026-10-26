@@ -39,6 +39,7 @@ from src.db.users import (
     User,
 )
 from src.security.rbac.constants import ADMIN_ROLE_ID
+from src.security.staff import require_staff
 from src.security.superadmin import require_superadmin
 from src.security.features_utils.plans import DEFAULT_PLAN, PLAN_HIERARCHY, is_paying_plan
 from src.security.features_utils.resolve import (
@@ -240,9 +241,20 @@ def _serialize_org_summary(
 # ---------------------------------------------------------------------------
 
 @router.get("/status")
-async def superadmin_status(current_user: Any = Depends(require_superadmin)):
-    """Confirms the caller is a superadmin (the router gate already enforces it)."""
-    return {"is_superadmin": True}
+async def superadmin_status(
+    current_user: Any = Depends(require_staff("read")),
+    db_session: AsyncSession = Depends(get_db_session),
+):
+    """Who the caller is on the platform console and what they may do.
+
+    ``is_superadmin`` is true only for owners; ``role`` is owner, support or finance;
+    ``capabilities`` lists what the tier allows so the UI can hide what the server would refuse.
+    """
+    from src.security.staff import OWNER, capabilities_of, staff_role_of
+
+    user_id = getattr(current_user, "created_by_user_id", None) or current_user.id
+    role = await staff_role_of(user_id, db_session) or OWNER
+    return {"is_superadmin": role == OWNER, "role": role, "capabilities": sorted(capabilities_of(role))}
 
 
 # ---------------------------------------------------------------------------
@@ -251,7 +263,7 @@ async def superadmin_status(current_user: Any = Depends(require_superadmin)):
 
 @router.get("/organizations/visits")
 async def organization_visits(
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     """Per-org visitor series. Empty unless analytics is configured."""
@@ -274,7 +286,7 @@ async def list_organizations(
     sort: str = Query("id"),
     search: Optional[str] = Query(None),
     plan: Optional[str] = Query(None),
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     page, limit = _clamp_page(page, limit)
@@ -343,7 +355,7 @@ async def list_organizations(
 async def create_organization(
     request: Request,
     body: dict,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("org_write")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.orgs.orgs import create_org
@@ -379,7 +391,7 @@ async def create_organization(
 @router.get("/organizations/{org_id}")
 async def get_organization(
     org_id: int,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     org = await _get_org_or_404(org_id, db_session)
@@ -411,7 +423,7 @@ async def update_organization_settings(
     org_id: int,
     request: Request,
     body: dict,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("org_write")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.orgs.orgs import update_org
@@ -455,7 +467,7 @@ async def update_organization_config(
     org_id: int,
     request: Request,
     body: dict,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("org_write")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.orgs.orgs import update_org_with_config_no_auth
@@ -486,7 +498,7 @@ async def update_organization_config(
 async def organization_usage(
     org_id: int,
     request: Request,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     await _get_org_or_404(org_id, db_session)
@@ -499,7 +511,7 @@ async def organization_courses(
     org_id: int,
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     page, limit = _clamp_page(page, limit)
@@ -543,7 +555,7 @@ async def organization_users(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     search: str = Query(""),
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     page, limit = _clamp_page(page, limit)
@@ -600,7 +612,7 @@ async def update_organization_plan(
     org_id: int,
     request: Request,
     body: dict,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("org_write")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.orgs.orgs import update_org_with_config_no_auth
@@ -647,7 +659,7 @@ async def update_organization_admin_toggles(
     org_id: int,
     request: Request,
     body: dict,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("org_write")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.orgs.orgs import update_org_with_config_no_auth
@@ -731,7 +743,7 @@ async def _run_analytics_queries(org_id: int, days: int, db_session: AsyncSessio
 @router.get("/analytics/global")
 async def global_analytics(
     days: int = Query(30, ge=1, le=365),
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     return await _run_analytics_queries(0, days, db_session)
@@ -741,7 +753,7 @@ async def global_analytics(
 async def organization_analytics(
     org_id: int,
     days: int = Query(30, ge=1, le=365),
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     await _get_org_or_404(org_id, db_session)
@@ -760,7 +772,7 @@ async def list_platform_users(
     search: Optional[str] = Query(None),
     superadmin: str = Query("all"),
     min_orgs: Optional[int] = Query(None, ge=1),
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     page, limit = _clamp_page(page, limit)
@@ -846,7 +858,7 @@ async def list_platform_users(
 
 @router.get("/tokens/", response_model=list[SuperadminAPITokenRead])
 async def list_superadmin_tokens(
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("tokens")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.api_tokens.superadmin_api_tokens import list_superadmin_tokens as _list
@@ -858,7 +870,7 @@ async def list_superadmin_tokens(
 async def create_superadmin_token_endpoint(
     request: Request,
     body: SuperadminAPITokenCreate,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("tokens", session_only=True)),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.api_tokens.superadmin_api_tokens import create_superadmin_token as _create
@@ -880,7 +892,7 @@ async def create_superadmin_token_endpoint(
 @router.get("/tokens/{token_uuid}", response_model=SuperadminAPITokenRead)
 async def get_superadmin_token_endpoint(
     token_uuid: str,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("tokens")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.api_tokens.superadmin_api_tokens import get_superadmin_token as _get
@@ -893,7 +905,7 @@ async def update_superadmin_token_endpoint(
     request: Request,
     token_uuid: str,
     body: SuperadminAPITokenUpdate,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("tokens", session_only=True)),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.api_tokens.superadmin_api_tokens import update_superadmin_token as _update
@@ -914,7 +926,7 @@ async def update_superadmin_token_endpoint(
 async def revoke_superadmin_token_endpoint(
     request: Request,
     token_uuid: str,
-    current_user: Any = Depends(require_session_superadmin),
+    current_user: Any = Depends(require_staff("tokens", session_only=True)),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.services.api_tokens.superadmin_api_tokens import revoke_superadmin_token as _revoke
@@ -937,7 +949,7 @@ async def revoke_superadmin_token_endpoint(
 @router.get("/public-education/applications")
 async def list_public_ed_applications(
     status_filter: Optional[str] = Query(None, alias="status"),
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.db.billing.public_education import PUBLIC_ED_STATUSES, PublicEdApplication
@@ -973,7 +985,7 @@ async def _get_public_ed_app_or_404(app_id: int, db_session: AsyncSession):
 @router.get("/public-education/applications/{app_id}/document")
 async def get_public_ed_document(
     app_id: int,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("read")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     """The applicant's registration document, for review. Superadmin only."""
@@ -1004,7 +1016,7 @@ async def approve_public_ed_application(
     app_id: int,
     request: Request,
     body: Optional[dict] = None,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("org_write")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.db.billing._common import utcnow
@@ -1063,7 +1075,7 @@ async def reject_public_ed_application(
     app_id: int,
     request: Request,
     body: Optional[dict] = None,
-    current_user: Any = Depends(require_superadmin),
+    current_user: Any = Depends(require_staff("org_write")),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     from src.db.billing._common import utcnow

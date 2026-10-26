@@ -63,10 +63,13 @@ async def _enrol(db, user_id: int, confirmed: bool = True) -> None:
 
 
 def _superadmin_patch(value: bool = True):
-    return patch(
-        "src.security.superadmin.is_user_superadmin",
-        new=AsyncMock(return_value=value),
-    )
+    from contextlib import ExitStack
+
+    stack = ExitStack()
+    stack.enter_context(patch("src.security.superadmin.is_user_superadmin", new=AsyncMock(return_value=value)))
+    # The console routes resolve the caller's tier through staff_role_of.
+    stack.enter_context(patch("src.security.staff.staff_role_of", new=AsyncMock(return_value="owner" if value else None)))
+    return stack
 
 
 class TestFlagParsing:

@@ -16,6 +16,8 @@ import {
   Gear,
   Sparkle,
   SealCheck,
+  ClockCounterClockwise,
+  UsersThree,
 } from '@phosphor-icons/react'
 import { signOut } from '@components/Contexts/AuthContext'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
@@ -27,6 +29,7 @@ import {
   TooltipTrigger,
 } from '@components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import useStaffAccess from '@components/Hooks/useStaffAccess'
 
 interface NavGroup {
   label: string
@@ -35,6 +38,8 @@ interface NavGroup {
     icon: React.ReactNode
     label: string
     badge?: string
+    // API capability the item needs; hidden when the tier lacks it.
+    requires?: string
   }[]
 }
 
@@ -42,6 +47,7 @@ export default function AdminSidebar() {
   const session = useVBSession() as any
   const pathname = usePathname() || ''
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const { can, role } = useStaffAccess()
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -78,7 +84,7 @@ export default function AdminSidebar() {
     return pathname === href || pathname.startsWith(href + '/')
   }
 
-  const navGroups: NavGroup[] = [
+  const allGroups: NavGroup[] = [
     {
       label: 'OVERVIEW',
       items: [
@@ -106,6 +112,7 @@ export default function AdminSidebar() {
           href: '/admin/public-education',
           icon: <SealCheck size={18} weight={isActive('/admin/public-education') ? 'fill' : 'bold'} />,
           label: 'Public Education',
+          requires: 'org_write',
         },
       ],
     },
@@ -116,6 +123,24 @@ export default function AdminSidebar() {
           href: '/admin/developers',
           icon: <Key size={18} weight={isActive('/admin/developers') ? 'fill' : 'bold'} />,
           label: 'Developer Keys',
+          requires: 'tokens',
+        },
+      ],
+    },
+    {
+      label: 'GOVERNANCE',
+      items: [
+        {
+          href: '/admin/audit',
+          icon: <ClockCounterClockwise size={18} weight={isActive('/admin/audit') ? 'fill' : 'bold'} />,
+          label: 'Audit log',
+          requires: 'audit_read',
+        },
+        {
+          href: '/admin/staff',
+          icon: <UsersThree size={18} weight={isActive('/admin/staff') ? 'fill' : 'bold'} />,
+          label: 'Staff',
+          requires: 'staff_manage',
         },
       ],
     },
@@ -131,6 +156,13 @@ export default function AdminSidebar() {
       ],
     },
   ]
+
+  const navGroups = allGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !item.requires || can(item.requires)),
+    }))
+    .filter((group) => group.items.length > 0)
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -154,7 +186,7 @@ export default function AdminSidebar() {
                     ValidBridge
                   </span>
                   <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.5 rounded-full shrink-0">
-                    SUPERADMIN
+                    {role && role !== 'owner' ? role : 'SUPERADMIN'}
                   </span>
                 </div>
                 <span className="text-[11px] font-medium text-muted-foreground truncate">Platform Console</span>

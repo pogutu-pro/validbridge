@@ -252,6 +252,10 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid: initialOf
         toast.error(`Please enter an amount of at least ${formatCurrency(offer.amount, offer.currency, i18n.language)}`)
         return
       }
+      if (offer.total_amount && chosenAmount > offer.total_amount) {
+        toast.error(`The full price is ${formatCurrency(offer.total_amount, offer.currency, i18n.language)}`)
+        return
+      }
     }
     track(AnalyticsEvent.OfferCheckoutStarted, {
       offer_uuid: offerUuid,
@@ -405,7 +409,9 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid: initialOf
               <div className="mb-5">
                 <p className="text-xs text-gray-400 font-medium mb-1">
                   {offer.price_type === 'customer_choice'
-                    ? `Pay what you want (min. ${formatCurrency(offer.amount, offer.currency, i18n.language)})`
+                    ? offer.total_amount
+                      ? `Full price ${formatCurrency(offer.total_amount, offer.currency, i18n.language)}. Start from ${formatCurrency(offer.amount, offer.currency, i18n.language)} and pay the rest later`
+                      : `Pay what you want (min. ${formatCurrency(offer.amount, offer.currency, i18n.language)})`
                     : isSubscription ? 'Subscription price' : 'One-time price'}
                 </p>
                 {offer.price_type === 'customer_choice' ? (

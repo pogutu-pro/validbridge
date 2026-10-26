@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import JSON, BigInteger, Column, ForeignKey, String
+from sqlalchemy import JSON, BigInteger, Column, Float, ForeignKey, String
 from sqlmodel import Field, SQLModel
 
 
@@ -44,6 +44,9 @@ class PaymentsEnrollment(SQLModel, table=True):
     )
     email_token: Optional[str] = Field(default=None, sa_column=Column(String, nullable=True))
     provider_specific_data: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    # Running total of what the buyer has paid for the offer itself (fees excluded), for offers
+    # that can be paid in parts. 0 on enrollments made before instalments existed.
+    amount_paid: float = Field(default=0.0, sa_column=Column(Float, nullable=False, default=0.0, server_default="0"))
     creation_date: datetime = Field(default_factory=datetime.now)
     update_date: datetime = Field(default_factory=datetime.now)
 

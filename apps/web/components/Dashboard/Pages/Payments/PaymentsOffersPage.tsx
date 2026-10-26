@@ -27,6 +27,7 @@ const editValidationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   description: Yup.string().required('Description is required'),
   amount: Yup.number().min(0, 'Amount must be positive').required('Amount is required'),
+  total_amount: Yup.number().nullable().transform((v, o) => (o === '' ? null : v)).moreThan(Yup.ref('amount'), 'Full price must be more than the minimum amount'),
   benefits: Yup.string(),
   currency: Yup.string().required('Currency is required'),
   offer_type: Yup.string().oneOf(['one_time', 'subscription']).required('Offer type is required'),
@@ -264,6 +265,7 @@ const EditOfferForm = ({
     name: offer.name,
     description: offer.description,
     amount: offer.amount,
+    total_amount: (offer.total_amount ?? '') as number | '',
     benefits: offer.benefits || '',
     currency: offer.currency || 'KES',
     offer_type: offer.offer_type as 'one_time' | 'subscription',
@@ -275,7 +277,19 @@ const EditOfferForm = ({
     { setSubmitting }: { setSubmitting: (b: boolean) => void }
   ) => {
     try {
-      await updateOffer(org.id, offer.id, values, session.data?.tokens?.access_token);
+      const res = await updateOffer(
+        org.id,
+        offer.id,
+        {
+          ...values,
+          total_amount: values.price_type === 'customer_choice' && values.total_amount !== '' ? Number(values.total_amount) : null,
+        },
+        session.data?.tokens?.access_token
+      );
+      if (!res.success) {
+        toast.error(res.data?.detail || 'Failed to update offer');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.offers(org.id) });
       onSuccess();
       toast.success('Offer updated successfully');
@@ -376,6 +390,17 @@ const EditOfferForm = ({
                 <ErrorMessage name="currency" component="div" className="text-red-500 text-sm mt-1" />
               </div>
             </div>
+
+            {values.price_type === 'customer_choice' && (
+              <div>
+                <Label htmlFor="total_amount">Full price (optional)</Label>
+                <Field name="total_amount" as={Input} type="number" placeholder="e.g. 15000" />
+                <p className="text-xs text-gray-500 mt-1">
+                  If set, students can start from the minimum above and pay the rest later. Leave empty for a single pay-what-you-want payment.
+                </p>
+                <ErrorMessage name="total_amount" component="div" className="text-red-500 text-sm mt-1" />
+              </div>
+            )}
 
             <div>
               <Label htmlFor="benefits">Benefits</Label>

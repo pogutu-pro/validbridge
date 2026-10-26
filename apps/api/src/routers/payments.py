@@ -56,6 +56,8 @@ class OfferBody(BaseModel):
     interval: Optional[str] = None
     benefits: Optional[str] = None
     amount: float = 0
+    # Full price when the offer can be paid in parts; `amount` is then the smallest payment.
+    total_amount: Optional[float] = None
     currency: str = "KES"
     payments_group_id: Optional[int] = None
     resource_uuids: Optional[list[str]] = None

@@ -55,6 +55,9 @@ class PaymentsOffer(SQLModel, table=True):
         default=None, sa_column=Column(String, nullable=True)
     )
     amount: float = Field(sa_column=Column(Float, nullable=False, default=0.0))
+    # Full price for a "customer_choice" offer that can be paid in parts: ``amount`` is then the
+    # smallest payment (the deposit) and this is what the buyer owes in total. None = no instalments.
+    total_amount: Optional[float] = Field(default=None, sa_column=Column(Float, nullable=True))
     currency: str = Field(default="KES")
     benefits: Optional[str] = None
     is_publicly_listed: bool = Field(default=False)
@@ -75,6 +78,7 @@ class PaymentsOfferRead(SQLModel):
     price_type: str
     interval: Optional[str]
     amount: float
+    total_amount: Optional[float] = None
     currency: str
     benefits: Optional[str]
     is_publicly_listed: bool

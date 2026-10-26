@@ -339,3 +339,17 @@ export async function personAction(
   if (!res.ok) return failure(res, 'Action failed')
   return res.json()
 }
+
+// ── Command center and monitors ───────────────────────────────────────────────
+
+export async function getCommandCenter(accessToken: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/command-center`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load the command center')
+  return res.json()
+}
+
+export async function getMonitor(accessToken: string, kind: 'live' | 'exams') {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/monitor/${kind}`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load the monitor')
+  return (await res.json()) as { items: any[] }
+}

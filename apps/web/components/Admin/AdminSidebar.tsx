@@ -19,6 +19,8 @@ import {
   ClockCounterClockwise,
   UsersThree,
   MagnifyingGlass,
+  Gauge,
+  Broadcast,
 } from '@phosphor-icons/react'
 import { signOut } from '@components/Contexts/AuthContext'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
@@ -89,6 +91,16 @@ export default function AdminSidebar() {
     {
       label: 'OVERVIEW',
       items: [
+        {
+          href: '/admin',
+          icon: <Gauge size={18} weight={isActive('/admin') ? 'fill' : 'bold'} />,
+          label: 'Command center',
+        },
+        {
+          href: '/admin/monitors',
+          icon: <Broadcast size={18} weight={isActive('/admin/monitors') ? 'fill' : 'bold'} />,
+          label: 'Live monitors',
+        },
         {
           href: '/admin/search',
           icon: <MagnifyingGlass size={18} weight={isActive('/admin/search') ? 'fill' : 'bold'} />,

@@ -19,6 +19,7 @@ import {
     Zap,
     BarChart3,
     ClipboardCheck,
+    ShieldCheck,
 } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
@@ -40,6 +41,7 @@ import { useTranslation } from 'react-i18next';
 import { useVBAnalytics, AnalyticsEvent } from '@services/analytics';
 const AssignmentSubmissionsSubPage = dynamic(() => import('./subpages/AssignmentSubmissionsSubPage'))
 const AssignmentAnalyticsSubPage = dynamic(() => import('./subpages/AssignmentAnalyticsSubPage'))
+const AssignmentExamSubPage = dynamic(() => import('./subpages/AssignmentExamSubPage'))
 
 function AssignmentEdit() {
     const { t } = useTranslation()
@@ -126,12 +128,25 @@ function AssignmentEdit() {
                                 <div>{t('dashboard.assignments.detail.tabs.analytics')}</div>
                             </div>
                         </div>
+                        <div
+                            onClick={() => setSelectedSubPage('exam')}
+                            className={`flex space-x-4 py-2 w-fit text-center border-black transition-all ease-linear ${selectedSubPage === 'exam'
+                                ? 'border-b-4'
+                                : 'opacity-50'
+                                } cursor-pointer`}
+                        >
+                            <div className="flex items-center space-x-2.5 mx-2">
+                                <ShieldCheck size={16} />
+                                <div>{t('dashboard.assignments.detail.tabs.exam', { defaultValue: 'Exam mode' })}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div className="flex flex-1 min-h-0 w-full">
                     {selectedSubPage === 'editor' && <AssignmentEditorSubPage assignmentuuid={params.assignmentuuid} />}
                     {selectedSubPage === 'submissions' && <AssignmentSubmissionsSubPage assignment_uuid={params.assignmentuuid} />}
                     {selectedSubPage === 'analytics' && <AssignmentAnalyticsSubPage assignment_uuid={params.assignmentuuid} />}
+                    {selectedSubPage === 'exam' && <AssignmentExamSubPage assignment_uuid={params.assignmentuuid} />}
                 </div>
             </AssignmentProvider>
         </div>

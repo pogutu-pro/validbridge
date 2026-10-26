@@ -56,6 +56,11 @@ export const queryKeys = {
     analytics: (uuid: string) => ['assignment', uuid, 'analytics'] as const,
     allSubmissions: (uuid: string) => ['assignment', uuid, 'submissions'] as const,
   },
+  exams: {
+    status: (uuid: string) => ['exam', uuid, 'status'] as const,
+    monitor: (uuid: string) => ['exam', uuid, 'monitor'] as const,
+    events: (uuid: string, userUuid: string) => ['exam', uuid, 'events', userUuid] as const,
+  },
   usergroups: {
     list: (orgId: number) => ['usergroups', orgId] as const,
     resources: (ugId: string, orgId: number) => ['usergroup', ugId, 'resources', orgId] as const,

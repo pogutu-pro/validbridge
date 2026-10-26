@@ -28,7 +28,7 @@ from src.routers.orgs import packs
 from src.routers import payments as payments_router_module
 from src.routers import billing as billing_router_module
 from src.routers import superadmin_billing as superadmin_billing_router_module
-from src.routers.courses import chapters, courses, assignments, certifications
+from src.routers.courses import chapters, courses, assignments, certifications, exams
 from src.routers.folders import folders as folders_router_module
 from src.routers.media import media as media_router_module
 from src.routers.courses import migration as migration_router_module
@@ -249,6 +249,13 @@ v1_router.include_router(
     # authorize_assignment_access (assignments rights bucket), while learner
     # /me + submission endpoints keep _block_api_tokens (session-only).
     dependencies=[Depends(require_authenticated_user_or_api_token)]
+)
+v1_router.include_router(
+    exams.router,
+    prefix="/exams",
+    tags=["exams"],
+    # Sessions only: exams are taken by people, never by API tokens.
+    dependencies=[Depends(require_authenticated_user)],
 )
 v1_router.include_router(chapters.router, prefix="/chapters", tags=["chapters"])
 v1_router.include_router(activities.router, prefix="/activities", tags=["activities"])

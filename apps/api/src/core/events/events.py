@@ -122,6 +122,10 @@ def startup_app(app: FastAPI) -> Callable:
         from src.services.live.reconciler import start_reconciler
         start_reconciler()
 
+        # Submit exam sittings whose clock has run out, even if the student never returns.
+        from src.services.courses.activities.exams import start_sweeper as start_exam_sweeper
+        start_exam_sweeper()
+
         # Start the audit-log writer (drains the bounded in-process queue; never raises).
         from src.core.middleware.audit_log import start_audit_log_worker
         start_audit_log_worker()
@@ -163,6 +167,8 @@ def shutdown_app(app: FastAPI) -> Callable:
         # Stop the live-session reconciler.
         from src.services.live.reconciler import stop_reconciler
         await stop_reconciler()
+        from src.services.courses.activities.exams import stop_sweeper as stop_exam_sweeper
+        await stop_exam_sweeper()
         # Stop the audit-log writer and drain any remaining rows (bounded).
         from src.core.middleware.audit_log import stop_audit_log_worker
         await stop_audit_log_worker()

@@ -99,7 +99,21 @@ jobs:
       - name: Install ffmpeg
         # Required by the video faststart / HLS transcode tests (they skip
         # without it, which would silently leave that code uncovered).
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+        # The package mirror sometimes stalls and used to hold this step for the whole
+        # 30 minute job limit. Each attempt now has network timeouts and a hard cap,
+        # and is retried, so a stall costs minutes instead of the run.
+        timeout-minutes: 12
+        run: |
+          apt_opts="-o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20"
+          for attempt in 1 2 3; do
+            if sudo timeout 120 apt-get update $apt_opts \
+              && sudo timeout 180 apt-get install -y --no-install-recommends $apt_opts ffmpeg; then
+              exit 0
+            fi
+            echo "ffmpeg install attempt $attempt failed"
+            sleep 5
+          done
+          exit 1
       - name: Install dependencies
         run: uv sync
         working-directory: apps/api

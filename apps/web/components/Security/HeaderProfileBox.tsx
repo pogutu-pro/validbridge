@@ -2,9 +2,10 @@
 import React, { useMemo } from 'react'
 
 import Link from 'next/link'
-import { Crown, Shield, User, Users, SignOut, CaretDown, Check, ShoppingBag, House, Buildings, Plus, CreditCard } from '@phosphor-icons/react'
+import { Crown, Shield, User, Users, SignOut, CaretDown, Check, ShoppingBag, House, Buildings, Plus, CreditCard, ClipboardText } from '@phosphor-icons/react'
 import UserAvatar from '@components/Objects/UserAvatar'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
+import useFrontdeskAccess from '@components/Hooks/useFrontdeskAccess'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg, getMainDomainUri, isMultiOrgModeEnabled } from '@services/config/config'
@@ -44,6 +45,7 @@ interface CustomRoleInfo {
 export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string }) => {
   const session = useVBSession() as any
   const { userRoles, rights } = useAdminStatus()
+  const frontdesk = useFrontdeskAccess()
   const org = useOrg() as any
   const { t } = useTranslation()
   const { track } = useVBAnalytics()
@@ -235,6 +237,14 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                     <Link href="/dash" className="flex items-center space-x-2">
                       <Shield size={16} weight="fill" />
                       <span>{t('common.dashboard')}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {frontdesk.allowed && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/frontdesk" className="flex items-center space-x-2">
+                      <ClipboardText size={16} weight="fill" />
+                      <span>{t('common.frontdesk', { defaultValue: 'Front desk' })}</span>
                     </Link>
                   </DropdownMenuItem>
                 )}

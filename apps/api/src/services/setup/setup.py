@@ -505,10 +505,30 @@ async def install_default_elements(db_session: AsyncSession):
         update_date=str(datetime.now()),
     )
 
+    # Reception: a front-desk role. It starts from the learner's rights (read the
+    # courses it can see, nothing else) and adds only the front-desk bucket. No
+    # dashboard access: the front desk has its own screen, so none of the admin
+    # dashboard is reachable. Looked up by role_uuid below, not by a fixed id,
+    # because organisations create custom roles with ids of their own.
+    reception_rights = role_global_user.rights.model_copy(deep=True)  # type: ignore[union-attr]
+    reception_rights.frontdesk = Permission(
+        action_create=True, action_read=True, action_update=True, action_delete=False
+    )
+    role_global_reception = Role(
+        name="Reception",
+        description="Front desk: onboard students, manage groups, look up students, support class and exam days",
+        role_type=RoleTypeEnum.TYPE_GLOBAL,
+        role_uuid="role_global_reception",
+        rights=reception_rights,
+        creation_date=str(datetime.now()),
+        update_date=str(datetime.now()),
+    )
+
     # Serialize rights to JSON
     desired_roles = [role_global_admin, role_global_maintainer, role_global_instructor, role_global_user]
     for role in desired_roles:
         role.rights = role.rights.model_dump()  # type: ignore
+    role_global_reception.rights = role_global_reception.rights.model_dump()  # type: ignore
 
     # Upsert: update existing roles in place, create missing ones
     for desired in desired_roles:
@@ -525,6 +545,21 @@ async def install_default_elements(db_session: AsyncSession):
         else:
             db_session.add(desired)
             logger.info(f"Created new global role: {desired.name} (id={desired.id})")
+
+    existing_reception = (
+        await db_session.execute(select(Role).where(Role.role_uuid == role_global_reception.role_uuid))
+    ).scalars().first()
+    if existing_reception:
+        existing_reception.name = role_global_reception.name
+        existing_reception.description = role_global_reception.description
+        existing_reception.role_type = role_global_reception.role_type
+        existing_reception.rights = role_global_reception.rights
+        existing_reception.update_date = str(datetime.now())
+        db_session.add(existing_reception)
+        logger.info("Updated existing global role: Reception")
+    else:
+        db_session.add(role_global_reception)
+        logger.info("Created new global role: Reception")
 
     await db_session.commit()
 

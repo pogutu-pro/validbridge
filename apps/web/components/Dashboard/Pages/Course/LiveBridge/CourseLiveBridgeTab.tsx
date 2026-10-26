@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -14,6 +16,7 @@ import {
   GraduationCap,
   PlayCircle,
   Radio,
+  Send,
   UserCheck,
   UserPlus,
   Users,
@@ -31,6 +34,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { liveErrorKey } from '@components/Objects/Live/liveErrors'
+import { shareLiveRecording } from '@services/live/live'
+import {
+  useLiveAccessToken,
   useCourseLiveRecordings,
   useCourseLiveSessions,
   useLiveCourseOverview,
@@ -122,6 +136,87 @@ function Empty({ text }: { text: string }) {
 // Session report (drill-down)
 // ---------------------------------------------------------------------------
 
+function ShareRecordingDialog({ recording, onClose }: { recording: LiveRecording; onClose: () => void }) {
+  const { t } = useTranslation()
+  const qc = useQueryClient()
+  const token = useLiveAccessToken()
+  const [everyone, setEveryone] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const draft = recording.published === false
+
+  const send = async () => {
+    setBusy(true)
+    try {
+      const res = await shareLiveRecording(
+        recording.recording_uuid,
+        { publish: true, audience: everyone ? 'everyone' : 'absent' },
+        token
+      )
+      qc.invalidateQueries({ queryKey: ['live'] })
+      toast.success(
+        res.queued
+          ? t('live.recording.shared', { count: res.queued, defaultValue: 'Recording sent to {{count}} student(s).' })
+          : t('live.recording.shared_none', {
+              defaultValue: 'Nobody to send it to: everyone attended, or email is not enabled for this school.',
+            })
+      )
+      onClose()
+    } catch (error) {
+      toast.error(t(liveErrorKey(error)))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(next) => !busy && !next && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t('live.recording.share_title', { defaultValue: 'Share this recording' })}</DialogTitle>
+          <DialogDescription>
+            {t('live.recording.share_description', {
+              defaultValue:
+                'Students enrolled in this course who never joined the live lesson get an email with a link to watch "{{title}}".',
+              title: recording.session_title,
+            })}
+          </DialogDescription>
+        </DialogHeader>
+        {draft && (
+          <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+            {t('live.recording.share_draft', {
+              defaultValue: 'This recording is still a draft. Sending it publishes it so students can watch.',
+            })}
+          </p>
+        )}
+        <label className="flex items-start gap-3 rounded-lg bg-neutral-50 p-3 text-sm text-neutral-800">
+          <input
+            type="checkbox"
+            checked={everyone}
+            onChange={(e) => setEveryone(e.target.checked)}
+            className="mt-0.5 size-4 accent-[hsl(var(--primary))]"
+          />
+          <span>
+            {t('live.recording.share_everyone', { defaultValue: 'Send to everyone enrolled, not only those who missed it' })}
+          </span>
+        </label>
+        <DialogFooter className="gap-2">
+          <button type="button" onClick={onClose} disabled={busy} className="h-10 rounded-lg px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
+            {t('live.common.cancel')}
+          </button>
+          <button
+            type="button"
+            onClick={send}
+            disabled={busy}
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          >
+            {draft ? t('live.recording.share_publish_send', { defaultValue: 'Publish and send' }) : t('live.recording.share_send', { defaultValue: 'Send' })}
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function RecordingLinks({
   recordings,
   orgslug,
@@ -132,9 +227,12 @@ function RecordingLinks({
   shortCourse: string
 }) {
   const { t } = useTranslation()
+  const [sharing, setSharing] = useState<LiveRecording | null>(null)
   if (!recordings.length)
     return <Empty text={t('live.dashboard.no_recordings')} />
   return (
+    <>
+    {sharing && <ShareRecordingDialog recording={sharing} onClose={() => setSharing(null)} />}
     <ul className="divide-y divide-neutral-100">
       {recordings.map((r) => (
         <li key={r.recording_uuid} className="flex items-center gap-3 py-2">
@@ -170,9 +268,20 @@ function RecordingLinks({
               {t(`live.recording.state_${r.status}`)}
             </Pill>
           )}
+          {r.status === 'ready' && r.activity_uuid && (
+            <button
+              type="button"
+              onClick={() => setSharing(r)}
+              className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-primary"
+            >
+              <Send className="size-3.5" />{' '}
+              {t('live.recording.share_button', { defaultValue: 'Send to students who missed it' })}
+            </button>
+          )}
         </li>
       ))}
     </ul>
+    </>
   )
 }
 

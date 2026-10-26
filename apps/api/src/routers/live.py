@@ -33,6 +33,7 @@ from src.db.live_sessions import (
     LiveMyLessons,
     LiveLearnerEngagement,
     LiveRecordingRead,
+    LiveRecordingShare,
     LiveSessionReport,
     LiveReactionCreate,
     LiveSessionCreate,
@@ -42,7 +43,7 @@ from src.db.live_sessions import (
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.services.live import classroom, insights, invitations, livekit, quizzes, recordings
+from src.services.live import classroom, insights, invitations, livekit, quizzes, recording_share, recordings
 from src.services.live.sessions import (
     create_session,
     delete_session,
@@ -568,6 +569,25 @@ async def api_list_live_session_recordings(
     current_user: PublicUser = Depends(get_current_user),
 ) -> List[LiveRecordingRead]:
     return await recordings.list_session_recordings(request, db_session, current_user, session_uuid)
+
+
+@router.post(
+    "/recordings/{recording_uuid}/share",
+    summary="Share a recording with the students who missed the lesson (staff)",
+    description=(
+        "Emails the recording lesson's link to the course's students who never joined the live lesson (or to everyone "
+        "enrolled), publishing a draft recording first when asked. The link still enforces course access."
+    ),
+    responses={**_COMMON_ERRORS, 409: {"description": "Recording not ready or still a draft"}, 429: {"description": "Too many shares"}},
+)
+async def api_share_live_recording(
+    request: Request,
+    recording_uuid: str,
+    payload: LiveRecordingShare,
+    db_session: AsyncSession = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+) -> dict:
+    return await recording_share.share_recording_api(request, db_session, current_user, recording_uuid, payload)
 
 
 @router.get("/recordings", response_model=List[LiveRecordingRead], summary="Live lesson recordings of a course")

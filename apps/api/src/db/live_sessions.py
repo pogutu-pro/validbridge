@@ -18,7 +18,7 @@ out-of-order webhooks cannot corrupt the totals.
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field as PydanticField
 from sqlalchemy import (
@@ -164,6 +164,8 @@ class LiveSession(SQLModel, table=True):
     ready_at: Optional[datetime] = Field(default=None, sa_column=_tz_column())
     started_at: Optional[datetime] = Field(default=None, sa_column=_tz_column())
     ended_at: Optional[datetime] = Field(default=None, sa_column=_tz_column())
+    # When the recording was last sent to the students who missed the lesson (None: not yet).
+    recording_shared_at: Optional[datetime] = Field(default=None, sa_column=_tz_column())
     created_at: datetime = Field(default_factory=utcnow, sa_column=_tz_column(nullable=False))
     updated_at: datetime = Field(default_factory=utcnow, sa_column=_tz_column(nullable=False))
 
@@ -746,6 +748,13 @@ class LiveQuizRead(BaseModel):
     # Staff: every question so far with stats. Learners: none.
     questions: Optional[list[LiveQuizQuestionRead]] = None
     results: Optional[LiveQuizResults] = None
+
+
+class LiveRecordingShare(BaseModel):
+    # Publish the recording lesson first if it is still a draft.
+    publish: bool = True
+    # absent: students enrolled who never joined. everyone: all enrolled students.
+    audience: Literal["absent", "everyone"] = "absent"
 
 
 class LiveRecordingRead(BaseModel):

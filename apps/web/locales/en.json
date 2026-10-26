@@ -6579,6 +6579,16 @@
       "prompt_label": "Quiz · question {{n}} of {{total}}"
     },
     "recording": {
+      "share_button": "Send to students who missed it",
+      "share_title": "Share this recording",
+      "share_description": "Students enrolled in this course who never joined the live lesson get an email with a link to watch \"{{title}}\".",
+      "share_draft": "This recording is still a draft. Sending it publishes it so students can watch.",
+      "share_everyone": "Send to everyone enrolled, not only those who missed it",
+      "share_send": "Send",
+      "share_publish_send": "Publish and send",
+      "shared_one": "Recording sent to 1 student.",
+      "shared_other": "Recording sent to {{count}} students.",
+      "shared_none": "Nobody to send it to: everyone attended, or email is not enabled for this school.",
       "start": "Start recording",
       "stop": "Stop recording",
       "started_toast": "Recording started",

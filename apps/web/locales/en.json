@@ -6507,7 +6507,31 @@
       "notify_students": "Email the class link to my students now",
       "notify_students_hint": "Everyone enrolled in this course gets the link and a calendar button by email.",
       "created_notified_one": "Lesson scheduled. 1 student was emailed the class link.",
-      "created_notified_other": "Lesson scheduled. {{count}} students were emailed the class link."
+      "created_notified_other": "Lesson scheduled. {{count}} students were emailed the class link.",
+      "edit_title": "Edit live lesson",
+      "edit_description": "Changes apply before the lesson starts.",
+      "save": "Save changes",
+      "updated": "Lesson updated",
+      "updated_notified_one": "Lesson updated. 1 student was emailed.",
+      "updated_notified_other": "Lesson updated. {{count}} students were emailed.",
+      "time_locked": "The time cannot change once the lesson has been opened.",
+      "notify_changes": "Email students if the title or time changed",
+      "notify_changes_hint": "Students enrolled in this course are told the new details."
+    },
+    "edit": {
+      "button": "Edit lesson"
+    },
+    "delete": {
+      "button": "Delete lesson",
+      "short": "Delete",
+      "title": "Delete this live lesson?",
+      "description": "\"{{title}}\" will be removed and its link will stop working. This cannot be undone.",
+      "notify": "Email the students that it was cancelled",
+      "notify_hint": "Students who were sent the link are told, so nobody turns up to a dead link.",
+      "confirm": "Delete lesson",
+      "done": "Lesson deleted",
+      "done_notified_one": "Lesson deleted. 1 student was told.",
+      "done_notified_other": "Lesson deleted. {{count}} students were told."
     },
     "course": {
       "schedule": "Schedule",

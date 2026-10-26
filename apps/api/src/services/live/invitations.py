@@ -218,7 +218,9 @@ async def send_invitations(
 
 
 
-async def invite_enrolled_students(request: Request, db: AsyncSession, user, session_uuid: str) -> int:
+async def invite_enrolled_students(
+    request: Request, db: AsyncSession, user, session_uuid: str, message: Optional[str] = None
+) -> int:
     """Email the classroom link to every student enrolled in the lesson's course.
 
     Used when a lesson is scheduled. Scheduling must never fail because an email
@@ -228,7 +230,7 @@ async def invite_enrolled_students(request: Request, db: AsyncSession, user, ses
     """
     try:
         result = await send_invitations(
-            request, db, user, session_uuid, LiveInvitationCreate(all_enrolled=True)
+            request, db, user, session_uuid, LiveInvitationCreate(all_enrolled=True, message=message)
         )
         return result.queued
     except HTTPException as exc:
@@ -237,3 +239,80 @@ async def invite_enrolled_students(request: Request, db: AsyncSession, user, ses
     except Exception:
         logger.warning("Live session %s: automatic invitations failed", session_uuid, exc_info=True)
     return 0
+
+
+def _cancellation_html(*, org_name: str, lecturer: str, title: str, course_name: str, when: str, branding: dict) -> tuple[str, str]:
+    from src.services.users.emails import STYLES, _brand_logo_html, _email_layout
+
+    safe = {k: html.escape(v) for k, v in {"lecturer": lecturer, "title": title, "course": course_name, "when": when, "org": org_name}.items()}
+    body = f"""
+        <h1 style="{STYLES['h1']}">Live lesson cancelled</h1>
+        <p style="{STYLES['p']}">
+            {safe['lecturer']} cancelled <strong>{safe['title']}</strong> in <strong>{safe['course']}</strong>,
+            which was planned for {safe['when']}.
+        </p>
+        <p style="{STYLES['p']}">Any link you were sent for this lesson no longer works. You will be told if it is scheduled again.</p>
+    """
+    layout = _email_layout(
+        title="Live lesson cancelled",
+        body_content=body,
+        footer_note=f"You received this because you're a student of {safe['org']} on LiveBridge.",
+        logo_html=_brand_logo_html(branding.get("logo_url"), org_name),
+        powered_by=branding.get("powered_by", True),
+        preheader=f"{safe['title']} was cancelled",
+        lang="en",
+    )
+    return f"Cancelled: {title} - {course_name}", layout
+
+
+async def send_cancellation(request: Request, db: AsyncSession, user, course, session: LiveSession) -> int:
+    """Tell the course's students that a lesson was cancelled. Returns how many emails were queued; never raises."""
+    try:
+        from src.services.email.branding import resolve_org_email_branding
+        from src.services.email.utils import gate_engagement_email, send_email
+        from src.services.security.profile_validation import sanitize_display_name
+
+        ids = await enrolled_user_ids(db, course.id)
+        if not ids:
+            return 0
+        recipients = sorted(
+            {
+                (email or "").strip().lower()
+                for email in (await db.execute(select(User.email).where(User.id.in_(ids)))).scalars().all()
+                if email and "@" in email
+            }
+            - {str(user.email).strip().lower()}
+        )
+        if not recipients:
+            return 0
+        org = await db.get(Organization, course.org_id)
+        org_config = (
+            await db.execute(select(OrganizationConfig).where(OrganizationConfig.org_id == org.id))
+        ).scalars().first()
+        branding = resolve_org_email_branding(org, org_config, request).as_kwargs()
+        start = as_utc(session.scheduled_at)
+        lecturer = sanitize_display_name(f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username)
+        subject, body = _cancellation_html(
+            org_name=sanitize_display_name(org.name, fallback="Your school"), lecturer=lecturer, title=session.title,
+            course_name=course.name, when=f"{start:%A %d %B %Y, %H:%M} UTC", branding=branding,
+        )
+        allowed = await gate_engagement_email(org.id, db, len(recipients))
+        recipients = recipients[:allowed]
+        if not recipients:
+            return 0
+        sender_name = branding.get("sender_name")
+
+        async def _deliver(addresses: list[str]) -> None:
+            for address in addresses:
+                try:
+                    await asyncio.to_thread(send_email, address, subject, body, None, sender_name)
+                except Exception:
+                    logger.warning("Live cancellation to %s failed", address, exc_info=True)
+
+        task = asyncio.create_task(_deliver(recipients))
+        _background.add(task)
+        task.add_done_callback(_background.discard)
+        return len(recipients)
+    except Exception:
+        logger.warning("Live session %s: cancellation emails failed", session.session_uuid, exc_info=True)
+        return 0

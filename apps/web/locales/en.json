@@ -6503,10 +6503,15 @@
       "record_automatically": "Record automatically",
       "record_automatically_hint": "Recording starts as soon as the lesson goes live.",
       "publish_recordings": "Publish recordings to students",
-      "publish_recordings_hint": "Otherwise a recording is added to the course as a draft lesson for you to review first."
+      "publish_recordings_hint": "Otherwise a recording is added to the course as a draft lesson for you to review first.",
+      "notify_students": "Email the class link to my students now",
+      "notify_students_hint": "Everyone enrolled in this course gets the link and a calendar button by email.",
+      "created_notified_one": "Lesson scheduled. 1 student was emailed the class link.",
+      "created_notified_other": "Lesson scheduled. {{count}} students were emailed the class link."
     },
     "course": {
       "schedule": "Schedule",
+      "join_class": "Join class",
       "join_now": "Join now",
       "open": "Open",
       "empty_staff": "No live lessons scheduled. Schedule one to teach this course live in LiveBridge.",

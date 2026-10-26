@@ -490,6 +490,8 @@ class LiveSessionCreate(BaseModel):
     scheduled_at: datetime
     record_automatically: bool = False
     publish_recordings: bool = True
+    # Email the classroom link to the course's students as soon as it is scheduled.
+    notify_students: bool = True
 
 
 class LiveSessionRead(BaseModel):
@@ -511,6 +513,8 @@ class LiveSessionRead(BaseModel):
     ended_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
+    # Set only on the response to scheduling: how many students were emailed.
+    invitations_queued: Optional[int] = None
 
 
 class LiveJoinResponse(BaseModel):

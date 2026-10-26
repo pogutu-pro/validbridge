@@ -112,6 +112,9 @@ async def _create(client, course_uuid="course_test", **extra):
         "course_uuid": course_uuid,
         "title": "Week 1 live lecture",
         "scheduled_at": "2026-09-24T09:00:00Z",
+        # Most tests count emails sent by the explicit invitation endpoint, so
+        # scheduling does not email anyone unless a test asks for it.
+        "notify_students": False,
         **extra,
     }
     return await client.post("/api/v1/live/sessions", json=body)
@@ -746,6 +749,35 @@ class TestInvitations:
         assert f"https://school.example.test/course/test/live/{short}" in body
         assert "calendar.google.com" in body
         assert "&lt;b&gt;Bring notes&lt;/b&gt;" in body and "<b>Bring notes" not in body
+
+    async def test_scheduling_emails_enrolled_students_with_the_link(self, client, lk_calls, livekit_env, enrolled, sent):
+        res = await _create(client, notify_students=True)
+        assert res.status_code == 200, res.text
+        assert res.json()["invitations_queued"] == 1
+        await self._drain()
+        # The instructor is not emailed; the enrolled student is.
+        assert [call.args[0] for call in sent.call_args_list] == ["regular@test.com"]
+        short = res.json()["session_uuid"].removeprefix("livesession_")
+        assert f"https://school.example.test/course/test/live/{short}" in sent.call_args_list[0].args[2]
+
+    async def test_scheduling_can_skip_the_emails(self, client, lk_calls, livekit_env, enrolled, sent):
+        res = await _create(client, notify_students=False)
+        assert res.status_code == 200
+        assert res.json()["invitations_queued"] is None
+        await self._drain()
+        sent.assert_not_called()
+
+    async def test_scheduling_still_works_when_nobody_is_enrolled(self, client, course, lk_calls, livekit_env, sent):
+        res = await _create(client, notify_students=True)
+        assert res.status_code == 200, res.text
+        assert res.json()["invitations_queued"] == 0
+        sent.assert_not_called()
+
+    async def test_scheduling_survives_an_email_failure(self, client, lk_calls, livekit_env, enrolled, sent):
+        with patch("src.services.live.invitations.send_invitations", new_callable=AsyncMock, side_effect=RuntimeError("smtp down")):
+            res = await _create(client, notify_students=True)
+        assert res.status_code == 200, res.text
+        assert res.json()["invitations_queued"] == 0
 
     async def test_learners_cannot_invite(self, client, lk_calls, livekit_env, enrolled, state, regular_user, sent):
         uuid = (await _create(client)).json()["session_uuid"]

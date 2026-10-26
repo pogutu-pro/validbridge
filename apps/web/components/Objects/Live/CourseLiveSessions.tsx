@@ -57,6 +57,7 @@ export function ScheduleDialog({
   const [start, setStart] = useState(defaultStart)
   const [recordAutomatically, setRecordAutomatically] = useState(false)
   const [publishRecordings, setPublishRecordings] = useState(true)
+  const [notifyStudents, setNotifyStudents] = useState(true)
   const [saving, setSaving] = useState(false)
   const valid = title.trim().length > 0 && !!start
 
@@ -72,12 +73,17 @@ export function ScheduleDialog({
           scheduled_at: new Date(start).toISOString(),
           record_automatically: recordAutomatically,
           publish_recordings: publishRecordings,
+          notify_students: notifyStudents,
         },
         token
       )
       await qc.invalidateQueries({ queryKey: queryKeys.live.courseSessions(courseUuid) })
       qc.invalidateQueries({ queryKey: queryKeys.live.courseOverview(courseUuid) })
-      toast.success(t('live.schedule.created'))
+      toast.success(
+        created.invitations_queued
+          ? t('live.schedule.created_notified', { count: created.invitations_queued })
+          : t('live.schedule.created')
+      )
       setTitle('')
       setDescription('')
       setStart(defaultStart())
@@ -150,6 +156,18 @@ export function ScheduleDialog({
               </span>
             </label>
           </fieldset>
+          <label className="flex items-start gap-3 rounded-lg bg-neutral-50 p-3 text-sm text-neutral-800">
+            <input
+              type="checkbox"
+              checked={notifyStudents}
+              onChange={(e) => setNotifyStudents(e.target.checked)}
+              className="mt-0.5 size-4 accent-[hsl(var(--primary))]"
+            />
+            <span>
+              {t('live.schedule.notify_students')}
+              <span className="block text-xs text-neutral-500">{t('live.schedule.notify_students_hint')}</span>
+            </span>
+          </label>
         </div>
         <DialogFooter className="gap-2">
           <button type="button" onClick={() => onOpenChange(false)} disabled={saving} className="h-10 rounded-lg px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
@@ -170,7 +188,7 @@ export function ScheduleDialog({
   )
 }
 
-function SessionRow({ session, href, onInvite }: { session: LiveSession; href: string; onInvite?: () => void }) {
+function SessionRow({ session, href, onInvite, staff }: { session: LiveSession; href: string; onInvite?: () => void; staff?: boolean }) {
   const { t } = useTranslation()
   const live = session.status === 'live'
   const when = new Date(session.scheduled_at).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -199,13 +217,15 @@ function SessionRow({ session, href, onInvite }: { session: LiveSession; href: s
       )}
       <Link
         href={href}
+        // Instructors keep the course page open: the classroom opens in a new tab.
+        {...(staff ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         className={
-          live
+          live || staff
             ? 'inline-flex h-9 shrink-0 items-center rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground hover:bg-primary/90'
             : 'inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-xs font-medium text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50'
         }
       >
-        {t(live ? 'live.course.join_now' : 'live.course.open')}
+        {t(staff ? 'live.course.join_class' : live ? 'live.course.join_now' : 'live.course.open')}
       </Link>
     </li>
   )
@@ -286,7 +306,7 @@ export default function CourseLiveSessions({ courseUuid, orgslug }: { courseUuid
       ) : (
         <ul className="mt-2 divide-y divide-neutral-100">
           {visible.map((s) => (
-            <SessionRow key={s.session_uuid} session={s} href={hrefFor(s)} onInvite={canSchedule ? () => setInviting(s) : undefined} />
+            <SessionRow key={s.session_uuid} session={s} href={hrefFor(s)} staff={canSchedule} onInvite={canSchedule ? () => setInviting(s) : undefined} />
           ))}
         </ul>
       )}
@@ -309,7 +329,7 @@ export default function CourseLiveSessions({ courseUuid, orgslug }: { courseUuid
         </Link>
       )}
       {canSchedule && (
-        <ScheduleDialog courseUuid={courseUuid} open={scheduling} onOpenChange={setScheduling} onCreated={setInviting} />
+        <ScheduleDialog courseUuid={courseUuid} open={scheduling} onOpenChange={setScheduling} />
       )}
       {canSchedule && inviting && (
         <InviteDialog

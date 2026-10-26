@@ -26,6 +26,8 @@ export interface LiveSession {
   ended_at: string | null
   created_at: string
   updated_at: string
+  /** Only on the response to scheduling: how many students were emailed the link. */
+  invitations_queued?: number | null
 }
 
 export interface LiveClassroom {
@@ -381,6 +383,7 @@ export const createLiveSession = (
     activity_uuid?: string
     record_automatically?: boolean
     publish_recordings?: boolean
+    notify_students?: boolean
   },
   token?: string
 ) => liveRequest<LiveSession>('sessions', token, { method: 'POST', body })

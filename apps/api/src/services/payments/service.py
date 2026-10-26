@@ -570,21 +570,41 @@ async def list_offers(org_id: int, db_session: AsyncSession) -> list[PaymentsOff
     return [PaymentsOfferRead.model_validate(o) for o in rows]
 
 
+def _clean_total(price_type: OfferPriceTypeEnum, amount: float, total) -> float | None:
+    """The full price for an offer paid in parts, or None when there is none.
+
+    Only customer-choice offers can be paid in parts, and the full price must
+    be larger than the smallest payment."""
+    if total in (None, "", 0):
+        return None
+    total = float(total)
+    if price_type != OfferPriceTypeEnum.customer_choice:
+        raise HTTPException(status_code=400, detail="Only offers where the student chooses the amount can be paid in parts.")
+    if total <= amount:
+        raise HTTPException(status_code=400, detail="The full price must be more than the smallest payment.")
+    return total
+
+
 async def create_offer(
     org_id: int,
     data: dict,
     db_session: AsyncSession,
 ) -> PaymentsOfferRead:
     offer_type = OfferTypeEnum(data["offer_type"])
+    price_type = OfferPriceTypeEnum(data.get("price_type", "fixed_price"))
+    total_amount = _clean_total(price_type, float(data.get("amount", 0)), data.get("total_amount"))
+    if total_amount and offer_type == OfferTypeEnum.subscription:
+        raise HTTPException(status_code=400, detail="Subscriptions cannot be paid in parts.")
     offer = PaymentsOffer(
         offer_uuid=f"offer_{uuid.uuid4().hex}",
         org_id=org_id,
         name=data["name"],
         description=data.get("description"),
         offer_type=offer_type,
-        price_type=OfferPriceTypeEnum(data.get("price_type", "fixed_price")),
+        price_type=price_type,
         interval=_interval_from(data),
         amount=float(data.get("amount", 0)),
+        total_amount=total_amount,
         currency=data.get("currency", "KES"),
         benefits=data.get("benefits"),
         is_publicly_listed=bool(data.get("is_publicly_listed", True)),
@@ -617,6 +637,11 @@ async def update_offer(org_id: int, offer_id: int, data: dict, db_session: Async
         offer.price_type = OfferPriceTypeEnum(data["price_type"])
     if "interval" in data:
         offer.interval = _interval_from(data)
+    if "total_amount" in data or "amount" in data or "price_type" in data:
+        # Re-check the full price against the (possibly changed) minimum and price type.
+        offer.total_amount = _clean_total(
+            offer.price_type, offer.amount, data["total_amount"] if "total_amount" in data else offer.total_amount
+        )
     offer.update_date = _now()
     db_session.add(offer)
     await db_session.commit()
@@ -800,6 +825,7 @@ async def _offer_public_shape(offer: PaymentsOffer, db_session: AsyncSession) ->
         "price_type": offer.price_type.value if isinstance(offer.price_type, OfferPriceTypeEnum) else offer.price_type,
         "interval": offer.interval.value if isinstance(offer.interval, SubscriptionIntervalEnum) else offer.interval,
         "amount": offer.amount,
+        "total_amount": offer.total_amount,
         "currency": offer.currency,
         "benefits": offer.benefits,
         "payments_group_id": offer.payments_group_id,
@@ -989,8 +1015,12 @@ async def list_my_enrollments(org_id: int, user_id: int, db_session: AsyncSessio
     ).all()
     result = []
     for enrollment, offer in rows:
+        paid = _amount_paid(enrollment, offer)
         result.append(
             {
+                "total_amount": offer.total_amount,
+                "amount_paid": paid if _pays_in_parts(offer) else None,
+                "balance": max(offer.total_amount - paid, 0.0) if _pays_in_parts(offer) else None,
                 "enrollment_id": enrollment.id,
                 "offer_id": offer.id,
                 "offer_uuid": offer.offer_uuid,
@@ -1321,6 +1351,40 @@ async def list_customers(org_id: int, db_session: AsyncSession) -> list[dict]:
 
 # ── Checkout ─────────────────────────────────────────────────────────────────
 
+def _pays_in_parts(offer: PaymentsOffer) -> bool:
+    return (
+        offer.price_type == OfferPriceTypeEnum.customer_choice
+        and (getattr(offer, "total_amount", None) or 0) > offer.amount
+    )
+
+
+def _amount_paid(enrollment: PaymentsEnrollment | None, offer: PaymentsOffer) -> float:
+    """What the buyer has paid towards the offer so far.
+
+    Enrollments made before instalments existed have no running total; for them
+    the amount recorded at checkout (or the minimum) is what was paid."""
+    if enrollment is None or enrollment.status not in (EnrollmentStatusEnum.completed, EnrollmentStatusEnum.active):
+        return 0.0
+    if enrollment.amount_paid and enrollment.amount_paid > 0:
+        return float(enrollment.amount_paid)
+    recorded = (enrollment.provider_specific_data or {}).get("amount")
+    return float(recorded) if isinstance(recorded, (int, float)) and not isinstance(recorded, bool) else float(offer.amount)
+
+
+async def _remaining_balance(offer: PaymentsOffer, user_id: int, db_session: AsyncSession) -> float | None:
+    """What this buyer still owes for an offer paid in parts; None for any other offer."""
+    if not _pays_in_parts(offer):
+        return None
+    enrollment = (
+        await db_session.execute(
+            select(PaymentsEnrollment).where(
+                PaymentsEnrollment.offer_id == offer.id, PaymentsEnrollment.user_id == user_id
+            ).order_by(PaymentsEnrollment.id)
+        )
+    ).scalars().first()
+    return max(offer.total_amount - _amount_paid(enrollment, offer), 0.0)
+
+
 async def create_checkout_session(
     org_id: int,
     offer_uuid: str,
@@ -1353,8 +1417,10 @@ async def create_checkout_session(
             )
         )
     ).scalars().first()
-    if existing is not None:
+    remaining = await _remaining_balance(offer, user_id, db_session)
+    if existing is not None and not (remaining and remaining > 0):
         return {"checkout_url": redirect_uri}
+    paying_balance = existing is not None
 
     # Recurring billing starts a Paystack plan subscription rather than a
     # one-time charge. Already-enrolled users are handled above and keep access.
@@ -1367,7 +1433,15 @@ async def create_checkout_session(
     # Resolve the amount to charge. Only ``customer_choice`` offers accept a
     # buyer-supplied amount, and it must meet the configured minimum.
     charge_amount = offer.amount
-    if offer.price_type == OfferPriceTypeEnum.customer_choice and amount is not None:
+    if remaining is not None:
+        # Paid in parts: at least the minimum (or whatever is left, if that is less), never more than is owed.
+        floor = min(offer.amount, remaining)
+        charge_amount = remaining if (paying_balance and amount is None) else (amount if amount is not None else offer.amount)
+        if charge_amount < floor:
+            raise HTTPException(status_code=400, detail=f"Amount must be at least {floor:g} {offer.currency}")
+        if charge_amount > remaining:
+            raise HTTPException(status_code=400, detail=f"You only owe {remaining:g} {offer.currency}. Enter that or less.")
+    elif offer.price_type == OfferPriceTypeEnum.customer_choice and amount is not None:
         if amount < offer.amount:
             raise HTTPException(
                 status_code=400,
@@ -1451,6 +1525,9 @@ async def create_checkout_session(
             )
         )
     ).scalars().first()
+    if paying_balance:
+        # The buyer already has an enrollment; the payment is added to it when Paystack confirms.
+        return {"checkout_url": session["authorization_url"]}
     if pending is None:
         db_session.add(
             PaymentsEnrollment(
@@ -1614,7 +1691,7 @@ async def handle_webhook(raw_body: bytes, signature: str | None, db_session: Asy
     return {"result": event_type, "ok": True}
 
 
-def _paid_amount_matches(offer: PaymentsOffer, data: dict) -> bool:
+def _paid_amount_matches(offer: PaymentsOffer, data: dict, remaining: float | None = None) -> bool:
     """Reject payments whose amount/currency does not match the offer.
 
     ``amount`` arrives in minor units. It may include the processing fee the
@@ -1634,6 +1711,9 @@ def _paid_amount_matches(offer: PaymentsOffer, data: dict) -> bool:
     if fee < 0 or base <= 0 or fee > paystack.max_fee_minor(base):
         return False
     expected = int(round(offer.amount * 100))
+    if remaining is not None:
+        # Paid in parts: the last payment may be smaller than the minimum.
+        expected = min(expected, int(round(remaining * 100)))
     if offer.price_type == OfferPriceTypeEnum.customer_choice:
         if base < expected:
             return False
@@ -1643,6 +1723,29 @@ def _paid_amount_matches(offer: PaymentsOffer, data: dict) -> bool:
     if currency and offer.currency and str(currency).upper() != str(offer.currency).upper():
         return False
     return True
+
+
+def _count_payment(enrollment: PaymentsEnrollment, offer: PaymentsOffer, data: dict, before: float) -> None:
+    """Add a confirmed payment to the buyer's running total, once per Paystack reference.
+
+    The webhook and the buyer's return from Paystack can both report the same
+    charge; the reference list keeps it from being counted twice."""
+    if not _pays_in_parts(offer):
+        return
+    reference = data.get("reference")
+    counted = list((enrollment.provider_specific_data or {}).get("paid_references") or [])
+    if not reference or reference in counted:
+        return
+    try:
+        fee = int((data.get("metadata") or {}).get("fee_minor") or 0)
+    except (TypeError, ValueError):
+        fee = 0
+    paid_now = (int(data.get("amount") or 0) - fee) / 100
+    enrollment.amount_paid = before + paid_now
+    enrollment.provider_specific_data = {
+        **(enrollment.provider_specific_data or {}),
+        "paid_references": counted + [reference],
+    }
 
 
 async def _grant_enrollment(org_id: int, data: dict, db_session: AsyncSession) -> None:
@@ -1664,7 +1767,10 @@ async def _grant_enrollment(org_id: int, data: dict, db_session: AsyncSession) -
             )
         )
     ).scalars().first()
-    if offer is None or not _paid_amount_matches(offer, data):
+    if offer is None:
+        return
+    remaining = await _remaining_balance(offer, user_id, db_session)
+    if not _paid_amount_matches(offer, data, remaining):
         return
 
     enrollment = (
@@ -1697,7 +1803,11 @@ async def _grant_enrollment(org_id: int, data: dict, db_session: AsyncSession) -
             },
         )
         db_session.add(enrollment)
+        _count_payment(enrollment, offer, data, before=0.0)
     else:
+        # What was paid before this charge (read before the status changes: a pending
+        # enrollment has paid nothing yet, an older completed one counts what it recorded).
+        paid_before = _amount_paid(enrollment, offer)
         is_subscription = getattr(offer, "offer_type", None) in (OfferTypeEnum.subscription, "subscription")
         enrollment.status = (
             EnrollmentStatusEnum.active if is_subscription else EnrollmentStatusEnum.completed
@@ -1705,6 +1815,7 @@ async def _grant_enrollment(org_id: int, data: dict, db_session: AsyncSession) -
         if (data.get("subscription") or {}).get("subscription_code"):
             enrollment.subscription_code = (data.get("subscription") or {}).get("subscription_code")
             enrollment.email_token = (data.get("subscription") or {}).get("email_token")
+        _count_payment(enrollment, offer, data, before=paid_before)
         enrollment.provider_specific_data = {
             **enrollment.provider_specific_data,
             "reference": data.get("reference"),
@@ -1796,7 +1907,9 @@ async def verify_checkout(
             )
         )
     ).scalars().first()
-    if offer is None or not _paid_amount_matches(offer, data):
+    if offer is None or not _paid_amount_matches(
+        offer, data, await _remaining_balance(offer, user_id, db_session)
+    ):
         return {"status": "failed"}
     await _grant_enrollment(org_id, data, db_session)
     await db_session.commit()

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { getUriWithOrg } from '@services/config/config'
-import { getUserEnrollments, cancelSubscription } from '@services/payments/offers'
+import { getUserEnrollments, cancelSubscription, getOfferCheckoutSession } from '@services/payments/offers'
 import {
   ShoppingBag, RefreshCcw, SquareCheck, ArrowRight,
   Loader2, CalendarDays, BadgeCheck
@@ -28,10 +28,19 @@ function EnrollmentCard({ enrollment, orgslug, orgId, access_token }: {
   const { i18n } = useTranslation()
   const queryClient = useQueryClient()
   const [cancelling, setCancelling] = useState(false)
+  const [payAmount, setPayAmount] = useState('')
+  const [paying, setPaying] = useState(false)
+  // Offers the student pays in parts: total price, what is paid, what is left.
+  const inParts = enrollment.balance != null
+  const balance: number = enrollment.balance ?? 0
+  const paidSoFar: number = enrollment.amount_paid ?? 0
+  const paidPercent = inParts && enrollment.total_amount ? Math.min(100, Math.round((paidSoFar / enrollment.total_amount) * 100)) : 0
   const isSubscription = enrollment.offer_type === 'subscription'
   const isActive = enrollment.status === 'active'
 
-  const formattedPrice = enrollment.amount != null
+  const formattedPrice = enrollment.total_amount != null && enrollment.balance != null
+    ? formatCurrency(enrollment.total_amount, enrollment.currency ?? 'USD', i18n.language)
+    : enrollment.amount != null
     ? formatCurrency(enrollment.amount, enrollment.currency ?? 'USD', i18n.language)
     : null
 
@@ -54,6 +63,38 @@ function EnrollmentCard({ enrollment, orgslug, orgId, access_token }: {
       toast.error(meaningfulMessage(err))
     } finally {
       setCancelling(false)
+    }
+  }
+
+  const handlePayBalance = async () => {
+    if (paying) return
+    const amount = Number(payAmount || balance)
+    const smallest = Math.min(enrollment.amount ?? 0, balance)
+    if (!Number.isFinite(amount) || amount < smallest || amount > balance) {
+      toast.error(`Enter an amount between ${formatCurrency(smallest, enrollment.currency ?? 'KES', i18n.language)} and ${formatCurrency(balance, enrollment.currency ?? 'KES', i18n.language)}`)
+      return
+    }
+    setPaying(true)
+    // Opened inside the click: browsers block pop-ups opened after an await.
+    const tab = window.open('', '_blank')
+    try {
+      const redirectUri = window.location.origin + getUriWithOrg(orgslug, `/marketplace/offers/${enrollment.offer_uuid}`)
+      const result = await getOfferCheckoutSession(orgId, enrollment.offer_uuid, redirectUri, access_token, amount)
+      const url = result?.data?.checkout_url
+      if (url && tab && !tab.closed) {
+        tab.opener = null
+        tab.location.href = url
+      } else if (url) {
+        window.location.assign(url)
+      } else {
+        tab?.close()
+        toast.error(result?.data?.detail || 'Could not start the payment. Please try again.')
+      }
+    } catch (err) {
+      tab?.close()
+      toast.error(meaningfulMessage(err))
+    } finally {
+      setPaying(false)
     }
   }
 
@@ -88,6 +129,43 @@ function EnrollmentCard({ enrollment, orgslug, orgId, access_token }: {
             </div>
           )}
         </div>
+
+        {/* Paid in parts: progress and the balance */}
+        {inParts && (
+          <div className="space-y-2 rounded-lg bg-gray-50 p-3">
+            <div className="flex justify-between text-xs font-semibold text-gray-700">
+              <span>Paid {formatCurrency(paidSoFar, enrollment.currency ?? 'KES', i18n.language)} of {formatCurrency(enrollment.total_amount, enrollment.currency ?? 'KES', i18n.language)}</span>
+              <span>{paidPercent}%</span>
+            </div>
+            <div className="h-2 rounded-full bg-gray-200" role="progressbar" aria-valuenow={paidPercent} aria-valuemin={0} aria-valuemax={100}>
+              <div className="h-2 rounded-full bg-green-500" style={{ width: `${paidPercent}%` }} />
+            </div>
+            {balance > 0 ? (
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="number"
+                  min={Math.min(enrollment.amount ?? 0, balance)}
+                  max={balance}
+                  step="any"
+                  value={payAmount}
+                  onChange={(e) => setPayAmount(e.target.value)}
+                  placeholder={String(balance)}
+                  aria-label="Amount to pay"
+                  className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                />
+                <button
+                  onClick={handlePayBalance}
+                  disabled={paying}
+                  className="shrink-0 rounded-lg bg-gray-900 px-3 py-2 text-xs font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+                >
+                  {paying ? <Loader2 size={12} className="animate-spin" /> : `Pay balance ${formatCurrency(balance, enrollment.currency ?? 'KES', i18n.language)}`}
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs font-semibold text-green-700">Fully paid</p>
+            )}
+          </div>
+        )}
 
         {/* Purchase date */}
         {formattedDate && (

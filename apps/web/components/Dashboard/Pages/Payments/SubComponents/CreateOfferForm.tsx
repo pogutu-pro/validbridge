@@ -24,6 +24,7 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   description: Yup.string().required('Description is required'),
   amount: Yup.number().min(1, 'Amount must be greater than zero').required('Amount is required'),
+  total_amount: Yup.number().nullable().transform((v, o) => (o === '' ? null : v)).moreThan(Yup.ref('amount'), 'Full price must be more than the minimum amount'),
   benefits: Yup.string(),
   currency: Yup.string().required('Currency is required'),
   offer_type: Yup.string().oneOf(['one_time', 'subscription']).required('Offer type is required'),
@@ -39,6 +40,7 @@ interface OfferFormValues {
   interval: 'monthly' | 'yearly';
   benefits: string;
   amount: number;
+  total_amount: number | '';
   currency: string;
   payments_group_id: number | '';
   resource_uuids: string[];
@@ -85,6 +87,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
     interval: 'monthly',
     benefits: '',
     amount: 1,
+    total_amount: '',
     currency: 'KES',
     payments_group_id: '',
     resource_uuids: [],
@@ -95,6 +98,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
       const payload = {
         ...values,
         payments_group_id: values.payments_group_id !== '' ? values.payments_group_id : undefined,
+        total_amount: values.price_type === 'customer_choice' && values.total_amount !== '' ? Number(values.total_amount) : null,
       };
       const res = await createOffer(org.id, payload, token);
       if (res.success) {
@@ -220,6 +224,18 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                 <ErrorMessage name="currency" component="div" className="text-red-500 text-sm mt-1" />
               </div>
             </div>
+
+
+            {values.price_type === 'customer_choice' && (
+              <div>
+                <Label htmlFor="total_amount">Full price (optional)</Label>
+                <Field name="total_amount" as={Input} type="number" placeholder="e.g. 15000" />
+                <p className="text-xs text-gray-500 mt-1">
+                  If set, students can start from the minimum above and pay the rest later. Leave empty for a single pay-what-you-want payment.
+                </p>
+                <ErrorMessage name="total_amount" component="div" className="text-red-500 text-sm mt-1" />
+              </div>
+            )}
 
             <div>
               <Label htmlFor="benefits">Benefits</Label>

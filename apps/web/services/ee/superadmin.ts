@@ -279,3 +279,77 @@ export async function downloadAuditCsv(accessToken: string, filters: AuditFilter
   link.click()
   setTimeout(() => URL.revokeObjectURL(url), 10_000)
 }
+
+// ── View as school (read-only, reason required, 30 minutes) ───────────────────
+
+export type ViewAsPage = 'billing' | 'invoices' | 'ledger' | 'members'
+
+export async function startViewAs(accessToken: string, orgId: number, reason: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/view-as`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ org_id: orgId, reason }),
+  })
+  if (!res.ok) return failure(res, 'Could not start the view')
+  return (await res.json()) as { grant: string; expires_at: string; org: { id: number; name: string; slug: string } }
+}
+
+export async function getViewAsPage(accessToken: string, grant: string, orgId: number, page: ViewAsPage) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/view-as/${orgId}/${page}`, {
+    headers: { ...authHeaders(accessToken), 'X-View-As-Grant': grant },
+  })
+  if (!res.ok) return failure(res, 'Could not load this page')
+  return res.json()
+}
+
+// ── Search and people ─────────────────────────────────────────────────────────
+
+export interface SearchResults {
+  people: { user_uuid: string; username: string; email: string; name: string }[]
+  orgs: { id: number; name: string; slug: string }[]
+}
+
+export async function searchPlatform(accessToken: string, q: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/search?q=${encodeURIComponent(q)}`, {
+    headers: authHeaders(accessToken),
+  })
+  if (!res.ok) return failure(res, 'Search failed')
+  return (await res.json()) as SearchResults
+}
+
+export async function getPerson(accessToken: string, userUuid: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/people/${encodeURIComponent(userUuid)}`, {
+    headers: authHeaders(accessToken),
+  })
+  if (!res.ok) return failure(res, 'Person not found')
+  return res.json()
+}
+
+export async function personAction(
+  accessToken: string,
+  userUuid: string,
+  action: 'sign-out' | 'unlock' | 'verify-email',
+  reason: string
+) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/people/${encodeURIComponent(userUuid)}/${action}`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ reason }),
+  })
+  if (!res.ok) return failure(res, 'Action failed')
+  return res.json()
+}
+
+// ── Command center and monitors ───────────────────────────────────────────────
+
+export async function getCommandCenter(accessToken: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/command-center`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load the command center')
+  return res.json()
+}
+
+export async function getMonitor(accessToken: string, kind: 'live' | 'exams') {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/monitor/${kind}`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load the monitor')
+  return (await res.json()) as { items: any[] }
+}

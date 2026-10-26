@@ -496,6 +496,18 @@ class LiveSessionCreate(BaseModel):
     notify_students: bool = True
 
 
+class LiveSessionUpdate(BaseModel):
+    """Fields a lesson's staff may change before it starts. Anything left out is kept."""
+
+    title: Optional[str] = PydanticField(default=None, min_length=1, max_length=200)
+    description: Optional[str] = PydanticField(default=None, max_length=5000)
+    scheduled_at: Optional[datetime] = None
+    record_automatically: Optional[bool] = None
+    publish_recordings: Optional[bool] = None
+    # Email the course's students about a change of title or time.
+    notify_students: bool = True
+
+
 class LiveSessionRead(BaseModel):
     id: int
     session_uuid: str

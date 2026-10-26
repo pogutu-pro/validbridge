@@ -269,6 +269,12 @@ async def monitor(request: Request, db: AsyncSession, user, assignment_uuid: str
     user = _require_user(user)
     assignment, course = await _assignment_and_course(db, assignment_uuid)
     await _require_staff(request, db, user, course)
+    return await build_monitor(request, db, assignment)
+
+
+async def build_monitor(request: Optional[Request], db: AsyncSession, assignment: Assignment) -> ExamMonitorRead:
+    """The roster for one exam. The caller has already decided the viewer may see it."""
+    assignment_uuid = assignment.assignment_uuid
     settings = await get_settings(db, assignment.id)
     if settings is None:
         raise HTTPException(status_code=404, detail="This assessment is not an exam")

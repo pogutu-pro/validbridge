@@ -87,6 +87,18 @@ class Rights(BaseModel):
         action_delete_own=False,
     )  # Default: read-only for backward compat with existing roles
 
+    # Front desk (reception) work: action_read looks up students, groups, the
+    # day's classes and exam rosters; action_create invites students; action_update
+    # manages group membership and resends class links. There is no delete.
+    # Deliberately its own bucket, so a front-desk role needs no `users`, `roles`
+    # or `organizations` rights and can never reach the admin endpoints.
+    frontdesk: Permission = Permission(
+        action_create=False,
+        action_read=False,
+        action_update=False,
+        action_delete=False,
+    )
+
     def __getitem__(self, item):
         return getattr(self, item)
 

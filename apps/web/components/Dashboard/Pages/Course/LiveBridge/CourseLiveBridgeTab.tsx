@@ -11,6 +11,8 @@ import {
   CalendarPlus,
   CircleHelp,
   Clock,
+  Pencil,
+  Trash2,
   GraduationCap,
   PlayCircle,
   Radio,
@@ -44,6 +46,7 @@ import { shareLiveRecording } from '@services/live/live'
 import {
   useLiveAccessToken,
   useCourseLiveRecordings,
+  useCourseLiveSessions,
   useLiveCourseOverview,
   useLiveLearnerEngagement,
   useLiveSessionReport,
@@ -55,7 +58,7 @@ import type {
   LiveSession,
   LiveSessionReport,
 } from '@services/live/live'
-import { ScheduleDialog } from '@components/Objects/Live/CourseLiveSessions'
+import { DeleteLiveDialog, ScheduleDialog } from '@components/Objects/Live/CourseLiveSessions'
 import InviteDialog from '@components/Objects/Live/InviteDialog'
 import { formatDuration } from '@components/Objects/Live/liveMath'
 
@@ -558,12 +561,16 @@ function Overview({
   shortCourse,
   onOpen,
   onInvite,
+  onEdit,
+  onDelete,
 }: {
   courseUuid: string
   orgslug: string
   shortCourse: string
   onOpen: (_uuid: string) => void
   onInvite: (_session: InviteTarget) => void
+  onEdit: (_sessionUuid: string) => void
+  onDelete: (_session: InviteTarget) => void
 }) {
   const { t } = useTranslation()
   const { data, isLoading, isError } = useLiveCourseOverview(courseUuid)
@@ -677,6 +684,24 @@ function Overview({
                     <TableCell className="text-end">
                       {joinable ? (
                         <span className="inline-flex items-center gap-3">
+                          {(s.status === 'scheduled' || s.status === 'ready') && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => onEdit(s.session_uuid)}
+                                className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-primary"
+                              >
+                                <Pencil className="size-3.5" /> {t('live.edit.button', { defaultValue: 'Edit' })}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onDelete(s)}
+                                className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-red-600"
+                              >
+                                <Trash2 className="size-3.5" /> {t('live.delete.short', { defaultValue: 'Delete' })}
+                              </button>
+                            </>
+                          )}
                           <button
                             type="button"
                             onClick={() => onInvite(s)}
@@ -826,6 +851,10 @@ export default function CourseLiveBridgeTab({
   const selected = searchParams.get('session')
   const [scheduling, setScheduling] = useState(false)
   const [inviting, setInviting] = useState<InviteTarget | null>(null)
+  const [editingUuid, setEditingUuid] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<InviteTarget | null>(null)
+  const { data: allSessions } = useCourseLiveSessions(courseUuid)
+  const editing = allSessions?.find((x) => x.session_uuid === editingUuid) ?? null
   const shortCourse = courseUuid.replace(/^course_/, '')
   const base = getUriWithOrg(
     orgslug,
@@ -877,6 +906,8 @@ export default function CourseLiveBridgeTab({
               shortCourse={shortCourse}
               onOpen={open}
               onInvite={setInviting}
+              onEdit={setEditingUuid}
+              onDelete={setDeleting}
             />
           </TabsContent>
           <TabsContent value="learners" className="mt-4">
@@ -889,6 +920,10 @@ export default function CourseLiveBridgeTab({
         open={scheduling}
         onOpenChange={setScheduling}
       />
+      {editing && (
+        <ScheduleDialog key={editing.session_uuid} courseUuid={courseUuid} open editing={editing} onOpenChange={(next) => !next && setEditingUuid(null)} />
+      )}
+      {deleting && <DeleteLiveDialog session={deleting} courseUuid={courseUuid} onClose={() => setDeleting(null)} />}
       {inviting && (
         <InviteDialog
           session={inviting}

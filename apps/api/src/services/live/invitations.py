@@ -101,7 +101,7 @@ def _email_html(
     return subject, layout
 
 
-async def _throttle(session_uuid: str) -> None:
+async def _throttle(session_uuid: str, limit: int = _SENDS_PER_HOUR) -> None:
     try:
         from src.core.redis import get_redis_client
 
@@ -114,15 +114,22 @@ async def _throttle(session_uuid: str) -> None:
             await asyncio.to_thread(client.expire, key, 3600)
     except Exception:  # pragma: no cover - Redis is an optimisation
         return
-    if count > _SENDS_PER_HOUR:
+    if count > limit:
         from src.services.live.sessions import _error
 
         raise _error(429, "SLOW_DOWN", "Too many invitations for this lesson. Try again later.")
 
 
 async def send_invitations(
-    request: Request, db: AsyncSession, user, session_uuid: str, payload: LiveInvitationCreate
+    request: Request, db: AsyncSession, user, session_uuid: str, payload: LiveInvitationCreate,
+    *, authorized: bool = False, throttle: bool = True,
 ) -> LiveInvitationResult:
+    """Email the classroom link.
+
+    ``authorized`` skips only the course-staff check, for callers that have decided
+    on their own that this user may send (the front desk). ``throttle=False`` lets
+    such a caller apply its own, finer rate limit.
+    """
     from src.services.email.branding import resolve_org_email_branding
     from src.services.email.utils import get_org_signup_base_url, send_email
     from src.services.live.sessions import _get_course, _require_staff, _require_user, get_session_by_uuid
@@ -132,7 +139,8 @@ async def send_invitations(
     user = _require_user(user)
     session: LiveSession = await get_session_by_uuid(db, session_uuid)
     course = await _get_course(db, session.course_id)
-    await _require_staff(request, db, user, course)
+    if not authorized:
+        await _require_staff(request, db, user, course)
     if session.status not in (LiveSessionStatus.SCHEDULED, *ACTIVE_STATUSES):
         from src.services.live.sessions import _error
 
@@ -153,7 +161,8 @@ async def send_invitations(
         raise HTTPException(status_code=422, detail="Add at least one email or choose all enrolled students")
     if len(recipients) > MAX_RECIPIENTS:
         raise HTTPException(status_code=422, detail=f"At most {MAX_RECIPIENTS} recipients per send")
-    await _throttle(session.session_uuid)
+    if throttle:
+        await _throttle(session.session_uuid)
 
     org = await db.get(Organization, course.org_id)
     org_config = (
@@ -209,7 +218,9 @@ async def send_invitations(
 
 
 
-async def invite_enrolled_students(request: Request, db: AsyncSession, user, session_uuid: str) -> int:
+async def invite_enrolled_students(
+    request: Request, db: AsyncSession, user, session_uuid: str, message: Optional[str] = None
+) -> int:
     """Email the classroom link to every student enrolled in the lesson's course.
 
     Used when a lesson is scheduled. Scheduling must never fail because an email
@@ -219,7 +230,7 @@ async def invite_enrolled_students(request: Request, db: AsyncSession, user, ses
     """
     try:
         result = await send_invitations(
-            request, db, user, session_uuid, LiveInvitationCreate(all_enrolled=True)
+            request, db, user, session_uuid, LiveInvitationCreate(all_enrolled=True, message=message)
         )
         return result.queued
     except HTTPException as exc:
@@ -228,3 +239,80 @@ async def invite_enrolled_students(request: Request, db: AsyncSession, user, ses
     except Exception:
         logger.warning("Live session %s: automatic invitations failed", session_uuid, exc_info=True)
     return 0
+
+
+def _cancellation_html(*, org_name: str, lecturer: str, title: str, course_name: str, when: str, branding: dict) -> tuple[str, str]:
+    from src.services.users.emails import STYLES, _brand_logo_html, _email_layout
+
+    safe = {k: html.escape(v) for k, v in {"lecturer": lecturer, "title": title, "course": course_name, "when": when, "org": org_name}.items()}
+    body = f"""
+        <h1 style="{STYLES['h1']}">Live lesson cancelled</h1>
+        <p style="{STYLES['p']}">
+            {safe['lecturer']} cancelled <strong>{safe['title']}</strong> in <strong>{safe['course']}</strong>,
+            which was planned for {safe['when']}.
+        </p>
+        <p style="{STYLES['p']}">Any link you were sent for this lesson no longer works. You will be told if it is scheduled again.</p>
+    """
+    layout = _email_layout(
+        title="Live lesson cancelled",
+        body_content=body,
+        footer_note=f"You received this because you're a student of {safe['org']} on LiveBridge.",
+        logo_html=_brand_logo_html(branding.get("logo_url"), org_name),
+        powered_by=branding.get("powered_by", True),
+        preheader=f"{safe['title']} was cancelled",
+        lang="en",
+    )
+    return f"Cancelled: {title} - {course_name}", layout
+
+
+async def send_cancellation(request: Request, db: AsyncSession, user, course, session: LiveSession) -> int:
+    """Tell the course's students that a lesson was cancelled. Returns how many emails were queued; never raises."""
+    try:
+        from src.services.email.branding import resolve_org_email_branding
+        from src.services.email.utils import gate_engagement_email, send_email
+        from src.services.security.profile_validation import sanitize_display_name
+
+        ids = await enrolled_user_ids(db, course.id)
+        if not ids:
+            return 0
+        recipients = sorted(
+            {
+                (email or "").strip().lower()
+                for email in (await db.execute(select(User.email).where(User.id.in_(ids)))).scalars().all()
+                if email and "@" in email
+            }
+            - {str(user.email).strip().lower()}
+        )
+        if not recipients:
+            return 0
+        org = await db.get(Organization, course.org_id)
+        org_config = (
+            await db.execute(select(OrganizationConfig).where(OrganizationConfig.org_id == org.id))
+        ).scalars().first()
+        branding = resolve_org_email_branding(org, org_config, request).as_kwargs()
+        start = as_utc(session.scheduled_at)
+        lecturer = sanitize_display_name(f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username)
+        subject, body = _cancellation_html(
+            org_name=sanitize_display_name(org.name, fallback="Your school"), lecturer=lecturer, title=session.title,
+            course_name=course.name, when=f"{start:%A %d %B %Y, %H:%M} UTC", branding=branding,
+        )
+        allowed = await gate_engagement_email(org.id, db, len(recipients))
+        recipients = recipients[:allowed]
+        if not recipients:
+            return 0
+        sender_name = branding.get("sender_name")
+
+        async def _deliver(addresses: list[str]) -> None:
+            for address in addresses:
+                try:
+                    await asyncio.to_thread(send_email, address, subject, body, None, sender_name)
+                except Exception:
+                    logger.warning("Live cancellation to %s failed", address, exc_info=True)
+
+        task = asyncio.create_task(_deliver(recipients))
+        _background.add(task)
+        task.add_done_callback(_background.discard)
+        return len(recipients)
+    except Exception:
+        logger.warning("Live session %s: cancellation emails failed", session.session_uuid, exc_info=True)
+        return 0

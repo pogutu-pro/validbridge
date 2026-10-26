@@ -913,7 +913,11 @@ async def invite_batch_users(
     invite_code_uuid: Optional[str],
     db_session: AsyncSession,
     current_user: PublicUser | AnonymousUser,
+    authorized: bool = False,
 ):
+    # ``authorized`` is for callers that have already decided this user may
+    # invite (the front desk checks its own right); it skips only the
+    # organisation-admin gate below, never the abuse limits.
     # Redis init
     VB_CONFIG = get_validbridge_config()
     redis_conn_string = VB_CONFIG.redis_config.redis_connection_string
@@ -938,7 +942,8 @@ async def invite_batch_users(
     user = (await db_session.execute(statement)).scalars().first()
 
     # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "create", db_session)
+    if not authorized:
+        await rbac_check(request, org.org_uuid, current_user, "create", db_session)
 
     # This is the endpoint that actually sends the mail, so it needs the demo
     # guard even though create_invite_code already has one — an invite code is

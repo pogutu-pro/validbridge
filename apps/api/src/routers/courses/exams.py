@@ -12,6 +12,7 @@ from src.db.courses.exams import (
     ExamEventRead,
     ExamHeartbeat,
     ExamMonitorRead,
+    ExamOverviewRow,
     ExamSettingsRead,
     ExamSettingsWrite,
     ExamStatusRead,
@@ -21,6 +22,14 @@ from src.security.auth import get_current_user
 from src.services.courses.activities import exams
 
 router = APIRouter()
+
+
+@router.get("/org/{org_id}", response_model=List[ExamOverviewRow], summary="Every exam you can supervise (staff)")
+async def api_org_exams(
+    request: Request, org_id: int,
+    db_session: AsyncSession = Depends(get_db_session), current_user: PublicUser = Depends(get_current_user),
+) -> List[ExamOverviewRow]:
+    return await exams.list_org_exams(request, db_session, current_user, org_id)
 
 
 @router.get("/{assignment_uuid}", response_model=ExamStatusRead, summary="Exam rules and the caller's sitting")

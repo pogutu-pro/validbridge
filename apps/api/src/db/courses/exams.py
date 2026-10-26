@@ -191,3 +191,22 @@ class ExamMonitorRead(BaseModel):
     server_time: datetime
     counts: dict
     students: list[ExamRosterRow]
+
+
+class ExamOverviewRow(BaseModel):
+    """One exam in the staff Exams list."""
+
+    assignment_uuid: str
+    title: str
+    course_name: str
+    course_uuid: str
+    state: str  # upcoming | open | running | closed
+    duration_minutes: int
+    opens_at: Optional[datetime] = None
+    closes_at: Optional[datetime] = None
+    enrolled: int = 0
+    not_started: int = 0
+    in_progress: int = 0
+    submitted: int = 0
+    disconnected: int = 0
+    flagged: int = 0

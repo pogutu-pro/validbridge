@@ -245,6 +245,12 @@ export function getPrimarySections(
               href: `/dash/assignments/${assignUuid}?subpage=analytics`,
               icon: React.createElement(ChartBar, { size: 16 }),
             },
+            {
+              key: 'exam',
+              label: t('dashboard.assignments.detail.tabs.exam', { defaultValue: 'Exam mode' }),
+              href: `/dash/assignments/${assignUuid}?subpage=exam`,
+              icon: React.createElement(ShieldCheck, { size: 16 }),
+            },
           ]
         }
         return [
@@ -256,6 +262,16 @@ export function getPrimarySections(
           },
         ]
       },
+    },
+    {
+      key: 'exams',
+      label: t('common.exams', { defaultValue: 'Exams' }),
+      labelKey: 'common.exams',
+      icon: React.createElement(ShieldCheck, { size: 22 }),
+      href: '/dash/exams',
+      matchPrefix: '/dash/exams',
+      group: 'learning',
+      hasChildren: false,
     },
   ]
 

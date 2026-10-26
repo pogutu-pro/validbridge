@@ -36,6 +36,7 @@ from src.db.courses.exams import (
     ExamEventRead,
     ExamHeartbeat,
     ExamMonitorRead,
+    ExamOverviewRow,
     ExamRosterRow,
     ExamSession,
     ExamSessionStatus,
@@ -45,8 +46,10 @@ from src.db.courses.exams import (
     ExamStatusRead,
     utcnow,
 )
+from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
 from src.db.users import AnonymousUser, APITokenUser, PublicUser, User
+from src.security.org_auth import is_org_admin, is_org_member
 from src.security.rbac import AccessAction, authorization_verify_based_on_roles, check_resource_access
 
 logger = logging.getLogger(__name__)
@@ -336,6 +339,50 @@ async def student_events(request: Request, db: AsyncSession, user, assignment_uu
         await db.execute(select(ExamEvent).where(ExamEvent.session_id == session.id).order_by(ExamEvent.id.asc()))
     ).scalars().all()
     return [ExamEventRead(kind=e.kind, detail=e.detail, is_violation=e.is_violation, created_at=_aware(e.created_at)) for e in events]
+
+
+async def list_org_exams(request: Request, db: AsyncSession, user, org_id: int) -> list[ExamOverviewRow]:
+    """Every exam the caller can supervise, with live counts. Admins see all; staff see their courses'."""
+    user = _require_user(user)
+    org = await db.get(Organization, org_id)
+    if org is None:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    if not await is_org_member(user.id, org.id, db):
+        raise HTTPException(status_code=403, detail="You are not a member of this organization")
+    admin = await is_org_admin(user.id, org.id, db)
+
+    rows = (
+        await db.execute(
+            select(ExamSettings, Assignment, Course)
+            .join(Assignment, Assignment.id == ExamSettings.assignment_id)
+            .join(Course, Course.id == ExamSettings.course_id)
+            .where(ExamSettings.org_id == org.id, ExamSettings.enabled.is_(True))
+        )
+    ).all()
+    now = utcnow()
+    live_cutoff = now - timedelta(seconds=CONNECTED_WITHIN_SECONDS)
+    out: list[ExamOverviewRow] = []
+    for settings, assignment, course in rows:
+        if not admin and not await authorization_verify_based_on_roles(request, user.id, "update", course.course_uuid, db):
+            continue
+        sessions = (await db.execute(select(ExamSession).where(ExamSession.assignment_id == assignment.id))).scalars().all()
+        enrolled = int(
+            (await db.execute(select(func.count(func.distinct(TrailRun.user_id))).where(TrailRun.course_id == course.id))).scalar() or 0
+        )
+        in_progress = [s for s in sessions if s.status == ExamSessionStatus.IN_PROGRESS.value]
+        submitted = [s for s in sessions if s.status == ExamSessionStatus.SUBMITTED.value]
+        window = window_state(settings, now)
+        state = "running" if in_progress else {"not_open": "upcoming", "open": "open", "closed": "closed"}.get(window, "open")
+        out.append(ExamOverviewRow(
+            assignment_uuid=assignment.assignment_uuid, title=assignment.title, course_name=course.name, course_uuid=course.course_uuid,
+            state=state, duration_minutes=settings.duration_minutes, opens_at=_aware(settings.opens_at), closes_at=_aware(settings.closes_at),
+            enrolled=enrolled, not_started=max(0, enrolled - len(sessions)), in_progress=len(in_progress), submitted=len(submitted),
+            disconnected=sum(1 for s in in_progress if not (s.last_seen_at and _aware(s.last_seen_at) >= live_cutoff)),
+            flagged=sum(1 for s in sessions if int(s.violation_count or 0) > 0),
+        ))
+    order = {"running": 0, "open": 1, "upcoming": 2, "closed": 3}
+    out.sort(key=lambda r: (order[r.state], r.opens_at or now, r.title.lower()))
+    return out
 
 
 # ---------------------------------------------------------------------------

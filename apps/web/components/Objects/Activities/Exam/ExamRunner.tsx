@@ -10,6 +10,7 @@ import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/Assign
 import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext'
 import { useAssignmentDirtyTasks } from '@components/Contexts/Assignments/AssignmentDirtyTasksContext'
 import AssignmentStudentActivity from '@components/Objects/Activities/Assignment/AssignmentStudentActivity'
+import ExamSidebar from './ExamSidebar'
 import {
   ExamApiError,
   examHeartbeat,
@@ -493,7 +494,12 @@ export default function ExamRunner({ assignmentUuid }: { assignmentUuid: string 
         <AssignmentSubmissionProvider assignment_uuid={assignmentUuid}>
           <AssignmentProvider assignment_uuid={assignmentUuid}>
             <AssignmentsTaskProvider>
-              <AssignmentStudentActivity />
+              <div className="mx-auto flex max-w-7xl flex-col gap-4 px-2 pt-4 lg:flex-row lg:px-6">
+                <ExamSidebar assignmentUuid={assignmentUuid} />
+                <main className="min-w-0 flex-1">
+                  <AssignmentStudentActivity />
+                </main>
+              </div>
             </AssignmentsTaskProvider>
           </AssignmentProvider>
         </AssignmentSubmissionProvider>

@@ -57,6 +57,7 @@ export const queryKeys = {
     allSubmissions: (uuid: string) => ['assignment', uuid, 'submissions'] as const,
   },
   exams: {
+    list: (orgId: number) => ['exams', 'org', orgId] as const,
     status: (uuid: string) => ['exam', uuid, 'status'] as const,
     monitor: (uuid: string) => ['exam', uuid, 'monitor'] as const,
     events: (uuid: string, userUuid: string) => ['exam', uuid, 'events', userUuid] as const,

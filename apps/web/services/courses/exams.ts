@@ -53,6 +53,23 @@ export type ExamMonitor = {
 
 export type ExamEvent = { kind: string; detail: string | null; is_violation: boolean; created_at: string }
 
+export type ExamOverviewRow = {
+  assignment_uuid: string
+  title: string
+  course_name: string
+  course_uuid: string
+  state: 'upcoming' | 'open' | 'running' | 'closed'
+  duration_minutes: number
+  opens_at: string | null
+  closes_at: string | null
+  enrolled: number
+  not_started: number
+  in_progress: number
+  submitted: number
+  disconnected: number
+  flagged: number
+}
+
 export class ExamApiError extends Error {
   status: number
   code: string
@@ -112,3 +129,4 @@ export const finishExam = (assignmentUuid: string, token?: string, clientId?: st
 export const getExamMonitor = (assignmentUuid: string, token?: string) => request<ExamMonitor>(`${u(assignmentUuid)}/monitor`, token)
 export const getExamStudentEvents = (assignmentUuid: string, userUuid: string, token?: string) =>
   request<ExamEvent[]>(`${u(assignmentUuid)}/students/${encodeURIComponent(userUuid)}/events`, token)
+export const getOrgExams = (orgId: number, token?: string) => request<ExamOverviewRow[]>(`org/${orgId}`, token)

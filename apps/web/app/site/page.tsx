@@ -308,7 +308,7 @@ function Exams() {
   const items: [React.ElementType, string, string][] = [
     [Timer, 'A clock students cannot change', 'The timer runs on our servers. Refreshing the page or changing the device clock does nothing, and time up submits for them.'],
     [Desktop, 'One window at a time', 'If a student opens the exam in a second browser, the first one closes by itself.'],
-    [Webcam, 'Camera and screen sharing on', 'Students keep the camera on and share their screen. We check they are on. We do not take photos or record.'],
+    [Webcam, 'Camera and screen sharing on', 'Students keep the camera on and share their screen. Your staff see the moment either one stops.'],
     [Eye, 'Watch it happen', 'A live roster shows who is sitting the exam, who lost connection, and how many warnings each student has.'],
     [CheckCircle, 'Every slip is logged', 'Leaving the tab, leaving full screen, closing the tab or losing the connection is recorded with the time.'],
     [Lightning, 'Nothing to install', 'No exam browser to download. It runs in the browser students already have.'],

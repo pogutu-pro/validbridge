@@ -10,15 +10,28 @@ import {
   ChatsCircle,
   ClosedCaptioning,
   Certificate,
+  Chalkboard,
+  Coins,
+  Desktop,
+  EnvelopeSimple,
+  Exam,
+  Eye,
+  FilmReel,
   Globe,
+  Headset,
   Key,
   Lightning,
+  MonitorPlay,
   PaintBrush,
   PlugsConnected,
+  Robot,
   ShieldCheck,
+  Timer,
   UserPlus,
   UsersThree,
   VideoCamera,
+  Wallet,
+  Webcam,
 } from '@phosphor-icons/react/dist/ssr'
 import { SITE_LINKS } from '@lib/site/content'
 import PlanGrid from '@components/Site/PlanGrid'
@@ -106,7 +119,7 @@ function Hero() {
 function OnePlace() {
   const items = [
     ['01', 'Stop juggling tools', 'Zoom, Forms and spreadsheets, replaced by one login.'],
-    ['02', 'Everything together', 'Courses, live classes, quizzes, attendance, payments.'],
+    ['02', 'Everything together', 'Courses, live classes, exams, attendance, payments.'],
     ['03', 'Your own brand', 'school.validbridge.co.ke, looks like yours.'],
   ]
   return (
@@ -130,6 +143,16 @@ function LiveBridge() {
     [VideoCamera, 'Teach face to face', 'Camera, microphone and screen sharing, with control over what students see.'],
     [ChatsCircle, 'Keep everyone involved', "Chat, Q&A, polls and live quizzes built from your course's own content."],
     [UsersThree, 'Attendance done for you', 'Present, late, left early, partial or absent, recorded per student.'],
+    [
+      EnvelopeSimple,
+      'The link reaches everyone',
+      'Students get the class link by email the moment you schedule. You get a Join class button that opens in a new tab.',
+    ],
+    [
+      FilmReel,
+      'Missed it? Share the recording',
+      'Send the recording to the students who were absent, or to the whole class. You can edit or cancel a class any time.',
+    ],
   ]
   return (
     <section id="livebridge" className="s-section s-surface scroll-mt-16">
@@ -281,6 +304,39 @@ function Assess() {
   )
 }
 
+function Exams() {
+  const items: [React.ElementType, string, string][] = [
+    [Timer, 'A clock students cannot change', 'The timer runs on our servers. Refreshing the page or changing the device clock does nothing, and time up submits for them.'],
+    [Desktop, 'One window at a time', 'If a student opens the exam in a second browser, the first one closes by itself.'],
+    [Webcam, 'Camera and screen sharing on', 'Students keep the camera on and share their screen. We check they are on. We do not take photos or record.'],
+    [Eye, 'Watch it happen', 'A live roster shows who is sitting the exam, who lost connection, and how many warnings each student has.'],
+    [CheckCircle, 'Every slip is logged', 'Leaving the tab, leaving full screen, closing the tab or losing the connection is recorded with the time.'],
+    [Lightning, 'Nothing to install', 'No exam browser to download. It runs in the browser students already have.'],
+  ]
+  return (
+    <section id="exams" className="s-section scroll-mt-16">
+      <div className="s-container">
+        <SectionHead
+          eyebrow="Exams"
+          title="Run timed exams (CATs) online."
+          intro="Separate from take-home assignments: a proper sitting, with a clock, a supervised screen and a live view for your staff."
+        />
+        <Reveal className="s-bento sm:grid-cols-2 lg:grid-cols-3">
+          {items.map(([Icon, title, body]) => (
+            <div key={title} className="s-tile">
+              <div className="mb-6 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--s-accent-100)]">
+                <Icon size={22} weight="duotone" className="text-[var(--s-accent-600)]" aria-hidden />
+              </div>
+              <h3 className="!mb-2">{title}</h3>
+              <p className="s-muted m-0 text-[15px]">{body}</p>
+            </div>
+          ))}
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
 function Payments() {
   return (
     <section className="s-section">
@@ -290,7 +346,12 @@ function Payments() {
           <h2 className="!mb-6">Sell with your own Paystack account.</h2>
           <p className="s-lead m-0 mb-8">Card, bank or M-Pesa. Money goes straight to you, at 0% platform fee.</p>
           <ul className="m-0 flex list-none flex-col gap-3 p-0">
-            {['One-time, subscriptions, pay-what-you-want, bundles', 'Prices in KES by default'].map((t) => (
+            {[
+              'One-time, subscriptions, pay-what-you-want, bundles',
+              'Let students start with a small deposit and pay the balance later, all through Paystack',
+              'Students see what they have paid and what is left',
+              'Prices in KES by default',
+            ].map((t) => (
               <li key={t} className="flex items-start gap-3">
                 <CheckCircle size={22} weight="fill" className="mt-px shrink-0 text-[var(--s-accent)]" aria-hidden />
                 {t}
@@ -404,6 +465,18 @@ function Learners() {
       body: 'Chat, Q&A and polls right inside the class, no separate app.',
       wide: true,
     },
+    {
+      Icon: Exam,
+      title: 'Sit exams from home',
+      body: 'Timed exams in the browser, with a clear clock and a navigator to jump between questions.',
+      wide: true,
+    },
+    {
+      Icon: Wallet,
+      title: 'Pay in parts',
+      body: 'Start with a deposit and pay the rest when you can. Your payments and balance are always one tap away.',
+      wide: true,
+    },
   ]
   return (
     <section className="s-section">
@@ -437,8 +510,12 @@ function Institutions() {
     [UserPlus, 'Invite-only signup', 'User groups'],
     [ShieldCheck, '2FA & audit logs', 'Security per account'],
     [PlugsConnected, 'API & webhooks', '41 signed events, Zapier'],
-    [UsersThree, 'Communities', 'Boards and podcasts'],
+    [UsersThree, 'Communities', 'Discussion spaces and podcasts'],
     [Buildings, 'Custom domains', 'Available on request'],
+    [Headset, 'Front desk role', 'Reception finds students, sends invites and class links, and watches exams. No grading access'],
+    [Chalkboard, 'Boards & playgrounds', 'Live whiteboards and interactive simulations'],
+    [Robot, 'AI assistant', 'Help for learners and instructors, grounded in your course'],
+    [Coins, 'Your money, your account', 'Paystack payouts straight to you, 0% platform fee'],
   ]
   return (
     <section className="s-section border-t border-[var(--s-divider)]">
@@ -525,6 +602,7 @@ export default function LandingPage() {
       <LiveBridge />
       <Editor />
       <Assess />
+      <Exams />
       <Payments />
       <Insights />
       <Learners />

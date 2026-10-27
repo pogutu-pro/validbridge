@@ -113,6 +113,103 @@ class Problem(Exception):
     """A deliberate, safe-to-show finding. Anything else is reported generically."""
 
 
+MANUAL_PREFIX = "manual:"
+
+
+def _month_key(value: datetime) -> str:
+    return _aware(value).strftime("%Y-%m")
+
+
+@router.get("/schools-payments")
+async def schools_payments(
+    current_user: Any = Depends(require_staff("billing_read")),
+    db_session: AsyncSession = Depends(get_db_session),
+):
+    """What each school has paid ValidBridge: Paystack payments and payments staff recorded by hand.
+
+    Spending a wallet balance is not counted (the top-up already was), nor are card checks.
+    An invoice recorded by hand counts in the month it was last updated, which is when it was marked paid."""
+    db = db_session
+    now = datetime.now(timezone.utc)
+    this_month = _month_key(now)
+    year, month = (now.year, now.month - 1) if now.month > 1 else (now.year - 1, 12)
+    last_month = f"{year:04d}-{month:02d}"
+
+    rows: dict[int, dict] = {}
+
+    def row(org_id: int) -> dict:
+        return rows.setdefault(org_id, {"online": 0, "manual": 0, "this_month": 0, "last_month": 0, "payments": 0})
+
+    def add(org_id: int, kind: str, cents: int, when: datetime) -> None:
+        r = row(org_id)
+        r[kind] += cents
+        r["payments"] += 1
+        key = _month_key(when)
+        if key == this_month:
+            r["this_month"] += cents
+        elif key == last_month:
+            r["last_month"] += cents
+
+    attempts = (
+        await db.execute(
+            select(PaymentAttempt.org_id, PaymentAttempt.amount_cents, PaymentAttempt.created_at).where(
+                PaymentAttempt.status == "success",
+                PaymentAttempt.reference.like("vb%"),
+                ~PaymentAttempt.reference.like("vbw_%"),
+                ~PaymentAttempt.reference.like("vbc_%"),
+            )
+        )
+    ).all()
+    for org_id, cents, created in attempts:
+        add(org_id, "online", int(cents), created)
+
+    manual = (
+        await db.execute(
+            select(Invoice.org_id, Invoice.total_cents, Invoice.updated_at).where(
+                Invoice.status == "paid", Invoice.paid_via.like(f"{MANUAL_PREFIX}%")
+            )
+        )
+    ).all()
+    for org_id, cents, updated in manual:
+        add(org_id, "manual", int(cents), updated)
+
+    unpaid = dict(
+        (
+            await db.execute(
+                select(Invoice.org_id, func.coalesce(func.sum(Invoice.total_cents), 0))
+                .where(Invoice.status.in_(("open", "failed")))
+                .group_by(Invoice.org_id)
+            )
+        ).all()
+    )
+    for org_id in unpaid:
+        row(org_id)
+    plans = dict((await db.execute(select(BillingSubscription.org_id, BillingSubscription.plan))).all())
+    wallets = dict((await db.execute(select(LedgerEntry.org_id, func.sum(LedgerEntry.amount_cents)).group_by(LedgerEntry.org_id))).all())
+    names = {i: (n, sl) for i, n, sl in (await db.execute(select(Organization.id, Organization.name, Organization.slug))).all()}
+
+    items = []
+    for org_id, r in rows.items():
+        name, slug = names.get(org_id, (f"School {org_id}", ""))
+        items.append({
+            "org_id": org_id, "org_name": name, "org_slug": slug, "plan": plans.get(org_id),
+            "paid_cents": r["online"] + r["manual"], "paid_online_cents": r["online"], "paid_manual_cents": r["manual"],
+            "this_month_cents": r["this_month"], "last_month_cents": r["last_month"], "payments": r["payments"],
+            "unpaid_cents": int(unpaid.get(org_id, 0)), "wallet_cents": int(wallets.get(org_id) or 0),
+        })
+    items.sort(key=lambda i: i["paid_cents"], reverse=True)
+    return {
+        "currency": "KES",
+        "items": items,
+        "totals": {
+            "paid_cents": sum(i["paid_cents"] for i in items),
+            "this_month_cents": sum(i["this_month_cents"] for i in items),
+            "unpaid_cents": sum(i["unpaid_cents"] for i in items),
+            "schools_paying": sum(1 for i in items if i["paid_cents"]),
+        },
+    }
+
+
 async def _check(name: str, probe) -> dict:
     """Run one probe and report ok / fail without letting it break the page."""
     try:

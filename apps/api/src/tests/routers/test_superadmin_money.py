@@ -91,3 +91,35 @@ async def test_health_flags_stuck_live_classes(client, db, org, course, monkeypa
     checks = {c["name"]: c for c in (await client.get(f"{BASE}/health")).json()["checks"]}
     assert checks["Live classes"]["ok"] is False and "1 live classes" in checks["Live classes"]["detail"]
     assert checks["Exam sweeper"]["ok"] is True
+
+
+async def test_what_each_school_pays_us(client, db, org, other_org):
+    n = now()
+    year, month = (n.year, n.month - 1) if n.month > 1 else (n.year - 1, 12)
+    last_month = datetime(year, month, 15, tzinfo=timezone.utc)
+    db.add_all([
+        PaymentAttempt(reference="vbp_1_a", org_id=org.id, purpose="plan", amount_cents=500000, status="success", created_at=n),
+        PaymentAttempt(reference="vbp_1_b", org_id=org.id, purpose="wallet_topup", amount_cents=100000, status="success", created_at=last_month),
+        PaymentAttempt(reference="vbw_1_c", org_id=org.id, purpose="pack", amount_cents=999999, status="success", created_at=n),   # wallet spend
+        PaymentAttempt(reference="vbc_1_d", org_id=org.id, purpose="card", amount_cents=999999, status="success", created_at=n),   # card check
+        PaymentAttempt(reference="vbp_1_e", org_id=org.id, purpose="plan", amount_cents=999999, status="failed", created_at=n),
+        PaymentAttempt(reference="vbp_2_f", org_id=other_org.id, purpose="plan", amount_cents=200000, status="success", created_at=n),
+        Invoice(org_id=other_org.id, number="M1", period="p", lines=[], total_cents=300000, status="paid", paid_via="manual:mpesa", catalog_version=1),
+        Invoice(org_id=other_org.id, number="M2", period="p", lines=[], total_cents=777, status="paid", paid_via="wallet", catalog_version=1),
+        Invoice(org_id=other_org.id, number="U1", period="p", lines=[], total_cents=40000, status="open", catalog_version=1),
+        BillingSubscription(org_id=org.id, plan="growth", cycle="monthly", period_start=n, period_end=n),
+        LedgerEntry(org_id=org.id, amount_cents=2500, kind="topup", balance_after_cents=2500),
+    ])
+    await db.commit()
+    body = (await client.get(f"{BASE}/schools-payments")).json()
+    top, runner_up = body["items"]  # ranked by paid: org (600,000), then other_org (500,000)
+    assert (top["org_id"], top["paid_cents"], top["paid_online_cents"], top["paid_manual_cents"]) == (org.id, 600000, 600000, 0), "wallet spending, card checks and failed payments are not money in"
+    assert top["plan"] == "growth" and top["last_month_cents"] == 100000 and top["this_month_cents"] == 500000 and top["wallet_cents"] == 2500
+    assert (runner_up["org_id"], runner_up["paid_online_cents"], runner_up["paid_manual_cents"]) == (other_org.id, 200000, 300000)
+    assert runner_up["unpaid_cents"] == 40000 and runner_up["paid_cents"] == 500000, "a wallet-paid invoice is not cash"
+    assert body["totals"] == {"paid_cents": 1100000, "this_month_cents": 1000000, "unpaid_cents": 40000, "schools_paying": 2}
+
+
+async def test_school_payments_need_billing_access(client):
+    client.state["id"] = 2
+    assert (await client.get(f"{BASE}/schools-payments")).status_code == 403

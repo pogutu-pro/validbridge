@@ -381,3 +381,9 @@ export async function getSchoolRevenue(accessToken: string, orgId: number | stri
   if (!res.ok) return failure(res, 'Failed to load this school')
   return res.json()
 }
+
+export async function getSchoolsPayments(accessToken: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/schools-payments`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load what schools pay')
+  return res.json()
+}

@@ -23,6 +23,7 @@ import {
   Broadcast,
   CurrencyCircleDollar,
   Heartbeat,
+  Bank,
 } from '@phosphor-icons/react'
 import { signOut } from '@components/Contexts/AuthContext'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
@@ -155,6 +156,12 @@ export default function AdminSidebar() {
           icon: <CurrencyCircleDollar size={18} weight={isActive('/admin/money') ? 'fill' : 'bold'} />,
           label: 'Money',
           requires: 'billing_read',
+        },
+        {
+          href: '/admin/revenue',
+          icon: <Bank size={18} weight={isActive('/admin/revenue') ? 'fill' : 'bold'} />,
+          label: 'School revenue',
+          requires: 'revenue_read',
         },
         {
           href: '/admin/health',

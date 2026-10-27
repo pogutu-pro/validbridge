@@ -88,7 +88,7 @@ export const FAQ: FaqItem[] = [
   },
   {
     q: 'Can I run timed exams online?',
-    a: 'Yes. Exams run on a server-side clock, allow one browser window at a time, and log every time a student leaves the tab or loses connection. Your staff watch a live roster. Students install nothing.',
+    a: 'Yes. Exams run on a server-side clock, allow one browser window at a time, check that the camera and screen share are on, and log every time a student leaves the tab or loses connection. Your staff watch a live roster. Students install nothing.',
   },
   {
     q: 'Can students pay in instalments?',

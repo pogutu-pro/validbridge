@@ -10,6 +10,7 @@ import {
 import { fmtDate, fmtDuration, fullName, avatarUrl } from './format'
 import UserAuditExport from './UserAuditExport'
 import { Card, KpiTile, P } from './sections/primitives'
+import ProgressOverviewSection from './sections/ProgressOverviewSection'
 import ConnectionsSection from './sections/ConnectionsSection'
 import CoursesSection from './sections/CoursesSection'
 import AssignmentsSection from './sections/AssignmentsSection'
@@ -72,8 +73,9 @@ export default function UserDossier({ dossier }: { dossier: any }) {
       </div>
 
       {/* Detailed sections */}
-      <Tabs defaultValue="connections">
+      <Tabs defaultValue="progress">
         <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="progress">{t(`${P}.tabs.progress`, { defaultValue: 'Progress' })}</TabsTrigger>
           <TabsTrigger value="connections">{t(`${P}.tabs.connections`)}</TabsTrigger>
           <TabsTrigger value="courses">{t(`${P}.tabs.courses`)}</TabsTrigger>
           <TabsTrigger value="assignments">{t(`${P}.tabs.assignments`)}</TabsTrigger>
@@ -83,6 +85,7 @@ export default function UserDossier({ dossier }: { dossier: any }) {
           <TabsTrigger value="live">LiveBridge</TabsTrigger>
           <TabsTrigger value="behavior">{t(`${P}.tabs.behavior`)}</TabsTrigger>
         </TabsList>
+        <TabsContent value="progress"><ProgressOverviewSection dossier={dossier} /></TabsContent>
         <TabsContent value="connections"><ConnectionsSection connections={dossier?.connections || []} /></TabsContent>
         <TabsContent value="courses"><CoursesSection courses={dossier?.courses || []} /></TabsContent>
         <TabsContent value="assignments"><AssignmentsSection assignments={dossier?.assignments || []} /></TabsContent>

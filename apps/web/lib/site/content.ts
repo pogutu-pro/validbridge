@@ -86,6 +86,18 @@ export const FAQ: FaqItem[] = [
     q: 'How do recordings and attendance work?',
     a: 'Recordings are added back to the course automatically; attendance is tracked per student.',
   },
+  {
+    q: 'Can I run timed exams online?',
+    a: 'Yes. Exams run on a server-side clock, allow one browser window at a time, check that the camera and screen share are on, and log every time a student leaves the tab or loses connection. Your staff watch a live roster. Students install nothing.',
+  },
+  {
+    q: 'Can students pay in instalments?',
+    a: 'Yes. Set a full price and a smallest first payment, for example a deposit, and students pay the balance later through Paystack. They can see what they have paid and what is left.',
+  },
+  {
+    q: 'Can a receptionist help students without seeing everything?',
+    a: 'Yes. The front desk role can find students, invite them, add them to groups, resend class links and watch a live exam roster. It cannot edit courses or grade work.',
+  },
   { q: 'Where do I get help?', a: `help.validbridge.co.ke and ${SUPPORT_EMAIL}.` },
 ]
 

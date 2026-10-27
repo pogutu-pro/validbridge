@@ -367,3 +367,17 @@ export async function getSystemHealth(accessToken: string) {
   if (!res.ok) return failure(res, 'Failed to load system health')
   return res.json()
 }
+
+// ── What each school collects from its own students (owner and finance) ───────
+
+export async function getSchoolsRevenue(accessToken: string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/schools-revenue`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load school revenue')
+  return res.json()
+}
+
+export async function getSchoolRevenue(accessToken: string, orgId: number | string) {
+  const res = await fetch(`${getAPIUrl()}ee/superadmin/schools-revenue/${orgId}`, { headers: authHeaders(accessToken) })
+  if (!res.ok) return failure(res, 'Failed to load this school')
+  return res.json()
+}

@@ -2,12 +2,14 @@
 import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2, Search, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { Loader2, Plus, Search, ShieldAlert, ShieldCheck } from 'lucide-react'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
 import { queryKeys } from '@/lib/query/keys'
+import { getOrgCourses } from '@services/courses/courses'
 import { getOrgExams, type ExamOverviewRow } from '@services/courses/exams'
+import CreateExamDialog from '@components/Dashboard/Pages/Exams/CreateExamDialog'
 
 type Filter = 'all' | 'running' | 'upcoming' | 'finished'
 
@@ -28,6 +30,14 @@ export default function ExamsPage() {
   const orgId: number | undefined = org?.id
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
+  const [settingExam, setSettingExam] = useState(false)
+
+  const courses = useQuery({
+    queryKey: queryKeys.courses.list(org?.slug ?? ''),
+    queryFn: () => getOrgCourses(org.slug, {}, token, true),
+    enabled: !!(org?.slug && token),
+    staleTime: 60_000,
+  })
 
   const exams = useQuery({
     queryKey: queryKeys.exams.list(orgId ?? 0),
@@ -57,10 +67,17 @@ export default function ExamsPage() {
         <div>
           <h1 className="text-2xl font-bold text-neutral-900">Exams</h1>
           <p className="mt-1 text-sm text-neutral-600">
-            Every live, timed exam and CAT you supervise. Open one to watch the sitting or change its settings. To make an assessment an exam,
-            open it under Assignments and use the Exam mode tab.
+            Every live, timed exam and CAT you supervise. Open one to watch the sitting, edit its questions or change its settings. Use Create
+            exam to set up a new one.
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setSettingExam(true)}
+          className="inline-flex h-10 items-center gap-2 rounded-lg bg-neutral-900 px-4 text-sm font-semibold text-white hover:bg-neutral-800"
+        >
+          <Plus className="size-4" /> Create exam
+        </button>
         {running.length > 0 && (
           <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-900">
             {running.length} exam{running.length === 1 ? '' : 's'} running now
@@ -134,7 +151,7 @@ export default function ExamsPage() {
                 </td>
                 <td className="px-4 py-3 text-end">
                   <Link
-                    href={`/dash/assignments/${shortUuid(e.assignment_uuid)}?subpage=exam`}
+                    href={`/dash/exams/${shortUuid(e.assignment_uuid)}`}
                     className="inline-flex h-9 items-center rounded-lg bg-neutral-900 px-3 text-xs font-semibold text-white"
                   >
                     {e.state === 'running' ? 'Monitor' : 'Open'}
@@ -149,11 +166,12 @@ export default function ExamsPage() {
               <tr><td colSpan={8} className="px-4 py-10 text-center text-rose-600">Could not load the exams.</td></tr>
             )}
             {exams.data && rows.length === 0 && (
-              <tr><td colSpan={8} className="px-4 py-10 text-center text-neutral-500">{exams.data.length === 0 ? 'No exams yet. Turn an assignment into an exam from its Exam mode tab.' : 'No exams match.'}</td></tr>
+              <tr><td colSpan={8} className="px-4 py-10 text-center text-neutral-500">{exams.data.length === 0 ? 'No exams yet. Use Create exam to set up your first one.' : 'No exams match.'}</td></tr>
             )}
           </tbody>
         </table>
       </div>
+      <CreateExamDialog open={settingExam} onClose={() => setSettingExam(false)} courses={courses.data} />
     </div>
   )
 }

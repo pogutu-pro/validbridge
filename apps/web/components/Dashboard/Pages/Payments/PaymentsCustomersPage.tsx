@@ -8,6 +8,7 @@ import { deleteCustomer, getOrgCustomers } from '@services/payments/payments'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '@services/utils/ts/errorMessage'
 import { AddCustomerDialog, EditCustomerDialog } from './SubComponents/CustomerDialogs'
+import StudentBalances from './SubComponents/StudentBalances'
 import { Badge } from '@components/ui/badge'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import {
@@ -213,13 +214,30 @@ function PaymentsCustomersPage() {
   const session = useVBSession() as any
   const access_token = session?.data?.tokens?.access_token
   const { isEnabled, isLoading } = usePaymentsEnabled()
+  const [view, setView] = useState<'customers' | 'balances'>('customers')
 
   if (!isEnabled && !isLoading) return <UnconfiguredPaymentsDisclaimer />
   if (isLoading) return <PageLoading />
 
   return (
     <div className="ms-10 me-10 mx-auto space-y-4">
-      <CustomersTab orgId={org.id} accessToken={access_token} />
+      <div className="flex w-fit rounded-lg border border-gray-200 bg-white p-1 text-sm">
+        {([['customers', 'Customers'], ['balances', 'Student balances']] as const).map(([id, text]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setView(id)}
+            className={`rounded-md px-3 py-1.5 font-medium ${view === id ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
+      {view === 'customers' ? (
+        <CustomersTab orgId={org.id} accessToken={access_token} />
+      ) : (
+        <StudentBalances orgId={org.id} accessToken={access_token} />
+      )}
     </div>
   )
 }

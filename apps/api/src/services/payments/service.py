@@ -2157,3 +2157,60 @@ async def _refund_enrollment(
     enrollment.update_date = _now()
     db_session.add(enrollment)
     await _sync_membership_for_enrollment(enrollment, db_session, granted=False)
+
+
+# ── What each student has paid and still owes ────────────────────────────────
+
+def _paid_toward(enrollment: PaymentsEnrollment, offer: PaymentsOffer) -> float:
+    """Money this enrollment has actually brought in for the school (0 unless paid)."""
+    if enrollment.status not in _GRANTING:
+        return 0.0
+    if _pays_in_parts(offer):
+        return _amount_paid(enrollment, offer)
+    recorded = (enrollment.provider_specific_data or {}).get("amount")
+    if isinstance(recorded, (int, float)) and not isinstance(recorded, bool):
+        return float(recorded)
+    return float(offer.amount)
+
+
+async def student_balances(org_id: int, db_session: AsyncSession) -> list[dict]:
+    """One row per student and currency: total paid, what they still owe, and the offers behind it.
+
+    "Owes" counts only offers paid in parts, where the student has started paying and a balance
+    remains. A pending checkout is not a debt. Subscriptions are left out of the money columns
+    because they renew on Paystack's schedule, so there is no fixed price to measure against."""
+    from src.db.users import User
+
+    rows = (
+        await db_session.execute(
+            select(PaymentsEnrollment, PaymentsOffer, User)
+            .join(PaymentsOffer, PaymentsOffer.id == PaymentsEnrollment.offer_id)
+            .join(User, User.id == PaymentsEnrollment.user_id)
+            .where(PaymentsEnrollment.org_id == org_id)
+        )
+    ).all()
+    students: dict[tuple[int, str], dict] = {}
+    for enrollment, offer, user in rows:
+        if offer.offer_type == OfferTypeEnum.subscription:
+            continue
+        paid = _paid_toward(enrollment, offer)
+        owes = max(offer.total_amount - paid, 0.0) if _pays_in_parts(offer) and enrollment.status in _GRANTING else 0.0
+        if not paid and not owes:
+            continue
+        currency = (offer.currency or "KES").upper()
+        row = students.setdefault(
+            (user.id, currency),
+            {
+                "user_uuid": user.user_uuid, "name": f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username,
+                "email": user.email, "currency": currency, "paid": 0.0, "owes": 0.0, "offers": [],
+            },
+        )
+        row["paid"] += paid
+        row["owes"] += owes
+        row["offers"].append({"name": offer.name, "paid": paid, "owes": owes, "total": offer.total_amount if _pays_in_parts(offer) else None})
+    result = list(students.values())
+    for row in result:
+        row["paid"] = round(row["paid"], 2)
+        row["owes"] = round(row["owes"], 2)
+    result.sort(key=lambda r: (-r["owes"], -r["paid"], r["name"].lower()))
+    return result

@@ -128,3 +128,12 @@ export async function deleteCustomer(orgId: number, enrollmentId: number, confir
   );
   return getResponseMetadata(result);
 }
+
+// What each student has paid and still owes the school.
+export async function getOrgBalances(orgId: number, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/balances`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
+  );
+  return errorHandling(result);
+}

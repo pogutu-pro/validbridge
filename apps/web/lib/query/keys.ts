@@ -116,6 +116,7 @@ export const queryKeys = {
     configs: (orgId: number) => ['payments', orgId, 'configs'] as const,
     offers: (orgId: number) => ['payments', orgId, 'offers'] as const,
     customers: (orgId: number) => ['payments', orgId, 'customers'] as const,
+    balances: (orgId: number) => ['payments', orgId, 'balances'] as const,
     groups: (orgId: number) => ['payments', orgId, 'groups'] as const,
   },
   live: {

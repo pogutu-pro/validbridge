@@ -360,6 +360,13 @@ async def api_cancel_subscription(
     return await service.cancel_subscription(org_id, user_id, offer_id, db_session)
 
 
+@router.get("/{org_id}/balances")
+async def api_student_balances(
+    org_id: int, db_session: AsyncSession = Depends(get_db_session), _=Depends(require_payments_admin)
+):
+    return await service.student_balances(org_id, db_session)
+
+
 @router.post("/{org_id}/customers")
 async def api_add_customer(
     org_id: int, body: CustomerCreateBody,

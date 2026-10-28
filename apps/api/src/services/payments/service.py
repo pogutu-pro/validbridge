@@ -1344,9 +1344,135 @@ async def list_customers(org_id: int, db_session: AsyncSession) -> list[dict]:
                 },
                 "status": enrollment.status.value if isinstance(enrollment.status, EnrollmentStatusEnum) else enrollment.status,
                 "creation_date": enrollment.creation_date,
+                "offer_id": offer.id,
+                "total_amount": offer.total_amount if _pays_in_parts(offer) else None,
+                "amount_paid": _amount_paid(enrollment, offer) if _pays_in_parts(offer) else None,
+                "manual": bool((enrollment.provider_specific_data or {}).get("manual")),
+                "has_live_subscription": bool(enrollment.subscription_code) and enrollment.status == EnrollmentStatusEnum.active,
             }
         )
     return result
+
+
+# ── Managing customers by hand ───────────────────────────────────────────────
+# For payments made outside Paystack (cash, M-PESA to the school), demo or test rows, and fixing mistakes.
+# Every manual change is logged on the enrollment itself.
+
+MANUAL_STATUSES = frozenset({"pending", "completed", "cancelled", "refunded", "failed"})
+_GRANTING = (EnrollmentStatusEnum.completed, EnrollmentStatusEnum.active)
+
+
+async def _customer_row(org_id: int, enrollment_id: int, db_session: AsyncSession) -> tuple[PaymentsEnrollment, PaymentsOffer]:
+    row = (
+        await db_session.execute(
+            select(PaymentsEnrollment, PaymentsOffer)
+            .join(PaymentsOffer, PaymentsOffer.id == PaymentsEnrollment.offer_id)
+            .where(PaymentsEnrollment.org_id == org_id, PaymentsEnrollment.id == enrollment_id)
+        )
+    ).first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return row[0], row[1]
+
+
+def _log_manual(enrollment: PaymentsEnrollment, actor_id: int, change: str, note: str | None) -> None:
+    data = dict(enrollment.provider_specific_data or {})
+    data["manual"] = True
+    data["manual_log"] = [
+        *list(data.get("manual_log") or []),
+        {"at": _now().isoformat(), "by": actor_id, "change": change, "note": (note or "")[:500]},
+    ]
+    enrollment.provider_specific_data = data
+
+
+def _check_manual_amount(offer: PaymentsOffer, amount: float) -> None:
+    if amount < 0:
+        raise HTTPException(status_code=400, detail="The amount cannot be negative.")
+    if _pays_in_parts(offer) and amount > offer.total_amount:
+        raise HTTPException(status_code=400, detail=f"The amount cannot be more than the full price of {offer.total_amount:g} {offer.currency}.")
+
+
+def _check_manual_status(offer: PaymentsOffer, status: str) -> None:
+    if status not in MANUAL_STATUSES:
+        raise HTTPException(status_code=400, detail="Unknown status.")
+    if offer.offer_type == OfferTypeEnum.subscription and status == "completed":
+        raise HTTPException(status_code=400, detail="Subscriptions are billed by Paystack and cannot be marked paid by hand.")
+
+
+async def add_customer(
+    org_id: int, offer_id: int, email: str, status: str, amount: float | None, note: str | None, actor_id: int, db_session: AsyncSession
+) -> dict:
+    """Add a customer by hand, for example someone who paid in cash or by M-PESA outside the platform."""
+    from src.db.users import User
+
+    offer = await _get_offer(org_id, offer_id, db_session)
+    _check_manual_status(offer, status)
+    user = (await db_session.execute(select(User).where(User.email.ilike(email.strip())))).scalars().first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="No account with that email. They need to sign up first.")
+    exists = (
+        await db_session.execute(
+            select(PaymentsEnrollment).where(PaymentsEnrollment.offer_id == offer.id, PaymentsEnrollment.user_id == user.id)
+        )
+    ).scalars().first()
+    if exists is not None:
+        raise HTTPException(status_code=409, detail="This person is already a customer for this offer. Edit that row instead.")
+    paid = float(amount if amount is not None else offer.amount)
+    _check_manual_amount(offer, paid)
+    enrollment = PaymentsEnrollment(
+        enrollment_uuid=f"enr_{uuid.uuid4().hex}", offer_id=offer.id, user_id=user.id, org_id=org_id,
+        status=EnrollmentStatusEnum(status), amount_paid=paid if status == "completed" and _pays_in_parts(offer) else 0.0,
+        provider_specific_data={"amount": paid},
+    )
+    _log_manual(enrollment, actor_id, f"added as {status}", note)
+    db_session.add(enrollment)
+    await db_session.flush()
+    await _sync_membership_for_offer(offer, user.id, db_session, granted=enrollment.status in _GRANTING)
+    await db_session.commit()
+    return {"enrollment_id": enrollment.id, "status": status}
+
+
+async def update_customer(org_id: int, enrollment_id: int, data: dict, actor_id: int, db_session: AsyncSession) -> dict:
+    """Change a customer's status or, for an offer paid in parts, how much they have paid."""
+    enrollment, offer = await _customer_row(org_id, enrollment_id, db_session)
+    changes: list[str] = []
+    if data.get("status") is not None and data["status"] != enrollment.status.value:
+        _check_manual_status(offer, data["status"])
+        if enrollment.subscription_code and enrollment.status == EnrollmentStatusEnum.active:
+            raise HTTPException(status_code=409, detail="This customer has a live Paystack subscription. Cancel the subscription first.")
+        changes.append(f"status {enrollment.status.value} to {data['status']}")
+        enrollment.status = EnrollmentStatusEnum(data["status"])
+    if data.get("amount_paid") is not None:
+        if not _pays_in_parts(offer):
+            raise HTTPException(status_code=400, detail="Only offers that can be paid in parts track an amount paid.")
+        _check_manual_amount(offer, float(data["amount_paid"]))
+        changes.append(f"amount paid {_amount_paid(enrollment, offer):g} to {float(data['amount_paid']):g}")
+        enrollment.amount_paid = float(data["amount_paid"])
+    if not changes:
+        return {"enrollment_id": enrollment.id, "status": enrollment.status.value, "changed": False}
+    _log_manual(enrollment, actor_id, "; ".join(changes), data.get("note"))
+    enrollment.update_date = _now()
+    db_session.add(enrollment)
+    await _sync_membership_for_offer(offer, enrollment.user_id, db_session, granted=enrollment.status in _GRANTING)
+    await db_session.commit()
+    return {"enrollment_id": enrollment.id, "status": enrollment.status.value, "changed": True}
+
+
+async def delete_customer(org_id: int, enrollment_id: int, confirm: bool, db_session: AsyncSession) -> dict:
+    """Remove a customer row (demo, test or a mistake). Access they had through it is taken away."""
+    enrollment, offer = await _customer_row(org_id, enrollment_id, db_session)
+    if enrollment.subscription_code and enrollment.status == EnrollmentStatusEnum.active:
+        raise HTTPException(status_code=409, detail="This customer has a live Paystack subscription. Cancel the subscription first.")
+    had_access = enrollment.status in _GRANTING
+    if had_access and not confirm:
+        raise HTTPException(status_code=409, detail="This customer has paid and has access. Confirm to delete the row and remove their access.")
+    user_id = enrollment.user_id
+    await db_session.delete(enrollment)
+    await db_session.flush()
+    if had_access:
+        await _sync_membership_for_offer(offer, user_id, db_session, granted=False)
+    await db_session.commit()
+    return {"deleted": True, "access_removed": had_access}
 
 
 # ── Checkout ─────────────────────────────────────────────────────────────────

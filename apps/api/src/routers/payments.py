@@ -10,7 +10,7 @@ Authorization model (the ValidBridge principle):
 Every query is scoped by the path ``org_id``; there is no cross-org access.
 """
 
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -62,6 +62,20 @@ class OfferBody(BaseModel):
     payments_group_id: Optional[int] = None
     resource_uuids: Optional[list[str]] = None
     is_publicly_listed: Optional[bool] = True
+
+
+class CustomerCreateBody(BaseModel):
+    offer_id: int
+    email: str
+    status: Literal["pending", "completed"] = "completed"
+    amount: Optional[float] = None
+    note: Optional[str] = None
+
+
+class CustomerUpdateBody(BaseModel):
+    status: Optional[Literal["pending", "completed", "cancelled", "refunded", "failed"]] = None
+    amount_paid: Optional[float] = None
+    note: Optional[str] = None
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -344,6 +358,30 @@ async def api_cancel_subscription(
     if user_id == 0:
         raise HTTPException(status_code=401, detail="You must be logged in to cancel a subscription")
     return await service.cancel_subscription(org_id, user_id, offer_id, db_session)
+
+
+@router.post("/{org_id}/customers")
+async def api_add_customer(
+    org_id: int, body: CustomerCreateBody,
+    db_session: AsyncSession = Depends(get_db_session), actor_id: int = Depends(require_payments_admin),
+):
+    return await service.add_customer(org_id, body.offer_id, body.email, body.status, body.amount, body.note, actor_id, db_session)
+
+
+@router.patch("/{org_id}/customers/{enrollment_id}")
+async def api_update_customer(
+    org_id: int, enrollment_id: int, body: CustomerUpdateBody,
+    db_session: AsyncSession = Depends(get_db_session), actor_id: int = Depends(require_payments_admin),
+):
+    return await service.update_customer(org_id, enrollment_id, body.model_dump(exclude_unset=True), actor_id, db_session)
+
+
+@router.delete("/{org_id}/customers/{enrollment_id}")
+async def api_delete_customer(
+    org_id: int, enrollment_id: int, confirm: bool = False,
+    db_session: AsyncSession = Depends(get_db_session), _=Depends(require_payments_admin),
+):
+    return await service.delete_customer(org_id, enrollment_id, confirm, db_session)
 
 
 @router.get("/{org_id}/customers")

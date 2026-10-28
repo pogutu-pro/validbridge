@@ -94,3 +94,37 @@ export async function getOrgCustomers(orgId: number, access_token: string) {
   const res = await errorHandling(result);
   return res;
 }
+
+// Customers added, changed or removed by hand (cash payments, demo rows, fixing mistakes).
+export async function addCustomer(
+  orgId: number,
+  body: { offer_id: number; email: string; status: 'pending' | 'completed'; amount?: number; note?: string },
+  access_token: string
+) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/customers`,
+    RequestBodyWithAuthHeader('POST', body, null, access_token)
+  );
+  return getResponseMetadata(result);
+}
+
+export async function updateCustomer(
+  orgId: number,
+  enrollmentId: number,
+  body: { status?: string; amount_paid?: number; note?: string },
+  access_token: string
+) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/customers/${enrollmentId}`,
+    RequestBodyWithAuthHeader('PATCH', body, null, access_token)
+  );
+  return getResponseMetadata(result);
+}
+
+export async function deleteCustomer(orgId: number, enrollmentId: number, confirm: boolean, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/customers/${enrollmentId}?confirm=${confirm}`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  );
+  return getResponseMetadata(result);
+}

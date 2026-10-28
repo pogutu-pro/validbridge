@@ -1,15 +1,21 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useVBSession } from '@components/Contexts/VBSessionContext'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { getOrgCustomers } from '@services/payments/payments'
+import { deleteCustomer, getOrgCustomers } from '@services/payments/payments'
+import toast from 'react-hot-toast'
+import { getErrorMessage } from '@services/utils/ts/errorMessage'
+import { AddCustomerDialog, EditCustomerDialog } from './SubComponents/CustomerDialogs'
 import { Badge } from '@components/ui/badge'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import {
+  Pencil,
+  Plus,
   RefreshCcw,
   SquareCheck,
+  Trash2,
 } from 'lucide-react'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import UserAvatar from '@components/Objects/UserAvatar'
@@ -69,13 +75,61 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
     staleTime: 60_000,
   })
 
+  const queryClient = useQueryClient()
+  const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState<any | null>(null)
+
+  const remove = async (item: any) => {
+    const paid = item.status === 'completed' || item.status === 'active'
+    const who = item.user?.email ?? 'this customer'
+    const ok = window.confirm(
+      paid
+        ? `${who} has paid and has access to "${item.offer?.name}". Deleting this row removes their access and the record of the payment here. Delete anyway?`
+        : `Delete ${who} from "${item.offer?.name}"? This cannot be undone.`
+    )
+    if (!ok) return
+    const res = await deleteCustomer(orgId, item.enrollment_id, paid, accessToken)
+    if (!res.success) {
+      toast.error(getErrorMessage(res.data?.detail, 'Could not delete the customer.'))
+      return
+    }
+    queryClient.invalidateQueries({ queryKey: queryKeys.payments.customers(orgId) })
+    toast.success('Customer deleted.')
+  }
+
+  const addButton = (
+    <div className="mb-3 flex justify-end">
+      <button
+        type="button"
+        onClick={() => setAdding(true)}
+        className="inline-flex h-10 items-center gap-2 rounded-lg bg-gray-900 px-4 text-sm font-semibold text-white hover:bg-gray-800"
+      >
+        <Plus size={16} /> Add customer
+      </button>
+    </div>
+  )
+  const dialogs = (
+    <>
+      <AddCustomerDialog open={adding} onClose={() => setAdding(false)} orgId={orgId} token={accessToken} />
+      <EditCustomerDialog customer={editing} onClose={() => setEditing(null)} orgId={orgId} token={accessToken} />
+    </>
+  )
+
   if (isLoading) return <PageLoading />
   if (error) return <div className="p-6 text-sm text-red-500">Error loading customers</div>
   if (!customers || customers.length === 0) {
-    return <Empty message="No customers yet" />
+    return (
+      <>
+        {addButton}
+        <Empty message="No customers yet" />
+        {dialogs}
+      </>
+    )
   }
 
   return (
+    <>
+    {addButton}
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
       <Table>
         <TableHeader>
@@ -86,6 +140,7 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
             <TableHead>Amount</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Since</TableHead>
+            <TableHead className="text-end">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -116,15 +171,37 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
                     <Badge variant="outline" className="flex items-center gap-1 w-fit"><SquareCheck size={11} /><span>One-time</span></Badge>
                   )}
                 </TableCell>
-                <TableCell>{offer ? fmt(offer.amount, offer.currency) : '—'}</TableCell>
+                <TableCell>
+                  {item.total_amount != null ? (
+                    <div className="flex flex-col">
+                      <span>{fmt(item.amount_paid ?? 0, offer?.currency)} of {fmt(item.total_amount, offer?.currency)}</span>
+                      <span className="text-xs text-gray-400">paid in parts</span>
+                    </div>
+                  ) : offer ? fmt(offer.amount, offer.currency) : '—'}
+                </TableCell>
                 <TableCell><StatusPill status={item.status} /></TableCell>
-                <TableCell className="text-sm text-gray-500">{fmtDate(item.creation_date)}</TableCell>
+                <TableCell className="text-sm text-gray-500">
+                  {fmtDate(item.creation_date)}
+                  {item.manual && <span className="ms-2 text-xs text-gray-400">added by hand</span>}
+                </TableCell>
+                <TableCell className="text-end">
+                  <div className="inline-flex gap-1">
+                    <button type="button" aria-label="Edit customer" title="Edit" onClick={() => setEditing(item)} className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900">
+                      <Pencil size={15} />
+                    </button>
+                    <button type="button" aria-label="Delete customer" title="Delete" onClick={() => remove(item)} className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </TableCell>
               </TableRow>
             )
           })}
         </TableBody>
       </Table>
     </div>
+    {dialogs}
+    </>
   )
 }
 
